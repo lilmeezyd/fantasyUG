@@ -1,6 +1,5 @@
 import express from "express";
-import { protect } from "../middleware/authMiddleware.js";
-import { roles } from "../middleware/authMiddleware.js"
+import { protect, roles } from "../middleware/authMiddleware.js";
 import ROLES from "../config/permissions.js";
 import {
   authUser,
