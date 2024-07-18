@@ -26,7 +26,7 @@ const authUser = asyncHandler(async(req, res) => {
 //@route POST /api/users
 //@access Public
 const registerUser = asyncHandler(async(req, res) => {
-    const { name, email, password } = req.body
+    const { firstName, lastName, email, password, roles } = req.body
 
     const userExists = await User.findOne({email})
     if(userExists) {
@@ -36,17 +36,21 @@ const registerUser = asyncHandler(async(req, res) => {
     
 
     const user = await User.create({
-        name,
+        firstName,
+        lastName,
         email,
-        password
+        password,
+        roles
     })
 
     if(user) {
         generateToken(res, user._id)
         res.status(201).json({
             _id: user._id,
-            name: user.name, 
-            email: user.email
+            firstName: user.firstName,
+            lastName: user.lastName,
+            email: user.email,
+            roles: user.roles
         })
     } else {
         res.status(400)
@@ -101,6 +105,15 @@ const updateUserProfile = asyncHandler(async(req, res) => {
     })
 })
 
-export { authUser, registerUser, logoutUser, getUserProfile, updateUserProfile }
+//@desc 
+//@route GET /api/users/all
+//@access Private
+//@role ADMIN
+const getAllUsers = asyncHandler(async(req, res) => {
+    const users = await User.find({}).select('-password')
+    res.status(200).json(users)
+})
+
+export { authUser, registerUser, logoutUser, getUserProfile, updateUserProfile, getAllUsers }
 
 
