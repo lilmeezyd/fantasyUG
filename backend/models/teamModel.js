@@ -30,6 +30,18 @@ const teamSchema = mongoose.Schema(
         loss: {
             type: Number,
             default: 0
+        },
+        goalsScored: {
+            type: Number,
+            default: 0
+        },
+        goalsConceded: {
+            type: Number,
+            default: 0
+        },
+        points: {
+            type: Number,
+            default: 0
         }
    })
 const Team = mongoose.model("Team", teamSchema);

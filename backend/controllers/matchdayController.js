@@ -7,8 +7,12 @@ import User from "../models/userModel.js";
 //@access Private
 //@role ADMIN
 const setMatchday = asyncHandler(async (req, res) => {
-  let { name } = req.body;
+  let { name, deadlineTime } = req.body;
   //let timeString = new Date(deadlineTime).toISOString()
+  if(!name) {
+    res.status(400)
+    throw new Error('Add matchday name!')
+  }
   name =
     name &&
     name
@@ -24,11 +28,19 @@ const setMatchday = asyncHandler(async (req, res) => {
     res.status(400);
     throw new Error("User not found");
   }
+  if(!!id === false) {
+    res.status(400)
+    throw new Error('Entry has no id')
+  }
+  if(name.slice(0,8).toLocaleLowerCase() !== 'matchday') {
+    res.status(400)
+    throw new Error("name should start with matchday")
+  }
   // Make sure the logged in user is an ADMIN
-  if (!Object.values(req.user.roles).includes(2048)) {
+  /*if (!Object.values(req.user.roles).includes(2048)) {
     res.status(401);
     throw new Error("Not authorized");
-  }
+  }*/
   //Check if matchday exists
   if (nameExists) {
     res.status(400);
@@ -38,13 +50,14 @@ const setMatchday = asyncHandler(async (req, res) => {
     res.status(400);
     throw new Error("Id already taken");
   }
-  if (!name) {
+  if (!name || !deadlineTime) {
     res.status(400);
     throw new Error("Please add all fields");
   }
 
   const matchday = await Matchday.create({
     name,
+    deadlineTime,
     id,
   });
   res.status(200).json(matchday);
@@ -73,10 +86,10 @@ const updateMatchday = asyncHandler(async (req, res) => {
     throw new Error("User not found");
   }
   // Make sure the logged in user is an ADMIN
-  if (!Object.values(req.user.roles).includes(2048)) {
+  /*if (!Object.values(req.user.roles).includes(2048)) {
     res.status(401);
     throw new Error("Not authorized");
-  }
+  }*/
 
   if (!matchday) {
     res.status(400);
@@ -84,6 +97,14 @@ const updateMatchday = asyncHandler(async (req, res) => {
   } else {
     Object.keys(req.body).forEach((val) => {
       if (val === "name") {
+        if(req.body.name.slice(0,8).toLocaleLowerCase() !== 'matchday') {
+          res.status(400)
+          throw new Error("name should start with matchday")
+        }
+        if(!!(+req.body.name.slice(8).trim()) === false) {
+          res.status(400)
+          throw new Error('Entry has no id')
+        }
         req.body.name = req.body.name
           .split(" ")
           .map((x) => x[0].toLocaleUpperCase() + x.slice(1).toLocaleLowerCase())
@@ -116,10 +137,10 @@ const deleteMatchday = asyncHandler(async (req, res) => {
     res.status(400);
     throw new Error("User not found");
   }
-  if (!Object.values(req.user.roles).includes(2048)) {
+  /*if (!Object.values(req.user.roles).includes(2048)) {
     res.status(401);
     throw new Error("Not authorized");
-  }
+  }*/
 
   await Matchday.findOneAndDelete({ id: req.params.id });
   res.status(200).json({ id: +req.params.id });

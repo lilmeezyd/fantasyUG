@@ -7,9 +7,13 @@ const matchdaySchema = mongoose.Schema({
   deadlineTime: { type: Date, default: null },
   pastDeadline: { type: Boolean, default: false },
   finished: { type: Boolean, default: false },
-  avergaeScore: { type: Number, default: 0},
+  avergeScore: { type: Number, default: 0 },
   highestScore: { type: Number, default: 0 },
-  highestScoringEntry: { type: Number, default: null },
+  highestScoringEntry: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    default: null,
+  },
   current: { type: Boolean, default: false },
   next: { type: Boolean, default: false },
   mostSelected: {
@@ -40,4 +44,4 @@ const matchdaySchema = mongoose.Schema({
 });
 
 const Matchday = mongoose.model("Matchday", matchdaySchema);
-export default Matchday
+export default Matchday;

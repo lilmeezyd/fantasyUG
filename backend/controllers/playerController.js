@@ -35,12 +35,12 @@ const setPlayer = asyncHandler(async (req, res) => {
     throw new Error("User not found");
   }
   // Make sure the logged in user is an ADMIN
-  if (!Object.values(user.roles).includes(2048)) {
+ /* if (!Object.values(user.roles).includes(2048)) {
     res.status(401);
     throw new Error("Not Authorized");
-  }
+  }*/
 
-  firstName = firstName
+  /*firstName = firstName
     .trim()
     .split(" ")
     .map((x) => x[0].toLocaleUpperCase() + x.slice(1).toLocaleLowerCase())
@@ -54,6 +54,7 @@ const setPlayer = asyncHandler(async (req, res) => {
     .split(" ")
     .map((x) => x[0].toLocaleUpperCase() + x.slice(1).toLocaleLowerCase())
     .join(" ");
+    */
 
   const player = await Player.create({
     firstName,
@@ -125,7 +126,7 @@ const updatePlayer = asyncHandler(async (req, res) => {
     req.body.playerPosition ||
     req.body.playerTeam
   ) {
-    Object.keys(req.body).forEach((val) => {
+    /*Object.keys(req.body).forEach((val) => {
       if (val === "firstName") {
         req.body.firstName = req.body.firstName
           .split(" ")
@@ -144,7 +145,7 @@ const updatePlayer = asyncHandler(async (req, res) => {
           .map((x) => x[0].toLocaleUpperCase() + x.slice(1).toLocaleLowerCase())
           .join(" ");
       }
-    });
+    });*/
     const updatedPlayer = await Player.findByIdAndUpdate(
       req.params.id,
       req.body,

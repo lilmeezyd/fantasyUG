@@ -16,9 +16,14 @@ const setTeams = asyncHandler(async (req, res) => {
     throw new Error("User not found");
   }
   // Make sure the logged in user is an ADMIN
-  if (!Object.values(user.roles).includes(2048)) {
+  /*if (!Object.values(user.roles).includes(2048)) {
     res.status(401);
     throw new Error("Not Authorized");
+  }*/
+
+  if(code <= 0)  {
+    res.status(400);
+    throw new Error(`Code can't be less than 0`)
   }
 
   if (duplicateCode) {
@@ -29,10 +34,12 @@ const setTeams = asyncHandler(async (req, res) => {
     res.status(400);
     throw new Error("Please add all fields");
   }
+  /*console.log(name)
   name = name
     .split(" ")
     .map((x) => x[0].toLocaleUpperCase() + x.slice(1).toLocaleLowerCase())
     .join(" ");
+    console.log(name)*/
   shortName = shortName.toLocaleUpperCase();
   const team = await Team.create({
     name,
@@ -64,19 +71,19 @@ const updateTeam = asyncHandler(async (req, res) => {
     throw new Error("User not found");
   }
   // Make sure the logged in user is an ADMIN OR EDITOR
-  if (
+  /*if (
     Object.values(user.roles).includes(1) &&
     Object.values(user.roles).length === 1
   ) {
     res.status(401);
     throw new Error("Not Authorized");
-  }
+  }*/
 
   if (!team) {
     res.status(400);
     throw new Error("Team not found");
   } else {
-    Object.keys(req.body).forEach((val) => {
+   /* Object.keys(req.body).forEach((val) => {
       if (val === "name") {
         req.body.name = req.body.name
           .split(" ")
@@ -86,7 +93,7 @@ const updateTeam = asyncHandler(async (req, res) => {
       if (val === "shortName") {
         req.body.shortName = req.body.shortName.toLocaleUpperCase();
       }
-    });
+    });*/
     const updatedTeam = await Team.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
     });
@@ -112,10 +119,10 @@ const deleteTeam = asyncHandler(async (req, res) => {
     throw new Error("User not found");
   }
   // Make sure the logged in user is an ADMIN
-  if (!Object.values(user.roles).includes(2048)) {
+  /*if (!Object.values(user.roles).includes(2048)) {
     res.status(401);
     throw new Error("Not Authorized");
-  }
+  }*/
 
   await Team.findByIdAndDelete(req.params.id);
   res.status(200).json({ id: req.params.id });

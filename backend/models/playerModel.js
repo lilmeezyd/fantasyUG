@@ -29,12 +29,7 @@ const playerSchema = mongoose.Schema({
     },
     nowCost: {
         type: Number,
-        default: 4.0
-    },
-    matchdays: [],
-    matchdayPoints: {
-        type: Number,
-        default: 0
+        required: [ true, 'Please add price']
     },
     totalPoints: {
         type: Number,
@@ -76,15 +71,7 @@ const playerSchema = mongoose.Schema({
         type: Number,
         default: 0
     },
-    started: {
-        type: Number,
-        default: 0
-    },
-    offBench: {
-        type: Number,
-        default: 0
-    },
-    bestPlayer: {
+    starts: {
         type: Number,
         default: 0
     }
