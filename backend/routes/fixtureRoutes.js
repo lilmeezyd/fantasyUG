@@ -4,6 +4,7 @@ import {
   getFixtures,
   editFixture,
   populateStats,
+  dePopulateStats,
   editStats,
   deleteFixture,
   updateScore,
@@ -20,6 +21,9 @@ router
 router
   .route("/:id/populate")
   .put(protect, roles(ROLES.ADMIN, ROLES.EDITOR), populateStats);
+router
+  .route("/:id/depopulate")
+  .put(protect, roles(ROLES.ADMIN, ROLES.EDITOR), dePopulateStats);
 router
   .route("/:id/stats")
   .put(protect, roles(ROLES.ADMIN, ROLES.EDITOR), editStats);

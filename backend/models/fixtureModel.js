@@ -22,10 +22,12 @@ const fixtureSchema = mongoose.Schema({
         ref: 'Team'
     },
     teamAwayScore: {
-        type: Number
+        type: Number,
+        default: null
     },
     teamHomeScore: {
-        type: Number
+        type: Number,
+        default: null
     }
 })
 
