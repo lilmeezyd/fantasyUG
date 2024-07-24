@@ -120,11 +120,13 @@ const populateStats = asyncHandler(async (req, res) => {
       home: fixture.teamHome === player.playerTeam ? true : false,
     });
   });
+  fixture.teamAwayScore = 0
+  fixture.teamHomeScore = 0
 
   
   const updatedFixture = await Fixture.findByIdAndUpdate(
     req.params.id,
-    {...fixture, teamAwayScore: 0, teamHomeScore: 0},
+    fixture,
     { new: true }
   );
   res.status(200).json(updatedFixture);
@@ -150,12 +152,18 @@ const dePopulateStats = asyncHandler(async (req, res) => {
     res.status(400);
     throw new Error("Fixture not found");
   }
+  if (fixture.stats.length === 0) {
+    res.status(400);
+    throw new Error("Fixture already De-populated");
+  }
 
   fixture.stats.length = 0;
+  fixture.teamAwayScore = null
+  fixture.teamHomeScore = null
   await PlayerHistory.deleteMany({ fixture: req.params.id });
   const updatedFixture = await Fixture.findByIdAndUpdate(
     req.params.id,
-    {...fixture, teamAwayScore: null, teamHomeScore: null},
+    fixture,
     { new: true }
   );
   res.status(200).json(updatedFixture);
@@ -336,46 +344,24 @@ const editStats = asyncHandler(async (req, res) => {
   
   if(identifier === 'goalsScored') {
     if(homeAway === 'away') {
-      teamAwayScore+=newValue
-      await Fixture.findByIdAndUpdate(
-        req.params.id,
-        teamAwayScore,
-        { new: true }
-      );
+      fixture.teamAwayScore = teamAwayScore+=newValue
     }
     if(homeAway === 'home') {
-      teamHomeScore+=newValue
-      await Fixture.findByIdAndUpdate(
-        req.params.id,
-        teamHomeScore,
-        { new: true }
-      );
+      fixture.teamHomeScore = teamHomeScore+=newValue
     }
   }
   if(identifier === 'ownGoals') {
     if(homeAway === 'home') {
-      teamAwayScore+=newValue
-      /*await Fixture.findByIdAndUpdate(
-        req.params.id,
-        teamAwayScore,
-        { new: true }
-      );*/
+      fixture.teamAwayScore = teamAwayScore+=newValue
     }
     if(homeAway === 'away') {
-      teamHomeScore+=newValue
-      await Fixture.findByIdAndUpdate(
-        req.params.id,
-        teamHomeScore,
-        { new: true }
-      );
+      fixture.teamHomeScore = teamHomeScore+=newValue
     }
   }
 
-  console.log(teamAwayScore)
-  console.log(teamHomeScore)
   const updatedFixture = await Fixture.findByIdAndUpdate(
     req.params.id,
-    {...fixture, teamAwayScore, teamHomeScore},
+    fixture,
     { new: true }
   );
   res.status(200).json(updatedFixture);
@@ -386,19 +372,19 @@ const editStats = asyncHandler(async (req, res) => {
 //@route PUT /api/fixtures/:id/scores
 //@access private
 //@role ADMIN, EDITOR
-const updateScore = asyncHandler(async (req, res) => {
+/*const updateScore = asyncHandler(async (req, res) => {
   const fixture = await Fixture.findById(req.params.id);
 
   if (!fixture) {
     res.status(400);
     throw new Error("Fixture not found");
-  }
+  }*/
   // Find user
-  const user = await User.findById(req.user.id).select("-password");
+ /* const user = await User.findById(req.user.id).select("-password");
   if (!user) {
     res.status(400);
     throw new Error("User not found");
-  }
+  }*/
   // Make sure the logged in user is an ADMIN
   /*if (
     Object.values(user.roles).includes(1) &&
@@ -407,13 +393,13 @@ const updateScore = asyncHandler(async (req, res) => {
     res.status(401);
     throw new Error("Not Authorized");
   }*/
-  if (fixture.stats.length > 0) {
+  /*if (fixture.stats.length > 0) {
     console.log("Fixture populated");
   } else {
     res.status(400);
     throw new Error(`Stats not populated or fixture not started`);
   }
-});
+});*/
 
 //@desc Get Fixture
 //@route GET /api/fixtures/:id
@@ -452,10 +438,10 @@ const deleteFixture = asyncHandler(async (req, res) => {
     throw new Error("User not found");
   }
   // Make sure the logged in user is an ADMIN
-  if (!Object.values(user.roles).includes(2048)) {
+  /*if (!Object.values(user.roles).includes(2048)) {
     res.status(401);
     throw new Error("Not Authorized");
-  }
+  }*/
   if (!players) {
     res.status(400);
     throw new Error("No players found");
@@ -535,6 +521,5 @@ export {
   dePopulateStats,
   editFixture,
   editStats,
-  deleteFixture,
-  updateScore,
+  deleteFixture
 };

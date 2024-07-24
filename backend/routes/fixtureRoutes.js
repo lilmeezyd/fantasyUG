@@ -7,7 +7,6 @@ import {
   dePopulateStats,
   editStats,
   deleteFixture,
-  updateScore,
   getFixture,
 } from "../controllers/fixtureController.js";
 import { protect, roles } from "../middleware/authMiddleware.js";
@@ -27,9 +26,11 @@ router
 router
   .route("/:id/stats")
   .put(protect, roles(ROLES.ADMIN, ROLES.EDITOR), editStats);
+  /*
 router
   .route("/:id/scores")
   .put(protect, roles(ROLES.ADMIN, ROLES.EDITOR), updateScore);
+  */
 router
   .route("/:id")
   .get(getFixture)
