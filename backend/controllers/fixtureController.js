@@ -3,6 +3,7 @@ import Fixture from "../models/fixtureModel.js";
 import Stats from "../models/statsModel.js";
 import Player from "../models/playerModel.js";
 import PlayerHistory from "../models/playerHistoryModel.js";
+import Position from "../models/positionModel.js"
 import User from "../models/userModel.js";
 import Matchday from "../models/matchdayModel.js";
 
@@ -76,14 +77,7 @@ const populateStats = asyncHandler(async (req, res) => {
     res.status(400);
     throw new Error("User not found");
   }
-  // Make sure the logged in user is an ADMIN OR EDITOR
-  /* if (
-    Object.values(req.user.roles).includes(1) &&
-    Object.values(req.user.roles).length === 1
-  ) {
-    res.status(401);
-    throw new Error("Not Authorized");
-  }*/
+  
   const identifiers = {
     identifier1: "goalsScored",
     identifier2: "assists",
@@ -113,10 +107,6 @@ const populateStats = asyncHandler(async (req, res) => {
     res.status(400);
     throw new Error("No players found");
   }
-  /*const singleMatchday = await PlayerHistory.create({
-    matchday: fixture.matchday,
-  });
-  console.log(fixture)*/
 
   players.forEach(async (player) => {
     await PlayerHistory.create({
@@ -131,19 +121,10 @@ const populateStats = asyncHandler(async (req, res) => {
     });
   });
 
-  /*players.forEach(async (player) => {
-    player.matchdays && player.matchdays.push(singleMatchday);
-    await Player.findByIdAndUpdate(player.id, player, { new: true });
-    await Player.findByIdAndUpdate(
-      player.id,
-      { matchdayPoints: 0 },
-      { new: true }
-    );
-  });*/
-
+  
   const updatedFixture = await Fixture.findByIdAndUpdate(
     req.params.id,
-    fixture,
+    {...fixture, teamAwayScore: 0, teamHomeScore: 0},
     { new: true }
   );
   res.status(200).json(updatedFixture);
@@ -174,7 +155,7 @@ const dePopulateStats = asyncHandler(async (req, res) => {
   await PlayerHistory.deleteMany({ fixture: req.params.id });
   const updatedFixture = await Fixture.findByIdAndUpdate(
     req.params.id,
-    fixture,
+    {...fixture, teamAwayScore: null, teamHomeScore: null},
     { new: true }
   );
   res.status(200).json(updatedFixture);
@@ -237,8 +218,12 @@ const editFixture = asyncHandler(async (req, res) => {
 //@role ADMIN, EDITOR
 const editStats = asyncHandler(async (req, res) => {
   const fixture = await Fixture.findById(req.params.id);
+  let { teamHomeScore, teamAwayScore } = fixture
   const { identifier, homeAway, player, value } = req.body;
   const playerFound = player ? await Player.findById(player) : "";
+
+   const _code = playerFound && await Position.findOne(playerFound.playerPosition)
+   const { code } = _code
 
   if (fixture.stats.length === 0) {
     res.status(400);
@@ -258,14 +243,6 @@ const editStats = asyncHandler(async (req, res) => {
     res.status(400);
     throw new Error("User not found");
   }
-  // Make sure the logged in user is an ADMIN
-  /*if (
-    Object.values(user.roles).includes(1) &&
-    Object.values(user.roles).length === 1
-  ) {
-    res.status(401);
-    throw new Error("Not Authorized");
-  }*/
 
   if (homeAway === "away") {
     if (playerFound.playerTeam.toString() !== fixture.teamAway.toString()) {
@@ -283,7 +260,7 @@ const editStats = asyncHandler(async (req, res) => {
 
   const retrievedPlayer = playerFound._id;
   const weight = {
-    goalsScored: 0,
+    goalsScored: code === 1 ? 10 : code === 2 ? 6 : code === 3 ? 5 : code === 4 ? 4 : 0,
     assists: 3,
     ownGoals: -2,
     penaltiesSaved: 5,
@@ -291,7 +268,7 @@ const editStats = asyncHandler(async (req, res) => {
     yellowCards: -1,
     redCards: -3,
     saves: 0,
-    cleansheets: 0,
+    cleansheets: code === 1 ? 4 : code === 2 ? 4 : code === 3 ? 1 : 0,
     starts: 1,
     bestPlayer: 3,
   };
@@ -300,8 +277,8 @@ const editStats = asyncHandler(async (req, res) => {
     [homeAway].some((x) => x.player.toString() === retrievedPlayer.toString());
   let newValue = +value;
   const playerPoints = await PlayerHistory.findOne({ player: retrievedPlayer });
-  let { totalPoints } = playerPoints
-  console.log(totalPoints)
+  let { totalPoints } = playerPoints;
+
 
   if (playerIn) {
     let playerIndex = fixture.stats
@@ -312,18 +289,22 @@ const editStats = asyncHandler(async (req, res) => {
     let a = +fixture.stats.filter((x) => x.identifier === identifier)[0][
       homeAway
     ][playerIndex].value;
+    if (newValue + a <= -1) {
+      res.status(400);
+      throw new Error(`Value can't be less than 0`);
+    }
     if (newValue + a === 0) {
       fixture.stats
         .filter((x) => x.identifier === identifier)[0]
         [homeAway].splice(playerIndex, 1);
-        totalPoints+=(weight[identifier]*(newValue))
-        await PlayerHistory.findOneAndUpdate(
-          {player, retrievedPlayer},
-          { identifier: newValue, totalPoints },
-          { new: true }
-        );
+      totalPoints += weight[identifier] * newValue;
+      await PlayerHistory.findOneAndUpdate(
+        { player: retrievedPlayer },
+        { [identifier]: newValue + a, totalPoints },
+        { new: true }
+      );
     } else {
-      totalPoints+=(weight[identifier]*(newValue+a))
+      totalPoints += weight[identifier] * (newValue);
       fixture.stats
         .filter((x) => x.identifier === identifier)[0]
         [homeAway].splice(playerIndex, 1, {
@@ -331,36 +312,74 @@ const editStats = asyncHandler(async (req, res) => {
           value: newValue + a,
         });
       await PlayerHistory.findOneAndUpdate(
-        {player, retrievedPlayer},
-        { identifier: newValue + a , totalPoints },
+        { player: retrievedPlayer },
+        { [identifier]: newValue + a, totalPoints },
         { new: true }
       );
     }
   } else {
-    if (newValue === -1) {
+    if (newValue <= -1) {
       res.status(400);
       throw new Error(`Value can't be less than 0`);
     }
-    
-    console.log(identifier)
     fixture.stats
       .filter((x) => x.identifier === identifier)[0]
       [homeAway].push({ player: retrievedPlayer, value: +value });
-      totalPoints+=(weight[identifier]*(+value))
-      await PlayerHistory.findOneAndUpdate(
-        {player, retrievedPlayer},
-        { identifier: +value , totalPoints },
+    totalPoints += weight[identifier] * +value;
+    await PlayerHistory.findOneAndUpdate(
+      { player: retrievedPlayer },
+      { [identifier]: +value, totalPoints },
+      { new: true }
+    );
+  }
+
+  
+  if(identifier === 'goalsScored') {
+    if(homeAway === 'away') {
+      teamAwayScore+=newValue
+      await Fixture.findByIdAndUpdate(
+        req.params.id,
+        teamAwayScore,
         { new: true }
       );
+    }
+    if(homeAway === 'home') {
+      teamHomeScore+=newValue
+      await Fixture.findByIdAndUpdate(
+        req.params.id,
+        teamHomeScore,
+        { new: true }
+      );
+    }
   }
-  
+  if(identifier === 'ownGoals') {
+    if(homeAway === 'home') {
+      teamAwayScore+=newValue
+      /*await Fixture.findByIdAndUpdate(
+        req.params.id,
+        teamAwayScore,
+        { new: true }
+      );*/
+    }
+    if(homeAway === 'away') {
+      teamHomeScore+=newValue
+      await Fixture.findByIdAndUpdate(
+        req.params.id,
+        teamHomeScore,
+        { new: true }
+      );
+    }
+  }
+
+  console.log(teamAwayScore)
+  console.log(teamHomeScore)
   const updatedFixture = await Fixture.findByIdAndUpdate(
     req.params.id,
-    fixture,
+    {...fixture, teamAwayScore, teamHomeScore},
     { new: true }
   );
-  res.json(updatedFixture)
-  res.status(200).json({ updatedFixture, msg: `Fixture Updated` });
+  res.status(200).json(updatedFixture);
+  //res.status(200).json({ updatedFixture, msg: `Fixture Updated` });
 });
 
 //@desc Update score for a specific fixture

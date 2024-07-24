@@ -29,47 +29,47 @@ const playerHistorySchema = mongoose.Schema({
         type: Number,
         default: 0
     },
-    goalsScored: {
+    "goalsScored": {
         type: Number,
         default: 0
     },
-    assists: {
+    "assists": {
         type: Number,
         default: 0
     },
-    ownGoals: {
+    "ownGoals": {
         type: Number,
         default: 0
     },
-    penaltiesSaved: {
+    "penaltiesSaved": {
         type: Number,
         default: 0
     },
-    penaltiesMissed: {
+    "penaltiesMissed": {
         type: Number,
         default: 0
     },
-    yellowCards: {
+    "yellowCards": {
         type: Number,
         default: 0
     },
-    redCards: {
+    "redCards": {
         type: Number,
         default: 0
     },
-    saves: {
+    "saves": {
         type: Number,
         default: 0
     },
-    cleansheets: {
+    "cleansheets": {
         type: Number,
         default: 0
     },
-    starts: {
+    "starts": {
         type: Number,
         default: 0
     },
-    bestPlayer: {
+    "bestPlayer": {
         type: Number,
         default: 0
     },
