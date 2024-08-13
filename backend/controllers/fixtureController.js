@@ -217,7 +217,7 @@ const editFixture = asyncHandler(async (req, res) => {
     { deadlineTime: deadline },
     { new: true }
   );
-  res.status(200).json({ updatedFixture, msg: `Fixture Updated` });
+  res.status(200).json(updatedFixture);
 });
 
 //@desc Set stats for a specific fixture
@@ -497,7 +497,7 @@ const deleteFixture = asyncHandler(async (req, res) => {
   await Fixture.findByIdAndDelete(req.params.id);
   const fixtures = await Fixture.find({ matchday: fixture.matchday });
 
-  if (fixtures.length > 1) {
+  if (fixtures.length > 0) {
     const firstKickOff = fixtures.sort((x, y) => {
       if (x.kickOffTime > y.kickOffTime) return 1;
       if (x.kickOffTime < y.kickOffTime) return -1;

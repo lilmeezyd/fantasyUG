@@ -3,7 +3,7 @@ import Position from "../models/positionModel.js";
 import User from "../models/userModel.js";
 
 //@desc Set Position
-//@route POST /api/positions
+//@route POST /api/positions 
 //@access Private
 //@role Admin
 const setPosition = asyncHandler(async (req, res) => {
@@ -56,8 +56,17 @@ const setPosition = asyncHandler(async (req, res) => {
 //@access public
 //@role not restricted
 const getPositions = asyncHandler(async (req, res) => {
-  const positions = await Position.find({});
+  const positions = await Position.find({}); 
   res.status(200).json(positions);
+});
+
+//@desc Get Position
+//@route GET /api/position
+//@access public
+//@role not restricted
+const getPosition = asyncHandler(async (req, res) => {
+  const position = await Position.findById(req.params.id); 
+  res.status(200).json(position);
 });
 
 //@desc update position
@@ -137,4 +146,4 @@ const deletePosition = asyncHandler(async (req, res) => {
   res.status(200).json({ id: req.params.id });
 });
 
-export { setPosition, getPositions, updatePosition, deletePosition };
+export { setPosition, getPositions, getPosition, updatePosition, deletePosition };

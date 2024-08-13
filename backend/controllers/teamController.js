@@ -58,6 +58,19 @@ const getTeams = asyncHandler(async (req, res) => {
   res.status(200).json(teams);
 });
 
+//@desc Get Team
+//@route GET /api/teams/:id
+//@access Public
+//@role Admin, editor, normal_use
+const getTeam = asyncHandler(async(req, res) => {
+  const team = await Team.findById(req.params.id)
+  if(!team) {
+    res.status(400);
+    throw new Error("Team not found");
+  }
+  res.status(200).json(team)
+})
+
 //@desc Update Team
 //@route PUT /api/teams/:id
 //@access Private
@@ -67,20 +80,12 @@ const updateTeam = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user.id);
 
   if (!user) {
-    res.status(400);
+    res.status(404);
     throw new Error("User not found");
   }
-  // Make sure the logged in user is an ADMIN OR EDITOR
-  /*if (
-    Object.values(user.roles).includes(1) &&
-    Object.values(user.roles).length === 1
-  ) {
-    res.status(401);
-    throw new Error("Not Authorized");
-  }*/
 
   if (!team) {
-    res.status(400);
+    res.status(404);
     throw new Error("Team not found");
   } else {
    /* Object.keys(req.body).forEach((val) => {
@@ -97,7 +102,8 @@ const updateTeam = asyncHandler(async (req, res) => {
     const updatedTeam = await Team.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
     });
-    res.status(200).json({ msg: `${updatedTeam.name} updated` });
+    //res.status(200).json({ msg: `${updatedTeam.name} updated` });
+    res.status(200).json(updatedTeam)
   }
 });
 
@@ -128,4 +134,4 @@ const deleteTeam = asyncHandler(async (req, res) => {
   res.status(200).json({ id: req.params.id });
 });
 
-export { getTeams, setTeams, updateTeam, deleteTeam };
+export { getTeams, getTeam, setTeams, updateTeam, deleteTeam };

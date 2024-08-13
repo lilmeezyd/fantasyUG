@@ -2,6 +2,7 @@ import express from "express";
 import {
   getTeams,
   setTeams,
+  getTeam,
   updateTeam,
   deleteTeam,
 } from "../controllers/teamController.js";
@@ -12,6 +13,7 @@ const router = express.Router();
 router.route("/").get(getTeams).post(protect, roles(ROLES.ADMIN), setTeams);
 router
   .route("/:id")
+  .get(getTeam)
   .put(protect, roles(ROLES.EDITOR, ROLES.ADMIN), updateTeam)
   .delete(protect, roles(ROLES.ADMIN), deleteTeam);
 

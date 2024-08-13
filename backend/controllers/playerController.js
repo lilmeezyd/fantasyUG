@@ -97,6 +97,8 @@ const getPlayer = asyncHandler(async (req, res) => {
 //@access private
 //@role ADMIN, EDITOR
 const updatePlayer = asyncHandler(async (req, res) => {
+  console.log(req.params)
+  console.log(req.body)
   const player = await Player.findById(req.params.id);
   const position = await Position.findById(player.playerPosition);
 
@@ -107,13 +109,13 @@ const updatePlayer = asyncHandler(async (req, res) => {
     throw new Error("User not found");
   }
   // Make sure the logged in user is an ADMIN
-  if (
+  /*if (
     Object.values(user.roles).includes(1) &&
     Object.values(user.roles).length === 1
   ) {
     res.status(401);
     throw new Error("Not Authorized");
-  }
+  }*/
 
   if (!player) {
     res.status(400);
@@ -124,7 +126,8 @@ const updatePlayer = asyncHandler(async (req, res) => {
     req.body.secondName ||
     req.body.appName ||
     req.body.playerPosition ||
-    req.body.playerTeam
+    req.body.playerTeam ||
+    req.body.nowCost
   ) {
     /*Object.keys(req.body).forEach((val) => {
       if (val === "firstName") {
@@ -155,7 +158,7 @@ const updatePlayer = asyncHandler(async (req, res) => {
       .status(200)
       .json({ msg: `${updatedPlayer.appName} updated`, updatedPlayer });
   }
-
+/*
   if (req.body.matchday) {
     const matchdayIndex = player.matchdays.findIndex(
       (x) => x.matchday.toString() === req.body.matchday.toString()
@@ -340,7 +343,7 @@ const updatePlayer = asyncHandler(async (req, res) => {
     res
       .status(200)
       .json({ msg: `${updatedPlayer.appName} updated`, updatedPlayer });
-  }
+  }*/
 });
 
 //@desc delete player
@@ -348,16 +351,18 @@ const updatePlayer = asyncHandler(async (req, res) => {
 //@access private
 //@role ADMIN
 const deletePlayer = asyncHandler(async (req, res) => {
+  console.log(req.params)
+  console.log(req.body)
   const player = await Player.findById(req.params.id);
 
   if (!player) {
-    res.status(400);
+    res.status(404);
     throw new Error("Player not found");
   }
 
   // Find user
   const user = await User.findById(req.user.id).select("-password");
-  if (!user) {
+ /* if (!user) {
     res.status(400);
     throw new Error("User not found");
   }
@@ -365,12 +370,12 @@ const deletePlayer = asyncHandler(async (req, res) => {
   if (!Object.values(user.roles).includes(2048)) {
     res.status(401);
     throw new Error("Not Authorized");
-  }
-  const doesExist = player.matchdays.length;
+  }*/
+  /*const doesExist = player.matchdays.length;
   if (doesExist > 0) {
     res.status(400);
     throw new Error(`Can't delete player involved in previous fixture`);
-  }
+  }*/
   await Player.findByIdAndDelete(req.params.id);
   res.status(200).json({ id: req.params.id });
 });

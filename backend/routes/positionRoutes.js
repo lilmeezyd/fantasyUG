@@ -3,6 +3,7 @@ import {
   getPositions,
   setPosition,
   updatePosition,
+  getPosition,
   deletePosition,
 } from "../controllers/positionController.js";
 import { protect, roles } from "../middleware/authMiddleware.js";
@@ -15,6 +16,7 @@ router
   .post(protect, roles(ROLES.ADMIN), setPosition);
 router
   .route("/:id")
+  .get(getPosition)
   .put(protect, roles(ROLES.EDITOR, ROLES.ADMIN), updatePosition)
   .delete(protect, roles(ROLES.ADMIN), deletePosition);
 

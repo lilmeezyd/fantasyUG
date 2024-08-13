@@ -2,6 +2,7 @@ import express from "express";
 import {
   setMatchday,
   getMatchdays,
+  getMatchday,
   updateMatchday,
   deleteMatchday,
 } from "../controllers/matchdayController.js";
@@ -15,6 +16,7 @@ router
   .post(protect, roles(ROLES.ADMIN), setMatchday);
 router
   .route("/:id")
+  .get(getMatchday)
   .put(protect, roles(ROLES.ADMIN, ROLES.EDITOR), updateMatchday)
   .delete(protect, roles(ROLES.ADMIN), deleteMatchday);
 

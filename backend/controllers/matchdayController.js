@@ -8,6 +8,7 @@ import User from "../models/userModel.js";
 //@role ADMIN
 const setMatchday = asyncHandler(async (req, res) => {
   let { name, deadlineTime } = req.body;
+  console.log(req.body)
   //let timeString = new Date(deadlineTime).toISOString()
   if(!name) {
     res.status(400)
@@ -73,6 +74,16 @@ const getMatchdays = asyncHandler(async (req, res) => {
   res.status(200).json(matchdays);
 });
 
+//@desc Get Matchday
+//@route GET /api/matchdays/:id
+//@access Public
+//@role normal_user
+const getMatchday = asyncHandler(async (req, res) => {
+  const matchday = await Matchday.findById(req.params.id);
+  //const matchdays = await Matchday.find({}).select('-_id')
+  res.status(200).json(matchday);
+});
+
 //@desc Update Matchday
 //@route PUT /api/matchdays/:id
 //@access Private
@@ -125,7 +136,7 @@ const updateMatchday = asyncHandler(async (req, res) => {
 //@access Private
 //@roles Admin
 const deleteMatchday = asyncHandler(async (req, res) => {
-  const matchday = await Matchday.findOne({ id: req.params.id });
+  const matchday = await Matchday.findById(req.params.id);
 
   if (!matchday) {
     res.status(400);
@@ -137,13 +148,9 @@ const deleteMatchday = asyncHandler(async (req, res) => {
     res.status(400);
     throw new Error("User not found");
   }
-  /*if (!Object.values(req.user.roles).includes(2048)) {
-    res.status(401);
-    throw new Error("Not authorized");
-  }*/
 
-  await Matchday.findOneAndDelete({ id: req.params.id });
-  res.status(200).json({ id: +req.params.id });
+  await Matchday.findByIdAndDelete(req.params.id );
+  res.status(200).json({ id: req.params.id });
 });
 
-export { setMatchday, getMatchdays, updateMatchday, deleteMatchday };
+export { setMatchday, getMatchdays, getMatchday, updateMatchday, deleteMatchday };
