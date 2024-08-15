@@ -1,38 +1,17 @@
 import { Modal, Button } from "react-bootstrap"
-import { useState, useEffect } from "react"
-import {  useGetMutation } from "../../../slices/teamApiSlice"
-import { useGetPositionsMutation } from "../../../slices/positionApiSlice"
+import { useState  } from "react"
+import {  useGetQuery } from "../../../slices/teamApiSlice"
+import { useGetPositionsQuery } from "../../../slices/positionApiSlice"
 const AddModal = (props) => {
     const {show, closeAdd, submit} = props
     const [ data, setData ] = useState({firstName: '', secondName: '', appName: '',
       playerPosition: '', playerTeam: '', startCost: ''
     })
-    const [ teams, setTeams ] = useState([])
-    const [ positions, setPositions ] = useState([])
+    //const [ teams, setTeams ] = useState([])
 
-    const [ get] = useGetMutation()
-    const [ getPositions ] = useGetPositionsMutation()
+    const { data: teams} = useGetQuery()
+    const { data: positions } = useGetPositionsQuery()
 
-    useEffect(() => {
-      const fetchTeams = async () => {
-        try {
-          const res = await get().unwrap()
-          setTeams(res)
-        } catch (error) {
-          console.log(error)
-        }
-    }
-    const fetchPositions = async () => {
-      try {
-        const res = await getPositions().unwrap()
-        setPositions(res)
-      } catch (error) {
-        console.log(error)
-      }
-  }
-  fetchTeams()
-    fetchPositions()
-    }, [get, getPositions])
     const onSubmit = (e) => {
       e.preventDefault()
       submit(data) 
@@ -82,7 +61,7 @@ const AddModal = (props) => {
                         ...prev, playerTeam: e.target.value
                       }))
                     }} className="form-control" name="team" id="team">
-                  {teams.map(team => 
+                  {teams?.map(team => 
                     <option 
                     key={team._id} 
                     value={team._id}
@@ -99,7 +78,7 @@ const AddModal = (props) => {
                   }))
                 }}
                 className="form-control" name="position" id="position">
-                  {positions.map(position => 
+                  {positions?.map(position => 
                     <option 
                     key={position._id} 
                     value={position._id}

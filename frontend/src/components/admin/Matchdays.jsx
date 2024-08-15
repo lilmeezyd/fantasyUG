@@ -1,10 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
+import {  useMemo, useState } from "react";
 import {
-  useGetMatchdaysMutation,
-  useGetMatchdayMutation,
+  useGetMatchdaysQuery,
   useAddMatchdayMutation,
-  useDeleteMatchdayMutation,
-  useEditMatchdayMutation,
+  useDeleteMatchdayMutation
 } from "../../slices/matchdayApiSlice";
 import { Container, Button, Spinner } from "react-bootstrap";
 import Pagination from "../Pagination"
@@ -14,39 +12,20 @@ import EditModal from "./matchdayModals/EditModal";
 import getTime from "../../utils/getTime";
 
 const Matchdays = () => {  
-  const [matchdays, setMatchdays] = useState([]);
   const [show, setShow] = useState({
     edited: false,
     deleted: false,
-    added: false,
+    added: false, 
   });
   const [matchdayId, setMatchdayId] = useState("");
-  const [matchdayName, setMatchdayName] = useState({});
   const [curPage, setCurPage] = useState(1);
   const [page, setPage] = useState(1);
-  const [ getMatchdays, { isLoading} ] = useGetMatchdaysMutation()
-  const [ getMatchday ] = useGetMatchdayMutation()
+  const { data: matchdays,  isLoading}  = useGetMatchdaysQuery()
   const [addMatchday ] = useAddMatchdayMutation()
-  const [ editMatchday ] = useEditMatchdayMutation()
   const [ deleteMatchday ] = useDeleteMatchdayMutation()
   const {deleted, edited, added } = show
   const pageSize = 5
-  let totalPages = Math.ceil(matchdays.length / pageSize);
-
-  useEffect(() => {
-    const fetchMatchdays = async () => {
-       try {
-         const res = await getMatchdays().unwrap()
-         setMatchdays(res)
-         console.log(res)
-       } catch (error) {
-         console.log(error)
-       }
-   }
-   fetchMatchdays()
- 
-   
- }, [getMatchdays])
+  let totalPages = Math.ceil(matchdays?.length / pageSize);
 
  const closeAdd = () => {
   setShow((prevState) => ({
@@ -81,13 +60,7 @@ const editMatchdayPop = async (id) => {
     edited: true,
   }));
   setMatchdayId(id);
-  try {
-    const res = await getMatchday(id).unwrap();
-    setMatchdayName(res);
-  } catch (error) {
-    console.log(error);
-  }
-};
+}
 const deleteMatchdayPop = (id) => {
   setShow((prevState) => ({
     ...prevState,
@@ -120,8 +93,7 @@ const deleteMatchdayNow = async () => {
 
 const submit = async (data) => {
   try {
-    const res = await addMatchday(data).unwrap();
-    setMatchdays((prev) => [...prev, res]);
+    await addMatchday(data).unwrap();
   } catch (error) {
     console.log(error);
   }
@@ -132,7 +104,7 @@ const submit = async (data) => {
   setMatchdayId("");
 };
 
-const editMatchdayNow = async (data) => {
+const resetEdit = async (data) => {
   try {
     const res = await editMatchday(data, matchdayId).unwrap();
     console.log(res);
@@ -192,8 +164,7 @@ const viewLastPage = () => {
 };
 
 const memoMatchdays = useMemo(() => { 
-  return matchdays
-  .filter((player, key) => {
+  return matchdays?.filter((matchday, key) => {
     let start = (curPage - 1) * pageSize;
     let end = curPage * pageSize;
     if (key >= start && key < end) return true;
@@ -215,8 +186,8 @@ const memoMatchdays = useMemo(() => {
       </div>
       <AddModal submit={submit} show={added} closeAdd={closeAdd}></AddModal>
       <EditModal
-        matchdayName={matchdayName}
-        editMatchdayNow={editMatchdayNow}
+        matchdayId={matchdayId}
+        resetEdit={resetEdit}
         show={edited}
         closeEdit={closeEdit}
       ></EditModal>

@@ -1,10 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
+import { useState } from "react";
 import {
-  useGetPositionsMutation,
-  useGetPositionMutation,
+  useGetPositionsQuery,
   useAddPositionMutation,
-  useDeletePositionMutation,
-  useEditPositionMutation, 
+  useDeletePositionMutation
 } from "../../slices/positionApiSlice";
 import { Container, Button, Spinner } from "react-bootstrap";
 import AddModal from "./positionModals/AddModal";
@@ -12,36 +10,16 @@ import DeleteModal from "./positionModals/DeleteModal";
 import EditModal from "./positionModals/EditModal";
 
 const Positions = () => {
-  const [positions, setPositions] = useState([]);
   const [show, setShow] = useState({
     edited: false,
     deleted: false,
     added: false,
   });
   const [positionId, setPositionId] = useState("");
-  const [positionName, setPositionName] = useState({});
-  const [curPage, setCurPage] = useState(1);
-  const [page, setPage] = useState(1);
-  const [ getPositions, { isLoading} ] = useGetPositionsMutation()
-  const [ getPosition ] = useGetPositionMutation()
+  const { data: positions, isLoading } = useGetPositionsQuery()
   const [addPosition ] = useAddPositionMutation()
-  const [ editPosition ] = useEditPositionMutation()
   const [ deletePosition ] = useDeletePositionMutation()
   const {deleted, edited, added } = show
-
-  useEffect(() => {
-    const fetchPositions = async () => {
-       try {
-         const res = await getPositions().unwrap()
-         setPositions(res)
-       } catch (error) {
-         console.log(error)
-       }
-   }
-   fetchPositions()
- 
-   
- }, [getPositions])
 
  const closeAdd = () => {
   setShow((prevState) => ({
@@ -76,12 +54,6 @@ const editPositionPop = async (id) => {
     edited: true,
   }));
   setPositionId(id);
-  try {
-    const res = await getPosition(id).unwrap();
-    setPositionName(res);
-  } catch (error) {
-    console.log(error);
-  }
 };
 const deletePositionPop = (id) => {
   setShow((prevState) => ({
@@ -102,7 +74,6 @@ const cancelDelete = () => {
 const deletePositionNow = async () => {
   try {
     await deletePosition(positionId).unwrap();
-    setPositions(positions.filter((position) => position._id !== positionId));
   } catch (error) {
     console.log(error);
   }
@@ -111,12 +82,11 @@ const deletePositionNow = async () => {
     deleted: false,
   }));
   setPositionId("");
-};
+}; 
 
 const submit = async (data) => {
   try {
-    const res = await addPosition(data).unwrap();
-    setPositions((prev) => [...prev, res]);
+     await addPosition(data).unwrap();
   } catch (error) {
     console.log(error);
   }
@@ -127,15 +97,7 @@ const submit = async (data) => {
   setPositionId("");
 };
 
-const editPositionNow = async (data) => {
-  try {
-    const res = await editPosition(data, positionId).unwrap();
-    console.log(res);
-    //dispatch(setPositionDetails({...res}))
-    setPositions((prev) => [...prev, res]);
-  } catch (error) {
-    console.log(error);
-  }
+const resetEdit = async () => { 
   setShow((prevState) => ({
     ...prevState,
     edited: false,
@@ -159,8 +121,8 @@ const editPositionNow = async (data) => {
       </div>
       <AddModal submit={submit} show={added} closeAdd={closeAdd}></AddModal>
       <EditModal
-        positionName={positionName}
-        editPositionNow={editPositionNow}
+      positionId={positionId}
+        resetEdit={resetEdit}
         show={edited}
         closeEdit={closeEdit}
       ></EditModal>

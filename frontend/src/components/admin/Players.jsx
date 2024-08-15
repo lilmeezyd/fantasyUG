@@ -1,10 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
-  useGetPlayersMutation,
-  useGetPlayerMutation,
+  useGetPlayersQuery,
   useAddPlayerMutation,
-  useDeletePlayerMutation,
-  useEditPlayerMutation,
+  useDeletePlayerMutation
 } from "../../slices/playerApiSlice";
 import { Container, Button, Spinner } from "react-bootstrap";
 import Pagination from "../Pagination"
@@ -13,40 +11,22 @@ import EditModal from "./playerModals/EditModal";
 import DeleteModal from "./playerModals/DeleteModal";
 
 const Players = () => {  
-  const [players, setPlayers] = useState([]);
   const [show, setShow] = useState({
     edited: false,
     deleted: false,
     added: false,
   });
   const [playerId, setPlayerId] = useState("");
-  const [playerName, setPlayerName] = useState({});
   const [curPage, setCurPage] = useState(1);
   const [page, setPage] = useState(1);
-  const [ getPlayers, { isLoading} ] = useGetPlayersMutation()
-  const [ getPlayer ] = useGetPlayerMutation()
+  const { data: players,  isLoading}  = useGetPlayersQuery()
   const [addPlayer ] = useAddPlayerMutation()
-  const [ editPlayer ] = useEditPlayerMutation()
-  const [ deletePlayer ] = useDeletePlayerMutation()
+  const [ deletePlayer ] = useDeletePlayerMutation() 
 
   const { deleted, edited, added } = show
   const pageSize = 5
-  let totalPages = Math.ceil(players.length / pageSize);
+  let totalPages = Math.ceil(players?.length / pageSize);
 
-  useEffect(() => {
-    const fetchPlayers = async () => {
-       try {
-         const res = await getPlayers().unwrap()
-         setPlayers(res)
-         console.log(res)
-       } catch (error) {
-         console.log(error)
-       }
-   }
-   fetchPlayers()
- 
-   
- }, [getPlayers])
  const closeAdd = () => {
   setShow((prevState) => ({
     ...prevState, added: false
@@ -102,15 +82,7 @@ const closeDelete = () => {
   setPlayerId('')
 }
 
-const editPlayerNow = async (data) => {
-  try {
-    const res = await editPlayer(data, playerId).unwrap()
-    console.log(res)
-    //dispatch(setPlayerDetails({...res}))
-    setPlayers(prev => [...prev, res])
-  } catch (error) {
-    console.log(error)
-  }
+const resetEdit = async () => {
   setShow((prevState) => ({
     ...prevState, edited: false
   }))
@@ -127,7 +99,6 @@ const cancelDelete = () => {
 const deletePlayerNow = async () => {
   try {
     await deletePlayer(playerId).unwrap()
-    setPlayers(players.filter(player => player._id !== playerId))
   } catch (error) {
     console.log(error)
   }
@@ -181,8 +152,7 @@ const viewLastPage = () => {
 };
 
 const memoPlayers = useMemo(() => {
-  return players
-    .filter((player, key) => {
+  return players?.filter((player, key) => {
       let start = (curPage - 1) * pageSize;
       let end = curPage * pageSize;
       if (key >= start && key < end) return true;
@@ -205,7 +175,7 @@ const memoPlayers = useMemo(() => {
       <AddModal
       submit={submit}
        show={added} closeAdd={closeAdd} ></AddModal>
-       <EditModal playerName={playerName} editPlayerNow={editPlayerNow} show={edited} closeEdit={closeEdit} ></EditModal>
+       <EditModal playerId={playerId} resetEdit={resetEdit} show={edited} closeEdit={closeEdit} ></EditModal>
       <DeleteModal
       deletePlayerNow={deletePlayerNow}
        cancelDelete={cancelDelete} show={deleted} closeDelete={closeDelete} ></DeleteModal>

@@ -1,8 +1,7 @@
 import mongoose from 'mongoose'
-const teamLeagueSchema = mongoose.Schema({
-    team : {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Team',
+const overallLeagueSchema = mongoose.Schema({
+    name : {
+        type: String,
         required: true
     },
     startMatchday: {
@@ -27,5 +26,5 @@ const teamLeagueSchema = mongoose.Schema({
 }, {
     timestamps: true,
 })
-const TeamLeague = mongoose.model("TeamLeague", teamLeagueSchema);
-export default TeamLeague;
+const OverallLeague = mongoose.model("OverallLeague", overallLeagueSchema);
+export default OverallLeague;

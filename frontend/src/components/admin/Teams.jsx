@@ -1,11 +1,7 @@
-import { useEffect, useMemo, useState } from "react"
-import {  useGetMutation,
-  useGetTeamMutation,
+import { useMemo, useState } from "react"
+import {  useGetQuery,
   useAddMutation,
-  useEditMutation,
   useDeletMutation } from "../../slices/teamApiSlice"
-  import { useDispatch, useSelector } from "react-redux"
-  import { setTeamDetails } from "../../slices/teamSlice"
 import { Button, Container, Spinner } from "react-bootstrap"
 import Pagination from "../Pagination"
 import AddModal from "./teamModals/AddModal"
@@ -13,24 +9,17 @@ import DeleteModal from "./teamModals/DeleteModal"
 import EditModal from "./teamModals/EditModal"
 const Teams = () => {
 
-  const [ teams, setTeams ] = useState([])
   const [ show, setShow ] = useState({edited: false, deleted: false, added: false})
   const [ teamId, setTeamId] = useState('')
-  const [ teamName, setTeamName ] = useState({})
   const [ curPage, setCurPage ] = useState(1)
   const [page, setPage] = useState(1);
-  const [ get, { isLoading }] = useGetMutation()
+  const { data,  isLoading } = useGetQuery()
   const [ add ] = useAddMutation()
-  const [ edit ] = useEditMutation()
   const [delet] = useDeletMutation()
-  const [getTeam] = useGetTeamMutation()
 
   const { deleted, edited, added } = show
   const pageSize = 5
-  let totalPages = Math.ceil(teams.length / pageSize);
-
-  const dispatch = useDispatch()
-  //const { teamInfo } = useSelector(state => state.team)
+  let totalPages = Math.ceil(data?.length / pageSize);
 
   const closeAdd = () => {
     setShow((prevState) => ({
@@ -50,20 +39,6 @@ const Teams = () => {
     setTeamId('')
   }
 
-  useEffect(() => {
-     const fetchTeams = async () => {
-        try {
-          const res = await get().unwrap()
-          setTeams(res)
-        } catch (error) {
-          console.log(error)
-        }
-    }
-    fetchTeams()
-  
-    
-  }, [get])
-
   const addTeam = () => {
     setShow((prevState) => ({
       ...prevState, added: true
@@ -74,12 +49,6 @@ const Teams = () => {
       ...prevState, edited: true
     }))
     setTeamId(id)
-    try {
-      const res = await getTeam(id).unwrap()
-      setTeamName(res)
-    } catch (error) {
-      console.log(error)
-    }
   }
   const deleteTeam = (id) => {
     setShow((prevState) => ({
@@ -98,7 +67,6 @@ const Teams = () => {
   const deleteTeamNow = async () => {
     try {
       await delet(teamId).unwrap()
-      setTeams(teams.filter(team => team._id !== teamId))
     } catch (error) {
       console.log(error)
     }
@@ -110,8 +78,7 @@ const Teams = () => {
 
   const submit = async (data) => {
     try {
-      const res = await add(data).unwrap()
-      setTeams(prev => ([...prev, res]))
+      await add(data).unwrap()
     } catch (error) {
       console.log(error)
     }
@@ -121,17 +88,7 @@ const Teams = () => {
     setTeamId('')
   }
 
-  const editTeamNow = async (data) => {
-    console.log(teamId)
-    console.log(data)
-    try {
-      const res = await edit(data, teamId).unwrap()
-      console.log(res)
-      //dispatch(setTeamDetails({...res}))
-      setTeams(prev => [...prev, res])
-    } catch (error) {
-      console.log(error)
-    }
+  const resetEdit = async () => {
     setShow((prevState) => ({
       ...prevState, edited: false
     }))
@@ -182,13 +139,12 @@ const Teams = () => {
   };
 
   const memoTeams = useMemo(() => {
-    return teams
-      .filter((player, key) => {
+    return data?.filter((player, key) => {
         let start = (curPage - 1) * pageSize;
         let end = curPage * pageSize;
         if (key >= start && key < end) return true;
       });
-  }, [teams, pageSize, curPage])
+  }, [data, pageSize, curPage])
 
   
   if(isLoading) {
@@ -209,7 +165,7 @@ const Teams = () => {
       <AddModal
       submit={submit}
        show={added} closeAdd={closeAdd} ></AddModal>
-      <EditModal teamName={teamName} editTeamNow={editTeamNow} show={edited} closeEdit={closeEdit} ></EditModal>
+      {<EditModal teamId={teamId} resetEdit={resetEdit} show={edited} closeEdit={closeEdit} ></EditModal>}
       <DeleteModal
       deleteTeamNow={deleteTeamNow}
        cancelDelete={cancelDelete} show={deleted} closeDelete={closeDelete} ></DeleteModal>

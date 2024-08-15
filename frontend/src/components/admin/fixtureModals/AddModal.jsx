@@ -1,37 +1,15 @@
 import { Modal, Button } from "react-bootstrap"
-import { useState, useEffect } from "react"
-import { useGetMutation } from "../../../slices/teamApiSlice"
-import { useGetMatchdaysMutation } from "../../../slices/matchdayApiSlice"
+import { useState } from "react"
+import { useGetQuery } from "../../../slices/teamApiSlice"
+import { useGetMatchdaysQuery } from "../../../slices/matchdayApiSlice"
 const AddModal = (props) => {
     const {show, closeAdd, submit} = props
-    const [ teams, setTeams ] = useState([])
-    const [ matchdays, setMatchdays ] = useState([])
+    //const [ teams, setTeams ] = useState([])
     const [ data, setData ] = useState({teamHome: '', teamAway: '',
       matchday: '', kickOffTime: ''})
-      const [ get ] = useGetMutation()
-      const [ getMatchdays ] = useGetMatchdaysMutation()
+      const { data: teams} = useGetQuery()
+      const { data:matchdays } = useGetMatchdaysQuery()
 
-      useEffect(() => {
-        const getTeams = async () => {
-          try {
-            const res = await get().unwrap()
-            setTeams(res)
-          } catch (error) {
-            console.log(error)
-          }
-        }
-        const getMds = async () => {
-          try {
-            const res = await getMatchdays().unwrap()
-            setMatchdays(res)
-          } catch (error) {
-            console.log(error)
-          }
-        }
-
-        getTeams()
-        getMds()
-      }, [get, getMatchdays])
     const onSubmit = (e) => {
       e.preventDefault()
       submit(data)
@@ -55,7 +33,7 @@ const AddModal = (props) => {
                   }))
                 }}
                 >
-                  {matchdays.map(matchday => 
+                  {matchdays?.map(matchday => 
                     <option key={matchday._id} value={matchday._id}>
                       {matchday.name}
                     </option>
@@ -84,7 +62,7 @@ const AddModal = (props) => {
                   }))
                 }}
                 >
-                  {teams.map(team => 
+                  {teams?.map(team => 
                     <option key={team._id} value={team._id}>
                       {team.name}
                     </option>
@@ -101,7 +79,7 @@ const AddModal = (props) => {
                   }))
                 }}
                 >
-                  {teams.map(team => 
+                  {teams?.map(team => 
                     <option key={team._id} value={team._id}>
                       {team.name}
                     </option>

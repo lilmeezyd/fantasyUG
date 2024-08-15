@@ -6,7 +6,6 @@ const leagueSchema = mongoose.Schema(
       type: String,
       required: true,
     },
-    id: { type: Number, required: true, unique: true },
     startMatchday: {
       type: mongoose.Schema.Types.Number,
       ref: "Matchday",
@@ -17,13 +16,18 @@ const leagueSchema = mongoose.Schema(
       ref: "Matchday",
       default: 30,
     },
-    admin: {
-      type: Number,
+    creator: {
+      type: mongoose.Schema.Types.Number,
+      ref: "User",
+      required: true 
     },
     entrants: {
       type: [mongoose.Schema.Types.ObjectId],
       ref: "ManagerInfo",
     },
+    entryCode: {
+      type: String
+    }
   },
   {
     timestamps: true,

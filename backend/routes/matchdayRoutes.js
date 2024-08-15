@@ -17,7 +17,7 @@ router
 router
   .route("/:id")
   .get(getMatchday)
-  .put(protect, roles(ROLES.ADMIN, ROLES.EDITOR), updateMatchday)
+  .patch(protect, roles(ROLES.ADMIN, ROLES.EDITOR), updateMatchday)
   .delete(protect, roles(ROLES.ADMIN), deleteMatchday);
 
 export default router;

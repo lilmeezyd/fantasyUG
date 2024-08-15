@@ -3,12 +3,13 @@ const PLAYERS_URL = "/api/players";
 
 export const playerApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    getPlayers: builder.mutation({
+    getPlayers: builder.query({
       query: () => ({
         url: `${PLAYERS_URL}`,
       }),
+      providesTags: ['Player']
     }),
-    getPlayer: builder.mutation({
+    getPlayer: builder.query({
       query: (id) => ({
         url: `${PLAYERS_URL}/${id}`
       })
@@ -19,26 +20,29 @@ export const playerApiSlice = apiSlice.injectEndpoints({
         method: "POST",
         body: data,
       }),
+      invalidatesTags: ['Player']
     }),
     editPlayer: builder.mutation({
-      query: (data, id) => ({
+      query: ({id, ...rest}) => ({
         url: `${PLAYERS_URL}/${id}`,
-        method: "PUT",
-        body: data, 
-      }),
+        method: "PATCH",
+        body: rest, 
+      }), 
+      invalidatesTags: ['Player']
     }),
     deletePlayer: builder.mutation({
       query: (id) => ({
         url: `${PLAYERS_URL}/${id}`,
         method: "DELETE",
       }),
+      invalidatesTags: ['Player']
     }),
   }),
 });
 
 export const {
-  useGetPlayersMutation,
-  useGetPlayerMutation,
+  useGetPlayersQuery,
+  useGetPlayerQuery,
   useAddPlayerMutation,
   useEditPlayerMutation,
   useDeletePlayerMutation,

@@ -1,48 +1,45 @@
 import { Modal, Button } from "react-bootstrap"
 import { useState, useEffect } from "react"
-import { useGetMutation } from "../../../slices/teamApiSlice"
-import { useGetMatchdaysMutation } from "../../../slices/matchdayApiSlice"
+import { useGetQuery } from "../../../slices/teamApiSlice"
+import { useGetMatchdaysQuery } from "../../../slices/matchdayApiSlice"
+import { useGetFixtureQuery, useEditFixtureMutation } from "../../../slices/fixtureApiSlice"
 
 const EditModal = (props) => {
-  const {show, closeEdit, editFixtureNow, fixtureName} = props
-  const [ teams, setTeams ] = useState([])
-  const [ matchdays, setMatchdays ] = useState([])
+  const {show, closeEdit, resetEdit, fixtureId} = props 
+  const { data: fixture } = useGetFixtureQuery(fixtureId)
   const [ data, setData ] = useState({teamHome: '', teamAway: '',
     matchday: '', kickOffTime: ''})
   const { teamHome, teamAway, matchday, kickOffTime} = data
-  const [ get ] = useGetMutation()
-      const [ getMatchdays ] = useGetMatchdaysMutation()
-      useEffect(() => {
-        const getTeams = async () => {
-          try {
-            const res = await get().unwrap()
-            setTeams(res)
-          } catch (error) {
-            console.log(error)
-          }
-        }
-        const getMds = async () => {
-          try {
-            const res = await getMatchdays().unwrap()
-            setMatchdays(res)
-          } catch (error) {
-            console.log(error)
-          }
-        }
-
-        getTeams()
-        getMds()
-      }, [get, getMatchdays])
+  const { data: teams } = useGetQuery()
+      const { data: matchdays } = useGetMatchdaysQuery()
+      const [ editFixture] = useEditFixtureMutation()
 
   useEffect(() => {
-    setData({teamHome:fixtureName.teamHome, kickOffTime: fixtureName.kickOffTime,
-      teamAway: fixtureName.teamAway, matchday: fixtureName.matchday})
-  }, [fixtureName.teamHome, fixtureName.teamAway, fixtureName.matchday,
-    fixtureName.kickOffTime
+    setData({teamHome:fixture?.teamHome, kickOffTime: fixture?.kickOffTime,
+      teamAway: fixture?.teamAway, matchday: fixture?.matchday})
+  }, [fixture?.teamHome, fixture?.teamAway, fixture?.matchday,
+    fixture?.kickOffTime
   ])
-  const onSubmit = (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault()
-    editFixtureNow(data)
+    const {elements}  = e.currentTarget
+    const teamHome = elements.hteam.value
+    const kickOffTime = elements.kickoff.value
+    const teamAway = elements.ateam.value
+    const matchday = elements.matchday.value
+
+    if(teamAway && teamHome && kickOffTime && matchday) {
+      await editFixture({id: fixture?._id, teamAway, teamHome, kickOffTime,matchday})
+      closeEdit()
+      resetEdit()
+    }
+  }
+  if(!fixture) {
+    return (
+      <section>
+        <h4>Fixture not found!</h4>
+      </section>
+    )
   }
 return (
   <Modal show={show} onHide={closeEdit}>
@@ -85,7 +82,7 @@ return (
               </div>
               <div className="form-group my-2">
                 <label className="py-2" htmlFor="hteam">Home Team</label>
-                <select name="hteam" id="ateam"
+                <select name="hteam" id="hteam"
                 className="form-control"
                 onChange={(e) => {
                   setData(prev => ({
@@ -93,15 +90,15 @@ return (
                   }))
                 }}
                 >
-                  {teams.map(team => 
+                  {teams?.map(team => 
                     <option key={team._id} value={teamHome}>
-                      {team.name}
+                      {team?.name}
                     </option>
                   )}
                 </select>
               </div>
               <div className="form-group my-2">
-                <label className="py-2" htmlFor="hteam">Away Team</label>
+                <label className="py-2" htmlFor="ateam">Away Team</label>
                 <select name="ateam" id="ateam"
                 className="form-control"
                 onChange={(e) => {
@@ -110,9 +107,9 @@ return (
                   }))
                 }}
                 >
-                  {teams.map(team => 
+                  {teams?.map(team => 
                     <option key={team._id} value={teamAway}>
-                      {team.name}
+                      {team?.name}
                     </option>
                   )}
                 </select>

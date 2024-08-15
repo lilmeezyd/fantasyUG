@@ -14,7 +14,7 @@ router.route("/").get(getTeams).post(protect, roles(ROLES.ADMIN), setTeams);
 router
   .route("/:id")
   .get(getTeam)
-  .put(protect, roles(ROLES.EDITOR, ROLES.ADMIN), updateTeam)
+  .patch(protect, roles(ROLES.EDITOR, ROLES.ADMIN), updateTeam)
   .delete(protect, roles(ROLES.ADMIN), deleteTeam);
 
 export default router;

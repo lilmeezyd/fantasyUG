@@ -1,18 +1,30 @@
 import { Modal, Button } from "react-bootstrap"
 import { useState, useEffect } from "react"
+import { useGetPositionQuery, useEditPositionMutation } from "../../../slices/positionApiSlice"
 
 const EditModal = (props) => {
-  const {show, closeEdit, editPositionNow, positionName} = props
-  const [ data, setData ] = useState({name: '', shortName: '', code: ''})
+  const {show, closeEdit, resetEdit, positionId} = props
+  const { data: position } = useGetPositionQuery(positionId)
+  const [ data, setData ] = useState({singularName: '', shortName: '', code: ''})
   const { name, shortName, code} = data
-  console.log(data)
+  const [ editPosition ] = useEditPositionMutation()
 
   useEffect(() => {
-    setData({name:positionName.singularName, shortName: positionName.shortName, code: positionName.code})
-  }, [positionName.singularName, positionName.shortName, positionName.code])
-  const onSubmit = (e) => {
+    setData({name:position?.singularName, shortName: position?.shortName, code: position?.code})
+  }, [position?.singularName, position?.shortName, position?.code])
+
+  const onSubmit = async (e) => {
     e.preventDefault()
-    editPositionNow(data)
+    const {elements}  = e.currentTarget
+    const singularName = elements.tname.value
+    const shortName = elements.sname.value
+    const code = +elements.code.value
+
+    if(name && shortName && code) {
+      await editPosition({id: position._id, singularName, shortName, code})
+      closeEdit()
+      resetEdit()
+    }
   }
 return (
   <Modal show={show} onHide={closeEdit}>

@@ -31,19 +31,19 @@ const router = createBrowserRouter(
       <Route index={true} path="/" element={<HomeScreen />} />
       <Route path="login" element={<LoginScreen />} />
       <Route path="register" element={<RegisterScreen />} />
-      <Route path="admin/dashboard" element={<DashboardScreen />}>
-        <Route path="fixtures" element={<Fixtures />} />
-        <Route path="leagues" element={<Leagues />} />
-        <Route path="matchdays" element={<Matchdays />} />
-        <Route path="players" element={<Players />} />
-        <Route path="positions" element={<Positions />} />
-        <Route path="teams" element={<Teams />} />
-        <Route path="users" element={<Users />} />
-      </Route>
 
       {/* Private Routes */}
       <Route path="" element={<PrivateRoute />}>
         <Route path="/profile" element={<ProfileScreen />} />
+        <Route path="admin/dashboard" element={<DashboardScreen />}>
+          <Route path="fixtures" element={<Fixtures />} />
+          <Route path="leagues" element={<Leagues />} />
+          <Route path="matchdays" element={<Matchdays />} />
+          <Route path="players" element={<Players />} />
+          <Route path="positions" element={<Positions />} />
+          <Route path="teams" element={<Teams />} />
+          <Route path="users" element={<Users />} />
+        </Route>
       </Route>
     </Route>
   )

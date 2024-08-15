@@ -2,10 +2,12 @@ import { Modal, Button } from "react-bootstrap"
 import { useState } from "react"
 const AddModal = (props) => {
     const {show, closeAdd, submit} = props
-    const [ data, setData ] = useState({name: '', deadlineTime:''})
+    const [ data, setData ] = useState({name: '', deadline:'', time:''})
+    const { deadline, time, name} = data
     const onSubmit = (e) => {
       e.preventDefault() 
-      submit(data)
+     const deadlineTime = deadline+'/'+time
+      submit({name, deadlineTime})
 
     }
   return (
@@ -31,9 +33,18 @@ const AddModal = (props) => {
               <input
               onChange={(e) => {
                 setData((prev) => ({
-                  ...prev, deadlineTime: e.target.value
+                  ...prev, deadline: e.target.value
                 }))
               }} name="sname" id="sname" className="form-control" type="date" />
+              </div>
+              <div className="form-group my-2">
+              <label className="py-2" htmlFor="time">Deadline</label>
+              <input
+              onChange={(e) => {
+                setData((prev) => ({
+                  ...prev, time: e.target.value
+                }))
+              }} name="time" id="time" className="form-control" type="time" />
               </div>
               <div className=" py-2 my-2">
                 <Button type="submit" className="btn-success form-control">Submit</Button>

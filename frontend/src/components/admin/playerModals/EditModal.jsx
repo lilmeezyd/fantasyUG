@@ -1,52 +1,51 @@
 import { Modal, Button } from "react-bootstrap"
 import { useState, useEffect } from "react"
-import {  useGetMutation } from "../../../slices/teamApiSlice"
-import { useGetPositionsMutation } from "../../../slices/positionApiSlice"
+import {  useGetQuery } from "../../../slices/teamApiSlice"
+import { useGetPositionsQuery } from "../../../slices/positionApiSlice" 
+import { useGetPlayerQuery, useEditPlayerMutation } from "../../../slices/playerApiSlice"
 
-const EditModal = (props) => {
-  const {show, closeEdit, editPlayerNow, playerName} = props
+const EditModal = (props) => { 
+  const {show, closeEdit, resetEdit, playerId} = props
+  const { data: player } = useGetPlayerQuery(playerId)
   const [ data, setData ] = useState({firstName: '', secondName: '', appName: '',
     playerPosition: '', playerTeam: '', startCost: ''
   })
   const { firstName, secondName, appName, playerPosition, playerTeam, startCost} = data
-  const [ teams, setTeams ] = useState([])
-  const [ positions, setPositions ] = useState([])
 
-  const [ get] = useGetMutation()
-  const [ getPositions ] = useGetPositionsMutation()
-
-  useEffect(() => {
-    const fetchTeams = async () => {
-      try {
-        const res = await get().unwrap()
-        setTeams(res)
-      } catch (error) {
-        console.log(error)
-      }
-  }
-  const fetchPositions = async () => {
-    try {
-      const res = await getPositions().unwrap()
-      setPositions(res)
-    } catch (error) {
-      console.log(error)
-    }
-}
-fetchTeams()
-  fetchPositions()
-  }, [get, getPositions])
+  const { data: teams} = useGetQuery()
+  const { data: positions } = useGetPositionsQuery()
+  const [ editPlayer ] = useEditPlayerMutation()
 
   useEffect(() => {
-    setData({firstName:playerName.firstName,
-      secondName: playerName.secondName, appName: playerName.appName,
-      playerPosition: playerName.playerPosition, playerTeam: playerName.playerTeam,
-    startCost: playerName.startCost})
-  }, [playerName.firstName, playerName.secondName, playerName.appName,
-    playerName.playerPosition, playerName.playerTeam, playerName.startCost
+    setData({firstName:player?.firstName,
+      secondName: player?.secondName, appName: player?.appName,
+      playerPosition: player?.playerPosition, playerTeam: player?.playerTeam,
+    startCost: player?.startCost})
+  }, [player?.firstName, player?.secondName, player?.appName,
+    player?.playerPosition, player?.playerTeam, player?.startCost
   ])
-  const onSubmit = (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault()
-    editPlayerNow(data)
+    const {elements}  = e.currentTarget
+    const firstName = elements.tname.value
+    const secondName = elements.sname.value
+    const appName = elements.code.value
+    const team = elements.team.value
+    const position = elements.position.value
+    const price = elements.price.value
+
+    if(firstName && secondName && appName && team && position && price) {
+      await editPlayer({id: player?._id, firstName, secondName, appName, team, position, price})
+      closeEdit()
+      resetEdit()
+    }
+  }
+  if(!player) {
+    return (
+      <section>
+        <h4>Player not found!</h4>
+      </section>
+    )
   }
 return (
   <Modal show={show} onHide={closeEdit}>
@@ -96,7 +95,7 @@ return (
                         ...prev, playerTeam: e.target.value
                       }))
                     }} className="form-control" name="team" id="team">
-                  {teams.map(team => 
+                  {teams?.map(team => 
                     <option 
                     key={team._id} 
                     value={team._id}
@@ -105,7 +104,7 @@ return (
                 </select>
               </div>
               <div className="form-group my-2">
-              <label className="py-2" htmlFor="team">Position</label>
+              <label className="py-2" htmlFor="position">Position</label>
                 <select
                 onChange={(e) => {
                   setData((prev) => ({
@@ -113,7 +112,7 @@ return (
                   }))
                 }}
                 className="form-control" name="position" id="position">
-                  {positions.map(position => 
+                  {positions?.map(position => 
                     <option 
                     key={position._id} 
                     value={position._id}
@@ -129,7 +128,7 @@ return (
                 setData((prev) => ({
                   ...prev, startCost: +e.target.value
                 }))
-              }} id="price" className="form-control" type="number" />
+              }} id="price" name="price" className="form-control" type="number" />
               </div>
               <div className=" py-2 my-2">
                 <Button type="submit" className="btn-success form-control">Submit</Button>

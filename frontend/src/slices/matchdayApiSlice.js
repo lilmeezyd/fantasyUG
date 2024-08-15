@@ -3,12 +3,13 @@ const MATCHDAYS_URL = "/api/matchdays";
 
 export const matchdayApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    getMatchdays: builder.mutation({
+    getMatchdays: builder.query({
       query: () => ({
         url: `${MATCHDAYS_URL}`,
-      }),
+      }), 
+      providesTags: ['Matchday']
     }),
-    getMatchday: builder.mutation({
+    getMatchday: builder.query({
       query: (id) => ({
         url: `${MATCHDAYS_URL}/${id}`
       })
@@ -19,26 +20,29 @@ export const matchdayApiSlice = apiSlice.injectEndpoints({
         method: "POST",
         body: data,
       }),
+      invalidatesTags: ['Matchday']
     }),
     editMatchday: builder.mutation({
-      query: (data, id) => ({
+      query: ({id, ...rest}) => ({
         url: `${MATCHDAYS_URL}/${id}`,
-        method: "PUT",
-        body: data,
+        method: "PATCH",
+        body: rest,
       }),
+      invalidatesTags: ['Matchday']
     }),
     deleteMatchday: builder.mutation({
       query: (id) => ({
         url: `${MATCHDAYS_URL}/${id}`,
         method: "DELETE",
       }),
+      invalidatesTags: ['Matchday']
     }),
   }),
 });
 
 export const {
-  useGetMatchdaysMutation,
-  useGetMatchdayMutation,
+  useGetMatchdaysQuery,
+  useGetMatchdayQuery,
   useAddMatchdayMutation,
   useEditMatchdayMutation,
   useDeleteMatchdayMutation,

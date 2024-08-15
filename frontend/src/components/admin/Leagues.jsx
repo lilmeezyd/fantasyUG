@@ -1,15 +1,13 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
-  useGetLeaguesMutation,
-  useGetLeagueMutation,
+  useGetLeaguesQuery,
   useAddLeagueMutation,
-  useDeleteLeagueMutation,
-  useEditLeagueMutation,
+  useDeleteLeagueMutation
 } from "../../slices/leagueApiSlice";
 import { Container, Button, Spinner } from "react-bootstrap";
+import AddModal from "./leagueModals/AddModal";
 
 const Leagues = () => {  
-  const [leagues, setLeagues] = useState([]);
   const [show, setShow] = useState({
     edited: false,
     deleted: false,
@@ -19,31 +17,49 @@ const Leagues = () => {
   const [leagueName, setLeagueName] = useState({});
   const [curPage, setCurPage] = useState(1);
   const [page, setPage] = useState(1);
-  const [ getLeagues, { isLoading} ] = useGetLeaguesMutation()
-  const [ getLeague ] = useGetLeagueMutation()
+  const { data: leagues,  isLoading} = useGetLeaguesQuery()
   const [addLeague ] = useAddLeagueMutation()
-  const [ editLeague ] = useEditLeagueMutation()
   const [ deleteLeague ] = useDeleteLeagueMutation()
+  const {deleted, edited, added } = show
 
-  useEffect(() => {
-    const fetchLeagues = async () => {
-       try {
-         const res = await getLeagues().unwrap()
-         setLeagues(res)
-         console.log(res)
-       } catch (error) {
-         console.log(error)
-       }
-   }
-   fetchLeagues()
- 
-   
- }, [getLeagues])
+
+ const closeAdd = () => {
+  setShow((prevState) => ({
+    ...prevState,
+    added: false,
+  }));
+};
+
+const addLeaguePop = () => {
+  setShow((prevState) => ({
+    ...prevState,
+    added: true,
+  }));
+};
+
+ const submit = async (data) => {
+  try {
+    await addLeague(data).unwrap();
+  } catch (error) {
+    console.log(error);
+  }
+  setShow((prevState) => ({
+    ...prevState,
+    added: false,
+  }));
+  setLeagueId("");
+};
  if(isLoading) {
     return <div className="spinner"><Spinner /></div>
  }
   return (
-    <div>Leagues</div>
+    <Container>
+      <div>Leagues</div>
+      <div className="add-button p-2">
+        <Button onClick={addLeaguePop} className="btn btn-success">Add League</Button>
+      </div>
+      <AddModal submit={submit} show={added} closeAdd={closeAdd}></AddModal>
+    </Container>
   )
 }
 

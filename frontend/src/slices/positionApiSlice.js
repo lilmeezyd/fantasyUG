@@ -3,12 +3,13 @@ const POSITIONS_URL = "/api/positions";
 
 export const positionApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    getPositions: builder.mutation({
+    getPositions: builder.query({
       query: () => ({
         url: `${POSITIONS_URL}`,
       }),
+      providesTags: ['Position']
     }),
-    getPosition: builder.mutation({
+    getPosition: builder.query({
       query: (id) => ({
         url: `${POSITIONS_URL}/${id}`
       })
@@ -19,26 +20,29 @@ export const positionApiSlice = apiSlice.injectEndpoints({
         method: "POST",
         body: data,
       }),
+      invalidatesTags: ['Position']
     }),
     editPosition: builder.mutation({
-      query: (data, id) => ({
+      query: ({id, ...rest}) => ({
         url: `${POSITIONS_URL}/${id}`,
-        method: "PUT",
-        body: data,
+        method: "PATCH",
+        body: rest,
       }),
+      invalidatesTags: ['Position']
     }),
     deletePosition: builder.mutation({
       query: (id) => ({
         url: `${POSITIONS_URL}/${id}`,
         method: "DELETE",
       }),
+      invalidatesTags: ['Position']
     }),
   }),
 });
 
 export const {
-  useGetPositionsMutation,
-  useGetPositionMutation,
+  useGetPositionsQuery,
+  useGetPositionQuery,
   useAddPositionMutation,
   useEditPositionMutation,
   useDeletePositionMutation,

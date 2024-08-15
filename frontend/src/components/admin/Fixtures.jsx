@@ -1,13 +1,11 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
-  useGetFixturesMutation,
-  useGetFixtureMutation,
+  useGetFixturesQuery,
   useAddFixtureMutation,
-  useDeleteFixtureMutation,
-  useEditFixtureMutation, 
+  useDeleteFixtureMutation
 } from "../../slices/fixtureApiSlice";
-import { useGetMutation } from "../../slices/teamApiSlice"
-import { useGetMatchdaysMutation } from "../../slices/matchdayApiSlice";
+import { useGetQuery } from "../../slices/teamApiSlice"
+import { useGetMatchdaysQuery } from "../../slices/matchdayApiSlice";
 import { Container, Button, Spinner } from "react-bootstrap";
 import Pagination from "../Pagination"
 import AddModal from "./fixtureModals/AddModal";
@@ -16,65 +14,23 @@ import EditModal from "./fixtureModals/EditModal";
 import getTime from "../../utils/getTime";
 
 const Fixtures = () => {  
-  const [fixtures, setFixtures] = useState([]);
   const [show, setShow] = useState({
     edited: false,
     deleted: false,
     added: false,
   });
-  const [ teams, setTeams ] = useState([])
-  const [ matchdays, setMatchdays ] = useState([])
   const [fixtureId, setFixtureId] = useState("");
-  const [fixtureName, setFixtureName] = useState({});
   const [curPage, setCurPage] = useState(1);
   const [page, setPage] = useState(1);
-  const [ getFixtures, { isLoading} ] = useGetFixturesMutation()
-  const [ getFixture ] = useGetFixtureMutation()
+  const { data: fixtures, isLoading}  = useGetFixturesQuery()
   const [addFixture ] = useAddFixtureMutation()
-  const [ editFixture ] = useEditFixtureMutation()
   const [ deleteFixture ] = useDeleteFixtureMutation()
-  const [ get ] = useGetMutation()
-  const [ getMatchdays ] = useGetMatchdaysMutation()
+  const { data: teams } = useGetQuery()
+  const { data: matchdays} = useGetMatchdaysQuery()
       const {deleted, edited, added } = show
   const pageSize = 5
-  let totalPages = Math.ceil(fixtures.length / pageSize);
+  let totalPages = Math.ceil(fixtures?.length / pageSize);
 
-      useEffect(() => {
-        const getTeams = async () => {
-          try {
-            const res = await get().unwrap()
-            setTeams(res)
-          } catch (error) {
-            console.log(error)
-          }
-        }
-        const getMds = async () => {
-          try {
-            const res = await getMatchdays().unwrap()
-            setMatchdays(res)
-          } catch (error) {
-            console.log(error)
-          }
-        }
-
-        getTeams()
-        getMds()
-      }, [get, getMatchdays])
-
-  useEffect(() => {
-    const fetchFixtures = async () => {
-       try {
-         const res = await getFixtures().unwrap()
-         setFixtures(res)
-         console.log(res)
-       } catch (error) {
-         console.log(error)
-       }
-   }
-   fetchFixtures()
- 
-   
- }, [getFixtures])
  const closeAdd = () => {
   setShow((prevState) => ({
     ...prevState,
@@ -108,12 +64,6 @@ const editFixturePop = async (id) => {
     edited: true,
   }));
   setFixtureId(id);
-  try {
-    const res = await getFixture(id).unwrap();
-    setFixtureName(res);
-  } catch (error) {
-    console.log(error);
-  }
 };
 const deleteFixturePop = (id) => {
   setShow((prevState) => ({
@@ -134,7 +84,6 @@ const cancelDelete = () => {
 const deleteFixtureNow = async () => {
   try {
     await deleteFixture(fixtureId).unwrap();
-    setFixtures(fixtures.filter((fixture) => fixture._id !== fixtureId));
   } catch (error) {
     console.log(error);
   }
@@ -147,8 +96,7 @@ const deleteFixtureNow = async () => {
 
 const submit = async (data) => {
   try {
-    const res = await addFixture(data).unwrap();
-    setFixtures((prev) => [...prev, res]);
+    await addFixture(data).unwrap();
   } catch (error) {
     console.log(error);
   }
@@ -159,15 +107,7 @@ const submit = async (data) => {
   setFixtureId("");
 };
 
-const editFixtureNow = async (data) => {
-  try {
-    const res = await editFixture(data, fixtureId).unwrap();
-    console.log(res);
-    //dispatch(setFixtureDetails({...res}))
-    setFixtures((prev) => [...prev, res]);
-  } catch (error) {
-    console.log(error);
-  }
+const resetEdit = async () => {
   setShow((prevState) => ({
     ...prevState,
     edited: false,
@@ -215,12 +155,11 @@ const viewFirstPage = () => {
 
 const viewLastPage = () => {
   setCurPage(totalPages);
-  setPage(totalPages);
+  setPage(totalPages); 
 };
 
 const memoFixtures = useMemo(() => { 
-  return fixtures
-  .filter((player, key) => {
+  return fixtures?.filter((player, key) => {
     let start = (curPage - 1) * pageSize;
     let end = curPage * pageSize;
     if (key >= start && key < end) return true;
@@ -248,8 +187,8 @@ const memoFixtures = useMemo(() => {
       </div>
       <AddModal submit={submit} show={added} closeAdd={closeAdd}></AddModal>
       <EditModal
-        fixtureName={fixtureName}
-        editFixtureNow={editFixtureNow}
+        fixtureId={fixtureId}
+        resetEdit={resetEdit}
         show={edited}
         closeEdit={closeEdit}
       ></EditModal>

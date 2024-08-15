@@ -19,22 +19,17 @@ router
   .post(protect, roles(ROLES.ADMIN), setFixture);
 router
   .route("/:id/populate")
-  .put(protect, roles(ROLES.ADMIN, ROLES.EDITOR), populateStats);
+  .patch(protect, roles(ROLES.ADMIN, ROLES.EDITOR), populateStats);
 router
   .route("/:id/depopulate")
-  .put(protect, roles(ROLES.ADMIN, ROLES.EDITOR), dePopulateStats);
+  .patch(protect, roles(ROLES.ADMIN, ROLES.EDITOR), dePopulateStats);
 router
   .route("/:id/stats")
-  .put(protect, roles(ROLES.ADMIN, ROLES.EDITOR), editStats);
-  /*
-router
-  .route("/:id/scores")
-  .put(protect, roles(ROLES.ADMIN, ROLES.EDITOR), updateScore);
-  */
+  .patch(protect, roles(ROLES.ADMIN, ROLES.EDITOR), editStats);
 router
   .route("/:id")
   .get(getFixture)
-  .put(protect, roles(ROLES.ADMIN, ROLES.EDITOR), editFixture)
+  .patch(protect, roles(ROLES.ADMIN, ROLES.EDITOR), editFixture)
   .delete(protect, roles(ROLES.ADMIN), deleteFixture);
 
 export default router;

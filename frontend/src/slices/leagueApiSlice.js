@@ -3,12 +3,13 @@ const LEAGUES_URL = "/api/leagues";
 
 export const leagueApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    getLeagues: builder.mutation({
+    getLeagues: builder.query({
       query: () => ({
         url: `${LEAGUES_URL}`,
       }),
+      providesTags: ['League']
     }),
-    getLeague: builder.mutation({
+    getLeague: builder.query({
       query: (id) => ({
         url: `${LEAGUES_URL}/${id}`
       })
@@ -19,26 +20,29 @@ export const leagueApiSlice = apiSlice.injectEndpoints({
         method: "POST",
         body: data,
       }),
+      invalidatesTags: ['League']
     }),
     editLeague: builder.mutation({
-      query: (data, id) => ({
+      query: ({id, ...rest}) => ({
         url: `${LEAGUES_URL}/${id}`,
-        method: "PUT",
-        body: data,
+        method: "PATCH",
+        body: rest,
       }),
+      invalidatesTags: ['League']
     }),
     deleteLeague: builder.mutation({
       query: (id) => ({
         url: `${LEAGUES_URL}/${id}`,
         method: "DELETE",
       }),
+      invalidatesTags: ['League']
     }),
   }),
 });
 
 export const {
-  useGetLeaguesMutation,
-  useGetLeagueMutation,
+  useGetLeaguesQuery,
+  useGetLeagueQuery,
   useAddLeagueMutation,
   useEditLeagueMutation,
   useDeleteLeagueMutation,

@@ -1,81 +1,77 @@
 import asyncHandler from "express-async-handler";
 import League from "../models/leagueModel.js";
+import OverallLeague from "../models/overallLeagueModel.js";
+import TeamLeague from "../models/teamLeagueModel.js";
 import Team from "../models/teamModel.js";
 import User from "../models/userModel.js";
 import ManagerInfo from "../models/managerInfoModel.js";
 
 //@desc Set League
-//@route POST /api/leagues
+//@route POST /api/leagues/privateleagues
 //@access Private
 const setLeague = asyncHandler(async (req, res) => {
-  const generalLeagues = {
-    "Arua Hills": 1,
-    "Bul Bidco": 2,
-    "Busoga United": 3,
-    Express: 4,
-    Gaddafi: 5,
-    KCCA: 6,
-    Kitara: 7,
-    Maroons: 8,
-    "Mbarara City": 9,
-    NEC: 10,
-    "SC Villa": 11,
-    "Bright Stars": 12,
-    URA: 13,
-    UPDF: 14,
-    Vipers: 15,
-    "Wakiso Giants": 16,
-    Neutral: 17,
-    Overall: 18,
-  };
   const { name, startMatchday, endMatchday } = req.body;
-  //const userId = await User.findById(req.user.id)
-  const nameFound = await League.findOne({ name });
-  const leagues = await League.find({});
-  const maxId = Math.max(...leagues.map((x) => x.id));
-  let admin, id;
-  if (!name || !startMatchday) {
+  if (!name || !startMatchday || !endMatchday) {
     res.status(400);
     throw new Error("Please add all fields");
   }
-
-  if (Object.values(req.user.roles).includes(2048)) {
-    if (nameFound) {
-      res.status(400);
-      throw new Error("League name already assigned");
-    }
-    if (
-      !Object.keys(generalLeagues)
-        .map((x) => x.toLowerCase())
-        .includes(name.toLowerCase())
-    ) {
-      res.status(400);
-      throw new Error("Trying to create invalid league!");
-    }
-    id = generalLeagues[name];
-    admin = null;
-    if (!id) {
-      res.status(400);
-      throw new Error(`League does not exist`);
-    }
-  }
-
-  if (!Object.values(req.user.roles).includes(2048)) {
-    id = maxId + 1;
-    admin = req.user.id;
-  }
+  //Create entry code
 
   const league = await League.create({
-    id,
     name,
     startMatchday,
     endMatchday,
-    admin,
+    creator: req.user,
     entrants: [],
+    entryCode
   });
 
   res.status(200).json(league);
 });
+
+//@desc Set overall League
+//@toute POST /api/leagues/overallleagues
+//@access Private
+//@role ADMIN
+const setOverallLeague = asyncHandler(async (req, res) => {
+  const { name, startMatchday, endMatchday } = req.body;
+  if (!name || !startMatchday || !endMatchday) {
+    res.status(400);
+    throw new Error("Please add all fields");
+  }
+
+  const league = await OverallLeague.create({
+    name,
+    startMatchday,
+    endMatchday,
+    creator: req.user,
+    entrants: []
+  });
+
+  res.status(200).json(league);
+})
+
+//@desc Set team League
+//@toute POST /api/leagues/teamleagues
+//@access Private
+//@role ADMIN
+const setTeamLeague = asyncHandler(async (req, res) => {
+  const { team, startMatchday, endMatchday } = req.body;
+  if (!team || !startMatchday || !endMatchday) {
+    res.status(400);
+    throw new Error("Please add all fields");
+  }
+
+  const league = await TeamLeague.create({
+    team,
+    startMatchday,
+    endMatchday,
+    creator: req.user,
+    entrants: []
+  });
+
+  res.status(200).json(league);
+})
 
 //@desc Add to team league
 //@route PUT /api/leagues/:id
@@ -226,6 +222,8 @@ const deleteLeague = asyncHandler(async (req, res) => {
 
 export {
   setLeague,
+  setOverallLeague,
+  setTeamLeague,
   addToLeague,
   getLeagues,
   getLeague,

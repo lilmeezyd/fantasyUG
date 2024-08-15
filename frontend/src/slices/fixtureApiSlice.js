@@ -3,12 +3,13 @@ const FIXTURES_URL = "/api/fixtures";
 
 export const fixtureApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    getFixtures: builder.mutation({
+    getFixtures: builder.query({
       query: () => ({
         url: `${FIXTURES_URL}`,
       }),
-    }),
-    getFixture: builder.mutation({
+      providesTags: ['Fixture']
+    }), 
+    getFixture: builder.query({
       query: (id) => ({
         url: `${FIXTURES_URL}/${id}`
       })
@@ -19,27 +20,53 @@ export const fixtureApiSlice = apiSlice.injectEndpoints({
         method: "POST",
         body: data,
       }),
+      invalidatesTags: ['Fixture']
     }),
     editFixture: builder.mutation({
-      query: (data, id) => ({
+      query: ({id, ...rest}) => ({
         url: `${FIXTURES_URL}/${id}`,
-        method: "PUT",
-        body: data,
+        method: "PATCH",
+        body: rest,
       }),
+      invalidatesTags: ['Fixture']
     }),
     deleteFixture: builder.mutation({
       query: (id) => ({
         url: `${FIXTURES_URL}/${id}`,
         method: "DELETE",
       }),
+      invalidatesTags: ['Fixture']
     }),
+    populateFixture: builder.mutation({
+      query: (id) => ({
+        url: `${FIXTURES_URL}/${id}/populate`,
+        method: 'PATCH'
+      }),
+      invalidatesTags: ['Fixture']
+    }),
+    depopulateFixture: builder.mutation({
+      query: (id) => ({
+        url: `${FIXTURES_URL}/${id}/depopulate`,
+        method: 'PATCH'
+      }),
+      invalidatesTags: ['Fixture']
+    }),
+    editStats: builder.mutation({
+      query: (id) => ({
+        url: `${FIXTURES_URL}/${id}/stats`,
+        method: 'PATCH'
+      }),
+      invalidatesTags: ['Fixture']
+    })
   }),
 });
 
 export const {
-  useGetFixturesMutation,
-  useGetFixtureMutation,
+  useGetFixturesQuery,
+  useGetFixtureQuery,
   useAddFixtureMutation,
   useEditFixtureMutation,
   useDeleteFixtureMutation,
+  usePopulateFixtureMutation,
+  useDepopulateFixtureMutation
 } = fixtureApiSlice;

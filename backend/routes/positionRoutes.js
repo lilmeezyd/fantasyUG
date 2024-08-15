@@ -17,7 +17,7 @@ router
 router
   .route("/:id")
   .get(getPosition)
-  .put(protect, roles(ROLES.EDITOR, ROLES.ADMIN), updatePosition)
+  .patch(protect, roles(ROLES.EDITOR, ROLES.ADMIN), updatePosition)
   .delete(protect, roles(ROLES.ADMIN), deletePosition);
 
 export default router;
