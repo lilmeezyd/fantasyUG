@@ -3,7 +3,8 @@ const teamLeagueSchema = mongoose.Schema({
     team : {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Team',
-        required: true
+        required: true,
+        unique: true
     },
     startMatchday: {
         type: mongoose.Schema.Types.ObjectId,

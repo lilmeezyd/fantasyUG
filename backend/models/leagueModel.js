@@ -17,7 +17,7 @@ const leagueSchema = mongoose.Schema(
       default: 30,
     },
     creator: {
-      type: mongoose.Schema.Types.Number,
+      type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true 
     },

@@ -2,7 +2,6 @@ import asyncHandler from "express-async-handler";
 import League from "../models/leagueModel.js";
 import OverallLeague from "../models/overallLeagueModel.js";
 import TeamLeague from "../models/teamLeagueModel.js";
-import Team from "../models/teamModel.js";
 import User from "../models/userModel.js";
 import ManagerInfo from "../models/managerInfoModel.js";
 
@@ -51,7 +50,7 @@ const setOverallLeague = asyncHandler(async (req, res) => {
   res.status(200).json(league);
 })
 
-//@desc Set team League
+//@desc Set team League 
 //@toute POST /api/leagues/teamleagues
 //@access Private
 //@role ADMIN
@@ -136,19 +135,19 @@ const addToLeague = asyncHandler(async (req, res) => {
   res.status(200).json(league);
 });
 
-//@desc Get default leagues
-//@route GET /api/leagues/teams
+//@desc Get default leagues 
+//@route GET /api/leagues/teamleagues
 //@access Public
 const getTeamLeagues = asyncHandler(async (req, res) => {
-  const leagues = await League.find({ id: { $lte: 17 } });
+  const leagues = await TeamLeague.find({}).populate("team");
   res.status(200).json(leagues);
-});
+}); 
 
 //@desc Get default leagues
-//@route GET /api/leagues/overall
+//@route GET /api/leagues/overallleagues
 //@access Public
-const getOverallLeague = asyncHandler(async (req, res) => {
-  const league = await League.findOne({ id: 18 });
+const getOverallLeagues = asyncHandler(async (req, res) => {
+  const league = await OverallLeague.find({});
   res.status(200).json(league);
 });
 
@@ -156,7 +155,7 @@ const getOverallLeague = asyncHandler(async (req, res) => {
 //@route GET /api/leagues/users/:id
 //@access Private
 const getLeagues = asyncHandler(async (req, res) => {
-  const user = await User.findById(req.user.id);
+  /*const user = await User.findById(req.user.id);
   const leagues = await League.find({ entrants: { $in: [req.params.id] } })
     .populate("entrants")
     .sort("overallPoints")
@@ -168,7 +167,10 @@ const getLeagues = asyncHandler(async (req, res) => {
     throw new Error("User not found");
   }
 
-  res.status(200).json(leagues);
+  res.status(200).json(leagues);*/
+  
+  const league = await League.find({});
+  res.status(200).json(league);
 });
 
 //@desc Get League for a specific user
@@ -176,14 +178,101 @@ const getLeagues = asyncHandler(async (req, res) => {
 //@access Private
 const getLeague = asyncHandler(async (req, res) => {
   const league = await League.findById(req.params.id)
-    .populate("entrants")
+    /*.populate("entrants")
     .sort("overallPoints")
     .sort("matchdayPoints")
-    .sort("mgrId");
+    .sort("mgrId");*/
   res.status(200).json(league);
 });
 
-const editLeague = asyncHandler(async (req, res) => {});
+//@desc Get League for a specific user
+//@route GET /api/leagues/:id
+//@access Private
+const getTeamLeague = asyncHandler(async (req, res) => {
+  const league = await TeamLeague.findById(req.params.id)
+    /*.populate("entrants")
+    .sort("overallPoints")
+    .sort("matchdayPoints")
+    .sort("mgrId");*/
+  res.status(200).json(league);
+});
+
+//@desc Get League for a specific user
+//@route GET /api/leagues/:id
+//@access Private
+const getOverallLeague = asyncHandler(async (req, res) => {
+  const league = await OverallLeague.findById(req.params.id)
+  res.status(200).json(league);
+});
+
+//@desc Update team League details
+//@route PATCH /api/leagues/teamleagues/:id
+//@access Private
+//@role ADMIN
+const editTeamLeague = asyncHandler(async (req, res) => {
+  const league = TeamLeague.findById(req.params.id)
+  const user = await User.findById(req.user.id).select("-password");
+  if (!user) {
+    res.status(404);
+    throw new Error("User not found");
+  }
+
+  if(!league) {
+    res.status(404)
+    throw new Error(`League not found`)
+  }
+
+  const updatedTeamLeague = await TeamLeague.findByIdAndUpdate(req.params.id, req.body, {
+    new: true,
+  });
+  res.status(200).json(updatedTeamLeague)
+});
+
+//@desc Update team League details
+//@route PATCH /api/leagues/overallleagues/:id
+//@access Private
+//@role ADMIN
+const editOverallLeague = asyncHandler(async (req, res) => {
+  const league = OverallLeague.findById(req.params.id)
+  const user = await User.findById(req.user.id).select("-password");
+  if (!user) {
+    res.status(404);
+    throw new Error("User not found");
+  }
+
+  if(!league) {
+    res.status(404)
+    throw new Error(`League not found`)
+  }
+
+  const updatedOverallLeague = await OverallLeague.findByIdAndUpdate(req.params.id, req.body, {
+    new: true,
+  });
+  res.status(200).json(updatedOverallLeague)
+});
+
+//@desc Update team League details
+//@route PATCH /api/leagues/privateleagues/:id
+//@access Private
+//@role ADMIN
+const editLeague = asyncHandler(async (req, res) => {
+  const league = League.findById(req.params.id)
+  const user = await User.findById(req.user.id).select("-password");
+  if (!user) {
+    res.status(404);
+    throw new Error("User not found");
+  }
+
+  if(!league) {
+    res.status(404)
+    throw new Error(`League not found`)
+  }
+
+  const updatedLeague = await League.findByIdAndUpdate(req.params.id, req.body, {
+    new: true,
+  });
+  res.status(200).json(updatedLeague)
+});
 
 //@desc Delete League
 //@route DELETE /api/leagues/:id
@@ -220,6 +309,48 @@ const deleteLeague = asyncHandler(async (req, res) => {
   res.status(200).json({ id: req.params.id });
 });
 
+//@desc Delete League
+//@route DELETE /api/leagues/teamleagues/:id
+//@access Private
+const deleteTeamLeague = asyncHandler(async (req, res) => {
+  const league = await TeamLeague.findById(req.params.id);
+
+  if (!league) {
+    res.status(400);
+    throw new Error("League not found");
+  }
+
+  // check for user
+  if (!req.user) {
+    res.status(401);
+    throw new Error("User not found");
+  }
+
+  await TeamLeague.findByIdAndDelete(req.params.id);
+  res.status(200).json({ id: req.params.id });
+});
+
+//@desc Delete League
+//@route DELETE /api/leagues/overallleagues/:id
+//@access Private
+const deleteOverallLeague = asyncHandler(async (req, res) => {
+  const league = await OverallLeague.findById(req.params.id);
+
+  if (!league) {
+    res.status(400);
+    throw new Error("League not found");
+  }
+
+  // check for user
+  if (!req.user) {
+    res.status(401);
+    throw new Error("User not found");
+  }
+
+    await OverallLeague.findByIdAndDelete(req.params.id);
+  res.status(200).json({ id: req.params.id });
+});
+
 export {
   setLeague,
   setOverallLeague,
@@ -227,8 +358,14 @@ export {
   addToLeague,
   getLeagues,
   getLeague,
-  editLeague,
-  deleteLeague,
-  getTeamLeagues,
   getOverallLeague,
+  getTeamLeague,
+  editLeague,
+  editTeamLeague,
+  editOverallLeague,
+  deleteLeague,
+  deleteTeamLeague,
+  deleteOverallLeague,
+  getTeamLeagues,
+  getOverallLeagues,
 };

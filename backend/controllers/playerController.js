@@ -97,8 +97,6 @@ const getPlayer = asyncHandler(async (req, res) => {
 //@access private
 //@role ADMIN, EDITOR
 const updatePlayer = asyncHandler(async (req, res) => {
-  console.log(req.params)
-  console.log(req.body)
   const player = await Player.findById(req.params.id);
   const position = await Position.findById(player.playerPosition);
 
@@ -118,7 +116,7 @@ const updatePlayer = asyncHandler(async (req, res) => {
   }*/
 
   if (!player) {
-    res.status(400);
+    res.status(404);
     throw new Error("Player not found");
   }
   if (

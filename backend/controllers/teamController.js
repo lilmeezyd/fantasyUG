@@ -76,8 +76,6 @@ const getTeam = asyncHandler(async(req, res) => {
 //@access Private
 //@role Admin, editor
 const updateTeam = asyncHandler(async (req, res) => {
-  console.log(req.body)
-  console.log(req.params.id)
   const team = await Team.findById(req.params.id);
   const user = await User.findById(req.user.id);
 
@@ -104,7 +102,6 @@ const updateTeam = asyncHandler(async (req, res) => {
     const updatedTeam = await Team.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
     });
-    //res.status(200).json({ msg: `${updatedTeam.name} updated` });
     res.status(200).json(updatedTeam)
   }
 });

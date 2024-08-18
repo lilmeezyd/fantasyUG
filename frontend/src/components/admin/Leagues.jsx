@@ -5,7 +5,7 @@ import {
   useDeleteLeagueMutation
 } from "../../slices/leagueApiSlice";
 import { Container, Button, Spinner } from "react-bootstrap";
-import AddModal from "./leagueModals/AddModal";
+import { Link, Outlet } from 'react-router-dom'
 
 const Leagues = () => {  
   const [show, setShow] = useState({
@@ -54,11 +54,16 @@ const addLeaguePop = () => {
  }
   return (
     <Container>
-      <div>Leagues</div>
-      <div className="add-button p-2">
+      <div className="leagues p-2">
+        <Link to='/admin/dashboard/leagues/teamleagues'><Button>Team Leagues</Button></Link>
+        <Link to='/admin/dashboard/leagues/overallleagues'><Button>Overall Leagues</Button></Link>
+        <Link to='/admin/dashboard/leagues/privateleagues'><Button>Private Leagues</Button></Link>
+      </div>
+      <Outlet />
+      {/*<div className="add-button p-2">
         <Button onClick={addLeaguePop} className="btn btn-success">Add League</Button>
       </div>
-      <AddModal submit={submit} show={added} closeAdd={closeAdd}></AddModal>
+      <AddModal submit={submit} show={added} closeAdd={closeAdd}></AddModal>*/}
     </Container>
   )
 }

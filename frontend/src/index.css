@@ -199,3 +199,9 @@ header .active {
   .pages .current {
     font-weight: 700;
   }
+
+  /* Leagues */
+  .leagues {
+    display: flex;
+    justify-content: space-between;
+  }

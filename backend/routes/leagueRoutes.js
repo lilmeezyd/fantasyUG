@@ -5,26 +5,46 @@ import {
   setTeamLeague,
   getLeagues,
   getLeague,
+  getOverallLeague,
+  getTeamLeague,
   editLeague,
-  deleteLeague, 
+  editOverallLeague,
+  editTeamLeague,
+  deleteLeague,
+  deleteTeamLeague,
+  deleteOverallLeague,
   addToLeague,
   getTeamLeagues,
-  getOverallLeague, 
+  getOverallLeagues,
 } from "../controllers/leagueController.js";
 import { protect, roles } from "../middleware/authMiddleware.js";
 import ROLES from "../config/permissions.js";
 const router = express.Router();
 
-router.route("/overallleagues", protect, roles(ROLES.ADMIN))
-router.route("/teamleagues", protect, roles(ROLES.ADMIN))
-router.route("/privateleagues").post(protect, roles(ROLES.NORMAL_USER, ROLES.ADMIN), setLeague);
-router.route('/teams').get(getTeamLeagues)
-router.route('/overall').get(getOverallLeague)
 router
-  .route("/:id")
-  .put(protect, roles(ROLES.NORMAL_USER), addToLeague)
-  .delete(protect, deleteLeague);
-router.route("/users/:id").get(protect, getLeagues);
-router.route("/:id").get(protect, getLeague);
+  .route("/overallleagues")
+  .post(protect, roles(ROLES.ADMIN), setOverallLeague);
+router.route("/teamleagues").post(protect, roles(ROLES.ADMIN), setTeamLeague);
+router
+  .route("/privateleagues")
+  .post(protect, roles(ROLES.NORMAL_USER, ROLES.ADMIN), setLeague);
+router.route("/teamleagues").get(getTeamLeagues);
+router.route("/overallleagues").get(getOverallLeagues);
+router.route("/privateleagues").get(getLeagues);
+router
+  .route("/overallleagues/:id")
+  .get(getOverallLeague)
+  .patch(protect, roles(ROLES.ADMIN), editOverallLeague)
+  .delete(protect, roles(ROLES.ADMIN), deleteOverallLeague);
+router
+  .route("/teamleagues/:id")
+  .get(getTeamLeague)
+  .patch(protect, roles(ROLES.ADMIN), editTeamLeague)
+  .delete(protect, roles(ROLES.ADMIN), deleteTeamLeague);
+router
+  .route("/privateleagues/:id")
+  .get(getLeague)
+  .patch(protect, roles(ROLES.NORMAL_USER, ROLES.ADMIN), editLeague)
+  .delete(protect, roles(ROLES.NORMAL_USER, ROLES.ADMIN), deleteLeague);
 
 export default router;

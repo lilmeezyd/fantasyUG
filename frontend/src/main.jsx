@@ -24,6 +24,9 @@ import Players from "./components/admin/Players.jsx";
 import Positions from "./components/admin/Positions.jsx";
 import Teams from "./components/admin/Teams.jsx";
 import Users from "./components/admin/Users.jsx";
+import TeamLeagues from "./components/admin/TeamLeagues.jsx";
+import OverallLeagues from "./components/admin/OverallLeagues.jsx";
+import PrivateLeagues from "./components/admin/PrivateLeagues.jsx";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -37,7 +40,12 @@ const router = createBrowserRouter(
         <Route path="/profile" element={<ProfileScreen />} />
         <Route path="admin/dashboard" element={<DashboardScreen />}>
           <Route path="fixtures" element={<Fixtures />} />
-          <Route path="leagues" element={<Leagues />} />
+          <Route path="leagues" element={<Leagues />}>
+          <Route path="" element={<OverallLeagues />} />
+            <Route path="teamleagues" element={<TeamLeagues />} />
+            <Route path="overallleagues" element={<OverallLeagues />} />
+            <Route path="privateleagues" element={<PrivateLeagues />} />
+          </Route>
           <Route path="matchdays" element={<Matchdays />} />
           <Route path="players" element={<Players />} />
           <Route path="positions" element={<Positions />} />
