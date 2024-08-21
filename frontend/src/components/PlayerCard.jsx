@@ -58,18 +58,12 @@ const PlayerCard = (props) => {
     <div className="price money">{(playerPos.nowCost).toFixed(1)}</div>
     {/*<div className="points others">{sort === 'event_points' ? playerPos.event_points : playerPos.total_points}</div>*/}
 </div>
-{/*
+
 <TransferPopUp 
-playersSelected={playersSelected}
-forwardsSelected={forwardsSelected}
-midfieldersSelected={midfieldersSelected}
-defendersSelected={defendersSelected}
-goalkeepersSelected={goalkeepersSelected}
-transferIn={transferIn}
 team={team}
 position={position}
 playerPos={playerPos} showPop={showPop} handleClosePop={handleClosePop}></TransferPopUp>
-<PlayerInfo playerPos={playerPos.id}
+{/*<PlayerInfo playerPos={playerPos.id}
       bgColor={playerPos.element_type}
       handleClose={handleClose}
       show={show}
@@ -77,47 +71,48 @@ playerPos={playerPos} showPop={showPop} handleClosePop={handleClosePop}></Transf
     </>
   )
 }
-/*
+
 const TransferPopUp = (props) => {
   const { showPop, handleClosePop, playerPos,
-    playersSelected, goalkeepersSelected, defendersSelected,
-    midfieldersSelected, forwardsSelected, transferIn,
     position, team
   } = props
+  console.log(playerPos)
+  console.log(position)
+  console.log(team)
   return (
   <Modal show={showPop} onHide={handleClosePop}>
       <Modal.Header style={{ background: "aquamarine" }} closeButton>
         <Modal.Title style={{ fontWeight: 500 }}>
         <div className="namesection">
-        <span>{playerPos.first_name}&nbsp;{playerPos.second_name}</span>
+        <span>{playerPos.firstName}&nbsp;{playerPos.secondName}</span>
     </div>
         </Modal.Title>
       </Modal.Header>
       <Modal.Body className="p-3">
-      {playersSelected() === 15 && <div className='message'>
+      {/*playersSelected() === 15 && <div className='message'>
         <span className='danger span-msg'>You already have the maximum number of Players in your squad</span>
-      </div>}
-      {playersSelected() < 15 && 
+      </div>*/}
+      {/*playersSelected() < 15 && 
       playerPos.element_type === 1 && 
       goalkeepersSelected() === 2 && <div className='message'>
          <span className='danger span-msg'>You already have the maximum number of Goalkeepers in your squad</span>
-        </div>}
-        {playersSelected() < 15 && 
+        </div>*/}
+        {/*playersSelected() < 15 && 
       playerPos.element_type === 2 && 
       defendersSelected() === 5 && <div className='message'>
          <span className='danger span-msg'>You already have the maximum number of Defenders in your squad</span>
-        </div>}
-        {playersSelected() < 15 && 
+        </div>*/}
+        {/*playersSelected() < 15 && 
       playerPos.element_type === 3 && 
       midfieldersSelected() === 5 && <div className='message'>
          <span className='danger span-msg'>You already have the maximum number of Midfielders in your squad</span>
-        </div>}
-        {playersSelected() < 15 && 
+        </div>*/}
+        {/*playersSelected() < 15 && 
       playerPos.element_type === 4 && 
       forwardsSelected() === 3 && <div className='message'>
          <span className='danger span-msg'>You already have the maximum number of Forwards in your squad</span>
-        </div>}
-    <div className="infobuttons">
+        </div>*/}
+    {/*<div className="infobuttons">
       {(((playersSelected() < 15 || playersSelected() === undefined) &&
       playerPos.element_type === 1 && (goalkeepersSelected() === undefined || goalkeepersSelected() < 2)) ||
       ((playersSelected() < 15 || playersSelected() === undefined) &&
@@ -127,9 +122,22 @@ const TransferPopUp = (props) => {
           ((playersSelected() < 15 || playersSelected() === undefined) &&
             playerPos.element_type === 4 && (forwardsSelected() === undefined || forwardsSelected() < 3)))&& <button
          onClick={() => transferIn(playerPos.id, position, team)} className='btn-info btn-info-block btn-green'>Add Player</button>}
-    </div>
+    </div>*/}
       </Modal.Body>
     </Modal>)
-}*/
+}
 
 export default PlayerCard
+
+/*
+playersSelected={playersSelected}
+forwardsSelected={forwardsSelected}
+midfieldersSelected={midfieldersSelected}
+defendersSelected={defendersSelected}
+goalkeepersSelected={goalkeepersSelected}
+transferIn={transferIn} */
+
+/*
+
+    playersSelected, goalkeepersSelected, defendersSelected,
+    midfieldersSelected, forwardsSelected, transferIn, */
