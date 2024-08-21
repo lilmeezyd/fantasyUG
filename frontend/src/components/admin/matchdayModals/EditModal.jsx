@@ -8,7 +8,6 @@ const EditModal = (props) => {
   const [data, setData] = useState({ name: "", deadline: "" , time: ''});
   const { name, deadline, time } = data;
   const [ editMatchday ] = useEditMatchdayMutation()
-  console.log(matchday)
 
   useEffect(() => {
     setData({ name: matchday?.name, deadline: new Date(matchday?.deadlineTime).toLocaleDateString(), 

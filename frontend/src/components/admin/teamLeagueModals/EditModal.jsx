@@ -27,7 +27,6 @@ const EditModal = (props) => {
     const endMatchday = elements.end.value
 
     if(team && startMatchday && endMatchday) {
-      console.log(teamLeague?._id)
       await editTeamLeague({id: teamLeague?._id, team, startMatchday, endMatchday})
       closeEdit()
       resetEdit()

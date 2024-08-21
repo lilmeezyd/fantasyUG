@@ -17,6 +17,11 @@ import LoginScreen from "./screens/LoginScreen.jsx";
 import RegisterScreen from "./screens/RegisterScreen.jsx";
 import ProfileScreen from "./screens/ProfileScreen.jsx";
 import DashboardScreen from "./screens/DashboardScreen.jsx";
+import CreateTeam from "./screens/CreateTeam.jsx"
+import PickTeam from "./screens/PickTeam.jsx"
+import Points from "./screens/Points.jsx"
+import Transfers from "./screens/Transfers.jsx"
+import UserLeagues from "./screens/Leagues.jsx"
 import Fixtures from "./components/admin/Fixtures.jsx";
 import Leagues from "./components/admin/Leagues.jsx";
 import Matchdays from "./components/admin/Matchdays.jsx";
@@ -27,6 +32,8 @@ import Users from "./components/admin/Users.jsx";
 import TeamLeagues from "./components/admin/TeamLeagues.jsx";
 import OverallLeagues from "./components/admin/OverallLeagues.jsx";
 import PrivateLeagues from "./components/admin/PrivateLeagues.jsx";
+import AdminRoute from "./components/AdminRoute.jsx";
+import NormalRoute from "./components/NormalRoute.jsx"
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -38,7 +45,20 @@ const router = createBrowserRouter(
       {/* Private Routes */}
       <Route path="" element={<PrivateRoute />}>
         <Route path="/profile" element={<ProfileScreen />} />
-        <Route path="admin/dashboard" element={<DashboardScreen />}>
+      </Route>
+
+      {/* Normal User Routes */}
+      <Route path="" element={<PrivateRoute />}>
+        <Route path="/create" element={<CreateTeam />} />
+        <Route path="/userleagues" element={<UserLeagues />} />
+        <Route path="/transfers" element={<Transfers />} />
+        <Route path="/pickteam" element={<PickTeam />} />
+        <Route path="/points" element={<Points />} />
+      </Route>
+
+      {/* Admin Routes */}
+      <Route path="" element={<AdminRoute />}>
+      <Route path="admin/dashboard" element={<DashboardScreen />}>
           <Route path="fixtures" element={<Fixtures />} />
           <Route path="leagues" element={<Leagues />}>
           <Route path="" element={<OverallLeagues />} />
@@ -51,8 +71,7 @@ const router = createBrowserRouter(
           <Route path="positions" element={<Positions />} />
           <Route path="teams" element={<Teams />} />
           <Route path="users" element={<Users />} />
-        </Route>
-      </Route>
+        </Route></Route>
     </Route>
   )
 );

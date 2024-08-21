@@ -80,7 +80,6 @@ const cancelDelete = () => {
 const deleteMatchdayNow = async () => {
   try {
     await deleteMatchday(matchdayId).unwrap();
-    setMatchdays(matchdays.filter((matchday) => matchday._id !== matchdayId));
   } catch (error) {
     console.log(error);
   }
@@ -104,15 +103,7 @@ const submit = async (data) => {
   setMatchdayId("");
 };
 
-const resetEdit = async (data) => {
-  try {
-    const res = await editMatchday(data, matchdayId).unwrap();
-    console.log(res);
-    //dispatch(setMatchdayDetails({...res}))
-    setMatchdays((prev) => [...prev, res]);
-  } catch (error) {
-    console.log(error);
-  }
+const resetEdit = async () => {
   setShow((prevState) => ({
     ...prevState,
     edited: false,

@@ -14,7 +14,7 @@ const picksSchema = mongoose.Schema({
         nowCost: { type: Number, required: true},
         IsCaptain: { type: Boolean, required: true},
         IsViceCaptain: { type: Boolean, required: true},
-        position: { type: Number, required: true}   
+        slot: { type: Number, required: true}    
     }],
     teamValue: { type: Number, required: true},
     bank: { type: Number, required: true}
