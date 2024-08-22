@@ -4,213 +4,85 @@ import {
   useGetOverallLeaguesQuery,
   useGetTeamLeaguesQuery,
 } from "../slices/leagueApiSlice";
+import {  useGetPlayersQuery } from "../slices/playerApiSlice";
 import {useGetQuery} from "../slices/teamApiSlice"
 import { Button } from "react-bootstrap";
-const PicksPlatform = () => {
+import SquadPlayer from "./SquadPlayer";
+const PicksPlatform = (props) => {
+  const { picks, removePlayer, totalPlayers, itb, reset } = props
   const [ teamName, setTeamName ] = useState('')
-  const [picks, setPicks] = useState([{ _id: '',
-    playerPosition: '669a41e50f8891d8e0b4eb2a',
-    playerTeam: '',
-    multiplier: 1,
-    nowCost: '',
-    IsCaptain: false,
-    IsViceCaptain: true,
-    slot: 1   
-}, { _id: '',
-  playerPosition: '669a41e50f8891d8e0b4eb2a',
-  playerTeam: '',
-  multiplier: 1,
-  nowCost: '',
-  IsCaptain: false,
-  IsViceCaptain: false,
-  slot: 12   
-}, { _id: '',
-  playerPosition: '669a4831e181cb2ed40c240f',
-  playerTeam: '',
-  multiplier: 2,
-  nowCost: '',
-  IsCaptain: true,
-  IsViceCaptain: false,
-  slot: 2   
-}, { _id: '',
-  playerPosition: '669a4831e181cb2ed40c240f',
-  playerTeam: '',
-  multiplier: 1,
-  nowCost: '',
-  IsCaptain: false,
-  IsViceCaptain: false,
-  slot: 3   
-}, { _id: '',
-  playerPosition: '669a4831e181cb2ed40c240f',
-  playerTeam: '',
-  multiplier: 1,
-  nowCost: '',
-  IsCaptain: false,
-  IsViceCaptain: false,
-  slot: 4   
-}, { _id: '',
-  playerPosition: '669a4831e181cb2ed40c240f',
-  playerTeam: '',
-  multiplier: 1,
-  nowCost: '',
-  IsCaptain: false,
-  IsViceCaptain: false,
-  slot: 5   
-}, { _id: '',
-  playerPosition: '669a4831e181cb2ed40c240f',
-  playerTeam: '',
-  multiplier: 1,
-  nowCost: '',
-  IsCaptain: false,
-  IsViceCaptain: false,
-  slot: 13  
-}, { _id: '',
-  playerPosition: '669a4846e181cb2ed40c2413',
-  playerTeam: '',
-  multiplier: 1,
-  nowCost: '',
-  IsCaptain: false,
-  IsViceCaptain: false,
-  slot: 6  
-}, { _id: '',
-  playerPosition: '669a4846e181cb2ed40c2413',
-  playerTeam: '',
-  multiplier: 1,
-  nowCost: '',
-  IsCaptain: false,
-  IsViceCaptain: false,
-  slot: 7   
-}, { _id: '',
-  playerPosition: '669a4846e181cb2ed40c2413',
-  playerTeam: '',
-  multiplier: 1,
-  nowCost: '',
-  IsCaptain: false,
-  IsViceCaptain: false,
-  slot: 8   
-}, { _id: '',
-  playerPosition: '669a4846e181cb2ed40c2413',
-  playerTeam: '',
-  multiplier: 1,
-  nowCost: '',
-  IsCaptain: false,
-  IsViceCaptain: false,
-  slot: 9   
-}, { _id: '',
-  playerPosition: '669a4846e181cb2ed40c2413',
-  playerTeam: '',
-  multiplier: 1,
-  nowCost: '',
-  IsCaptain: false,
-  IsViceCaptain: false,
-  slot: 14   
-}, { _id: '',
-  playerPosition: '669a485de181cb2ed40c2417',
-  playerTeam: '',
-  multiplier: 1,
-  nowCost: '',
-  IsCaptain: false,
-  IsViceCaptain: false,
-  slot: 10   
-}, { _id: '',
-  playerPosition: '669a485de181cb2ed40c2417',
-  playerTeam: '',
-  multiplier: 1,
-  nowCost: '',
-  IsCaptain: false,
-  IsViceCaptain: false,
-  slot: 11   
-}, { _id: '',
-  playerPosition:'669a485de181cb2ed40c2417',
-  playerTeam: '',
-  multiplier: 1,
-  nowCost: '',
-  IsCaptain: false,
-  IsViceCaptain: false,
-  slot: 15   
-}]);
+  const [ playerLeague, setPlayerLeague ] = useState('')
 
-const goalkeepers = picks.filter(pick => pick.playerPosition === '669a41e50f8891d8e0b4eb2a')
-const defenders = picks.filter(pick => pick.playerPosition === '669a4831e181cb2ed40c240f')
-const midfielders = picks.filter(pick => pick.playerPosition === '669a4846e181cb2ed40c2413')
-const forwards  = picks.filter(pick => pick.playerPosition === '669a485de181cb2ed40c2417')
+const goalkeepers = picks?.filter(pick => pick?.playerPosition === '669a41e50f8891d8e0b4eb2a')
+const defenders = picks?.filter(pick => pick?.playerPosition === '669a4831e181cb2ed40c240f')
+const midfielders = picks?.filter(pick => pick?.playerPosition === '669a4846e181cb2ed40c2413')
+const forwards  = picks?.filter(pick => pick?.playerPosition === '669a485de181cb2ed40c2417')
 
   const { data: teamLeagues } = useGetTeamLeaguesQuery()
   const {data: teams} = useGetQuery()
+  const { data: players} = useGetPlayersQuery()
+  
 
-  const onSubmit = () => {}
-  const disableButton = () => {}
+  const onSubmit = (e) => {
+    e.preventDefault()
+    console.log(playerLeague)
+    console.log(teamName)
+    console.log(picks)
+  }
   const selectLeague = (e) => {
-    console.log(e.target.value)
+    setPlayerLeague(e.target.value)
   }
   const onChange = (e) => {
     setTeamName(e.target.value)
   }
-  const handleShowModal = () => {}
 
   return (
     <div>
       <div className="transfer-data p-2">
         <div className="transfer-item p-2">
           <div>Selected</div>
-          <div>15/15</div>
+          <div>{totalPlayers}/15</div>
         </div>
         <div className="transfer-item p-2">
           <div>ITB</div>
-          <div>100.0</div>
+          <div>{itb.toFixed(1)}</div>
         </div>
         <div className="transfer-item p-2">
           <div>TC</div>
-          <div>-4</div>
+          <div>0</div>
         </div>
         <div className="transfer-item p-2">
-          <div>FTs</div>
-          <div>3</div>
+          <div>FTS</div>
+          <div>Unlimited</div>
         </div>
       </div>
       <div className="trans-reset p-2">
         <Button style={{ color: "aquamarine" }} className="btn-dark">
           Auto Pick
         </Button>
-        <Button style={{ color: "aquamarine" }} className="btn-dark">
+        <Button onClick={reset} style={{ color: "aquamarine" }} className="btn-dark">
           Reset
         </Button>
       </div>
       <div className="no-picks-team">
         <div className="default-player">
-          {goalkeepers.map(x => <div key={x.slot} className="squad-player">
-            <div className="element">
-            <button onClick={handleShowModal} className="player-btn">
-              {x._id === '' ? <div className="p-holder">GKP</div> : <>GoalKeeper</>}
-            </button>
-            </div>
+          {goalkeepers?.map(x => <div key={x.slot} className="squad-player">
+            <SquadPlayer removePlayer={removePlayer} baller={x} posName={'GKP'}></SquadPlayer>
           </div>)}
         </div>
         <div className="default-player">
-        {defenders.map(x => <div key={x.slot} className="squad-player">
-            <div className="element">
-            <button onClick={handleShowModal} className="player-btn">
-              {x._id === '' ? <div className="p-holder">DEF</div> : <>Defender</>}
-            </button>
-            </div>
+        {defenders?.map(x => <div key={x.slot} className="squad-player">
+          <SquadPlayer removePlayer={removePlayer} baller={x} posName={'DEF'}></SquadPlayer>
           </div>)}
         </div>
         <div className="default-player">
-        {midfielders.map(x => <div key={x.slot} className="squad-player">
-            <div className="element">
-            <button onClick={handleShowModal} className="player-btn">
-              {x._id === '' ? <div className="p-holder">MID</div> : <>Midfielder</>}
-            </button>
-            </div>
+        {midfielders?.map(x => <div key={x.slot} className="squad-player">
+          <SquadPlayer removePlayer={removePlayer} baller={x} posName={'MID'}></SquadPlayer>
           </div>)}
         </div>
         <div className="default-player">
-        {forwards.map(x => <div key={x.slot} className="squad-player">
-            <div className="element">
-            <button onClick={handleShowModal} className="player-btn">
-              {x._id === '' ? <div className="p-holder">FWD</div> : <>Forward</>}
-            </button>
-            </div>
+        {forwards?.map(x => <div key={x.slot} className="squad-player">
+          <SquadPlayer removePlayer={removePlayer} baller={x} posName={'FWD'}></SquadPlayer>
           </div>)}
         </div>
       </div>
@@ -245,7 +117,8 @@ const forwards  = picks.filter(pick => pick.playerPosition === '669a485de181cb2e
                             <div className='name-warning py-1'>*Select favorite team</div>
                         </div>
                         <div className="form-group py-3">
-                            <Button disabled={disableButton()} className="btn-success form-control">Save</Button>
+                            <Button type="submit"
+                            disabled={itb<0||totalPlayers<15||teamName===''||teamName.length>20||playerLeague===''} className="btn-success form-control">Save</Button>
                         </div>
                     </form>
                 </section>

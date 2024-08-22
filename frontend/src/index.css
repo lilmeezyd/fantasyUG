@@ -499,10 +499,11 @@ header .active {
   border: 1px solid #aaa;
   display: flex;
   flex-direction: column;
-  background: #0080003a;
+  background: darkgreen;
   gap: 1rem;
   border-radius: 1rem;
   padding: 1rem 0;
+  box-shadow: 0 0 5px 0px;
 }
 
 .default-player {
@@ -532,14 +533,20 @@ header .active {
   }
 
   .player-btn {
-    background: transparent;
+    background: white;
     outline: none;
     border: 0;
     width: 100%;
     position: relative;
     border: 1px solid #aaa;
     border-radius: 1rem;
+    transition: 1s;
   }
+
+  .empty-btn {
+    background: darkgoldenrod;
+    box-shadow: black 0 0 5px 0px;
+}
 
   .p-holder {
     font-weight: 600;
@@ -552,4 +559,22 @@ header .active {
     flex-direction: column;
     font-weight: 700;
     font-size: 1rem;
+  }
+
+  .message {
+    margin: 0.5rem 0;
+    padding: 0.4rem;
+    text-align: center;
+    font-weight: 600;
+  }
+
+  .danger {
+    background-color: darkred;
+    color: #fff;
+  }
+  .span-msg {
+    display: block;
+    font-size: 12px;
+    padding: 0.4rem;
+    margin: auto;
   }

@@ -11,7 +11,8 @@ import {
   getArrangedPlayers,
 } from "../helpers/playersHelper";
 
-const Players = () => {
+const Players = (props) => {
+  const { addPlayer, removePlayer, picks, GKP, DEF, MID, FWD, errorMsg } = props
   const { data: players, isLoading } = useGetPlayersQuery();
   const { data: teams } = useGetQuery()
   const { data: elementTypes } = useGetPositionsQuery()
@@ -234,6 +235,11 @@ const onSort = (e) => {
             `${teamObj?.code}-66`    
               return (<PlayerCard 
                 bgColor='rgb(255, 255, 0, 0.5)'
+                picks={picks}
+                GKP={GKP}
+                errorMsg={errorMsg}
+                addPlayer={addPlayer}
+                removePlayer={removePlayer}
                           key={goalkeeper?._id}
                           forwardImage={forwardImage}
                           playerPos={goalkeeper}
@@ -263,6 +269,11 @@ const onSort = (e) => {
             `${teamObj?.code}-66`   
                   return (<PlayerCard 
                 bgColor='rgb(0, 255, 0, 0.5)'
+                picks={picks}
+                DEF={DEF}
+                errorMsg={errorMsg}
+                addPlayer={addPlayer}
+                removePlayer={removePlayer}
                       key={defender?._id}
                       forwardImage={forwardImage}
                       playerPos={defender}
@@ -294,7 +305,12 @@ const onSort = (e) => {
             `${teamObj?.code}-66`    
                   return (<PlayerCard 
                 bgColor='rgb(0, 0, 255, 0.5)'
+                MID={MID}
+                errorMsg={errorMsg}
+                picks={picks}
                       key={midfielder?._id}
+                      addPlayer={addPlayer}
+                      removePlayer={removePlayer}
                       forwardImage={forwardImage}
                       playerPos={midfielder}
                       shortName={short_name}
@@ -325,6 +341,11 @@ const onSort = (e) => {
             `${teamObj?.code}-66`  
                   return (<PlayerCard 
                 bgColor='rgb(255, 0, 0, 0.5)'
+                FWD={FWD}
+                errorMsg={errorMsg}
+                picks={picks}
+                addPlayer={addPlayer}
+                removePlayer={removePlayer}
                       key={forward?._id}
                       forwardImage={forwardImage}
                       playerPos={forward}
