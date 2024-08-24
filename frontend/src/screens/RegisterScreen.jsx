@@ -9,7 +9,8 @@ import { toast } from "react-toastify"
 import Loader from "../components/Loader"
 
 const RegisterScreen = () => {
-    const [name, setName] = useState('')
+    const [firstName, setFirstName] = useState('')
+    const [lastName, setLastName] = useState('')
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [confirmPassword, setConfirmPassword] = useState('')
@@ -32,7 +33,7 @@ const RegisterScreen = () => {
             toast.error('Passwords do not match')
         } else {
             try {
-                const res = await register({ name, email, password}).unwrap()
+                const res = await register({ firstName, lastName, email, password}).unwrap()
                 dispatch(setCredentials({...res}))
                 navigate('/') 
             } catch (err) {
@@ -44,13 +45,22 @@ const RegisterScreen = () => {
         <FormContainer>
             <h1>Register</h1>
             <Form onSubmit={onSubmit}>
-            <Form.Group className="my-2" controlId="name">
+            <Form.Group className="my-2" controlId="firstName">
                     <Form.Label>Name</Form.Label>
                     <Form.Control
                         type="text"
-                        placeholder="Enter Name"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
+                        placeholder="Enter First Name"
+                        value={firstName}
+                        onChange={(e) => setFirstName(e.target.value)}
+                    ></Form.Control>
+                </Form.Group>
+                <Form.Group className="my-2" controlId="lastName">
+                    <Form.Label>Name</Form.Label>
+                    <Form.Control
+                        type="text"
+                        placeholder="Enter Last Name"
+                        value={lastName}
+                        onChange={(e) => setLastName(e.target.value)}
                     ></Form.Control>
                 </Form.Group>
                 <Form.Group className="my-2" controlId="email">

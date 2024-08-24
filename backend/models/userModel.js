@@ -21,6 +21,7 @@ const userSchema = mongoose.Schema(
       required: [true, "Please add a password"],
     },
     roles: { type: Object, default: { "NORMAL_USER": 1 } },
+    hasPicks: { type: Boolean, default: false}
   },
   {
     timestamps: true,

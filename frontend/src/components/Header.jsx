@@ -22,7 +22,7 @@ const Header = () => {
     }
   };
   return (
-    <header className='header'>
+    <header className="header">
       <Navbar className="bg-body-tertiary" expand="lg" collapseOnSelect>
         <Container>
           <LinkContainer to="/">
@@ -31,24 +31,36 @@ const Header = () => {
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="ms-auto">
-              {userInfo && userInfo?.roles?.ADMIN && <LinkContainer to="/admin/dashboard">
-                <Nav.Link>Dashboard</Nav.Link>
-              </LinkContainer>}
-              {userInfo && userInfo?.roles?.NORMAL_USER && <><LinkContainer to="/create">
-                <Nav.Link>Create Team</Nav.Link>
-              </LinkContainer>
-              <LinkContainer to="/points">
-                <Nav.Link>Points</Nav.Link>
-              </LinkContainer>
-              <LinkContainer to="/pickteam">
-                <Nav.Link>Pick Team</Nav.Link>
-              </LinkContainer>
-              <LinkContainer to="/transfers">
-                <Nav.Link>Transfers</Nav.Link>
-              </LinkContainer>
-              <LinkContainer to="/userleagues">
-                <Nav.Link>Leagues</Nav.Link>
-              </LinkContainer></>}
+              {userInfo && userInfo?.roles?.ADMIN && (
+                <LinkContainer to="/admin/dashboard">
+                  <Nav.Link>Dashboard</Nav.Link>
+                </LinkContainer>
+              )}
+              {userInfo && userInfo?.roles?.NORMAL_USER && (
+                <>
+                  <LinkContainer to="/create">
+                    <Nav.Link>Create Team</Nav.Link>
+                  </LinkContainer>
+                  {userInfo &&
+                    userInfo?.roles?.NORMAL_USER &&
+                    userInfo?.hasPicks && (
+                      <>
+                        <LinkContainer to="/points">
+                          <Nav.Link>Points</Nav.Link>
+                        </LinkContainer>
+                        <LinkContainer to="/pickteam">
+                          <Nav.Link>Pick Team</Nav.Link>
+                        </LinkContainer>
+                        <LinkContainer to="/transfers">
+                          <Nav.Link>Transfers</Nav.Link>
+                        </LinkContainer>
+                        <LinkContainer to="/userleagues">
+                          <Nav.Link>Leagues</Nav.Link>
+                        </LinkContainer>
+                      </>
+                    )}
+                </>
+              )}
               {userInfo ? (
                 <>
                   <NavDropdown title={userInfo.name} id="username">
