@@ -5,18 +5,13 @@ import Matchday from "../models/matchdayModel.js";
 import ManagerInfo from "../models/managerInfoModel.js";
 
 //@desc Set Pickss
-//@route POST /api/picks/
+//@route POST /api/picks/ 
 //@access Private
 const setPicks = asyncHandler(async (req, res) => {
-  const { picks, teamName } = req.body;
+  const { picks, teamName, bank, teamValue } = req.body;
   const user = await User.findById(req.user.id);
   const userHasPicks = await Picks.find({ user: req.user.id });
   const mgrExists = await ManagerInfo.findOne({ user: req.user.id });
-  const playerName = await User.findById(req.user.id);
-  const mgrIds = await ManagerInfo.find({});
-  const maxMgrId =
-    mgrIds.length > 0 ? Math.max(...mgrIds.map((x) => x.mgrId)) : 0;
-  //const validDeadline = await Matchday.findById(req.params.mid)
   if (!picks) {
     res.status(400);
     throw new Error("No players added");
@@ -41,19 +36,21 @@ const setPicks = asyncHandler(async (req, res) => {
     throw new Error("Manager Info already created");
   }
 
-  const teamValue = picks.reduce((x, y) => x + +y.nowCost, 0);
-  const bank = 100 - teamValue;
+  if(!teamValue || isNaN(bank)) {
+    res.status(400)
+    throw new Error('Please add all fields')
+  }
+
 
   if (bank < 0) {
     res.status(400);
     throw new Error("Not enough funds");
   }
 
+
   const managerInfo = await ManagerInfo.create({
     user: req.user.id,
-    mgrId: maxMgrId + 1,
     teamName,
-    playerName: playerName.name,
   });
 
   const matchdayPicks = await Picks.create({
@@ -63,7 +60,7 @@ const setPicks = asyncHandler(async (req, res) => {
     user: req.user.id,
   });
 
-  res.status(200).json(matchdayPicks);
+  res.status(200).json({matchdayPicks, managerInfo});
 });
 
 //@desc Get picks
@@ -71,9 +68,8 @@ const setPicks = asyncHandler(async (req, res) => {
 //@access Private
 const getPicks = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user.id);
-  const managerPicks = await Picks.findOne({ user: req.user.id }).select(
-    "-user"
-  );
+  const managerPicks = await Picks.findOne({ user: req.user.id });
+  console.log(managerPicks)
 
   if (!user) {
     res.status(400);

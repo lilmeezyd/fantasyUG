@@ -155,22 +155,6 @@ const CreateTeam = () => {
       slot: 15,
     },
   ]
-/*
-  const picksReducer = (state, action) =>{
-    if(action.type === '669a41e50f8891d8e0b4eb2a') {
-      console.log(state)
-    }
-    if(action.type === '669a4831e181cb2ed40c240f') {
-      console.log(state)
-    }
-    if(action.type === '669a4846e181cb2ed40c2413') {
-      console.log(state)
-    }
-    if(action.type === '669a485de181cb2ed40c2417') {
-      console.log(state)
-    }
-  }
-*/
   const reducer = (state, action) => {
     if(action.type === "GKP_ADD" && state.GKP < 2) {
       const { data } = action
@@ -298,7 +282,8 @@ const CreateTeam = () => {
   const [state, dispatch] = useReducer(reducer, {GKP:0, DEF: 0, MID: 0, FWD: 0, picks: initialState, errorMsg: ''})
   const { GKP, DEF, MID, FWD, picks, errorMsg } = state
   const totalPlayers = GKP+DEF+MID+FWD
-  const itb = 100 - picks?.reduce((x,y) => x+(+y.nowCost), 0)
+  const teamValue = picks?.reduce((x,y) => x+(+y.nowCost), 0)
+  const itb = 100 - teamValue
   
 
   const addPlayer = (data) => {
@@ -318,7 +303,7 @@ const CreateTeam = () => {
 
   return (
     <div className="main">
-      <PicksPlatform reset={reset} itb={itb} totalPlayers={totalPlayers} picks={picks} removePlayer={removePlayer} />
+      <PicksPlatform teamValue={teamValue} reset={reset} itb={itb} totalPlayers={totalPlayers} picks={picks} removePlayer={removePlayer} />
       <Players GKP={GKP} DEF={DEF} MID={MID} FWD={FWD} errorMsg={errorMsg} picks={picks} removePlayer={removePlayer} addPlayer={addPlayer} />
     </div>
   );

@@ -6,10 +6,12 @@ import {
 } from "../slices/leagueApiSlice";
 import {  useGetPlayersQuery } from "../slices/playerApiSlice";
 import {useGetQuery} from "../slices/teamApiSlice"
+import { useJoinOverallLeagueMutation, useJoinTeamLeagueMutation } from "../slices/leagueApiSlice";
+import { useSetPicksMutation } from "../slices/picksSlice";
 import { Button } from "react-bootstrap";
 import SquadPlayer from "./SquadPlayer";
 const PicksPlatform = (props) => {
-  const { picks, removePlayer, totalPlayers, itb, reset } = props
+  const { picks, removePlayer, totalPlayers, itb, reset, teamValue } = props
   const [ teamName, setTeamName ] = useState('')
   const [ playerLeague, setPlayerLeague ] = useState('')
 
@@ -21,13 +23,19 @@ const forwards  = picks?.filter(pick => pick?.playerPosition === '669a485de181cb
   const { data: teamLeagues } = useGetTeamLeaguesQuery()
   const {data: teams} = useGetQuery()
   const { data: players} = useGetPlayersQuery()
+  const [ joinOverallLeague ] = useJoinOverallLeagueMutation()
+  const [ joinTeamLeague ] = useJoinTeamLeagueMutation()
+  const [ setPicks ] = useSetPicksMutation()
   
 
-  const onSubmit = (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault()
     console.log(playerLeague)
     console.log(teamName)
     console.log(picks)
+    await setPicks({picks, teamName, bank:itb, teamValue})
+    await joinOverallLeague({id: '66c13c3d1f44b30a427fb02f'})
+    await joinTeamLeague({id: playerLeague})
   }
   const selectLeague = (e) => {
     setPlayerLeague(e.target.value)
@@ -107,6 +115,7 @@ const forwards  = picks?.filter(pick => pick?.playerPosition === '669a485de181cb
                             <div className="form-group fav-team">
                                 <label  className="py-1" htmlFor="team">Favorite Team</label>
                                 <select className="form-control" name="team" id="team" onChange={selectLeague}>
+                                  <option value="">Select Favorite Team</option>
                                     {teamLeagues?.map(league => (
                                         <option value={league._id} key={league._id}>
                                             {league?.team?.name}

@@ -84,6 +84,27 @@ export const leagueApiSlice = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ['TeamLeague']
     }),
+    joinLeague: builder.mutation({
+      query: ({id}) => ({
+        url: `${LEAGUES_URL}/${id}/join`,
+        method: "PATCH"
+      }),
+      invalidatesTags: ['League']
+    }),
+    joinOverallLeague: builder.mutation({
+      query: ({id}) => ({
+        url: `${LEAGUES_URL}/overallleagues/${id}/join`,
+        method: "PATCH",
+      }),
+      invalidatesTags: ['OverallLeague']
+    }),
+    joinTeamLeague: builder.mutation({
+      query: ({id}) => ({
+        url: `${LEAGUES_URL}/teamleagues/${id}/join`, 
+        method: "PATCH",
+      }),
+      invalidatesTags: ['TeamLeague']
+    }),
     deleteLeague: builder.mutation({
       query: (id) => ({
         url: `${LEAGUES_URL}/${id}`,
@@ -109,6 +130,9 @@ export const leagueApiSlice = apiSlice.injectEndpoints({
 });
 
 export const {
+  useJoinLeagueMutation,
+  useJoinOverallLeagueMutation,
+  useJoinTeamLeagueMutation,
   useGetLeaguesQuery,
   useGetOverallLeaguesQuery,
   useGetTeamLeaguesQuery,

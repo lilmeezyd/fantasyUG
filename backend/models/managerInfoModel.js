@@ -5,15 +5,11 @@ const managerInfoSchema = mongoose.Schema(
     user: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
+      unique: true,
       ref: "User",
     },
-    mgrId: { type: Number, required: true, unique: true },
     current: { type: Number, default: null},
     teamName: {
-      type: String,
-      required: true,
-    },
-    playerName: {
       type: String,
       required: true,
     },

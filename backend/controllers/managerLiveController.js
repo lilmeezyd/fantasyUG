@@ -7,7 +7,7 @@ import Matchday from "../models/matchdayModel.js";
 import Fixture from "../models/fixtureModel.js";
 
 //@desc set live picks
-//@route PUT api/livepicks/manager/
+//@route PUT api/livepicks/manager/ 
 //@access
 const setLivePicks = asyncHandler(async (req, res) => {
   const allPicks = await Picks.find({});

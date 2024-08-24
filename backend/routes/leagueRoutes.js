@@ -13,7 +13,9 @@ import {
   deleteLeague,
   deleteTeamLeague,
   deleteOverallLeague,
-  addToLeague,
+  joinOverallLeague,
+  joinTeamLeague,
+  joinPrivateLeague,
   getTeamLeagues,
   getOverallLeagues,
 } from "../controllers/leagueController.js";
@@ -46,5 +48,14 @@ router
   .get(getLeague)
   .patch(protect, roles(ROLES.NORMAL_USER, ROLES.ADMIN), editLeague)
   .delete(protect, roles(ROLES.NORMAL_USER, ROLES.ADMIN), deleteLeague);
+router
+  .route("/overallleagues/:id/join")
+  .patch(protect, roles(ROLES.NORMAL_USER), joinOverallLeague);
+router
+  .route("/teamleagues/:id/join")
+  .patch(protect, roles(ROLES.NORMAL_USER), joinTeamLeague);
+router
+  .route("/privateleagues/:id/join")
+  .patch(protect, roles(ROLES.NORMAL_USER), joinPrivateLeague);
 
 export default router;

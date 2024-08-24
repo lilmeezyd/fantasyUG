@@ -10,6 +10,8 @@ const SquadPlayer = (props) => {
   const { data: teams } = useGetQuery();
   const { data: players } = useGetPlayersQuery();
   const { data: elementTypes } = useGetPositionsQuery()
+  const appName = players?.find((player) => player._id === baller._id)?.appName
+  const nowCost = players?.find((player) => player._id === baller._id)?.nowCost
 
   const handleClose = () => {
     setShow(false)
@@ -21,8 +23,12 @@ const SquadPlayer = (props) => {
     <>
       <div className="element">
         {baller._id ?
-        <button onClick={handleShow} className="player-btn">
-            <>{players.find((player) => player._id === baller._id).appName}</></button>
+        <button onClick={handleShow} className="player-btn player-in-btn">
+            <div className="player-name">
+            <div>{appName}</div>
+            <div>{nowCost.toFixed(1)}</div>
+            </div>
+            </button>
          : <button className="player-btn empty-btn">
             <div className="p-holder">{posName}</div>
         </button> }
