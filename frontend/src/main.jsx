@@ -49,8 +49,8 @@ const router = createBrowserRouter(
       </Route>
 
       {/* Normal User Routes */}
-      <Route path="" element={<PrivateRoute />}>
-        <Route path="/create" element={<CreateTeam />} />
+      <Route path="" element={<NormalRoute />}>
+      <Route path="/create" element={<CreateTeam />} />
         <Route path="" element={<HasPicks />}>
           <Route path="/userleagues" element={<UserLeagues />} />
           <Route path="/transfers" element={<Transfers />} />
