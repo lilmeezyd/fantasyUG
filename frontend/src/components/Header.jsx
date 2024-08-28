@@ -36,13 +36,12 @@ const Header = () => {
                   <Nav.Link>Dashboard</Nav.Link>
                 </LinkContainer>
               )}
-              {userInfo && userInfo?.roles?.NORMAL_USER && (
-                <>
-                  <LinkContainer to="/create">
-                    <Nav.Link>Create Team</Nav.Link>
-                  </LinkContainer>
-                  {userInfo &&
-                    userInfo?.roles?.NORMAL_USER &&
+              {userInfo?.roles?.NORMAL_USER && !userInfo?.hasPicks && 
+              <LinkContainer to="/create">
+              <Nav.Link>Create Team</Nav.Link>
+            </LinkContainer>}
+              
+                  {
                     userInfo?.hasPicks && (
                       <>
                         <LinkContainer to="/points">
@@ -59,8 +58,6 @@ const Header = () => {
                         </LinkContainer>
                       </>
                     )}
-                </>
-              )}
               {userInfo ? (
                 <>
                   <NavDropdown title={userInfo.name} id="username">

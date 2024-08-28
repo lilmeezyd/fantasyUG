@@ -34,7 +34,7 @@ const setPicks = asyncHandler(async (req, res) => {
   if (mgrExists) {
     res.status(400);
     throw new Error("Manager Info already created");
-  }
+  } 
 
   if(!teamValue || isNaN(bank)) {
     res.status(400)
@@ -60,6 +60,7 @@ const setPicks = asyncHandler(async (req, res) => {
     user: req.user.id,
   });
 
+
   res.status(200).json({matchdayPicks, managerInfo});
 });
 
@@ -69,7 +70,6 @@ const setPicks = asyncHandler(async (req, res) => {
 const getPicks = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user.id);
   const managerPicks = await Picks.findOne({ user: req.user.id });
-  console.log(managerPicks)
 
   if (!user) {
     res.status(400);

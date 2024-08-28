@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const managerInfoSchema = mongoose.Schema(
   { 
     user: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: mongoose.Schema.Types.ObjectId, 
       required: true,
       unique: true,
       ref: "User",

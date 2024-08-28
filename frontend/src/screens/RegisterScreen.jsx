@@ -34,6 +34,7 @@ const RegisterScreen = () => {
         } else {
             try {
                 const res = await register({ firstName, lastName, email, password}).unwrap()
+                console.log(res)
                 dispatch(setCredentials({...res}))
                 navigate('/') 
             } catch (err) {

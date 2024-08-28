@@ -16,7 +16,8 @@ const authUser = asyncHandler(async (req, res) => {
       firstName: user.firstName,
       lastName: user.lastName,
       email: user.email,
-      roles: user.roles
+      roles: user.roles,
+      hasPicks: user.roles.NORMAL_USER ? user.hasPicks : null
     });
   } else {
     res.status(401);
@@ -52,6 +53,7 @@ const registerUser = asyncHandler(async (req, res) => {
       lastName: user.lastName,
       email: user.email,
       roles: user.roles,
+      hasPicks: user.hasPicks
     });
   } else {
     res.status(400);
@@ -90,7 +92,8 @@ const updateUserProfile = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id);
 
   if (user) {
-    user.name = req.body.name || user.name;
+    user.firstName = req.body.firstName || user.firstName;
+    user.lastName = req.body.lastName || user.lastName;
     user.email = req.body.email || user.email;
   }
 
@@ -98,11 +101,18 @@ const updateUserProfile = asyncHandler(async (req, res) => {
     user.password = req.body.password;
   }
 
+  if(req.body.hasPicks) {
+    user.hasPicks = req.body.hasPicks
+  }
+
   const updatedUser = await user.save();
   res.status(200).json({
     _id: updatedUser._id,
-    name: updatedUser.name,
+    firstName: updatedUser.firstName,
+    lastName: updatedUser.lastName,
     email: updatedUser.email,
+    roles: updatedUser.roles,
+    hasPicks: updatedUser.hasPicks
   });
 });
 

@@ -9,14 +9,14 @@ export const picksApiSlice = apiSlice.injectEndpoints({
                 method: 'POST',
                 body: data
             }),
-            invalidatesTags: ['Pick']
+            invalidatesTags: ['Pick', 'User']
         }),
         getPicks: builder.query({
             query: () => ({
                 url: `${PICKS_URL}`,
                 method: 'GET'
             }),
-            providesTags: ['Pick']
+            providesTags: ['Pick', 'User']
         })
     })
 }  

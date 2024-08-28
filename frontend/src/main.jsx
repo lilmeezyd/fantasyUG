@@ -35,6 +35,7 @@ import PrivateLeagues from "./components/admin/PrivateLeagues.jsx";
 import AdminRoute from "./components/AdminRoute.jsx";
 import NormalRoute from "./components/NormalRoute.jsx";
 import HasPicks from "./components/HasPicks.jsx";
+import HasNoPicks from "./components/HasNoPicks.jsx";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -50,7 +51,9 @@ const router = createBrowserRouter(
 
       {/* Normal User Routes */}
       <Route path="" element={<NormalRoute />}>
-      <Route path="/create" element={<CreateTeam />} />
+        <Route path="" element={<HasNoPicks />}>
+          <Route path="/create" element={<CreateTeam />} />
+        </Route>
         <Route path="" element={<HasPicks />}>
           <Route path="/userleagues" element={<UserLeagues />} />
           <Route path="/transfers" element={<Transfers />} />

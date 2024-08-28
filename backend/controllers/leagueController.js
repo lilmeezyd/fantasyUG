@@ -77,14 +77,20 @@ const setTeamLeague = asyncHandler(async (req, res) => {
 //@access Private
 const joinOverallLeague = asyncHandler(async (req, res) => {
   const managerInfo = await ManagerInfo.findOne({ user: req.user.id });
-  const oldLeagues = managerInfo.leagues;
+  const oldLeagues = managerInfo ? managerInfo.leagues: [];
   const oldLeaguesIds = oldLeagues.map((x) => x.id);
   const requiredLeague = await OverallLeague.findById(req.params.id);
   const oldEntrants = requiredLeague.entrants;
+  const oldEntrantsIds = oldEntrants.map((x) => x.toString());
   const entrants = [...oldEntrants, req.user.id];
   const { creator, name, id, startMatchday, endMatchday } = requiredLeague;
 
   if (oldLeaguesIds.includes(id)) {
+    res.status(400);
+    throw new Error("Already in the league");
+  }
+
+  if (oldEntrantsIds.includes(req.user.id)) {
     res.status(400);
     throw new Error("Already in the league");
   }
@@ -131,17 +137,22 @@ const joinOverallLeague = asyncHandler(async (req, res) => {
 //@access Private
 const joinTeamLeague = asyncHandler(async (req, res) => {
   const managerInfo = await ManagerInfo.findOne({ user: req.user.id });
-  const oldLeagues = managerInfo.leagues;
+  const oldLeagues = managerInfo ? managerInfo.leagues: [];
   const oldLeaguesIds = oldLeagues.map((x) => x.id);
   const requiredLeague = await TeamLeague.findById(req.params.id);
   const teamLeagues = await TeamLeague.find({})
   const teamLeagueIds = teamLeagues.map(x => x.id)
   const oldEntrants = requiredLeague.entrants;
+  const oldEntrantsIds = oldEntrants.map((x) => x.toString());
   const entrants = [...oldEntrants, req.user.id];
   const { creator, team, id, startMatchday, endMatchday } = requiredLeague;
   const inTeamLeagueArray = oldLeaguesIds.map(x => teamLeagueIds.includes(x) ? true : false)
   
   if (oldLeaguesIds.includes(id)) {
+    res.status(400);
+    throw new Error("Already in the league");
+  }
+  if (oldEntrantsIds.includes(req.user.id)) {
     res.status(400);
     throw new Error("Already in the league");
   }
@@ -193,14 +204,19 @@ const joinTeamLeague = asyncHandler(async (req, res) => {
 //@access Private
 const joinPrivateLeague = asyncHandler(async (req, res) => {
   const managerInfo = await ManagerInfo.findOne({ user: req.user.id });
-  const oldLeagues = managerInfo.leagues;
+  const oldLeagues = managerInfo ? managerInfo.leagues: [];
   const oldLeaguesIds = oldLeagues.map((x) => x.id);
   const requiredLeague = await League.findById(req.params.id);
   const oldEntrants = requiredLeague.entrants;
+  const oldEntrantsIds = oldEntrants.map((x) => x.toString());
   const entrants = [...oldEntrants, req.user.id];
   const { creator, name, id, startMatchday, endMatchday } = requiredLeague;
 
   if (oldLeaguesIds.includes(id)) {
+    res.status(400);
+    throw new Error("Already in the league");
+  }
+  if (oldEntrantsIds.includes(req.user.id)) {
     res.status(400);
     throw new Error("Already in the league");
   }

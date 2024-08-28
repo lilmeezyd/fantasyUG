@@ -1,14 +1,14 @@
 import { Navigate, Outlet } from "react-router-dom";
 import { useSelector } from "react-redux";
 
-const HasPicks = () => {
+const HasNoPicks = () => {
   const { userInfo } = useSelector((state) => state.auth);
 
-  return userInfo?.hasPicks ? (
+  return userInfo?.roles?.NORMAL_USER && !userInfo?.hasPicks ? (
     <Outlet />
   ) : (
-    <Navigate to="/create" replace />
+    <Navigate to="/" replace />
   );
 };
 
-export default HasPicks;
+export default HasNoPicks;
