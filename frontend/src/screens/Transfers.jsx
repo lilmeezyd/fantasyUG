@@ -1,8 +1,9 @@
-import { useEffect, useState, useReducer } from "react";
+import { useEffect, useReducer } from "react";
 import PicksPlatform from "../components/PicksPlatform";
 import Players from "../components/Players";
 import { useGetPicksQuery } from "../slices/picksSlice";
 import { Spinner } from "react-bootstrap";
+import FixtureList from "../components/FixtureList";
 
 const Transfers = () => {
   const { data, isLoading } = useGetPicksQuery()

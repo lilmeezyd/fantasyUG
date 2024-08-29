@@ -1,7 +1,6 @@
-import { useState, useReducer } from "react";
+import { useReducer } from "react";
 import Players from "../components/Players";
 import PicksPlatform from "../components/PicksPlatform";
-import FixtureList from "../components/FixtureList";
 const CreateTeam = () => {
   const initialState = [
     {
