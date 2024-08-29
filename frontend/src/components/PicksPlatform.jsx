@@ -10,7 +10,7 @@ import {
   useJoinOverallLeagueMutation,
   useJoinTeamLeagueMutation,
 } from "../slices/leagueApiSlice";
-import { useSetPicksMutation } from "../slices/picksSlice";
+import { useSetPicksMutation, useUpdatePicksMutation } from "../slices/picksSlice";
 import { useUpdateUserMutation } from "../slices/userApiSlice";
 import { Button } from "react-bootstrap";
 import SquadPlayer from "./SquadPlayer";
@@ -18,7 +18,8 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { setCredentials } from "../slices/authSlice";
 const PicksPlatform = (props) => {
-  const { picks, removePlayer, totalPlayers, itb, reset, teamValue } = props;
+  const { picks, removePlayer, totalPlayers, itb, reset, teamValue, id } = props;
+  console.log(props)
   const [teamName, setTeamName] = useState("");
   const [playerLeague, setPlayerLeague] = useState("");
 
@@ -41,19 +42,19 @@ const PicksPlatform = (props) => {
   const [joinOverallLeague] = useJoinOverallLeagueMutation();
   const [joinTeamLeague] = useJoinTeamLeagueMutation();
   const [setPicks] = useSetPicksMutation();
+  const [updatePicks] = useUpdatePicksMutation()
   const [updateUser] = useUpdateUserMutation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const { userInfo } = useSelector((state) => state.auth);
-/*
-  useEffect(() => {
-    if (userInfo?.hasPicks) {
-      console.log('yes')
-      navigate("/pickteam");
-    }
-  }, [navigate, userInfo]);*/
 
+  const onSave = async (e) => {
+    e.preventDefault()
+    const res = await updatePicks({id: id?._id, picks, teamValue, bank: itb}).unwrap()
+    console.log(res)
+    navigate('/pickteam')
+  }
   const onSubmit = async (e) => {
     e.preventDefault();
     const create_team = [setPicks({ picks, teamName, bank: itb, teamValue }).unwrap(),
@@ -62,7 +63,6 @@ const PicksPlatform = (props) => {
     ]
     try {
      const res =  await Promise.all(create_team)
-     console.log(res)
       //await setPicks({ picks, teamName, bank: itb, teamValue });
       //await joinOverallLeague({ id: "66c13c3d1f44b30a427fb02f" });
       //await joinTeamLeague({ id: playerLeague });
@@ -159,7 +159,7 @@ const PicksPlatform = (props) => {
         </div>
       </div>
 
-      <section className="form">
+      {!userInfo?.hasPicks && <section className="form">
         <form onSubmit={onSubmit}>
           <div className="team-name-1 py-3">
             <div className="form-group fav-team">
@@ -217,7 +217,24 @@ const PicksPlatform = (props) => {
             </Button>
           </div>
         </form>
-      </section>
+      </section>}
+
+      {userInfo?.hasPicks &&
+      <section className="form">
+        <form onSubmit={onSave}>
+        <div className="form-group py-3">
+            <Button
+              type="submit"
+              disabled={
+                itb < 0 ||
+                totalPlayers < 15
+              }
+              className="btn-success form-control"
+            >
+              Save
+            </Button>
+          </div>
+          </form></section>}
     </div>
   );
 };

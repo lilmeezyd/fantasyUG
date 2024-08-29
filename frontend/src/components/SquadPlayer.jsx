@@ -26,7 +26,7 @@ const SquadPlayer = (props) => {
         <button onClick={handleShow} className="player-btn player-in-btn">
             <div className="player-name">
             <div>{appName}</div>
-            <div>{nowCost.toFixed(1)}</div>
+            <div>{nowCost?.toFixed(1)}</div>
             </div>
             </button>
          : <button className="player-btn empty-btn">

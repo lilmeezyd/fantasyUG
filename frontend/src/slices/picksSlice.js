@@ -9,17 +9,26 @@ export const picksApiSlice = apiSlice.injectEndpoints({
                 method: 'POST',
                 body: data
             }),
-            invalidatesTags: ['Pick', 'User']
+            invalidatesTags: ['Pick']
         }),
         getPicks: builder.query({
             query: () => ({
                 url: `${PICKS_URL}`,
                 method: 'GET'
             }),
-            providesTags: ['Pick', 'User']
-        })
+            providesTags: ['Pick']
+        }),
+        
+    updatePicks: builder.mutation({
+        query: ({id, ...rest}) => ({
+          url: `${PICKS_URL}/${id}`,
+          method: "PATCH",
+          body: rest
+        }),
+        invalidatesTags: ['Pick']
+      }),
     })
 }  
 )
 
-export const { useSetPicksMutation, useGetPicksQuery } = picksApiSlice
+export const { useSetPicksMutation, useGetPicksQuery, useUpdatePicksMutation } = picksApiSlice

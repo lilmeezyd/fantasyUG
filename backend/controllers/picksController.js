@@ -147,14 +147,23 @@ const previousPicks = asyncHandler(async (req, res) => {
 });
 
 //@desc Update Picks before deadline
-//@route PUT /api/picks/:id
+//@route PATCh /api/picks/:id
 //@access Private
 const updatePicks = asyncHandler(async (req, res) => {
   const playerPicks = await Picks.findById(req.params.id);
-  //const playerPicks = await Picks.findOne({user: req.user.id})
-  //const picksId = playerPicks._id
   const user = await User.findById(req.user.id);
-  const { picks } = req.body;
+  const { picks, teamValue, bank } = req.body;
+
+  //Check for user
+  if (!user) {
+    res.status(400);
+    throw new Error("User not found");
+  }
+
+  if(playerPicks.user.toString() !== req.user.id.toString()) {
+    res.status(401)
+    throw new Error('Unathorized access')
+  }
 
   //Check for Player Picks
   if (!playerPicks) {
@@ -172,18 +181,18 @@ const updatePicks = asyncHandler(async (req, res) => {
     throw new Error("15 players should be picked");
   }
 
-  //Check for user
-  if (!user) {
+  if(!teamValue || isNaN(bank)) {
+    res.status(400)
+    throw new Error('Please add all fields')
+  }
+
+
+  if (bank < 0) {
     res.status(400);
-    throw new Error("User not found");
+    throw new Error("Not enough funds");
   }
 
-  //Check if logged in user matches the user
-  if (playerPicks.user.toString() !== user.id) {
-    res.status(401);
-    throw new Error("User not authorized");
-  }
-
+  
   const updatedPicks = await Picks.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
   });

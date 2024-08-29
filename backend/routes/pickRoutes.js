@@ -13,5 +13,5 @@ router
   .route("/")
   .get(protect, roles(ROLES.NORMAL_USER), getPicks)
   .post(protect, roles(ROLES.NORMAL_USER), setPicks);
-router.route("/:id").put(protect, roles(ROLES.NORMAL_USER), updatePicks);
+router.route("/:id").patch(protect, roles(ROLES.NORMAL_USER), updatePicks);
 export default router;

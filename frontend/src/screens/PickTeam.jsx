@@ -2,8 +2,11 @@ import React from 'react'
 
 const PickTeam = () => {
   return (
-    <div>PickTeam</div>
+    <div className='main'>
+      <div>Pick Team</div>
+      <div>More Stuff</div>
+    </div>
   )
 }
 
-export default PickTeam
+export default PickTeam 
