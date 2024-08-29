@@ -1,8 +1,14 @@
+import LeagueDetails from "../components/LeagueDetails"
+import ManagerPicks from "../components/ManagerPicks"
+import { useGetManagerInfoQuery } from "../slices/managerInfoApiSlice"
+
 const PickTeam = () => {
+  const { data: managerInfo } = useGetManagerInfoQuery()
+  console.log(managerInfo)
   return (
     <div className='main'>
-      <div>Pick Team</div>
-      <div>More Stuff</div>
+      <ManagerPicks teamName={managerInfo?.teamName} />
+      <LeagueDetails leagues={managerInfo?.leagues} />
     </div>
   )
 }

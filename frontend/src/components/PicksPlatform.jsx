@@ -52,7 +52,6 @@ const PicksPlatform = (props) => {
   const onSave = async (e) => {
     e.preventDefault()
     const res = await updatePicks({id: id?._id, picks, teamValue, bank: itb}).unwrap()
-    console.log(res)
     navigate('/pickteam')
   }
   const onSubmit = async (e) => {
@@ -63,10 +62,6 @@ const PicksPlatform = (props) => {
     ]
     try {
      const res =  await Promise.all(create_team)
-      //await setPicks({ picks, teamName, bank: itb, teamValue });
-      //await joinOverallLeague({ id: "66c13c3d1f44b30a427fb02f" });
-      //await joinTeamLeague({ id: playerLeague });
-      //const res = await updateUser({ hasPicks: true }).unwrap();
       dispatch(setCredentials({ ...res[3] }));
       navigate("/pickteam")
     } catch (error) {

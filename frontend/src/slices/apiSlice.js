@@ -5,7 +5,7 @@ const baseQuery = fetchBaseQuery({baseUrl: ''})
 export const apiSlice = createApi({
     baseQuery,
     tagTypes: ['User', 'Team', 'Position', 'Player', 'Matchday', 'Fixture', 'League',
-        'TeamLeague', 'OverallLeague', 'Pick'
+        'TeamLeague', 'OverallLeague', 'Pick', 'ManagerInfo'
     ],
     endpoints: (builder) => ({})
 })
