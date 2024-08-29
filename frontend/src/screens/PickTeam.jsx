@@ -1,5 +1,3 @@
-import React from 'react'
-
 const PickTeam = () => {
   return (
     <div className='main'>
