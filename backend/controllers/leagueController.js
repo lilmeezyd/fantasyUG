@@ -77,7 +77,7 @@ const setTeamLeague = asyncHandler(async (req, res) => {
 //@access Private
 const joinOverallLeague = asyncHandler(async (req, res) => {
   const managerInfo = await ManagerInfo.findOne({ user: req.user.id });
-  const oldLeagues = managerInfo ? managerInfo.leagues: [];
+  const oldLeagues = managerInfo ? managerInfo.overallLeagues: [];
   const oldLeaguesIds = oldLeagues.map((x) => x.id);
   const requiredLeague = await OverallLeague.findById(req.params.id);
   const oldEntrants = requiredLeague.entrants;
@@ -117,7 +117,7 @@ const joinOverallLeague = asyncHandler(async (req, res) => {
 
   await ManagerInfo.findOneAndUpdate(
     { user: req.user.id },
-    { leagues: leagues },
+    { overallLeagues: leagues },
     { new: true }
   );
 
@@ -137,7 +137,7 @@ const joinOverallLeague = asyncHandler(async (req, res) => {
 //@access Private
 const joinTeamLeague = asyncHandler(async (req, res) => {
   const managerInfo = await ManagerInfo.findOne({ user: req.user.id });
-  const oldLeagues = managerInfo ? managerInfo.leagues: [];
+  const oldLeagues = managerInfo ? managerInfo.teamLeagues: [];
   const oldLeaguesIds = oldLeagues.map((x) => x.id);
   const requiredLeague = await TeamLeague.findById(req.params.id);
   const teamLeagues = await TeamLeague.find({})
@@ -184,7 +184,7 @@ const joinTeamLeague = asyncHandler(async (req, res) => {
 
   await ManagerInfo.findOneAndUpdate(
     { user: req.user.id },
-    { leagues: leagues },
+    { teamLeagues: leagues },
     { new: true }
   );
 
@@ -204,7 +204,7 @@ const joinTeamLeague = asyncHandler(async (req, res) => {
 //@access Private
 const joinPrivateLeague = asyncHandler(async (req, res) => {
   const managerInfo = await ManagerInfo.findOne({ user: req.user.id });
-  const oldLeagues = managerInfo ? managerInfo.leagues: [];
+  const oldLeagues = managerInfo ? managerInfo.privateLeagues: [];
   const oldLeaguesIds = oldLeagues.map((x) => x.id);
   const requiredLeague = await League.findById(req.params.id);
   const oldEntrants = requiredLeague.entrants;
@@ -243,7 +243,7 @@ const joinPrivateLeague = asyncHandler(async (req, res) => {
 
   await ManagerInfo.findOneAndUpdate(
     { user: req.user.id },
-    { leagues: leagues },
+    { privateLeagues: leagues },
     { new: true }
   );
 
@@ -308,9 +308,10 @@ const getLeague = asyncHandler(async (req, res) => {
   res.status(200).json(league);
 });
 
-//@desc Get League for a specific user
-//@route GET /api/leagues/:id
+//@desc Get a Team League
+//@route GET /api/teamleagues/:id
 //@access Private
+//@access ADMIN & NORMAL_USER
 const getTeamLeague = asyncHandler(async (req, res) => {
   const league = await TeamLeague.findById(req.params.id)
     /*.populate("entrants")
@@ -320,9 +321,10 @@ const getTeamLeague = asyncHandler(async (req, res) => {
   res.status(200).json(league);
 });
 
-//@desc Get League for a specific user
-//@route GET /api/leagues/:id
+//@desc Get an Overall League
+//@route GET /api/overallleagues
 //@access Private
+//@access ADMIN & NORMAL_USER
 const getOverallLeague = asyncHandler(async (req, res) => {
   const league = await OverallLeague.findById(req.params.id)
   res.status(200).json(league);

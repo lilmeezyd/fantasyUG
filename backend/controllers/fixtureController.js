@@ -3,9 +3,10 @@ import Fixture from "../models/fixtureModel.js";
 import Stats from "../models/statsModel.js";
 import Player from "../models/playerModel.js";
 import PlayerHistory from "../models/playerHistoryModel.js";
-import Position from "../models/positionModel.js"
+import Position from "../models/positionModel.js";
 import User from "../models/userModel.js";
 import Matchday from "../models/matchdayModel.js";
+import Team from "../models/teamModel.js"
 
 //@desc Set Fixture
 //@route POST /api/fixtures
@@ -56,7 +57,12 @@ const setFixture = asyncHandler(async (req, res) => {
 //@access public
 //@role not restricted
 const getFixtures = asyncHandler(async (req, res) => {
-  const fixtures = await Fixture.find({});
+  //const fixtures = await Fixture.find({});
+  const fixtures = await Fixture.aggregate([
+    { $group: { _id: "$matchday", fixtures: { $addToSet: "$$ROOT" } } },
+  ]);
+  await Matchday.populate(fixtures, {path: "_id"})
+  await Team.populate(fixtures, {path: "fixtures/teamAway"})
   res.status(200).json(fixtures);
 });
 
@@ -77,7 +83,7 @@ const populateStats = asyncHandler(async (req, res) => {
     res.status(400);
     throw new Error("User not found");
   }
-  
+
   const identifiers = {
     identifier1: "goalsScored",
     identifier2: "assists",
@@ -120,10 +126,9 @@ const populateStats = asyncHandler(async (req, res) => {
       home: fixture.teamHome === player.playerTeam ? true : false,
     });
   });
-  fixture.teamAwayScore = 0
-  fixture.teamHomeScore = 0
+  fixture.teamAwayScore = 0;
+  fixture.teamHomeScore = 0;
 
-  
   const updatedFixture = await Fixture.findByIdAndUpdate(
     req.params.id,
     fixture,
@@ -158,8 +163,8 @@ const dePopulateStats = asyncHandler(async (req, res) => {
   }
 
   fixture.stats.length = 0;
-  fixture.teamAwayScore = null
-  fixture.teamHomeScore = null
+  fixture.teamAwayScore = null;
+  fixture.teamHomeScore = null;
   await PlayerHistory.deleteMany({ fixture: req.params.id });
   const updatedFixture = await Fixture.findByIdAndUpdate(
     req.params.id,
@@ -226,12 +231,13 @@ const editFixture = asyncHandler(async (req, res) => {
 //@role ADMIN, EDITOR
 const editStats = asyncHandler(async (req, res) => {
   const fixture = await Fixture.findById(req.params.id);
-  let { teamHomeScore, teamAwayScore } = fixture
+  let { teamHomeScore, teamAwayScore } = fixture;
   const { identifier, homeAway, player, value } = req.body;
   const playerFound = player ? await Player.findById(player) : "";
 
-   const _code = playerFound && await Position.findOne(playerFound.playerPosition)
-   const { code } = _code
+  const _code =
+    playerFound && (await Position.findOne(playerFound.playerPosition));
+  const { code } = _code;
 
   if (fixture.stats.length === 0) {
     res.status(400);
@@ -268,7 +274,8 @@ const editStats = asyncHandler(async (req, res) => {
 
   const retrievedPlayer = playerFound._id;
   const weight = {
-    goalsScored: code === 1 ? 10 : code === 2 ? 6 : code === 3 ? 5 : code === 4 ? 4 : 0,
+    goalsScored:
+      code === 1 ? 10 : code === 2 ? 6 : code === 3 ? 5 : code === 4 ? 4 : 0,
     assists: 3,
     ownGoals: -2,
     penaltiesSaved: 5,
@@ -286,7 +293,6 @@ const editStats = asyncHandler(async (req, res) => {
   let newValue = +value;
   const playerPoints = await PlayerHistory.findOne({ player: retrievedPlayer });
   let { totalPoints } = playerPoints;
-
 
   if (playerIn) {
     let playerIndex = fixture.stats
@@ -312,7 +318,7 @@ const editStats = asyncHandler(async (req, res) => {
         { new: true }
       );
     } else {
-      totalPoints += weight[identifier] * (newValue);
+      totalPoints += weight[identifier] * newValue;
       fixture.stats
         .filter((x) => x.identifier === identifier)[0]
         [homeAway].splice(playerIndex, 1, {
@@ -341,21 +347,20 @@ const editStats = asyncHandler(async (req, res) => {
     );
   }
 
-  
-  if(identifier === 'goalsScored') {
-    if(homeAway === 'away') {
-      fixture.teamAwayScore = teamAwayScore+=newValue
+  if (identifier === "goalsScored") {
+    if (homeAway === "away") {
+      fixture.teamAwayScore = teamAwayScore += newValue;
     }
-    if(homeAway === 'home') {
-      fixture.teamHomeScore = teamHomeScore+=newValue
+    if (homeAway === "home") {
+      fixture.teamHomeScore = teamHomeScore += newValue;
     }
   }
-  if(identifier === 'ownGoals') {
-    if(homeAway === 'home') {
-      fixture.teamAwayScore = teamAwayScore+=newValue
+  if (identifier === "ownGoals") {
+    if (homeAway === "home") {
+      fixture.teamAwayScore = teamAwayScore += newValue;
     }
-    if(homeAway === 'away') {
-      fixture.teamHomeScore = teamHomeScore+=newValue
+    if (homeAway === "away") {
+      fixture.teamHomeScore = teamHomeScore += newValue;
     }
   }
 
@@ -379,21 +384,21 @@ const editStats = asyncHandler(async (req, res) => {
     res.status(400);
     throw new Error("Fixture not found");
   }*/
-  // Find user
- /* const user = await User.findById(req.user.id).select("-password");
+// Find user
+/* const user = await User.findById(req.user.id).select("-password");
   if (!user) {
     res.status(400);
     throw new Error("User not found");
   }*/
-  // Make sure the logged in user is an ADMIN
-  /*if (
+// Make sure the logged in user is an ADMIN
+/*if (
     Object.values(user.roles).includes(1) &&
     Object.values(user.roles).length === 1
   ) {
     res.status(401);
     throw new Error("Not Authorized");
   }*/
-  /*if (fixture.stats.length > 0) {
+/*if (fixture.stats.length > 0) {
     console.log("Fixture populated");
   } else {
     res.status(400);
@@ -521,5 +526,5 @@ export {
   dePopulateStats,
   editFixture,
   editStats,
-  deleteFixture
+  deleteFixture,
 };

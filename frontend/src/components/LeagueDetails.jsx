@@ -1,5 +1,6 @@
 
-const LeagueDetails = () => {
+const LeagueDetails = (props) => {
+    console.log(props)
   return (
     <div>LeagueDetails</div>
   )
