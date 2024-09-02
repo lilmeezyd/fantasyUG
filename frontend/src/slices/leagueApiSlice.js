@@ -1,7 +1,7 @@
 import { apiSlice } from "./apiSlice";
 const LEAGUES_URL = "/api/leagues"; 
 
-export const leagueApiSlice = apiSlice.injectEndpoints({
+export const leagueApiSlice = apiSlice.injectEndpoints({ 
   endpoints: (builder) => ({
     getLeagues: builder.query({
       query: () => ({

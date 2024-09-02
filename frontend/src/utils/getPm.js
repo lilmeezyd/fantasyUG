@@ -3,4 +3,11 @@ const getPm = (time) => {
     return newTime
 }
 
-export default getPm
+const getPmString = (time) => {
+
+    let newTime = time.slice(0, time.length-3)
+    newTime = newTime.slice(0, newTime.length-3)
+    return newTime
+}
+
+export { getPm, getPmString}

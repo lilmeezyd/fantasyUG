@@ -1,6 +1,7 @@
 import { useGetPlayersQuery } from "../slices/playerApiSlice";
 import { useGetQuery } from "../slices/teamApiSlice";
 import { useGetPicksQuery, useUpdatePicksMutation } from "../slices/picksSlice";
+import { useGetPositionsQuery } from "../slices/positionApiSlice";
 import PickPlayer from "./PickPlayer";
 
 const ManagerPicks = (props) => {
@@ -8,6 +9,7 @@ const ManagerPicks = (props) => {
   const { data: teams } = useGetQuery();
   const { data: players } = useGetPlayersQuery();
   const { data: managerPicks } = useGetPicksQuery();
+  const { data: positions } = useGetPositionsQuery();
 
   const goalkeepers = managerPicks?.picks?.filter(
     (pick) =>
@@ -53,7 +55,7 @@ const ManagerPicks = (props) => {
         <div className="default-player">
           {midfielders?.map((x) => (
             <div key={x.slot} className="squad-player">
-              <PickPlayer baller={x}/>
+              <PickPlayer baller={x} />
             </div>
           ))}
         </div>
@@ -64,12 +66,23 @@ const ManagerPicks = (props) => {
             </div>
           ))}
         </div>
-        <div className="default-player bench border py-3">
-          {bench?.map((x) => (
-            <div key={x.slot} className="squad-player">
-              <PickPlayer baller={x} />
-            </div>
-          ))}
+        <div className="bench">
+          <div className="default-player">
+            {bench?.map((x, idx) => (
+              <div key={x.slot} className="squad-player">
+                <div className="bench-pos">
+                  {idx > 0 && idx}.&nbsp;&nbsp;
+                  {
+                    positions?.find(
+                      (position) => position._id === x.playerPosition
+                    )?.shortName
+                  }
+                </div>
+                {console.log(x)}
+                <PickPlayer baller={x} />
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>

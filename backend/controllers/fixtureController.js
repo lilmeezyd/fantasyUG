@@ -57,13 +57,17 @@ const setFixture = asyncHandler(async (req, res) => {
 //@access public
 //@role not restricted
 const getFixtures = asyncHandler(async (req, res) => {
+  const b = []
   //const fixtures = await Fixture.find({});
   const fixtures = await Fixture.aggregate([
-    { $group: { _id: "$matchday", fixtures: { $addToSet: "$$ROOT" } } },
+    {$group: {_id: "$matchday",  fixtures: { $addToSet: "$$ROOT"}}}
   ]);
   await Matchday.populate(fixtures, {path: "_id"})
-  await Team.populate(fixtures, {path: "fixtures/teamAway"})
-  res.status(200).json(fixtures);
+  fixtures.forEach(x => {
+    x.fixtures.sort((v, w) => v.kickOffTime > w.kickOffTime ? 1 : -1)
+    b.push(x)
+})
+  res.status(200).json(b);
 });
 
 //@desc Set stats for a specific fixture
