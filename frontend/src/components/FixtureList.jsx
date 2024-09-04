@@ -91,15 +91,15 @@ const FixtureList = () => {
         ?.map((fixture) => (
           <div key={fixture?._id?._id}>
             <div className="deadline">
-              <div>{fixture?._id?.name}</div>
-              <div>Deadline:</div>
-              <div>
+              <h4 className="pick-team-name">{fixture?._id?.name}</h4>
+              {/*<h4 className="pick-team-name">Deadline:</h4>
+              <h4 className="pick-team-name">
           {getTime1(fixture?._id?.deadlineTime)},&nbsp;
           {getPmString(
                           new Date(getTime(fixture?._id?.deadlineTime)).toLocaleTimeString()
                         )}&nbsp;
                         {getPm(fixture?._id?.kickOffTime)}
-          </div>
+          </h4>*/}
             </div>
             <div>
               {fixture?.fixtures?.map((x, idx) => (

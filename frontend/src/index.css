@@ -1,5 +1,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap');
 
+* {
+  margin: 0;
+  padding: 0;
+}
+
 html {
   font-size: 12px;
 }
@@ -555,7 +560,7 @@ header .active {
   width: 100%;
   position: relative;
   border-radius: 0.5rem;
-  transition: 1s;
+  /*transition: 1s;*/
 }
 
 .player-in-btn {
@@ -563,6 +568,7 @@ header .active {
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
+  align-items: center;
 }
 
 .player-name {
@@ -570,6 +576,12 @@ header .active {
   width: 100%;
   border-radius: 0.5rem;
   font-weight: 600;
+}
+
+@media(max-width: 760px) {
+  .player-name {
+    font-size: 10px;
+  }
 }
 
 .player-name div:first-of-type {
@@ -773,7 +785,7 @@ header .active {
 }
 
 .pick-team-name {
-  font-size: 1.5rem;
+  /*font-size: 1.5rem;*/
   font-weight: 700;
 }
 
@@ -793,4 +805,25 @@ header .active {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  border-bottom: 1px solid #aaa;
+  padding: 0.25rem 0.5rem;
+}
+
+.ld-1 {
+  padding: 0.25rem 0.5rem;
+}
+
+.ld-2 {
+  padding-left: 0.5rem;
+  font-weight: 700;
+}
+
+.ranks, .ld {
+  margin: 0.5rem 0;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+}
+
+.h-light {
+  border: 2px solid red;
 }

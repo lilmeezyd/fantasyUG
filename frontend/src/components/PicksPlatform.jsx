@@ -19,7 +19,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { setCredentials } from "../slices/authSlice";
 const PicksPlatform = (props) => {
   const { picks, removePlayer, totalPlayers, itb, reset, teamValue, id } = props;
-  console.log(props)
   const [teamName, setTeamName] = useState("");
   const [playerLeague, setPlayerLeague] = useState("");
 
