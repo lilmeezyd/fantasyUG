@@ -2,6 +2,10 @@ import { useGetPlayersQuery } from "../slices/playerApiSlice";
 import { useGetQuery } from "../slices/teamApiSlice";
 import { useGetPicksQuery, useUpdatePicksMutation } from "../slices/picksSlice";
 import { useGetPositionsQuery } from "../slices/positionApiSlice";
+import { useGetMatchdaysQuery } from "../slices/matchdayApiSlice";
+import getTime from "../utils/getTime";
+import getTime1 from "../utils/getTime1"
+import { getPm, getPmString } from "../utils/getPm";
 import PickPlayer from "./PickPlayer";
 
 const ManagerPicks = (props) => {
@@ -10,6 +14,9 @@ const ManagerPicks = (props) => {
   const { data: players } = useGetPlayersQuery();
   const { data: managerPicks } = useGetPicksQuery();
   const { data: positions } = useGetPositionsQuery();
+  const { data: matchdays } = useGetMatchdaysQuery()
+
+  const md = matchdays?.find(matchday => matchday?.next === true)
 
   const goalkeepers = managerPicks?.picks?.filter(
     (pick) =>
@@ -34,8 +41,19 @@ const ManagerPicks = (props) => {
   const bench = managerPicks?.picks?.filter((pick) => pick.multiplier === 0);
   return (
     <div>
-      <div className="d-flex justify-content-center align-items-center p-2">
-        <h1>{teamName}</h1>
+      <div className="pick-team-header p-2">
+        <div className="pick-team-name">{teamName}</div>
+        <div className="deadline">
+          <div>{md?.name}</div>
+          <div>Deadline:</div>
+          <div>
+          {getTime1(md?.deadlineTime)},&nbsp;
+          {getPmString(
+                          new Date(getTime(md?.deadlineTime)).toLocaleTimeString()
+                        )}&nbsp;
+                        {getPm(md?.kickOffTime)}
+          </div>
+        </div>
       </div>
       <div className="no-picks-team">
         <div className="default-player">

@@ -10,6 +10,7 @@ import {
   BsChevronDoubleRight,
 } from "react-icons/bs";
 import getTime from "../utils/getTime";
+import getTime1 from "../utils/getTime1";
 import { getPm, getPmString } from "../utils/getPm";
 const FixtureList = () => {
   const [curPage, setCurPage] = useState(1);
@@ -92,7 +93,13 @@ const FixtureList = () => {
             <div className="deadline">
               <div>{fixture?._id?.name}</div>
               <div>Deadline:</div>
-              <div>{getTime(fixture?._id?.deadlineTime)}</div>
+              <div>
+          {getTime1(fixture?._id?.deadlineTime)},&nbsp;
+          {getPmString(
+                          new Date(getTime(fixture?._id?.deadlineTime)).toLocaleTimeString()
+                        )}&nbsp;
+                        {getPm(fixture?._id?.kickOffTime)}
+          </div>
             </div>
             <div>
               {fixture?.fixtures?.map((x, idx) => (
@@ -145,11 +152,7 @@ const FixtureList = () => {
                               ?.filter((x) => x.identifier === "ownGoals")[0]
                               .away.map((x) => x.value)
                               .reduce((a, b) => a + b, 0)
-                          : getPm(
-                              new Date(
-                                getTime(x?.kickOffTime)
-                              ).toLocaleTimeString()
-                            )}
+                          : getPm(x?.kickOffTime)}
                       </div>
                       <div className="ticker-image"></div>
                       <div className="team">

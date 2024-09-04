@@ -14,6 +14,7 @@ const PickTeam = () => {
         <LeagueDetails privateLeagues={managerInfo?.privateLeagues}
         teamLeagues={managerInfo?.teamLeagues}
         overallLeagues={managerInfo?.overallLeagues}
+        teamName={managerInfo?.teamName}
          />
       </div>
       <Container>
