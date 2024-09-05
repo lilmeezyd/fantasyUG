@@ -172,7 +172,7 @@ const Players = () => {
   }
   return (
     <Container>
-      {memoPlayers.map((x) => (
+      {memoPlayers?.map((x) => (
         <div className="teams p-2" key={x._id}>
           <div className="team-name">{x.appName}</div>
           <div>{x.nowCost.toFixed(1)}</div>

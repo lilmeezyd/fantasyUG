@@ -8,7 +8,7 @@ import { useGetPicksQuery } from "../slices/picksSlice";
 
 const PickTeam = () => {
   const { data: managerInfo } = useGetManagerInfoQuery();
-  const { data: managerPicks } = useGetPicksQuery();
+  const { data: managerPicks, isLoading } = useGetPicksQuery();
 
   const reducer = (state, action) => {
     const ids = state?.picks?.map(x => x.slot)
@@ -282,8 +282,6 @@ const PickTeam = () => {
           } 
 
         }
-        console.log(DEF)
-        console.log(MID)
       return {
         ...state,
         switcher: {},
@@ -367,6 +365,8 @@ const PickTeam = () => {
     <>
       <div className="main">
         <ManagerPicks
+        isLoading={isLoading}
+        id={managerPicks}
         blocked={blocked}
         okayed={okayed}
         switcher={switcher}

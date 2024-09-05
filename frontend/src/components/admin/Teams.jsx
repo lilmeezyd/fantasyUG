@@ -153,7 +153,7 @@ const Teams = () => {
   
   return (
     <Container>
-      {memoTeams.map(x => <div className="teams p-2" key={x._id}>
+      {memoTeams?.map(x => <div className="teams p-2" key={x._id}>
           <div className="team-name">{x.name}</div>
           <div>{x.shortName}</div>
           <div><Button onClick={() =>editTeam(x._id)} className="btn btn-warning">Edit</Button></div>

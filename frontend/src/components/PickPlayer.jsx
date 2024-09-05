@@ -18,7 +18,7 @@ const PickPlayer = (props) => {
   const { data: matchdays } = useGetMatchdaysQuery();
 
   const mdId = matchdays?.find((matchday) => matchday?.next === true)?.id;
-  const mdFixs = fixtures?.find((x) => x?._id?.id === mdId).fixtures;
+  const mdFixs = fixtures?.find((x) => x?._id?.id === mdId)?.fixtures;
   const appName = players?.find((player) => player._id === baller._id)?.appName;
   const opponentFix = mdFixs?.find(
     (x) => x.teamAway === baller.playerTeam || x.teamHome === baller.playerTeam

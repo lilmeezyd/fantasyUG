@@ -110,7 +110,7 @@ const resetEdit = async () => {
   }
   return (
   <Container>
-    {positions.map(x => <div className="teams p-2" key={x._id}>
+    {positions?.map(x => <div className="teams p-2" key={x._id}>
           <div className="team-name">{x.singularName}</div>
           <div>{x.shortName}</div>
           <div><Button onClick={() => editPositionPop(x._id)} className="btn btn-warning">Edit</Button></div>

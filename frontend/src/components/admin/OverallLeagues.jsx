@@ -166,8 +166,8 @@ const OverallLeagues = () => {
     }*/
   return (
     <Container>
-      {memoOverallLeagues.length === 0 ? <div className="spinner">No Team Leagues Found!</div> : 
-      memoOverallLeagues.map(x => <div className="teams p-2" key={x._id}>
+      {memoOverallLeagues?.length === 0 ? <div className="spinner">No Team Leagues Found!</div> : 
+      memoOverallLeagues?.map(x => <div className="teams p-2" key={x._id}>
         <div className="team-name">{x?.name}</div>
         <div>
             <Button

@@ -107,7 +107,7 @@ const PicksPlatform = (props) => {
         </Button>
       </div>
       <div className="no-picks-team">
-        <div className="default-player">
+        <div className="default-player"> 
           {goalkeepers?.map((x) => (
             <div key={x.slot} className="squad-player">
               <SquadPlayer

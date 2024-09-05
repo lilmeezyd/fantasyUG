@@ -166,7 +166,7 @@ const memoMatchdays = useMemo(() => {
  }
   return (
     <Container>
-    {memoMatchdays.map(x => <div className="teams p-2" key={x._id}>
+    {memoMatchdays?.map(x => <div className="teams p-2" key={x._id}>
           <div className="team-name">{x.name}</div>
           <div>{getTime(x.deadlineTime)}</div>
           <div><Button onClick={() => editMatchdayPop(x._id)} className="btn btn-warning">Edit</Button></div>

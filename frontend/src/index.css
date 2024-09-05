@@ -642,17 +642,33 @@ header .active {
 
 /* Fixture List */
 
-.teams-normal div {
+.teams-normal {
   display: grid;
+  padding: 0.5rem;
+  justify-content: center;
   align-items: center;
+  font-weight: 700;
+  cursor: pointer;
+  grid-template-columns: 1fr min-content 1fr;
+  font-size: 1rem;
+  background: rgba(95, 230, 129, 0.3);
 }
 
+
 .home {
-  grid-template-columns: 60% 20% 20%;
+  display: grid;
+  align-items: center;
+  grid-template-columns: 60% 30%;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
 }
 
 .away {
-  grid-template-columns: 20% 20% 60%;
+  display: grid;
+  align-items: center;
+  grid-template-columns: 30% 60%;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
 }
 
 .home img,
@@ -711,9 +727,13 @@ header .active {
   place-items: center;
 }
 
+.time-score {
+  display: flex;
+}
+
 .time-1 {
   text-align: right;
-  padding: 1px;
+  padding: 0.5rem;
   background: #fff;
   border-right: none;
   border-radius: 0.5rem;
@@ -722,7 +742,7 @@ header .active {
 }
 
 .time-2 {
-  padding: 1px;
+  padding: 0.5rem;
   text-align: left;
   background: #fff;
   border-left: none;
@@ -749,19 +769,7 @@ header .active {
 }
 
 .fix-body {
-  padding: 1rem;
-}
-
-.teams-normal {
-  display: grid;
-  padding: 0.5rem;
-  justify-content: center;
-  align-items: center;
-  font-weight: 700;
-  cursor: pointer;
-  grid-template-columns: repeat(2, 1fr);
-  font-size: 1rem;
-  background: rgba(95, 230, 129, 0.3);
+  padding: 1rem 0;
 }
 
 .fix-admin-buttons {

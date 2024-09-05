@@ -1,34 +1,20 @@
-import { useMemo, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useGetFixturesQuery } from "../slices/fixtureApiSlice";
-import { useGetQuery } from "../slices/teamApiSlice";
-import { useGetMatchdaysQuery } from "../slices/matchdayApiSlice";
-import { Container, Button, Spinner } from "react-bootstrap";
+import { Spinner } from "react-bootstrap";
 import {
   BsChevronLeft,
-  BsChevronRight,
-  BsChevronDoubleLeft,
-  BsChevronDoubleRight,
+  BsChevronRight
 } from "react-icons/bs";
-import getTime from "../utils/getTime";
-import getTime1 from "../utils/getTime1";
-import { getPm, getPmString } from "../utils/getPm";
+import FixtureItem from "./FixtureItem";
 const FixtureList = () => {
-  const [curPage, setCurPage] = useState(1);
   const [page, setPage] = useState(1);
-  const [stats, displayStats] = useState(false);
   const [copy, setCopy] = useState([]);
   const { data: fixtures, isLoading } = useGetFixturesQuery();
-  const { data: teams } = useGetQuery();
-  const { data: matchdays } = useGetMatchdaysQuery();
   useEffect(() => {
     const copyFix = fixtures?.length > 0 ? [...fixtures] : [];
     copyFix?.sort((x, y) => (x?.deadlineTime > y?.deadlineTime ? 1 : -1));
     setCopy(fixtures);
   }, [fixtures]);
-
-  const onClick = () => {
-    displayStats((prevState) => !prevState);
-  };
 
   const onDecrement = () => {
     setPage((prevState) => prevState - 1);
@@ -92,14 +78,6 @@ const FixtureList = () => {
           <div key={fixture?._id?._id}>
             <div className="deadline">
               <h4 className="pick-team-name">{fixture?._id?.name}</h4>
-              {/*<h4 className="pick-team-name">Deadline:</h4>
-              <h4 className="pick-team-name">
-          {getTime1(fixture?._id?.deadlineTime)},&nbsp;
-          {getPmString(
-                          new Date(getTime(fixture?._id?.deadlineTime)).toLocaleTimeString()
-                        )}&nbsp;
-                        {getPm(fixture?._id?.kickOffTime)}
-          </h4>*/}
             </div>
             <div>
               {fixture?.fixtures?.map((x, idx) => (
@@ -107,59 +85,7 @@ const FixtureList = () => {
                   <div className="deadline">
                     {returnDay(fixture?.fixtures, idx)}
                   </div>
-                  <div
-                    onClick={onClick}
-                    className={`${stats && "bg-teams"} teams-normal`}
-                  >
-                    <div className="home">
-                      <div className="team">
-                        {teams?.find((team) => team._id === x.teamHome)?.name}
-                      </div>
-                      <div className="ticker-image"></div>
-                      <div
-                        className={`${
-                          x?.stats?.length > 0 ? "score" : "time-1"
-                        }`}
-                      >
-                        {x?.stats?.length > 0
-                          ? x?.stats
-                              ?.filter((x) => x.identifier === "goalsScored")[0]
-                              .home.map((x) => x.value)
-                              .reduce((a, b) => a + b, 0) +
-                            x?.stats
-                              ?.filter((x) => x.identifier === "ownGoals")[0]
-                              .away.map((x) => x.value)
-                              .reduce((a, b) => a + b, 0)
-                          : getPmString(
-                              new Date(
-                                getTime(x?.kickOffTime)
-                              ).toLocaleTimeString()
-                            )}
-                      </div>
-                    </div>
-                    <div className="away">
-                      <div
-                        className={`${
-                          x?.stats?.length > 0 ? "score" : "time-2"
-                        }`}
-                      >
-                        {x?.stats?.length > 0
-                          ? x?.stats
-                              ?.filter((x) => x.identifier === "goalsScored")[0]
-                              .home.map((x) => x.value)
-                              .reduce((a, b) => a + b, 0) +
-                            x?.stats
-                              ?.filter((x) => x.identifier === "ownGoals")[0]
-                              .away.map((x) => x.value)
-                              .reduce((a, b) => a + b, 0)
-                          : getPm(x?.kickOffTime)}
-                      </div>
-                      <div className="ticker-image"></div>
-                      <div className="team">
-                        {teams?.find((team) => team._id === x.teamAway)?.name}
-                      </div>
-                    </div>
-                  </div>
+                  <FixtureItem x={x} />
                 </div>
               ))}
             </div>

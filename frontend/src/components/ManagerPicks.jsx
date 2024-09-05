@@ -9,18 +9,18 @@ import { getPm, getPmString } from "../utils/getPm";
 import { Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import PickPlayer from "./PickPlayer";
+import {Spinner} from "react-bootstrap";
 
 const ManagerPicks = (props) => {
   const { teamName, switchPlayer,switchCaptain,
-  switchVice, inform, picks, blocked, okayed, switcher } = props;
+  switchVice, inform, picks, blocked, okayed, switcher, id } = props;
   const { data: teams } = useGetQuery();
   const { data: players } = useGetPlayersQuery();
   const { data: managerPicks } = useGetPicksQuery();
-  const [updatePicks] = useUpdatePicksMutation()
+  const [updatePicks, {isLoading}] = useUpdatePicksMutation()
   const { data: positions } = useGetPositionsQuery();
   const { data: matchdays } = useGetMatchdaysQuery()
   const navigate = useNavigate();
-
   const md = matchdays?.find(matchday => matchday?.next === true)
 
   const goalkeepers = picks?.filter(
@@ -44,12 +44,18 @@ const ManagerPicks = (props) => {
       pick?.multiplier > 0
   )?.sort((a,b) => a.slot > b.slot ? 1 : -1);
   const bench = picks?.filter((pick) => pick.multiplier === 0)?.sort((a,b) => a.slot > b.slot ? 1 : -1);
+  const teamValue = picks?.reduce((x,y) => x+(+y.nowCost), 0)
+  const itb = 100 - teamValue 
 
   const onSave = async (e) => {
     e.preventDefault()
-    console.log(picks)
-    /*const res = await updatePicks({id: id?._id, picks, teamValue, bank: itb}).unwrap()
-    navigate('/pickteam')*/
+    await updatePicks({id: id?._id, picks, teamValue, bank: itb}).unwrap()
+    navigate('/pickteam')
+  }
+  if(isLoading) {
+    <div className="spinner">
+      <Spinner />
+    </div>
   }
   return (
     <div>

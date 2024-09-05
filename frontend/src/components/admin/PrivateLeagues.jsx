@@ -135,8 +135,8 @@ const PrivateLeagues = () => {
     }
   return (
     <Container>
-      {memoPrivateLeagues.length === 0 ? <div className="spinner">No Private Leagues Found!</div> : 
-      memoPrivateLeagues.map(x => <div className="teams p-2" key={x._id}>
+      {memoPrivateLeagues?.length === 0 ? <div className="spinner">No Private Leagues Found!</div> : 
+      memoPrivateLeagues?.map(x => <div className="teams p-2" key={x._id}>
         <div className="team-name">{x?.team?.name}</div>
         <div>
             <Button

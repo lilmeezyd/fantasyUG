@@ -173,8 +173,8 @@ const TeamLeagues = () => {
   }*/
   return (
     <Container>
-      {memoTeamLeagues.length === 0 ? <div className="spinner">No Team Leagues Found!</div> : 
-      memoTeamLeagues.map(x => <div className="teams p-2" key={x._id}>
+      {memoTeamLeagues?.length === 0 ? <div className="spinner">No Team Leagues Found!</div> : 
+      memoTeamLeagues?.map(x => <div className="teams p-2" key={x._id}>
         <div className="team-name">{x?.team?.name}</div>
         <div>
             <Button

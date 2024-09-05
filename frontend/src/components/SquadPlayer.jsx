@@ -33,7 +33,7 @@ const SquadPlayer = (props) => {
           <button className="player-btn empty-btn">
             <div className="p-holder">{posName}</div>
           </button>
-        )}
+        )} 
       </div>
 
       {baller?._id && (

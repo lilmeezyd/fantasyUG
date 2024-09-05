@@ -62,7 +62,7 @@ const getFixtures = asyncHandler(async (req, res) => {
   const fixtures = await Fixture.aggregate([
     {$group: {_id: "$matchday",  fixtures: { $addToSet: "$$ROOT"}}}
   ]);
-  await Matchday.populate(fixtures, {path: "_id"})
+  await Matchday.populate(fixtures, {path: "_id"}) 
   fixtures.forEach(x => {
     x.fixtures.sort((v, w) => v.kickOffTime > w.kickOffTime ? 1 : -1)
     b.push(x)
@@ -194,15 +194,6 @@ const editFixture = asyncHandler(async (req, res) => {
     res.status(400);
     throw new Error("User not found");
   }
-
-  // Make sure the logged in user is an ADMIN OR EDITOR
-  /*if (
-    Object.values(req.user.roles).includes(1) &&
-    Object.values(req.user.roles).length === 1
-  ) {
-    res.status(401);
-    throw new Error("Not Authorized");
-  }*/
   if (!fixture) {
     res.status(400);
     throw new Error("Fixture not found");
@@ -226,6 +217,7 @@ const editFixture = asyncHandler(async (req, res) => {
     { deadlineTime: deadline },
     { new: true }
   );
+  console.log(updatedFixture)
   res.status(200).json(updatedFixture);
 });
 
@@ -446,15 +438,10 @@ const deleteFixture = asyncHandler(async (req, res) => {
     res.status(400);
     throw new Error("User not found");
   }
-  // Make sure the logged in user is an ADMIN
-  /*if (!Object.values(user.roles).includes(2048)) {
-    res.status(401);
-    throw new Error("Not Authorized");
-  }*/
   if (!players) {
     res.status(400);
     throw new Error("No players found");
-  }
+  }/*
   players.forEach(async (player) => {
     const matchdayIndex = player.matchdays.findIndex(
       (x) => x.matchday.toString() === fixture.matchday.toString()
@@ -502,7 +489,7 @@ const deleteFixture = asyncHandler(async (req, res) => {
         { new: true }
       );
     }
-  });
+  });*/
   await Fixture.findByIdAndDelete(req.params.id);
   const fixtures = await Fixture.find({ matchday: fixture.matchday });
 

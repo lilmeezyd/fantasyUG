@@ -87,11 +87,11 @@ const LeagueDetails = (props) => {
         <h4 className="ld-2">Finances</h4>
         <div className="my-ranking">
           <h5>Team value</h5>
-          <h5>`UGX&nbsp;{teamValue?.toFixed(1)}`</h5>
+          <h5>UGX&nbsp;{teamValue?.toFixed(1)}M</h5>
         </div>
         <div className="my-ranking">
           <h5>In the bank</h5>
-          <h5>`UGX&nbsp;{bank?.toFixed(1)}`</h5>
+          <h5>UGX&nbsp;{bank?.toFixed(1)}M</h5>
         </div>
       </div>
     </div>
