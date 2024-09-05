@@ -11,6 +11,7 @@ const PickTeam = () => {
   const { data: managerPicks } = useGetPicksQuery();
 
   const reducer = (state, action) => {
+    const ids = state?.picks?.map(x => x.slot)
     if(action.type === 'INITIAL_PICKS') {
       return action.payload
     }
@@ -37,19 +38,7 @@ const PickTeam = () => {
         ...state,
         picks: state.picks.map(x => x._id === data._id ? x = player : x._id === exCap._id ? x = exCapObj : x)
       }
-    }/*
-    if(action.type === 'SET_SWITCH') {
-      const { data } = action
-      if(data.multiplier > 0) {
-        const okayed = state.picks.filter(x => x.multiplier === 0).map(x => x.slot)
-        const blocked = state.picks.filter(x => x.multiplier > 0 && x.slot !== data.slot).map(x => x.slot)
-      return {
-        ...state,
-        switcher: data,
-        okayed: okayed,
-        blocked: blocked
-      }}
-    }*/
+    }
       if(action.type === 'GKP_SET_SWITCH') {
         const { data } = action
           const okayed = state.picks.filter(x => x._id !== data._id && x.playerPosition === '669a41e50f8891d8e0b4eb2a').map(x => x.slot)
@@ -63,63 +52,151 @@ const PickTeam = () => {
       }
       if(action.type === 'DEF_SET_SWITCH') {
         const { data } = action
-        /*  const okayed = state.picks.filter(x => x._id !== data._id && x.playerPosition === '669a41e50f8891d8e0b4eb2a').map(x => x.slot)
-          const blocked = state.picks.filter(x => x.playerPosition !== '669a41e50f8891d8e0b4eb2a').map(x => x.slot)
+       if(data.multiplier === 0) {
+        const okayB = state.picks.filter(x => x.multiplier === 0 && x.slot > 12).map(x => x.slot)
+        if(state.FWD === 1) {
+          const okayS = state.picks.filter(x => x.playerPosition !== "669a41e50f8891d8e0b4eb2a" && x.playerPosition !== "669a485de181cb2ed40c2417").map(x => x.slot)
+          const okayed = [...okayB, ...okayS]
+          const blocked = Array.from(new Set(ids).difference(new Set(okayed)))
+          return {
+            ...state,
+            switcher: data,
+            okayed: okayed,
+            blocked: blocked
+          }
+        }
+        const okayS = state.picks.filter(x => x.playerPosition !== "669a41e50f8891d8e0b4eb2a").map(x => x.slot)
+        const okayed = [...okayB, ...okayS]
+        const blocked = Array.from(new Set(ids).difference(new Set(okayed)))
         return {
           ...state,
           switcher: data,
           okayed: okayed,
           blocked: blocked
-        }*/
-       if(data.multiplier === 0) {
-        console.log('0')
+        }
        } else {
-        console.log('1')
+        if(state.DEF === 3) {
+          const okayS = state.picks.filter(x => x.slot > 12 && x.playerPosition === "669a4831e181cb2ed40c240f").map(x => x.slot)
+          const okayed = [...okayS]
+          const blocked = Array.from(new Set(ids).difference(new Set(okayed)))
+          return {
+            ...state,
+            switcher: data,
+            okayed: okayed,
+            blocked: blocked.filter(x => x !== data.slot)
+          }
+        }
+        const okayS = state.picks.filter(x => x.slot > 12).map(x => x.slot)
+        const okayed = [...okayS]
+        const blocked = Array.from(new Set(ids).difference(new Set(okayed)))
+        return {
+          ...state,
+          switcher: data,
+          okayed: okayed,
+          blocked: blocked.filter(x => x !== data.slot)
+        }
        }
 
       }
 
       if(action.type === 'MID_SET_SWITCH') {
         const { data } = action
-        /*  const okayed = state.picks.filter(x => x._id !== data._id && x.playerPosition === '669a41e50f8891d8e0b4eb2a').map(x => x.slot)
-          const blocked = state.picks.filter(x => x.playerPosition !== '669a41e50f8891d8e0b4eb2a').map(x => x.slot)
-        return {
-          ...state,
-          switcher: data,
-          okayed: okayed,
-          blocked: blocked
-        }*/
-       if(data.multiplier === 0) {
-        console.log('0')
-       } else {
-        console.log('1')
-       }
+        if(data.multiplier === 0) {
+          const okayB = state.picks.filter(x => x.multiplier === 0 && x.slot > 12).map(x => x.slot)
+          if(state.FWD === 1) {
+            const okayS = state.picks.filter(x => x.playerPosition !== "669a41e50f8891d8e0b4eb2a" && x.playerPosition !== "669a485de181cb2ed40c2417").map(x => x.slot)
+            const okayed = [...okayB, ...okayS]
+            const blocked = Array.from(new Set(ids).difference(new Set(okayed)))
+            return {
+              ...state,
+              switcher: data,
+              okayed: okayed,
+              blocked: blocked
+            }
+          }
+          
+          if(state.DEF === 3) {
+            const okayS = state.picks.filter(x => x.playerPosition !== "669a41e50f8891d8e0b4eb2a" && x.playerPosition !== "669a4831e181cb2ed40c240f").map(x => x.slot)
+            const okayed = [...okayS, ...okayB]
+            const blocked = Array.from(new Set(ids).difference(new Set(okayed)))
+            return {
+              ...state,
+              switcher: data,
+              okayed: okayed,
+              blocked: blocked.filter(x => x !== data.slot)
+            }
+          }
+          const okayS = state.picks.filter(x => x.playerPosition !== "669a41e50f8891d8e0b4eb2a").map(x => x.slot)
+          const okayed = [...okayB, ...okayS]
+          const blocked = Array.from(new Set(ids).difference(new Set(okayed)))
+          return {
+            ...state,
+            switcher: data,
+            okayed: okayed,
+            blocked: blocked
+          }
+         } else {
+          const okayS = state.picks.filter(x => x.slot > 12).map(x => x.slot)
+          const okayed = [...okayS]
+          const blocked = Array.from(new Set(ids).difference(new Set(okayed)))
+          return {
+            ...state,
+            switcher: data,
+            okayed: okayed,
+            blocked: blocked.filter(x => x !== data.slot)
+          }
+         }
 
       }
 
       if(action.type === 'FWD_SET_SWITCH') {
         const { data } = action
-        /*  const okayed = state.picks.filter(x => x._id !== data._id && x.playerPosition === '669a41e50f8891d8e0b4eb2a').map(x => x.slot)
-          const blocked = state.picks.filter(x => x.playerPosition !== '669a41e50f8891d8e0b4eb2a').map(x => x.slot)
-        return {
-          ...state,
-          switcher: data,
-          okayed: okayed,
-          blocked: blocked
-        }*/
-       if(data.multiplier === 0) {
-         if(state.DEF === 3) {
-          /*const okayed = state.picks.filter(x => x._id !== data._id && x.multiplier > 0 && 
-            x.playerPosition !== '669a41e50f8891d8e0b4eb2a' && x.playerPosition !== "669a4831e181cb2ed40c240f")
-            .map(x => x.slot)
-          const blocked = state.picks.filter  */
-          console.log('0')
+        if(data.multiplier === 0) {
+          const okayB = state.picks.filter(x => x.multiplier === 0 && x.slot > 12).map(x => x.slot)
+          if(state.DEF === 3) {
+            const okayS = state.picks.filter(x => x.playerPosition !== "669a41e50f8891d8e0b4eb2a" && x.playerPosition !== "669a4831e181cb2ed40c240f").map(x => x.slot)
+            const okayed = [...okayS, ...okayB]
+            const blocked = Array.from(new Set(ids).difference(new Set(okayed)))
+            return {
+              ...state,
+              switcher: data,
+              okayed: okayed,
+              blocked: blocked.filter(x => x !== data.slot)
+            }
+          }
+          const okayS = state.picks.filter(x => x.playerPosition !== "669a41e50f8891d8e0b4eb2a").map(x => x.slot)
+          const okayed = [...okayB, ...okayS]
+          const blocked = Array.from(new Set(ids).difference(new Set(okayed)))
+          return {
+            ...state,
+            switcher: data,
+            okayed: okayed,
+            blocked: blocked
+          }
+         } else {
+          const okayS = state.picks.filter(x => x.slot > 12).map(x => x.slot)
+          
+          if(state.FWD === 1) {
+            const okayS = state.picks.filter(x => x.slot > 12 && x.playerPosition === "669a485de181cb2ed40c2417").map(x => x.slot)
+            const okayed = [...okayS]
+            const blocked = Array.from(new Set(ids).difference(new Set(okayed)))
+            return {
+              ...state,
+              switcher: data,
+              okayed: okayed,
+              blocked: blocked.filter(x => x !== data.slot)
+            }
+          }
+          
+          const okayed = [...okayS]
+          const blocked = Array.from(new Set(ids).difference(new Set(okayed)))
+          return {
+            ...state,
+            switcher: data,
+            okayed: okayed,
+            blocked: blocked.filter(x => x !== data.slot)
+          }
          }
-       } else {
-        //const okayed = state.picks.filter(x => x._id !== data._id)
-        console.log('1')
-       }
-
       }
       if(action.type === 'SWAP_PLAYER') {
         const { data } = action
@@ -127,11 +204,94 @@ const PickTeam = () => {
       const player = {...data, multiplier, IsCaptain, IsViceCaptain, slot}
       const newSwitcher = {...state.switcher, multiplier: data.multiplier, IsCaptain: 
         data.IsCaptain, IsViceCaptain: data.IsViceCaptain, slot: data.slot}
+        let DEF = state.DEF, MID = state.MID, FWD = state.FWD
+        if(data.shortPos !== 'GKP' && state.switcher.shortPos !== 'GKP') {
+          /* Defender swap */
+          if(state.switcher.shortPos === 'DEF') {
+            if(state.switcher.multiplier === 0) {
+              if(data.multiplier === 1) {
+                if(data.shortPos === 'MID') {
+                  MID-=1
+                  DEF+=1
+                }
+                if(data.shortPos === 'FWD') {
+                  FWD-=1
+                  DEF+=1
+                }
+            }
+            } else {
+              if(data.shortPos === 'MID') {
+                MID+=1
+                DEF-=1
+              }
+              if(data.shortPos === 'FWD') {
+                FWD+=1
+                DEF-=1
+              }
+            }
+            
+          }
+
+          /* Midfielder swap */
+          if(state.switcher.shortPos === 'MID') {
+            if(state.switcher.multiplier === 0) {
+              if(data.multiplier === 1) {
+                if(data.shortPos === 'DEF') {
+                  MID+=1
+                  DEF-=1
+                }
+                if(data.shortPos === 'FWD') {
+                  FWD-=1
+                  MID+=1
+                }
+            }
+            } else {
+              if(data.shortPos === 'DEF') {
+                MID-=1
+                DEF+=1
+              }
+              if(data.shortPos === 'FWD') {
+                FWD+=1
+                MID-=1
+              }
+            }
+          }
+          /* Forward swap */
+          if(state.switcher.shortPos === 'FWD') {
+            if(state.switcher.multiplier === 0) {
+              if(data.multiplier === 1) {
+                if(data.shortPos === 'DEF') {
+                  FWD+=1
+                  DEF-=1
+                }
+                if(data.shortPos === 'MID') {
+                  FWD+=1
+                  MID-=1
+                }
+            }
+            } else {
+              if(data.shortPos === 'MID') {
+                MID+=1
+                FWD-=1
+              }
+              if(data.shortPos === 'DEF') {
+                FWD-=1
+                DEF+=1
+              }
+            }
+          } 
+
+        }
+        console.log(DEF)
+        console.log(MID)
       return {
         ...state,
         switcher: {},
           okayed: [],
           blocked: [],
+          DEF,
+          MID,
+          FWD,
         picks: state.picks.map(x => x._id === data._id ? x = player : x._id === state.switcher._id ? x = newSwitcher : x)
       }
         
@@ -185,13 +345,13 @@ const PickTeam = () => {
   const switchPlayer = (data) => {
     const { shortPos, ...rest} = data
     if(Object.keys(switcher).length === 0) {
-      dispatch({type: `${shortPos}_SET_SWITCH`, data:rest})
+      dispatch({type: `${shortPos}_SET_SWITCH`, data})
     }
     if(data._id === switcher._id) {
       dispatch({type: `CANCEL`})
     }
     if(Object.keys(switcher).length > 0 && (data._id !== switcher._id)) {
-      dispatch({type: `SWAP_PLAYER`, data: rest})
+      dispatch({type: `SWAP_PLAYER`, data})
     }
   }
   const switchCaptain = (data) => {

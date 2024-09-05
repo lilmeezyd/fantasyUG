@@ -32,18 +32,18 @@ const ManagerPicks = (props) => {
     (pick) =>
       pick?.playerPosition === "669a4831e181cb2ed40c240f" &&
       pick?.multiplier > 0
-  );
+  )?.sort((a,b) => a.slot > b.slot ? 1 : -1);
   const midfielders = picks?.filter(
     (pick) =>
       pick?.playerPosition === "669a4846e181cb2ed40c2413" &&
       pick?.multiplier > 0
-  );
+  )?.sort((a,b) => a.slot > b.slot ? 1 : -1);
   const forwards = picks?.filter(
     (pick) =>
       pick?.playerPosition === "669a485de181cb2ed40c2417" &&
       pick?.multiplier > 0
-  );
-  const bench = picks?.filter((pick) => pick.multiplier === 0);
+  )?.sort((a,b) => a.slot > b.slot ? 1 : -1);
+  const bench = picks?.filter((pick) => pick.multiplier === 0)?.sort((a,b) => a.slot > b.slot ? 1 : -1);
 
   const onSave = async (e) => {
     e.preventDefault()
