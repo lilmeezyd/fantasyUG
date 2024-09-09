@@ -115,8 +115,7 @@ const ManagerPicks = (props) => {
             </div>
           ))}
         </div>
-        <div className="bench">
-          <div className="default-player">
+          <div className="default-bench">
             {bench?.map((x, idx) => (
               <div key={x.slot} className="squad-player">
                 <div className="bench-pos">
@@ -139,7 +138,6 @@ const ManagerPicks = (props) => {
               </div>
             ))}
           </div>
-        </div>
       </div>
       <section className="form">
         <form onSubmit={onSave}>

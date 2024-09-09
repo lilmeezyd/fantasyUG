@@ -1,7 +1,10 @@
 import { Container  } from "react-bootstrap"
 import { NavLink, Outlet } from 'react-router-dom'
+import { useGetSomeQuery } from "../slices/playerApiSlice"
 
 const DashboardScreen = () => {
+  const { data } = useGetSomeQuery()
+  console.log(data)
 
   return (
     <Container>

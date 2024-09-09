@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useGetPlayersQuery } from "../slices/playerApiSlice";
 import { useGetQuery } from "../slices/teamApiSlice";
 import { useGetPositionsQuery } from "../slices/positionApiSlice";
+import { useGetMatchdaysQuery } from "../slices/matchdayApiSlice";
+import { useGetFixturesQuery } from "../slices/fixtureApiSlice";
 import { Modal, Button } from "react-bootstrap";
 
 const SquadPlayer = (props) => {
@@ -10,8 +12,21 @@ const SquadPlayer = (props) => {
   const { data: teams } = useGetQuery();
   const { data: players } = useGetPlayersQuery();
   const { data: elementTypes } = useGetPositionsQuery();
+  const { data: fixtures } = useGetFixturesQuery();
+  const { data: matchdays } = useGetMatchdaysQuery();
   const appName = players?.find((player) => player._id === baller._id)?.appName;
   const nowCost = players?.find((player) => player._id === baller._id)?.nowCost;
+  const image = teams?.find((team) => team?._id === baller?.playerTeam)?.code
+
+  const mdId = matchdays?.find((matchday) => matchday?.next === true)?.id;
+  const mdFixs = fixtures?.find((x) => x?._id?.id === mdId)?.fixtures;
+  const opponentFix = mdFixs?.find(
+    (x) => x.teamAway === baller.playerTeam || x.teamHome === baller.playerTeam
+  );
+  const opponent =
+    baller.playerTeam === opponentFix?.teamAway
+      ? `${teams?.find((x) => x._id === opponentFix?.teamHome)?.shortName}(A)`
+      : `${teams?.find((x) => x._id === opponentFix?.teamAway)?.shortName}(H)`;
 
   const handleClose = () => {
     setShow(false);
@@ -23,16 +38,26 @@ const SquadPlayer = (props) => {
     <>
       <div className="element">
         {baller._id ? (
+          <div className="button-wrapper" id={baller._id}>
+            <div className="next-fix">&#163;{nowCost?.toFixed(1)}M</div>
           <button onClick={handleShow} className="player-btn player-in-btn">
+          <img
+              src={`../shirt_${image}-66.webp`}
+              className="image_pic"
+              alt={appName}
+            />
             <div className="player-name">
               <div>{appName}</div>
-              <div>{nowCost?.toFixed(1)}</div>
+              <div>{opponent}</div>
             </div>
           </button>
+          </div>
         ) : (
+          <div className="button-wrapper">
           <button className="player-btn empty-btn">
             <div className="p-holder">{posName}</div>
           </button>
+          </div>
         )} 
       </div>
 
@@ -84,7 +109,7 @@ const TransferPopUp = (props) => {
       </Modal.Header>
       <Modal.Body className="p-3">
         <div className="infobuttons">
-          <button onClick={transferOut} className="btn-success form-control">
+          <button onClick={transferOut} className="btn btn-success form-control">
             Remove Player
           </button>
         </div>
