@@ -15,6 +15,7 @@ const PlayerCard = (props) => {
     picks, GKP,
     DEF, MID, FWD, errorMsg
   } = props;
+  console.log(forwardImage)
   const pickIds = picks?.map(x => x._id)
   const doesExist = pickIds?.includes(playerPos?._id)
   const [show, setShow] = useState(false);
@@ -63,8 +64,8 @@ const PlayerCard = (props) => {
             onClick={handleShowTransfer}
             className="player-cell btn-table"
           >
-            <div style={{ background: bgColor }} className="images">
-              {/*<img src={`../shirt_${forwardImage}.webp`} alt={forwardImage} />*/}
+            <div className="images">
+              <img src={`../shirt_${forwardImage}.svg`} alt={forwardImage} />
             </div>
             <div className="player-cell-info">
               <span className="name-1">{playerPos.appName}</span>

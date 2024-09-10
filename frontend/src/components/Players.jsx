@@ -231,8 +231,9 @@ const onSort = (e) => {
               let short_name = teamObj?.shortName
               let positionObj = elementTypes?.find(x => x._id === goalkeeper.playerPosition)
               let short_pos = positionObj?.shortName
-              let forwardImage = positionObj?.code === 1 ? `${teamObj?.code}_1-66`:
-            `${teamObj?.code}-66`    
+              /*let forwardImage = positionObj?.code === 1 ? `${teamObj?.code}_1-66`:
+            `${teamObj?.code}-66`  */
+            let forwardImage = `${teamObj?.code}-66`  
               return (<PlayerCard 
                 bgColor='rgb(255, 255, 0, 0.5)'
                 picks={picks}
@@ -337,8 +338,9 @@ const onSort = (e) => {
               let short_name = teamObj?.shortName
               let positionObj = elementTypes?.find(x => x._id === forward.playerPosition)
               let short_pos = positionObj?.shortName
-              let forwardImage = positionObj?.code === 1 ? `${teamObj?.code}_1-66`:
-            `${teamObj?.code}-66`  
+              /*let forwardImage = positionObj?.code === 1 ? `${teamObj?.code}_1-66`:
+            `${teamObj?.code}-66` */ 
+            let forwardImage = `${teamObj?.code}-66`
                   return (<PlayerCard 
                 bgColor='rgb(255, 0, 0, 0.5)'
                 FWD={FWD}

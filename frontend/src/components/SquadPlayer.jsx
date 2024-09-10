@@ -42,7 +42,7 @@ const SquadPlayer = (props) => {
             <div className="next-fix">&#163;{nowCost?.toFixed(1)}M</div>
           <button onClick={handleShow} className="player-btn player-in-btn">
           <img
-              src={`../shirt_${image}-66.webp`}
+              src={`../shirt_${image}-66.svg`}
               className="image_pic"
               alt={appName}
             />
@@ -55,6 +55,11 @@ const SquadPlayer = (props) => {
         ) : (
           <div className="button-wrapper">
           <button className="player-btn empty-btn">
+          <img
+              src={`../shirt_0-66.svg`}
+              className="image_pic"
+              alt='default'
+            />
             <div className="p-holder">{posName}</div>
           </button>
           </div>
@@ -109,7 +114,7 @@ const TransferPopUp = (props) => {
       </Modal.Header>
       <Modal.Body className="p-3">
         <div className="infobuttons">
-          <button onClick={transferOut} className="btn btn-success form-control">
+          <button onClick={transferOut} className="btn btn-danger form-control">
             Remove Player
           </button>
         </div>

@@ -45,7 +45,7 @@ const PickPlayer = (props) => {
           opacity: `${blocked?.includes(baller.slot) ? '0.6' : '1'}`}}
           className={`${okayed?.includes(baller.slot) ? 'h-light' : ''} player-btn player-in-btn`} onClick={handleShow}>
             <img
-              src={`../shirt_${image}-66.webp`}
+              src={`../shirt_${image}-66.svg`}
               className="image_pic"
               alt={appName}
             />
@@ -225,16 +225,16 @@ const SwitchPopUp = (props) => {
         <div className="infobuttons">
           {(switcher._id === baller._id || Object.keys(switcher).length === 0 || 
           okayed?.includes(baller.slot)) && 
-          <button onClick={switchOut} className="btn btn-success form-control my-2">
+          <button onClick={switchOut} className="btn btn-warning form-control my-2">
             {switcher._id === baller._id ? 'Cancel' : 'Switch Player'}
           </button>}
           {(baller.multiplier > 0 && baller.IsCaptain === false && Object.keys(switcher).length === 0) && <button onClick={changeCaptain} className="btn btn-success form-control my-2">
             Captain
           </button>}
-          {(baller.multiplier > 0 && baller.IsViceCaptain === false && Object.keys(switcher).length === 0) && <button onClick={changeVice} className="btn btn-success form-control my-2">
+          {(baller.multiplier > 0 && baller.IsViceCaptain === false && Object.keys(switcher).length === 0) && <button onClick={changeVice} className="btn btn-primary form-control my-2">
             Vice Captain
           </button>}
-          <button onClick={getInfo} className="btn btn-success form-control my-2">
+          <button onClick={getInfo} className="btn btn-info form-control my-2">
             Information
           </button>
         </div>
