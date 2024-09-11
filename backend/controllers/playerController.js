@@ -2,6 +2,8 @@ import asyncHandler from "express-async-handler";
 import Player from "../models/playerModel.js";
 import User from "../models/userModel.js";
 import Position from "../models/positionModel.js";
+import Fixture from "../models/fixtureModel.js";
+import PlayerHistory from "../models/playerHistoryModel.js";
 
 //@desc Set Player
 //@route POST /api/players
@@ -80,7 +82,7 @@ const getPlayers = asyncHandler(async (req, res) => {
 //@desc Get Players
 //@route GET /api/players/:id
 //@access public
-//@role not restricted
+//@role not restricted 
 const getPlayer = asyncHandler(async (req, res) => {
   const player = await Player.findById(req.params.id);
 
@@ -89,7 +91,13 @@ const getPlayer = asyncHandler(async (req, res) => {
     throw new Error("Player not found");
   }
 
-  res.status(200).json(player);
+  const team = player?.playerTeam
+  const pFixtures = await Fixture.find({$or: [{ teamHome: team }, { teamAway: team }]})
+  const pResults = await PlayerHistory.find({player: req.params.id})
+  const { _doc } = player
+  const newPlayer = {..._doc, fixtures: pFixtures, results: pResults}
+
+  res.status(200).json(newPlayer);
 });
 
 //@desc update player

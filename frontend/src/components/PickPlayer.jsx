@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useGetPlayersQuery } from "../slices/playerApiSlice";
+import { useGetPlayersQuery, useGetPlayerQuery } from "../slices/playerApiSlice";
 import { useGetQuery } from "../slices/teamApiSlice";
 import { useGetPositionsQuery } from "../slices/positionApiSlice";
 import { useGetMatchdaysQuery } from "../slices/matchdayApiSlice";
@@ -193,6 +193,8 @@ const SwitchPopUp = (props) => {
   const playerDetails = players?.find((player) => player._id === baller?._id);
   let positionObj = elementTypes?.find((x) => x._id === baller?.playerPosition);
   let shortPos = positionObj?.shortName;
+  const [ showPInfo, setShowPInfo ] = useState(false)
+  const { data: player} = useGetPlayerQuery(baller?._id)
   const switchOut = () => {
     switchPlayer({ ...baller, shortPos});
     handleClose();
@@ -206,11 +208,17 @@ const SwitchPopUp = (props) => {
     handleClose();
   };
   const getInfo = () => {
-    inform({ ...baller, shortPos });
+    console.log(player)
+    setShowPInfo(true)
     handleClose();
   };
 
+  const handleCloseInfo = () => {
+    setShowPInfo(false)
+  }
+
   return (
+    <>
     <Modal show={show} onHide={handleClose}>
       <Modal.Header style={{ background: "aquamarine" }} closeButton>
         <Modal.Title style={{ fontWeight: 500 }}>
@@ -240,7 +248,55 @@ const SwitchPopUp = (props) => {
         </div>
       </Modal.Body>
     </Modal>
+    <PlayerInfo
+    player={player}
+    handleCloseInfo={handleCloseInfo}
+    showPInfo={showPInfo}
+    ></PlayerInfo>
+    </>
   );
 };
+
+const PlayerInfo = (props) => {
+  const { showPInfo, handleCloseInfo, player} = props
+  const [ results, setResults ] = useState(true)
+  const [ fixtures, setFixtures ] = useState(false)
+
+  const resultsView = () => {
+    setResults(true)
+    setFixtures(false)
+  }
+  const fixturesView = () => {
+    setResults(false)
+    setFixtures(true)
+  }
+  return (
+    <>
+  <Modal show={showPInfo} onHide={handleCloseInfo}>
+      <Modal.Header style={{ background: "aquamarine" }} closeButton>
+        <Modal.Title style={{ fontWeight: 500 }}>
+          <div className="namesection">
+            <span>
+              {player?.firstName}&nbsp;{player?.secondName}
+            </span>
+          </div>
+        </Modal.Title>
+      </Modal.Header>
+      <Modal.Body className="p-3">
+        <div className="info-tabs">
+          <div className={`${results ? 'play-class' : 'no-play'} py-2`} onClick={resultsView}>Results</div>
+          <div className={`${fixtures ? 'play-class' : 'no-play'} py-2`} onClick={fixturesView}>Fixtures</div>
+        </div>
+        {fixtures && <div>
+          Player Fixtures
+        </div>}
+        {results && <div>
+          Player Results
+        </div>}
+      </Modal.Body>
+    </Modal>
+    </>
+  )
+}
 
 export default PickPlayer;

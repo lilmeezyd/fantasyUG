@@ -8,30 +8,30 @@ const LeagueDetails = (props) => {
   const navigate = useNavigate();
   console.log(userInfo);
   return (
-    <div>
+    <div className="league-details">
       <div className="ranks">
         <div className="ld-1">
-          <h4 style={{ fontWeight: 700 }}>
+          <h5 style={{ fontWeight: 700 }}>
             {userInfo?.firstName}&nbsp;{userInfo?.lastName}
-          </h4>
-          <h5>{teamName}</h5>
+          </h5>
+          <div>{teamName}</div>
         </div>
         <div>
-          <h4 className="ld-2">Ranking</h4>
+          <h5 className="ld-2">Ranking</h5>
           <div className="my-ranking">
-            <h5>Total points</h5>
+            <div>Total points</div>
             <div></div>
           </div>
           <div className="my-ranking">
-            <h5>Overall rank</h5>
-            <h5></h5>
-          </div>
-          <div className="my-ranking">
-            <h5>Total players</h5>
+            <div>Overall rank</div>
             <div></div>
           </div>
           <div className="my-ranking">
-            <h5>Matchday points</h5>
+            <div>Total players</div>
+            <div></div>
+          </div>
+          <div className="my-ranking">
+            <div>Matchday points</div>
             <div></div>
           </div>
         </div>
@@ -39,37 +39,37 @@ const LeagueDetails = (props) => {
 
       <div className="ld">
         <div>
-          <h4 className="ld-2">General Leagues</h4>
+          <h5 className="ld-2">General Leagues</h5>
           <div className="my-leagues">
             <div></div>
-            <h5>Rank</h5>
-            <h5>League</h5>
+            <div>Rank</div>
+            <div>League</div>
           </div>
           {overallLeagues?.map((x) => (
             <div className="my-leagues" key={x._id}>
               <div></div>
-              <h5>{x.currentRank}</h5>
-              <h5>{x.name}</h5>
+              <div>{x.currentRank}</div>
+              <div>{x.name}</div>
             </div>
           ))}
           {teamLeagues?.map((x) => (
             <div className="my-leagues" key={x._id}>
               <div></div>
-              <h5>{x.currentRank}</h5>
-              <h5>{teams?.find((team) => team._id === x.team)?.name}</h5>
+              <div>{x.currentRank}</div>
+              <div>{teams?.find((team) => team._id === x.team)?.name}</div>
             </div>
           ))}
         </div>
         <div>
-          <h4 className="ld-2">Private Leagues</h4>
+          <h5 className="ld-2">Private Leagues</h5>
           {privateLeagues?.length === 0 ? (
-            <h5 className="ld-1">Create or join a private league</h5>
+            <div className="ld-1">Create or join a private league</div>
           ) : (
             <>
               <div className="my-leagues">
                 <div></div>
-                <h5>Rank</h5>
-                <h5>League</h5>
+                <div>Rank</div>
+                <div>League</div>
               </div>
               {privateLeagues?.map((x) => (
                 <div className="my-leagues" key={x._id}>
@@ -84,14 +84,14 @@ const LeagueDetails = (props) => {
       </div>
 
       <div className="ld">
-        <h4 className="ld-2">Finances</h4>
+        <h5 className="ld-2">Finances</h5>
         <div className="my-ranking">
-          <h5>Team value</h5>
-          <h5>UGX&nbsp;{teamValue?.toFixed(1)}M</h5>
+          <div>Team value</div>
+          <div>UGX&nbsp;{teamValue?.toFixed(1)}M</div>
         </div>
         <div className="my-ranking">
-          <h5>In the bank</h5>
-          <h5>UGX&nbsp;{bank?.toFixed(1)}M</h5>
+          <div>In the bank</div>
+          <div>UGX&nbsp;{bank?.toFixed(1)}M</div>
         </div>
       </div>
     </div>

@@ -60,17 +60,16 @@ const ManagerPicks = (props) => {
   return (
     <div>
       <div className="pick-team-header p-2">
-        <h4 className="pick-team-name">{teamName}</h4>
+        <h5 className="pick-team-name">{teamName}</h5>
         <div className="deadline">
-          <h4 className="pick-team-name">{md?.name}</h4>
-          <h4 className="pick-team-name">Deadline:</h4>
-          <h4 className="pick-team-name">
+          <div className="pick-team-name">{md?.name}</div>
+          <div className="pick-team-name">
           {getTime1(md?.deadlineTime)},&nbsp;
           {getPmString(
                           new Date(getTime(md?.deadlineTime)).toLocaleTimeString()
                         )}&nbsp;
                         {getPm(md?.kickOffTime)}
-          </h4>
+          </div>
         </div>
       </div>
       <div className="no-picks-team">

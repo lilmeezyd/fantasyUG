@@ -379,7 +379,7 @@ const PickTeam = () => {
         bank={managerPicks?.bank}
          />
       </div>
-      <Container>
+      <Container className="main">
         <FixtureList />
       </Container>
     </>

@@ -8,7 +8,7 @@ const playerFixtureSchema = mongoose.Schema({
   },
   opponent: {
     type: mongoose.Schema.Types.ObjectId,
-    required: [true, "Please add opponent"],
+    required: [true, "Please add opponent"], 
     ref: "Team",
   },
   player: {
@@ -18,5 +18,5 @@ const playerFixtureSchema = mongoose.Schema({
   },
 });
 
-const PlayerFixture = mongoose.model("PlayerHistory", playerFixtureSchema);
+const PlayerFixture = mongoose.model("PlayerFixture", playerFixtureSchema);
 export default PlayerFixture;

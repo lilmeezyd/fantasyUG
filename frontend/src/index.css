@@ -552,15 +552,15 @@ header .active {
 
 .default-bench {
   min-height: 7rem;
-    margin: 0.5rem;
-    display: flex;
-    justify-content: center;
-    /*gap: 1rem;*/  
-    padding: 0.5rem 0;
-    border-top-left-radius: 0.5rem;
-    border-top-right-radius: 0.5rem;
-    background: #f0f8ff82;
-    box-shadow: 0 0 2px 0;
+  margin: 0.5rem;
+  display: flex;
+  justify-content: center;
+  /*gap: 1rem;*/
+  padding: 0.5rem 0;
+  border-top-left-radius: 0.5rem;
+  border-top-right-radius: 0.5rem;
+  background: #f0f8ff82;
+  box-shadow: 0 0 2px 0;
 }
 
 .default-player .squad-player,
@@ -741,7 +741,8 @@ header .active {
   cursor: pointer;
   grid-template-columns: 1fr min-content 1fr;
   font-size: 1rem;
-  background: rgba(95, 230, 129, 0.3);
+  border-bottom: 1px solid #aaa;
+  border-top: 1px solid #aaa;
 }
 
 
@@ -805,8 +806,10 @@ header .active {
 }
 
 .bg-teams {
-  background: #e1f6e1;
+  background: rgba(95, 230, 129, 0.3);
   border-left: 5px solid rgb(21, 90, 21);
+  border-bottom: none;
+  border-top: none;
 }
 
 .deadline {
@@ -819,6 +822,8 @@ header .active {
 
 .time-score {
   display: flex;
+  border: 1px solid #aaa;
+  border-radius: 0.5rem;
 }
 
 .time-1 {
@@ -842,7 +847,9 @@ header .active {
 }
 
 @media(max-width: 760px) {
-  .time-1, .time-2 {
+
+  .time-1,
+  .time-2 {
     font-size: 10px;
   }
 }
@@ -880,6 +887,8 @@ header .active {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  background: aliceblue;
+  border-radius: 1rem;
 }
 
 .pick-team-name {
@@ -891,11 +900,15 @@ header .active {
   display: grid;
   grid-template-columns: 20px 1fr 2fr;
 }
-.my-leagues h5, .my-leagues h6 {
+
+.my-leagues h5,
+.my-leagues h6 {
   font-weight: 700;
 }
 
-.my-leagues h5, .my-leagues h6, .my-leagues div {
+.my-leagues h5,
+.my-leagues h6,
+.my-leagues div {
   text-align: center;
 }
 
@@ -916,7 +929,8 @@ header .active {
   font-weight: 700;
 }
 
-.ranks, .ld {
+.ranks,
+.ld {
   margin: 0.5rem 0;
   padding: 0.5rem;
   border-radius: 0.5rem;
@@ -944,4 +958,36 @@ header .active {
   justify-content: center;
   border-bottom-left-radius: 0.5rem;
   border-bottom-right-radius: 0.5rem;
+}
+
+.league-details {
+  background: aliceblue;
+  border-radius: 1rem;
+  padding: 0.5rem;
+}
+.info-tabs {
+  display: flex;
+}
+.info-tabs div {
+  flex: 1 0 0;
+  text-align: center;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.no-play {
+  border: 1px solid #aaa;
+}
+
+.play-class {
+  box-shadow: 0 0 3px;
+  border: none;
+}
+.footer {
+  background: #cff7d9;
+  height: 75px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: 700;
 }

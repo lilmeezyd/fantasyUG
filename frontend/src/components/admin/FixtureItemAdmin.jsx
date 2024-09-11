@@ -13,6 +13,14 @@ const FixtureItemAdmin = (props) => {
   const onClick = () => {
     displayStats((prevState) => !prevState);
   };
+  const initialPoints = (x) => {
+    console.log(x)
+    //const data = {mid: y, fid: x}
+    /*setShowSwap(true)
+    handleShow()
+    setInitialData(data)
+    dispatch(populateFixture(x))*/
+}
   return (
     <>
     <div
@@ -64,7 +72,7 @@ const FixtureItemAdmin = (props) => {
               <div><Button onClick={() => editFixturePop(x._id)} className="btn btn-warning">Edit</Button></div>
               <div><Button onClick={() => deleteFixturePop(x._id)} className="btn btn-danger">Delete</Button></div>
                 <div>
-                  <Button>
+                  <Button onClick={() => initialPoints(x)}>
                     {x?.stats?.length === 0 ? "Populate" : "Depopulate"}
                   </Button>
                 </div>

@@ -77,7 +77,7 @@ const FixtureList = () => {
         ?.map((fixture) => (
           <div key={fixture?._id?._id}>
             <div className="deadline">
-              <h4 className="pick-team-name">{fixture?._id?.name}</h4>
+              <h5 className="pick-team-name">{fixture?._id?.name}</h5>
             </div>
             <div>
               {fixture?.fixtures?.map((x, idx) => (
