@@ -5,6 +5,7 @@ import { useGetPositionsQuery } from "../slices/positionApiSlice";
 import { useGetMatchdaysQuery } from "../slices/matchdayApiSlice";
 import { useGetFixturesQuery } from "../slices/fixtureApiSlice";
 import { Button, Modal } from "react-bootstrap";
+import PlayerInfo from "./PlayerInfo";
 
 const PickPlayer = (props) => {
   const { baller, posName, switchPlayer, switchCaptain, switchVice, inform, slot, multiplier,
@@ -208,7 +209,6 @@ const SwitchPopUp = (props) => {
     handleClose();
   };
   const getInfo = () => {
-    console.log(player)
     setShowPInfo(true)
     handleClose();
   };
@@ -257,46 +257,5 @@ const SwitchPopUp = (props) => {
   );
 };
 
-const PlayerInfo = (props) => {
-  const { showPInfo, handleCloseInfo, player} = props
-  const [ results, setResults ] = useState(true)
-  const [ fixtures, setFixtures ] = useState(false)
-
-  const resultsView = () => {
-    setResults(true)
-    setFixtures(false)
-  }
-  const fixturesView = () => {
-    setResults(false)
-    setFixtures(true)
-  }
-  return (
-    <>
-  <Modal show={showPInfo} onHide={handleCloseInfo}>
-      <Modal.Header style={{ background: "aquamarine" }} closeButton>
-        <Modal.Title style={{ fontWeight: 500 }}>
-          <div className="namesection">
-            <span>
-              {player?.firstName}&nbsp;{player?.secondName}
-            </span>
-          </div>
-        </Modal.Title>
-      </Modal.Header>
-      <Modal.Body className="p-3">
-        <div className="info-tabs">
-          <div className={`${results ? 'play-class' : 'no-play'} py-2`} onClick={resultsView}>Results</div>
-          <div className={`${fixtures ? 'play-class' : 'no-play'} py-2`} onClick={fixturesView}>Fixtures</div>
-        </div>
-        {fixtures && <div>
-          Player Fixtures
-        </div>}
-        {results && <div>
-          Player Results
-        </div>}
-      </Modal.Body>
-    </Modal>
-    </>
-  )
-}
 
 export default PickPlayer;

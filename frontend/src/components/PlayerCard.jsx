@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { Modal } from "react-bootstrap";
+import { useGetPlayerQuery } from "../slices/playerApiSlice";
+import PlayerInfo from "./PlayerInfo";
 const PlayerCard = (props) => {
   const {
     forwardImage,
@@ -15,20 +17,16 @@ const PlayerCard = (props) => {
     picks, GKP,
     DEF, MID, FWD, errorMsg
   } = props;
-  console.log(forwardImage)
   const pickIds = picks?.map(x => x._id)
   const doesExist = pickIds?.includes(playerPos?._id)
   const [show, setShow] = useState(false);
   const [showPop, setShowPop] = useState(false);
+  const [ showPInfo, setShowPInfo ] = useState(false)
+  const { data: player} = useGetPlayerQuery(playerPos?._id)
 
   const handleClose = () => setShow(false);
   const handleClosePop = () => setShowPop(false);
 
-  const handleShowInfo = () => {
-    setShow(true);
-    //setShowInfo(true)
-    //handleShow()
-  };
 
   const handleShowTransfer = () => {
     setShowPop(true);
@@ -40,11 +38,20 @@ const PlayerCard = (props) => {
     //handleClose()
   };
 
+  const getInfo = () => {
+    setShowPInfo(true)
+    handleClose();
+  };
+
+  const handleCloseInfo = () => {
+    setShowPInfo(false)
+  }
+
   return (
     <>
       <div className="player-tbh">
         <div className="info">
-          <button onClick={handleShowInfo} className="player-info-button-table">
+          <button onClick={getInfo} className="player-info-button-table">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="16"
@@ -93,11 +100,11 @@ const PlayerCard = (props) => {
         showPop={showPop}
         handleClosePop={handleClosePop}
       ></TransferPopUp>
-      {/*<PlayerInfo playerPos={playerPos.id}
-      bgColor={playerPos.element_type}
-      handleClose={handleClose}
-      show={show}
-      ></PlayerInfo>*/}
+      <PlayerInfo
+    player={player}
+    handleCloseInfo={handleCloseInfo}
+    showPInfo={showPInfo}
+    ></PlayerInfo>
     </>
   );
 };

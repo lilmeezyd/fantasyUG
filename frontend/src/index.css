@@ -85,8 +85,33 @@ header .active {
   z-index: 2;
 }
 
+form.login-cs {
+  display: grid;
+  padding: 1rem 0;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+.login-cs-child button {
+  height: 100%;
+}
+
+.login-cs-child label {
+  font-weight: 600;
+}
+
+.login-cs-child .col {
+  font-weight: 600;
+  align-self: center;
+}
+
 
 @media (max-width: 720px) {
+
+  form.login-cs {
+    grid-template-columns: repeat(1, 1fr);
+  }
+
   .dashboard-wrapper {
     grid-template-columns: 1fr;
     gap: 5%;
@@ -983,6 +1008,42 @@ header .active {
   box-shadow: 0 0 3px;
   border: none;
 }
+
+/* Player Info */
+.games-info-fixtures {
+  border-radius: 1rem;
+  border: 1px solid #aaa;
+  margin-top: 1rem;
+}
+.fix-grid {
+  display: grid;
+  grid-template-columns: 30% 10% 50%;
+  justify-content: center;
+  gap: 3%;
+  align-items: center;
+}
+
+.fix-row:nth-child(odd) {
+  background-color: #7fffd438;
+}
+
+.actual-fixture {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.2rem;
+}
+
+.fdr {
+  text-align: center;
+}
+
+.tx-center {
+  text-align: center;
+  padding: 0.5rem 0;
+  font-weight: 600;
+}
+
 .footer {
   background: #cff7d9;
   height: 75px;

@@ -2,7 +2,6 @@ import { useState, useEffect } from "react"
 import { Row, Col, Button, Form } from 'react-bootstrap'
 import { Link, useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
-import FormContainer from '../components/FormContainer'
 import { useLoginMutation } from "../slices/userApiSlice"
 import { setCredentials } from '../slices/authSlice'
 import { toast } from 'react-toastify'
@@ -36,10 +35,10 @@ const LoginScreen = () => {
         }
     }
     return (
-        <FormContainer>
-            <h1>Sign In</h1>
-            <Form onSubmit={onSubmit}>
-                <Form.Group className="my-2" controlId="email">
+        <>
+            <h4>Sign In</h4>
+            <Form className="login-cs" onSubmit={onSubmit}>
+                <Form.Group className="login-cs-child" controlId="email">
                     <Form.Label>Email Address</Form.Label>
                     <Form.Control
                         type="email"
@@ -48,7 +47,7 @@ const LoginScreen = () => {
                         onChange={(e) => setEmail(e.target.value)}
                     ></Form.Control>
                 </Form.Group>
-                <Form.Group className="my-2" controlId="password">
+                <Form.Group className="login-cs-child" controlId="password">
                     <Form.Label>Password</Form.Label>
                     <Form.Control
                         type="password"
@@ -58,16 +57,17 @@ const LoginScreen = () => {
                     ></Form.Control>
                 </Form.Group>
                 {isLoading && <Loader />}
-                <Button type="submit" variant="primary" className="mt-3">
+                <div className="login-cs-child">
+                <Button type="submit" variant="primary" className=" form-control">
                     Sign In
                 </Button>
-
-                <Row className="py-3">
+                </div>
+                <Row className="login-cs-child">
                     <Col>
-                    New Customer? <Link to='/register'>Register</Link></Col>
+                    New User? <Link to='/register'>Register</Link></Col>
                 </Row>
             </Form>
-        </FormContainer>
+            </>
     )
 }
 

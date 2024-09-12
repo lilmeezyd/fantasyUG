@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { useGetPlayersQuery } from "../slices/playerApiSlice";
+import { useGetPlayersQuery, useGetPlayerQuery } from "../slices/playerApiSlice";
 import { useGetQuery } from "../slices/teamApiSlice";
 import { useGetPositionsQuery } from "../slices/positionApiSlice";
 import { useGetMatchdaysQuery } from "../slices/matchdayApiSlice";
 import { useGetFixturesQuery } from "../slices/fixtureApiSlice";
 import { Modal, Button } from "react-bootstrap";
+import PlayerInfo from "./PlayerInfo";
 
 const SquadPlayer = (props) => {
   const { baller, posName, removePlayer } = props;
@@ -83,14 +84,24 @@ const SquadPlayer = (props) => {
 const TransferPopUp = (props) => {
   const { baller, show, handleClose, players, removePlayer, elementTypes } =
     props;
+    const [ showPInfo, setShowPInfo ] = useState(false)
 
   const playerDetails = players?.find((player) => player._id === baller?._id);
   let positionObj = elementTypes?.find((x) => x._id === baller?.playerPosition);
+  const { data: player} = useGetPlayerQuery(baller?._id)
   let shortPos = positionObj?.shortName;
   const transferOut = () => {
     removePlayer({ ...baller, shortPos });
     handleClose();
   };
+  const getInfo = () => {
+    setShowPInfo(true)
+    handleClose();
+  };
+
+  const handleCloseInfo = () => {
+    setShowPInfo(false)
+  }
 
   /*const transferIn = () => {
         addPlayer({_id:playerPos._id,
@@ -102,6 +113,7 @@ const TransferPopUp = (props) => {
         handleCloseTransfer()
     }*/
   return (
+    <>
     <Modal show={show} onHide={handleClose}>
       <Modal.Header style={{ background: "aquamarine" }} closeButton>
         <Modal.Title style={{ fontWeight: 500 }}>
@@ -117,9 +129,18 @@ const TransferPopUp = (props) => {
           <button onClick={transferOut} className="btn btn-danger form-control">
             Remove Player
           </button>
+          <button onClick={getInfo} className="btn btn-info form-control my-2">
+            Information
+          </button>
         </div>
       </Modal.Body>
     </Modal>
+    <PlayerInfo
+    player={player}
+    handleCloseInfo={handleCloseInfo}
+    showPInfo={showPInfo}
+    ></PlayerInfo>
+    </>
   );
 };
 
