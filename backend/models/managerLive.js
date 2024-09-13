@@ -6,7 +6,7 @@ const managerLiveSchema = mongoose.Schema({
     required: true,
     ref: "User",
   },
-  livePicks: [
+  livePicks: [ 
     {
       matchday: {
         type: Number,
@@ -37,7 +37,7 @@ const managerLiveSchema = mongoose.Schema({
          nowCost: { type: Number, required: true},
          IsCaptain: { type: Boolean, required: true},
          IsViceCaptain: { type: Boolean, required: true},
-         position: { type: Number, required: true},
+         slot: { type: Number, required: true},
          points: { type: Number, default: null}
       }
       ],

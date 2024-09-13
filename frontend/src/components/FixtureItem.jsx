@@ -5,7 +5,7 @@ import { getPm, getPmString } from "../utils/getPm";
 
 const FixtureItem = (props) => {
   const { x } = props;
-
+console.log(x)
   const [stats, displayStats] = useState(false);
   const { data: teams } = useGetQuery();
 
@@ -21,7 +21,9 @@ const FixtureItem = (props) => {
         <div className="team">
           {teams?.find((team) => team._id === x.teamHome)?.name}
         </div>
-        <div className="ticker-image"></div>
+        <div className="ticker-image">
+          <img src={`../${teams?.find((team) => team._id === x.teamHome)?.shortName}.png`} alt="logo" />
+        </div>
       </div>
       <div className="time-score">
         <div className={`${x?.stats?.length > 0 ? "score" : "time-1"}`}>
@@ -52,7 +54,9 @@ const FixtureItem = (props) => {
         </div>
       </div>
       <div className="away">
-        <div className="ticker-image"></div>
+        <div className="ticker-image">
+        <img src={`../${teams?.find((team) => team._id === x.teamAway)?.shortName}.png`} alt="" />
+        </div>
         <div className="team">
           {teams?.find((team) => team._id === x.teamAway)?.name}
         </div>

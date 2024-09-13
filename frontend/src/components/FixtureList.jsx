@@ -8,11 +8,11 @@ import {
 import FixtureItem from "./FixtureItem";
 const FixtureList = () => {
   const [page, setPage] = useState(1);
-  const [copy, setCopy] = useState([]);
+  const [copy, setCopy] = useState([]); 
   const { data: fixtures, isLoading } = useGetFixturesQuery();
   useEffect(() => {
     const copyFix = fixtures?.length > 0 ? [...fixtures] : [];
-    copyFix?.sort((x, y) => (x?.deadlineTime > y?.deadlineTime ? 1 : -1));
+    copyFix?.sort((x, y) => (x?.kickOffTime > y?.kickOffTime ? 1 : -1));
     setCopy(fixtures);
   }, [fixtures]);
 

@@ -21,6 +21,7 @@ const PickPlayer = (props) => {
   const mdId = matchdays?.find((matchday) => matchday?.next === true)?.id;
   const mdFixs = fixtures?.find((x) => x?._id?.id === mdId)?.fixtures;
   const appName = players?.find((player) => player._id === baller._id)?.appName;
+  const nowCost = players?.find((player) => player._id === baller._id)?.nowCost;
   const image = teams?.find((team) => team?._id === baller?.playerTeam)?.code
   const opponentFix = mdFixs?.find(
     (x) => x.teamAway === baller.playerTeam || x.teamHome === baller.playerTeam
@@ -41,6 +42,7 @@ const PickPlayer = (props) => {
       <div className="element">
         {baller._id ? (
           <div className="button-wrapper" id={baller._id}>
+            <div className="next-fix">&#163;{nowCost?.toFixed(1)}M</div>
           <button 
           style={{borderRadius: '0.5rem', border: `${switcher.slot === baller.slot ? '2px solid goldenrod' : ''}`,
           opacity: `${blocked?.includes(baller.slot) ? '0.6' : '1'}`}}

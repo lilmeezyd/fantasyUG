@@ -36,7 +36,7 @@ const Fixtures = () => {
 
   useEffect(() => {
     const copyFix = fixtures?.length > 0 ? [...fixtures] : [];
-    copyFix?.sort((x, y) => (x?.deadlineTime > y?.deadlineTime ? 1 : -1));
+    copyFix?.sort((x, y) => (x?.kickOffTime > y?.kickOffTime ? 1 : -1));
     setCopy(fixtures);
   }, [fixtures]);
 

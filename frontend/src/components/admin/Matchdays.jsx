@@ -61,6 +61,10 @@ const editMatchdayPop = async (id) => {
   }));
   setMatchdayId(id);
 }
+
+const startMatchdayPop = async (id) => {
+  console.log(id)
+}
 const deleteMatchdayPop = (id) => {
   setShow((prevState) => ({
     ...prevState,
@@ -169,6 +173,7 @@ const memoMatchdays = useMemo(() => {
     {memoMatchdays?.map(x => <div className="teams p-2" key={x._id}>
           <div className="team-name">{x.name}</div>
           <div>{getTime(x.deadlineTime)}</div>
+          <div><Button onClick={()=>startMatchdayPop(x._id)}>Start</Button></div>
           <div><Button onClick={() => editMatchdayPop(x._id)} className="btn btn-warning">Edit</Button></div>
           <div><Button onClick={() => deleteMatchdayPop(x._id)} className="btn btn-danger">Delete</Button></div>
       </div>)}

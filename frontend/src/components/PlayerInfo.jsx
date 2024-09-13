@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useGetQuery } from "../slices/teamApiSlice";
 import { useGetPositionsQuery } from "../slices/positionApiSlice";
 import { useGetMatchdaysQuery } from "../slices/matchdayApiSlice";
@@ -7,6 +7,7 @@ const PlayerInfo = (props) => {
   const { showPInfo, handleCloseInfo, player } = props;
   const [results, setResults] = useState(true);
   const [fixtures, setFixtures] = useState(false);
+  const [copy, setCopy] = useState([]);
   const { data: teams } = useGetQuery();
   const { data: elementTypes } = useGetPositionsQuery();
   const { data: matchdays } = useGetMatchdaysQuery();
@@ -16,6 +17,13 @@ const PlayerInfo = (props) => {
   const playerPosition = elementTypes?.find(
     (x) => x?._id === player?.playerPosition
   )?.singularName;
+  console.log(player?.fixtures)
+
+  useEffect(() => {
+    const copyFix = player?.fixtures?.length > 0 ? [...player?.fixtures] : [];
+    copyFix?.sort((x, y) => (x?.kickOffTime > y?.kickOffTime ? 1 : -1));
+    setCopy(copyFix);
+  }, [player]);
 
   const resultsView = () => {
     setResults(true);
@@ -55,7 +63,7 @@ const PlayerInfo = (props) => {
             </div>
           </div>
           {fixtures &&
-            (player?.fixtures?.length > 0 ? (
+            (copy?.length > 0 ? (
               <div className="games-info-fixtures">
                 <div style={{ fontWeight: 700 }} className="fix-grid p-2">
                   <div>Date</div>
@@ -63,7 +71,7 @@ const PlayerInfo = (props) => {
                   <div className="fdr">Fixture</div>
                 </div>
                 <div>
-                  {player?.fixtures?.map((x, idx) => {
+                  {copy?.map((x, idx) => {
                     let teamName =
                       player?.playerTeam === x.teamAway
                         ? teams?.find((tname) => tname._id === x.teamHome)?.name

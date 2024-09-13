@@ -216,7 +216,7 @@ const updateMatchdayRank = asyncHandler(async (req, res) => {});
 //@access private
 const getLivePicks = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user.id);
-  const livePicks = await ManagerLive.find({ user: req.params.id });
+  const livePicks = await ManagerLive.find({ user: req.params.id }); 
 
   if (!user) {
     res.status(400);

@@ -1,23 +1,20 @@
 import LoginScreen from "./LoginScreen"
 import { useSelector } from 'react-redux'
+import MostOwned from "../components/MostOwned"
+import TeamOfWeek from "../components/TeamOfWeek"
+import StarsOfWeek from "../components/StarsOfWeek"
 const HomeScreen = () => {
 
   const { userInfo } = useSelector((state) => state.auth)
   return (
     <>
     {userInfo ? 
-    <div style={{fontWeight: 600}}>Welcome, {userInfo?.firstName}&nbsp;{userInfo?.lastName}</div> : <LoginScreen />}
-    <div>
-      <div>
-        Most Owned Players
-      </div>
-      <div>
-        Team of the week
-      </div>
+    <div className="py-2" style={{fontWeight: 600}}>You&#39;re logged in as, {userInfo?.firstName}&nbsp;{userInfo?.lastName}</div> : <LoginScreen />}
+    <div className="home-section">
+      <MostOwned/>
+      <TeamOfWeek/>
     </div>
-    <div>
-      Players of a single matchday
-    </div>
+    <StarsOfWeek/>
     </>
   )
 }

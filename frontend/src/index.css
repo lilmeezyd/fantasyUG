@@ -25,6 +25,7 @@ header .active {
   background: transparent;
 }
 
+/* HomeScreen */
 .dashboard-links a {
   text-decoration: none;
   color: black;
@@ -103,6 +104,18 @@ form.login-cs {
 .login-cs-child .col {
   font-weight: 600;
   align-self: center;
+}
+
+.home-section {
+  display: flex;
+  gap: 1rem;
+}
+
+.home-section-sub {
+  flex: 1 0 0%;
+  text-align: center;
+  padding: 1rem 0;
+  border: 1px solid;
 }
 
 
@@ -772,24 +785,34 @@ form.login-cs {
 
 
 .home {
-  display: grid;
-  align-items: center;
-  grid-template-columns: 60% 30%;
+  display: flex;
+  /*align-items: center;
+  grid-template-columns: 60% 30%;*/
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
 }
 
 .away {
-  display: grid;
+  display: flex;
+  /*display: grid;
   align-items: center;
-  grid-template-columns: 30% 60%;
+  grid-template-columns: 30% 60%;*/
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
+}
+
+.home div, .away div {
+  flex: 1 0 0%;
+  align-self: center;
 }
 
 .home img,
 .away img {
   width: 25px;
+}
+
+.ticker-image {
+  text-align: center;
 }
 
 .team {
@@ -1043,6 +1066,8 @@ form.login-cs {
   padding: 0.5rem 0;
   font-weight: 600;
 }
+
+
 
 .footer {
   background: #cff7d9;

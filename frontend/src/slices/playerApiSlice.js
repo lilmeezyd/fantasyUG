@@ -3,11 +3,6 @@ const PLAYERS_URL = "/api/players";
 
 export const playerApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    getSome: builder.query({
-      query: () => ({
-        url: `https://fantasy.premierleague.com/api/fixtures`
-      })
-    }),
     getPlayers: builder.query({
       query: () => ({
         url: `${PLAYERS_URL}`,
@@ -52,4 +47,4 @@ export const {
   useEditPlayerMutation,
   useDeletePlayerMutation,
   useGetSomeQuery
-} = playerApiSlice;
+} = playerApiSlice; 
