@@ -1,10 +1,7 @@
 import { Container  } from "react-bootstrap"
 import { NavLink, Outlet } from 'react-router-dom'
-import { useGetSomeQuery } from "../slices/playerApiSlice"
 
 const DashboardScreen = () => {
-  const { data } = useGetSomeQuery()
-  console.log(data)
 
   return (
     <Container>
@@ -18,6 +15,7 @@ const DashboardScreen = () => {
                 <li><NavLink activeclassname="active" to='/admin/dashboard/fixtures'>Fixtures</NavLink></li>
                 <li><NavLink activeclassname="active" to='/admin/dashboard/matchdays'>Matchdays</NavLink></li>
                 <li><NavLink activeclassname="active" to='/admin/dashboard/leagues'>Leagues</NavLink></li>
+                <li><NavLink activeclassname="active" to='/admin/dashboard/actions'>Actions</NavLink></li>
             </ul>
         </div>
         <div className="outlet p-2 m-2">

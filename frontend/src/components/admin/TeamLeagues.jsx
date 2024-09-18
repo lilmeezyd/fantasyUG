@@ -1,5 +1,7 @@
 import { useState, useMemo } from "react";
 import { Container, Spinner, Button } from "react-bootstrap";
+import { BsPencilFill } from "react-icons/bs";
+import { AiFillDelete} from "react-icons/ai"
 import Pagination from "../Pagination"
 import {
   useGetTeamLeaguesQuery,
@@ -179,17 +181,17 @@ const TeamLeagues = () => {
         <div>
             <Button
               onClick={() => editTeamLeaguePop(x._id)}
-              className="btn btn-warning"
+              style={{background: 'white', border: '1px solid black'}}
             >
-              Edit
+              <BsPencilFill color="black"/>
             </Button>
           </div>
           <div>
             <Button
               onClick={() => deleteTeamLeaguePop(x._id)}
-              className="btn btn-danger"
+              style={{background: 'white', border: '1px solid black'}}
             >
-              Delete
+              <AiFillDelete color="black" />
             </Button>
           </div>
       </div>)

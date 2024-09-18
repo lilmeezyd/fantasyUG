@@ -1,21 +1,25 @@
 import {  useMemo, useState } from "react";
 import {
   useGetMatchdaysQuery,
+  useStartMatchdayMutation,
   useAddMatchdayMutation,
   useDeleteMatchdayMutation
 } from "../../slices/matchdayApiSlice";
+import { useSetLivePicksMutation } from "../../slices/livePicksApiSlice";
 import { Container, Button, Spinner } from "react-bootstrap";
 import Pagination from "../Pagination"
 import AddModal from "./matchdayModals/AddModal";
 import DeleteModal from "./matchdayModals/DeleteModal";
 import EditModal from "./matchdayModals/EditModal";
+import StartModal from "./matchdayModals/StartModal";
 import getTime from "../../utils/getTime";
 
 const Matchdays = () => {  
   const [show, setShow] = useState({
     edited: false,
     deleted: false,
-    added: false, 
+    added: false,
+    start: false
   });
   const [matchdayId, setMatchdayId] = useState("");
   const [curPage, setCurPage] = useState(1);
@@ -23,7 +27,9 @@ const Matchdays = () => {
   const { data: matchdays,  isLoading}  = useGetMatchdaysQuery()
   const [addMatchday ] = useAddMatchdayMutation()
   const [ deleteMatchday ] = useDeleteMatchdayMutation()
-  const {deleted, edited, added } = show
+  const [ startMatchday ] = useStartMatchdayMutation()
+  const [ setLivePicks ] = useSetLivePicksMutation()
+  const {deleted, edited, added, start } = show
   const pageSize = 5
   let totalPages = Math.ceil(matchdays?.length / pageSize);
 
@@ -47,6 +53,13 @@ const closeDelete = () => {
   }));
   setMatchdayId("");
 };
+const closeStart = () => {
+  setShow((prevState) => ({
+    ...prevState,
+    start: false,
+  }));
+  setMatchdayId("");
+};
 
  const addMatchdayPop = () => {
   setShow((prevState) => ({
@@ -63,8 +76,32 @@ const editMatchdayPop = async (id) => {
 }
 
 const startMatchdayPop = async (id) => {
-  console.log(id)
+  setShow((prevState) => ({
+    ...prevState,
+    start: true,
+  }));
+  setMatchdayId(id);
 }
+const cancelStart = () => {
+  setMatchdayId("");
+  setShow((prevState) => ({
+    ...prevState,
+    start: false,
+  }));
+};
+
+const startMatchdayNow = async () => {
+  setShow((prevState) => ({
+    ...prevState,
+    start: false,
+  }));
+  try {
+    await startMatchday(matchdayId).unwrap();
+  } catch (error) {
+    console.log(error);
+  }
+  setMatchdayId("");
+};
 const deleteMatchdayPop = (id) => {
   setShow((prevState) => ({
     ...prevState,
@@ -82,15 +119,15 @@ const cancelDelete = () => {
 };
 
 const deleteMatchdayNow = async () => {
+  setShow((prevState) => ({
+    ...prevState,
+    deleted: false,
+  }));
   try {
     await deleteMatchday(matchdayId).unwrap();
   } catch (error) {
     console.log(error);
   }
-  setShow((prevState) => ({
-    ...prevState,
-    deleted: false,
-  }));
   setMatchdayId("");
 };
 
@@ -114,6 +151,14 @@ const resetEdit = async () => {
   }));
   setMatchdayId("");
 };
+
+const setLive = async () => {
+  try {
+  await setLivePicks().unwrap()
+  } catch (error) {
+    console.log(error)
+  }
+}
 
 {/* Button Controls */}
 const onSubmit = (e) => {
@@ -177,8 +222,13 @@ const memoMatchdays = useMemo(() => {
           <div><Button onClick={() => editMatchdayPop(x._id)} className="btn btn-warning">Edit</Button></div>
           <div><Button onClick={() => deleteMatchdayPop(x._id)} className="btn btn-danger">Delete</Button></div>
       </div>)}
+      <div>
+      <div className="add-button p-2">
+      <div><Button onClick={setLive}>Set Live Picks</Button></div>
+      </div>
       <div className="add-button p-2">
         <Button onClick={addMatchdayPop} className="btn btn-success">Add Matchday</Button>
+      </div>
       </div>
       <AddModal submit={submit} show={added} closeAdd={closeAdd}></AddModal>
       <EditModal
@@ -187,6 +237,12 @@ const memoMatchdays = useMemo(() => {
         show={edited}
         closeEdit={closeEdit}
       ></EditModal>
+      <StartModal
+      startMatchdayNow={startMatchdayNow}
+      cancelStart={cancelStart}
+      show={start}
+      closeStart={closeStart}
+      ></StartModal>
       <DeleteModal
         deleteMatchdayNow={deleteMatchdayNow}
         cancelDelete={cancelDelete}

@@ -29,6 +29,7 @@ import Players from "./components/admin/Players.jsx";
 import Positions from "./components/admin/Positions.jsx";
 import Teams from "./components/admin/Teams.jsx";
 import Users from "./components/admin/Users.jsx";
+import Actions from "./components/admin/Actions.jsx";
 import TeamLeagues from "./components/admin/TeamLeagues.jsx";
 import OverallLeagues from "./components/admin/OverallLeagues.jsx";
 import PrivateLeagues from "./components/admin/PrivateLeagues.jsx";
@@ -77,6 +78,7 @@ const router = createBrowserRouter(
           <Route path="positions" element={<Positions />} />
           <Route path="teams" element={<Teams />} />
           <Route path="users" element={<Users />} />
+          <Route path="actions" element={<Actions />} />
         </Route>
       </Route>
     </Route>

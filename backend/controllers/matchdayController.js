@@ -8,7 +8,6 @@ import User from "../models/userModel.js";
 //@role ADMIN
 const setMatchday = asyncHandler(async (req, res) => {
   let { name, deadlineTime } = req.body;
-  console.log(req.body)
   //let timeString = new Date(deadlineTime).toISOString()
   if(!name) {
     res.status(400)
@@ -84,6 +83,71 @@ const getMatchday = asyncHandler(async (req, res) => {
   res.status(200).json(matchday);
 });
 
+//@desc Start Matchday
+//@route PATCH /api/matchdays/:id
+//@access Private
+//@role ADMIN
+const startMatchday = asyncHandler(async (req, res) => {
+  const matchday = await Matchday.findById(req.params.id);
+  const { id } = matchday
+  const prev = id > 1 ? id-1 : 0
+  const next = id+1 
+
+  if (!matchday) {
+    res.status(400);
+    throw new Error("Matchday not found");
+  }
+
+  //FInd user
+  if (!req.user) {
+    res.status(400);
+    throw new Error("User not found");
+  }
+
+  if(prev === 0) {
+    const updated = await Matchday.findByIdAndUpdate(
+      req.params.id,
+      {next: false, current: true, pastDeadline: true},
+      { new: true }
+    );
+
+    await Matchday.findOneAndUpdate(
+      {id: next},
+      {next: true},
+      {new: true}
+    )
+
+    res.status(200).json(updated)
+  } else {
+    const prevMatchday = await Matchday.findOne({id: prev});
+    const nextMatchday = await Matchday.findOne({id: next});
+    const { finished, pastDeadline } = prevMatchday
+    let nextMatch
+    
+    if(finished === false || pastDeadline === false) {
+      res.status(400)
+      throw new Error(`Previous matchday isn't finished yet!`)
+    }
+    const updated = await Matchday.findByIdAndUpdate(
+      req.params.id,
+      {next: false, current: true, pastDeadline: true},
+      { new: true }
+    );
+
+    if(nextMatchday) {
+      nextMatch = nextMatchday?._id
+      
+    await Matchday.findByIdAndUpdate(
+      nextMatch,
+      {next: true},
+      {new: true}
+    )
+    }
+
+    res.status(200).json(updated)
+  }
+})
+
 //@desc Update Matchday
 //@route PUT /api/matchdays/:id
 //@access Private
@@ -153,4 +217,4 @@ const deleteMatchday = asyncHandler(async (req, res) => {
   res.status(200).json({ id: req.params.id });
 });
 
-export { setMatchday, getMatchdays, getMatchday, updateMatchday, deleteMatchday };
+export { setMatchday, getMatchdays, getMatchday, startMatchday, updateMatchday, deleteMatchday };

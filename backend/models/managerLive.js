@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
  
 const managerLiveSchema = mongoose.Schema({
-  user: {
+  user: { 
     type: mongoose.Schema.Types.ObjectId,
     required: true,
     ref: "User",
@@ -41,6 +41,8 @@ const managerLiveSchema = mongoose.Schema({
          points: { type: Number, default: null}
       }
       ],
+      teamValue: { type: Number, required: true},
+      bank: { type: Number, required: true}
     }
   ],
 });

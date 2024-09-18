@@ -22,6 +22,13 @@ export const matchdayApiSlice = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ['Matchday']
     }),
+    startMatchday: builder.mutation({
+      query: (id) => ({
+        url: `${MATCHDAYS_URL}/${id}`,
+        method: "PATCH"
+      }),
+      invalidatesTags: ['Matchday']
+    }),
     editMatchday: builder.mutation({
       query: ({id, ...rest}) => ({
         url: `${MATCHDAYS_URL}/${id}`,
@@ -44,6 +51,7 @@ export const {
   useGetMatchdaysQuery,
   useGetMatchdayQuery,
   useAddMatchdayMutation,
+  useStartMatchdayMutation,
   useEditMatchdayMutation,
   useDeleteMatchdayMutation,
 } = matchdayApiSlice;

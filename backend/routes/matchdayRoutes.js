@@ -5,6 +5,7 @@ import {
   getMatchday,
   updateMatchday,
   deleteMatchday,
+  startMatchday,
 } from "../controllers/matchdayController.js";
 import { protect, roles } from "../middleware/authMiddleware.js";
 import ROLES from "../config/permissions.js";
@@ -17,6 +18,7 @@ router
 router
   .route("/:id")
   .get(getMatchday)
+  .patch(protect, roles(ROLES.ADMIN), startMatchday)
   .patch(protect, roles(ROLES.ADMIN, ROLES.EDITOR), updateMatchday)
   .delete(protect, roles(ROLES.ADMIN), deleteMatchday);
 

@@ -209,11 +209,11 @@ const onSort = (e) => {
           </div>
 
           <Suspense fallback={<Spinner/>}>
-{(players.length) ? 
+{(players?.length) ? 
 <div className="player-info">
 <div className="player-numbers">
-  <span className="number">{players.length}</span>
-  <span className="numbers">{players.length === 1 ? 'Player' : 'Players'}</span>
+  <span className="number">{players?.length}</span>
+  <span className="numbers">{players?.length === 1 ? 'Player' : 'Players'}</span>
 </div>
 <div className="players-table">
   { goalkeepers.length > 0 ? (<div className='table-one' id='goalkeepers'>

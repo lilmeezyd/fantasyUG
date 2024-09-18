@@ -5,30 +5,43 @@ import Player from "../models/playerModel.js";
 import User from "../models/userModel.js";
 import Matchday from "../models/matchdayModel.js";
 import Fixture from "../models/fixtureModel.js";
+import ManagerInfo from "../models/managerInfoModel.js";
 
 //@desc set live picks
-//@route PUT api/livepicks/manager/ 
+//@route PUT api/livepicks/manager/  
 //@access
-const setLivePicks = asyncHandler(async (req, res) => {
+const setLivePicks = asyncHandler(async (req, res) => { 
   const allPicks = await Picks.find({});
   const matchday = await Matchday.findOne({ current: true });
   const id = matchday.id;
   const mid = matchday._id;
+  
+  if(!matchday) {
+    res.status(404)
+    throw new Error(`No matchday found!`)
+  }
 
   for (let i = 0; i < allPicks.length; i++) {
     const mLive = await ManagerLive.findOne({ user: allPicks[i].user });
+    const mInfo = await ManagerInfo.findOne({ user: allPicks[i].user})
+    const {matchdayJoined} = mInfo
     if (mLive === null) {
-      await ManagerLive.create({
-        user: allPicks[i].user,
-        livePicks: [
-          {
-            matchday: id,
-            matchdayId: mid,
-            activeChip: null,
-            picks: allPicks[i].picks,
-          },
-        ],
-      });
+      if(id <= matchdayJoined) {
+        await ManagerLive.create({
+          user: allPicks[i].user,
+          livePicks: [
+            {
+              matchday: id,
+              matchdayId: mid,
+              activeChip: null,
+              picks: allPicks[i].picks,
+              teamValue: allPicks[i].teamValue,
+              bank: allPicks[i].bank
+            },
+          ],
+        });
+      }
+      
     } else {
       const mLivePicks = mLive.livePicks;
       let idIndex = mLive.livePicks.findIndex((x) => x.matchday === id);
@@ -46,6 +59,8 @@ const setLivePicks = asyncHandler(async (req, res) => {
           matchdayId: mid,
           activeChip: null,
           picks: allPicks[i].picks,
+          teamValue: allPicks[i].teamValue,
+          bank: allPicks[i].bank
         },
       ];
       await ManagerLive.findOneAndUpdate(

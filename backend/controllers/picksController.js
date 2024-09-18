@@ -12,6 +12,8 @@ const setPicks = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user.id);
   const userHasPicks = await Picks.find({ user: req.user.id });
   const mgrExists = await ManagerInfo.findOne({ user: req.user.id });
+  const nextMD = await Matchday.findOne({next: true})
+  const { id } = nextMD
   if (!picks) {
     res.status(400);
     throw new Error("No players added");
@@ -49,7 +51,8 @@ const setPicks = asyncHandler(async (req, res) => {
 
 
   const managerInfo = await ManagerInfo.create({
-    user: req.user.id,
+    user: req.user.id, 
+    matchdayJoined: id,
     teamName,
   });
 

@@ -6,15 +6,18 @@ import {
   BsChevronRight
 } from "react-icons/bs";
 import FixtureItem from "./FixtureItem";
-const FixtureList = () => {
+const FixtureList = (props) => {
+  const { mdParam } = props
   const [page, setPage] = useState(1);
   const [copy, setCopy] = useState([]); 
   const { data: fixtures, isLoading } = useGetFixturesQuery();
+  //const md = matchdays?.find(matchday => matchday?.next === true)
   useEffect(() => {
     const copyFix = fixtures?.length > 0 ? [...fixtures] : [];
     copyFix?.sort((x, y) => (x?.kickOffTime > y?.kickOffTime ? 1 : -1));
+    setPage(copyFix?.find(x => x?._id?.[mdParam] === true)?._id?.id)
     setCopy(fixtures);
-  }, [fixtures]);
+  }, [fixtures, mdParam]);
 
   const onDecrement = () => {
     setPage((prevState) => prevState - 1);

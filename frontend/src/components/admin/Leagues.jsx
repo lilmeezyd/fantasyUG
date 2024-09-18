@@ -1,7 +1,6 @@
 import { Container, Button } from "react-bootstrap";
 import { Link, Outlet } from 'react-router-dom'
-
-const Leagues = () => {  
+const Leagues = () => {   
   
   return (
     <Container>

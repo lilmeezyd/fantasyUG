@@ -706,6 +706,7 @@ form.login-cs {
   border-bottom-left-radius: 0.5rem;
   border-bottom-right-radius: 0.5rem;
   padding: 0.1rem;
+  min-height: 10px;
 }
 
 .image_pic {
@@ -777,7 +778,7 @@ form.login-cs {
   align-items: center;
   font-weight: 700;
   cursor: pointer;
-  grid-template-columns: 1fr min-content 1fr;
+  grid-template-columns: 45% min-content 45%;
   font-size: 1rem;
   border-bottom: 1px solid #aaa;
   border-top: 1px solid #aaa;
@@ -915,6 +916,7 @@ form.login-cs {
 
 .fix-body {
   padding: 1rem 0;
+  overflow: auto;
 }
 
 .fix-admin-buttons {

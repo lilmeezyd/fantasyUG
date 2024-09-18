@@ -8,8 +8,16 @@ export const livePicksApiSlice = apiSlice.injectEndpoints({
                 url: `${LIVE_PICKS_URL}/${id}`
             }),
             providesTags: ['Live']
-        })
+        },
+    ),
+    setLivePicks: builder.mutation({
+        query: () => ({
+            url: `${LIVE_PICKS_URL}`,
+            method: 'PUT'
+        }),
+        invalidatesTags: ['Live']
+    })
     })
 })
 
-export const { useGetLivePicksQuery } = livePicksApiSlice
+export const { useGetLivePicksQuery, useSetLivePicksMutation } = livePicksApiSlice

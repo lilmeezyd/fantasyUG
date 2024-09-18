@@ -8,7 +8,7 @@ const managerInfoSchema = mongoose.Schema(
       unique: true,
       ref: "User",
     },
-    current: { type: Number, default: null},
+    matchdayJoined: { type: Number, required: true},
     teamName: {
       type: String,
       required: true,

@@ -5,7 +5,6 @@ import { getPm, getPmString } from "../utils/getPm";
 
 const FixtureItem = (props) => {
   const { x } = props;
-console.log(x)
   const [stats, displayStats] = useState(false);
   const { data: teams } = useGetQuery();
 

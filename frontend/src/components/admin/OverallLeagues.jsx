@@ -1,5 +1,7 @@
 import { useState, useMemo } from "react"
 import { Container, Spinner, Button } from "react-bootstrap"
+import { BsPencilFill } from "react-icons/bs";
+import { AiFillDelete} from "react-icons/ai"
 import Pagination from "../Pagination"
 import { useGetOverallLeaguesQuery, useAddOverallLeagueMutation, useDeleteOverallLeagueMutation } from "../../slices/leagueApiSlice"
 import AddModal from "./overallLeagueModals/AddModal"
@@ -172,17 +174,17 @@ const OverallLeagues = () => {
         <div>
             <Button
               onClick={() => editOverallLeaguePop(x._id)}
-              className="btn btn-warning"
+              style={{background: 'white', border: 'white'}}
             >
-              Edit
+              <BsPencilFill color="black"/>
             </Button>
           </div>
           <div>
             <Button
               onClick={() => deleteOverallLeaguePop(x._id)}
-              className="btn btn-danger"
+              style={{background: 'white', border: 'white'}}
             >
-              Delete
+              <AiFillDelete color="black" />
             </Button>
           </div>
       </div>)

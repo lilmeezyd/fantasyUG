@@ -5,7 +5,7 @@ import FixtureList from "../components/FixtureList";
 import { Container } from "react-bootstrap";
 import { useGetManagerInfoQuery } from "../slices/managerInfoApiSlice";
 import { useGetPicksQuery } from "../slices/picksSlice";
-
+ 
 const PickTeam = () => {
   const { data: managerInfo } = useGetManagerInfoQuery();
   const { data: managerPicks, isLoading } = useGetPicksQuery();
@@ -380,7 +380,7 @@ const PickTeam = () => {
          />
       </div>
       <Container className="main">
-        <FixtureList />
+        <FixtureList mdParam={'next'} />
       </Container>
     </>
   );
