@@ -6,6 +6,7 @@ import User from "../models/userModel.js";
 import Matchday from "../models/matchdayModel.js";
 import Fixture from "../models/fixtureModel.js";
 import ManagerInfo from "../models/managerInfoModel.js";
+import PlayerHistory from "../models/playerHistoryModel.js";
 
 //@desc set live picks
 //@route PUT api/livepicks/manager/  
@@ -80,8 +81,10 @@ const setLivePicks = asyncHandler(async (req, res) => {
 const setInitialPoints = asyncHandler(async (req, res) => {
   const allLives = await ManagerLive.find({});
   const fixture = await Fixture.findById(req.params.id);
-  const matchday = await Matchday.findOne({ id: +req.params.mid });
+  const matchday = await Matchday.findById(req.params.mid);
   const mid = matchday._id;
+  console.log(req.params.id)
+  console.log(req.params.mid)
   const { teamAway, teamHome } = fixture;
   const players = await Player.find({
     $or: [{ playerTeam: teamAway }, { playerTeam: teamHome }],
@@ -97,7 +100,7 @@ const setInitialPoints = asyncHandler(async (req, res) => {
   if (!players) {
     res.status(400);
     throw new Error("No players found");
-  }
+  }/*
   for (let i = 0; i < players.length; i++) {
     const { matchdays, _id } = players[i];
     const mdPoints = matchdays.filter(
@@ -120,7 +123,7 @@ const setInitialPoints = asyncHandler(async (req, res) => {
         { new: true }
       );
     }
-  }
+  }*/
 });
 
 //@desc update player scores in picks

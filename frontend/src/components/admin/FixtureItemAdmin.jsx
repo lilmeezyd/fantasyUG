@@ -1,28 +1,44 @@
 import { useState } from "react";
 import { useGetQuery } from "../../slices/teamApiSlice";
+import { usePopulateFixtureMutation, useDepopulateFixtureMutation } from "../../slices/fixtureApiSlice";
 import getTime from "../../utils/getTime";
 import { getPm, getPmString } from "../../utils/getPm";
 import { Button } from "react-bootstrap";
+import { useSetInitialPointsMutation } from "../../slices/livePicksApiSlice";
 
 const FixtureItemAdmin = (props) => {
   const { x, editFixturePop, deleteFixturePop } = props;
 
   const [stats, displayStats] = useState(false);
   const { data: teams } = useGetQuery();
+  const [ populateFixture ] = usePopulateFixtureMutation()
+  const [ depopulateFixture ] = useDepopulateFixtureMutation()
+  const [ setInitialPoints ]  = useSetInitialPointsMutation()
 
   const onClick = () => {
     displayStats((prevState) => !prevState);
   };
-  const initialPoints = (x) => {
-    console.log(x)
-    //const data = {mid: y, fid: x}
-    /*setShowSwap(true)
-    handleShow()
-    setInitialData(data)
-    dispatch(populateFixture(x))*/
+  const initialStats = async (y) => {
+    try {
+      await populateFixture(y).unwrap()
+    } catch (error) {
+      console.log(error)
+    }
 }
-const dePopulate = (x) => {
-  console.log(x)
+const dePopulate = async (y) => {
+  try {
+    await depopulateFixture(y).unwrap()
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+const setInitial= async (x, y) => {
+  try {
+    await setInitialPoints({y:y, x:x}).unwrap()
+  } catch (error) {
+    console.log(error)
+  }
 }
   return (
     <>
@@ -75,15 +91,20 @@ const dePopulate = (x) => {
               <div><Button onClick={() => editFixturePop(x._id)} className="btn btn-warning">Edit</Button></div>
               <div><Button onClick={() => deleteFixturePop(x._id)} className="btn btn-danger">Delete</Button></div>
                 <div>
-                  {x?.stats?.length === 0 ? <Button onClick={() => initialPoints(x)}>
+                  {x?.stats?.length === 0 ? <Button onClick={() => initialStats(x._id)}>
                     Populate
-                  </Button> : <Button onClick={() => dePopulate(x)}>
+                  </Button> : <Button onClick={() => dePopulate(x._id)}>
                     Depopulate
                   </Button>}
                 </div>
                 <div>
                   <Button>Edit Stats</Button>
                 </div>
+                {x?.stats?.length > 0 &&<div>
+                    <Button onClick={() => setInitial(x._id, x.matchday)}>
+                        Set Initial Points
+                    </Button>
+                </div>}
               </div>
     </>
   );

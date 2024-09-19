@@ -32,7 +32,7 @@ const playerHistorySchema = mongoose.Schema({
     goalsScored: {
         type: Number,
         default: 0
-    },
+    }, 
     assists: {
         type: Number,
         default: 0
