@@ -83,12 +83,13 @@ const setInitialPoints = asyncHandler(async (req, res) => {
   const fixture = await Fixture.findById(req.params.id);
   const matchday = await Matchday.findById(req.params.mid);
   const mid = matchday._id;
-  console.log(req.params.id)
-  console.log(req.params.mid)
-  const { teamAway, teamHome } = fixture;
-  const players = await Player.find({
+  //const { teamAway, teamHome } = fixture;
+  /*const players = await Player.find({
     $or: [{ playerTeam: teamAway }, { playerTeam: teamHome }],
-  });
+  });*/
+  const players = await PlayerHistory.find({
+    matchday: req.params.mid, fixture: req.params.id
+  })
   if (!fixture) {
     res.status(400);
     throw new Error("Fixture not found");
@@ -100,30 +101,33 @@ const setInitialPoints = asyncHandler(async (req, res) => {
   if (!players) {
     res.status(400);
     throw new Error("No players found");
-  }/*
-  for (let i = 0; i < players.length; i++) {
-    const { matchdays, _id } = players[i];
-    const mdPoints = matchdays.filter(
-      (x) => x.matchday.toString() === mid.toString()
-    )[0].matchdayPoints;
+  }
+  
+  for(let i=0; i<allLives.length; i++) {
+    const mLive = await ManagerLive.findOne({user:allLives[i].user})
+   const mLivePicks = mLive.livePicks
+   const mdPicks = mLivePicks.find(x => x.matchdayId.toString() === req.params.mid.toString())
+   const { matchday, matchdayId, activeChip, matchdayRank, matchdayPoints } = mdPicks
+   const { picks: unformattedPicks } = mdPicks
+   const formatted = []
+   unformattedPicks.forEach(x => {
+    const { _id, playerPosition, playerTeam, multiplier, nowCost, IsCaptain, IsViceCaptain, slot} = x
+    const inPlayers = players.findIndex(y => x._id.toString() === y.player.toString())
+    inPlayers > -1 ? formatted.push({
+      _id, playerPosition, playerTeam, multiplier, nowCost, IsCaptain, IsViceCaptain, slot,
+      points:players.find(y => x._id.toString() === y.player.toString())?.totalPoints}
+    ) : formatted.push(x)
+  }
+   )
 
-    for (let i = 0; i < allLives.length; i++) {
-      const mLive = await ManagerLive.findOne({ user: allLives[i].user });
-      const mLivePicks = mLive.livePicks;
-
-      const a = mLivePicks.filter((x) => x.matchday === +req.params.mid);
-      a.length > 0 &&
-        a[0].picks.map((x) =>
-          x._id.toString() === _id.toString() ? (x.points = mdPoints) : x.points
-        );
-
-      await ManagerLive.findOneAndUpdate(
-        { user: allLives[i].user },
-        { livePicks: mLivePicks },
-        { new: true }
-      );
-    }
-  }*/
+   const newFormatted = { picks: formatted, matchday, matchdayId, activeChip, matchdayRank, matchdayPoints}
+   
+    await ManagerLive.findOneAndReplace({user: allLives[i].user, "livePicks.matchdayId": req.params.mid}, 
+        {livePicks:newFormatted}, {new: true})
+}
+        
+        
+    
 });
 
 //@desc update player scores in picks

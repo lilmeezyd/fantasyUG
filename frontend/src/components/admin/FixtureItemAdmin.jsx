@@ -34,6 +34,8 @@ const dePopulate = async (y) => {
 }
 
 const setInitial= async (x, y) => {
+  console.log(x)
+  console.log(y)
   try {
     await setInitialPoints({y:y, x:x}).unwrap()
   } catch (error) {

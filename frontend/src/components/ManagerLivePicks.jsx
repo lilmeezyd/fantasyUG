@@ -19,7 +19,6 @@ const ManagerPicks = (props) => {
   const { data: matchdays } = useGetMatchdaysQuery()
   const navigate = useNavigate();
   const md = matchdays?.find(matchday => matchday?.next === true)
-
   const goalkeepers = picks?.filter(
     (pick) =>
       pick?.playerPosition === "669a41e50f8891d8e0b4eb2a" &&
