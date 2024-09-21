@@ -45,10 +45,15 @@ export const fixtureApiSlice = apiSlice.injectEndpoints({
       invalidatesTags: ['Fixture']
     }),
     depopulateFixture: builder.mutation({
-      query: (id) => ({
-        url: `${FIXTURES_URL}/${id}/depopulate`,
-        method: 'PATCH'
-      }),
+      query: (data) => {
+        const {y, x} = data
+        console.log(y)
+        console.log(x)
+        console.log(data)
+        return {
+        url: `${FIXTURES_URL}/${x}/depopulate/matchday/${y}`,
+        method: 'PATCH'}
+      },
       invalidatesTags: ['Fixture']
     }),
     editStats: builder.mutation({

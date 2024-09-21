@@ -25,17 +25,15 @@ const FixtureItemAdmin = (props) => {
       console.log(error)
     }
 }
-const dePopulate = async (y) => {
+const dePopulate = async (x,y) => {
   try {
-    await depopulateFixture(y).unwrap()
+    await depopulateFixture({y,x}).unwrap()
   } catch (error) {
     console.log(error)
   }
 }
 
 const setInitial= async (x, y) => {
-  console.log(x)
-  console.log(y)
   try {
     await setInitialPoints({y:y, x:x}).unwrap()
   } catch (error) {
@@ -95,7 +93,7 @@ const setInitial= async (x, y) => {
                 <div>
                   {x?.stats?.length === 0 ? <Button onClick={() => initialStats(x._id)}>
                     Populate
-                  </Button> : <Button onClick={() => dePopulate(x._id)}>
+                  </Button> : <Button onClick={() => dePopulate(x._id, x.matchday)}>
                     Depopulate
                   </Button>}
                 </div>

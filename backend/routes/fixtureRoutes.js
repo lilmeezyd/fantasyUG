@@ -21,7 +21,7 @@ router
   .route("/:id/populate")
   .patch(protect, roles(ROLES.ADMIN, ROLES.EDITOR), populateStats);
 router
-  .route("/:id/depopulate")
+  .route("/:id/depopulate/matchday/:mid")
   .patch(protect, roles(ROLES.ADMIN, ROLES.EDITOR), dePopulateStats);
 router
   .route("/:id/stats")

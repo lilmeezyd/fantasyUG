@@ -6,7 +6,8 @@ import PlayerHistory from "../models/playerHistoryModel.js";
 import Position from "../models/positionModel.js";
 import User from "../models/userModel.js";
 import Matchday from "../models/matchdayModel.js";
-import Team from "../models/teamModel.js"
+import Team from "../models/teamModel.js";
+import ManagerLive from "../models/managerLive.js";
 
 //@desc Set Fixture
 //@route POST /api/fixtures
@@ -57,16 +58,16 @@ const setFixture = asyncHandler(async (req, res) => {
 //@access public
 //@role not restricted
 const getFixtures = asyncHandler(async (req, res) => {
-  const b = []
+  const b = [];
   //const fixtures = await Fixture.find({});
   const fixtures = await Fixture.aggregate([
-    {$group: {_id: "$matchday",  fixtures: { $addToSet: "$$ROOT"}}}
+    { $group: { _id: "$matchday", fixtures: { $addToSet: "$$ROOT" } } },
   ]);
-  await Matchday.populate(fixtures, {path: "_id"}) 
-  fixtures.forEach(x => {
-    x.fixtures.sort((v, w) => v.kickOffTime > w.kickOffTime ? 1 : -1)
-    b.push(x)
-})
+  await Matchday.populate(fixtures, { path: "_id" });
+  fixtures.forEach((x) => {
+    x.fixtures.sort((v, w) => (v.kickOffTime > w.kickOffTime ? 1 : -1));
+    b.push(x);
+  });
   res.status(200).json(b);
 });
 
@@ -147,15 +148,21 @@ const populateStats = asyncHandler(async (req, res) => {
 //@role ADMIN & EDITOR
 const dePopulateStats = asyncHandler(async (req, res) => {
   const fixture = await Fixture.findById(req.params.id);
-  /*const players = await Player.find({
+  const matchday  = await Matchday.findById(req.params.mid);
+  const allLives = await ManagerLive.find({});
+  const players = await Player.find({
     $or: [{ playerTeam: fixture.teamHome }, { playerTeam: fixture.teamAway }],
-  });*/
+  });
   // Find user
   const user = await User.findById(req.user.id).select("-password");
 
   if (!user) {
     res.status(400);
     throw new Error("User not found");
+  }
+  if (!matchday) {
+    res.status(400);
+    throw new Error("Matchday not found");
   }
   if (!fixture) {
     res.status(400);
@@ -165,7 +172,64 @@ const dePopulateStats = asyncHandler(async (req, res) => {
     res.status(400);
     throw new Error("Fixture already De-populated");
   }
+  if (!players) {
+    res.status(400);
+    throw new Error("No players found");
+  }
+  for (let i = 0; i < allLives.length; i++) {
+    const mLive = await ManagerLive.findOne({ user: allLives[i].user });
+    const mLivePicks = mLive.livePicks;
+    const mdPicks = mLivePicks.find(
+      (x) => x.matchdayId.toString() === req.params.mid
+    );
+    const { matchday, matchdayId, activeChip, matchdayRank, matchdayPoints } =
+      mdPicks;
+    const { picks: unformattedPicks } = mdPicks;
+    const formatted = [];
+    unformattedPicks.forEach((x) => {
+      const {
+        _id,
+        playerPosition,
+        playerTeam,
+        multiplier,
+        nowCost,
+        IsCaptain,
+        IsViceCaptain,
+        slot,
+      } = x;
+      const inPlayers = players.findIndex(
+        (y) => x._id.toString() === y._id.toString()
+      );
+      inPlayers > -1
+        ? formatted.push({
+            _id,
+            playerPosition,
+            playerTeam,
+            multiplier,
+            nowCost,
+            IsCaptain,
+            IsViceCaptain,
+            slot,
+            points: null,
+          })
+        : formatted.push(x);
+    });
 
+    const newFormatted = {
+      picks: formatted,
+      matchday,
+      matchdayId,
+      activeChip,
+      matchdayRank,
+      matchdayPoints,
+    };
+
+    await ManagerLive.findOneAndUpdate(
+      { user: allLives[i].user, "livePicks.matchdayId": req.params.mid },
+      { livePicks: newFormatted },
+      { new: true }
+    );
+  }
   fixture.stats.length = 0;
   fixture.teamAwayScore = null;
   fixture.teamHomeScore = null;
@@ -217,7 +281,7 @@ const editFixture = asyncHandler(async (req, res) => {
     { deadlineTime: deadline },
     { new: true }
   );
-  console.log(updatedFixture)
+  console.log(updatedFixture);
   res.status(200).json(updatedFixture);
 });
 
@@ -441,7 +505,7 @@ const deleteFixture = asyncHandler(async (req, res) => {
   if (!players) {
     res.status(400);
     throw new Error("No players found");
-  }/*
+  } /*
   players.forEach(async (player) => {
     const matchdayIndex = player.matchdays.findIndex(
       (x) => x.matchday.toString() === fixture.matchday.toString()

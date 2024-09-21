@@ -83,10 +83,6 @@ const setInitialPoints = asyncHandler(async (req, res) => {
   const fixture = await Fixture.findById(req.params.id);
   const matchday = await Matchday.findById(req.params.mid);
   const mid = matchday._id;
-  //const { teamAway, teamHome } = fixture;
-  /*const players = await Player.find({
-    $or: [{ playerTeam: teamAway }, { playerTeam: teamHome }],
-  });*/
   const players = await PlayerHistory.find({
     matchday: req.params.mid, fixture: req.params.id
   })
@@ -122,7 +118,7 @@ const setInitialPoints = asyncHandler(async (req, res) => {
 
    const newFormatted = { picks: formatted, matchday, matchdayId, activeChip, matchdayRank, matchdayPoints}
    
-    await ManagerLive.findOneAndReplace({user: allLives[i].user, "livePicks.matchdayId": req.params.mid}, 
+    await ManagerLive.findOneAndUpdate({user: allLives[i].user, "livePicks.matchdayId": req.params.mid}, 
         {livePicks:newFormatted}, {new: true})
 }
         
