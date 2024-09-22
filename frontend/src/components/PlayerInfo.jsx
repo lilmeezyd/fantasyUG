@@ -7,7 +7,8 @@ const PlayerInfo = (props) => {
   const { showPInfo, handleCloseInfo, player } = props;
   const [results, setResults] = useState(true);
   const [fixtures, setFixtures] = useState(false);
-  const [copy, setCopy] = useState([]);
+  const [copyFix, setCopyFix] = useState([]);
+  const [copyRes, setCopyRes ] = useState([])
   const { data: teams } = useGetQuery();
   const { data: elementTypes } = useGetPositionsQuery();
   const { data: matchdays } = useGetMatchdaysQuery();
@@ -22,7 +23,8 @@ const PlayerInfo = (props) => {
   useEffect(() => {
     const copyFix = player?.fixtures?.length > 0 ? [...player?.fixtures] : [];
     copyFix?.sort((x, y) => (x?.kickOffTime > y?.kickOffTime ? 1 : -1));
-    setCopy(copyFix);
+    setCopyRes(copyFix?.filter(x => x?.stats.length > 0));
+    setCopyFix(copyFix?.filter(x => x?.stats.length === 0));
   }, [player]);
 
   const resultsView = () => {
@@ -63,7 +65,7 @@ const PlayerInfo = (props) => {
             </div>
           </div>
           {fixtures &&
-            (copy?.length > 0 ? (
+            (copyFix?.length > 0 ? (
               <div className="games-info-fixtures">
                 <div style={{ fontWeight: 700 }} className="fix-grid p-2">
                   <div>Date</div>
@@ -71,7 +73,7 @@ const PlayerInfo = (props) => {
                   <div className="fdr">Fixture</div>
                 </div>
                 <div>
-                  {copy?.map((x, idx) => {
+                  {copyFix?.map((x, idx) => {
                     let teamName =
                       player?.playerTeam === x.teamAway
                         ? teams?.find((tname) => tname._id === x.teamHome)?.name
@@ -95,8 +97,8 @@ const PlayerInfo = (props) => {
                         </div>
                         <div className="fdr">{matchday}</div>
                         <div className="actual-fixture">
-                          <div>{teamName}</div>
-                          <div>{venue}</div>
+                          <div className="actual-fixture-1">{teamName}</div>
+                          <div className="actual-fixture-1">{venue}</div>
                         </div>
                       </div>
                     );
@@ -108,7 +110,55 @@ const PlayerInfo = (props) => {
             ))}
           {results &&
             (player?.results?.length > 0 ? (
-              <div>Player Results</div>
+              <div className="games-info-fixtures">
+                <div style={{ fontWeight: 700 }} className="fix-grid p-2">
+                  <div>Date</div>
+                  <div className="fdr">GW</div>
+                  <div className="fdr">Fixture</div>
+                </div>
+                <div>
+                  {copyRes?.map((x, idx) => {
+                    let teamHomeScore = x.teamHomeScore
+                    let teamAwayScore = x.teamAwayScore
+                    let teamName =
+                      player?.playerTeam === x.teamAway
+                        ? teams?.find((tname) => tname._id === x.teamHome)?.name
+                        : teams?.find((tname) => tname._id === x.teamAway)
+                            ?.name;
+                    let venue =
+                      player?.playerTeam === x.teamAway ? "(A)" : "(H)";
+                    let matchday = matchdays?.find(
+                      (y) => y._id === x.matchday
+                    )?.id;
+                    return (
+                      <div
+                        style={{ fontWeight: 700 }}
+                        className="fix-grid p-2 fix-row"
+                        key={idx+1}
+                      >
+                        <div>
+                          {x.kickOffTime === ""
+                            ? ""
+                            : new Date(x.kickOffTime).toDateString()}
+                        </div>
+                        <div className="fdr">{matchday}</div>
+                        <div className="actual-fixture">
+                          <div className="actual-fixture-1">
+                            <div>{teamName}</div>
+                            <div>{venue}</div>
+                          </div>
+                          <div className="actual-fixture-1">
+                          <div className="border" style={{borderRadius: 0.2+'rem'}}>{teamHomeScore}</div>
+                          &nbsp;
+                          <div className="border" style={{borderRadius: 0.2+'rem'}}>{teamAwayScore}</div>
+                        </div>
+                        </div>
+                        
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
             ) : (
               <div className="tx-center">Results will appear here!</div>
             ))}

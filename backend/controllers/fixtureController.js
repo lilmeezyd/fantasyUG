@@ -430,41 +430,8 @@ const editStats = asyncHandler(async (req, res) => {
     { new: true }
   );
   res.status(200).json(updatedFixture);
-  //res.status(200).json({ updatedFixture, msg: `Fixture Updated` });
 });
 
-//@desc Update score for a specific fixture
-//@route PUT /api/fixtures/:id/scores
-//@access private
-//@role ADMIN, EDITOR
-/*const updateScore = asyncHandler(async (req, res) => {
-  const fixture = await Fixture.findById(req.params.id);
-
-  if (!fixture) {
-    res.status(400);
-    throw new Error("Fixture not found");
-  }*/
-// Find user
-/* const user = await User.findById(req.user.id).select("-password");
-  if (!user) {
-    res.status(400);
-    throw new Error("User not found");
-  }*/
-// Make sure the logged in user is an ADMIN
-/*if (
-    Object.values(user.roles).includes(1) &&
-    Object.values(user.roles).length === 1
-  ) {
-    res.status(401);
-    throw new Error("Not Authorized");
-  }*/
-/*if (fixture.stats.length > 0) {
-    console.log("Fixture populated");
-  } else {
-    res.status(400);
-    throw new Error(`Stats not populated or fixture not started`);
-  }
-});*/
 
 //@desc Get Fixture
 //@route GET /api/fixtures/:id

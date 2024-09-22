@@ -55,8 +55,6 @@ export const fixtureApiSlice = apiSlice.injectEndpoints({
     }),
     editStats: builder.mutation({
       query: ({id, ...rest}) => {
-        console.log(id)
-        console.log(rest)
         return {
         url: `${FIXTURES_URL}/${id}/stats`,
         method: 'PATCH',

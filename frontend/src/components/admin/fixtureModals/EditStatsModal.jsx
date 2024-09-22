@@ -94,7 +94,7 @@ const { identifier, homeAway, player, value } = data
             <div className="form-group pb-2">
               <select className="form-control" name="value" id="value" onChange={onChange}>
                 <option value="">Select Value</option>
-                {[-1, 1].map((val, idx) => (
+                {[-3, -2,-1, 1,2,3].map((val, idx) => (
                   <option key={idx} value={+val}>
                     {val}
                   </option>

@@ -53,8 +53,6 @@ const setInitial= async (x, y) => {
 }
 
 const createStats = (field, ground) => {
-  console.log(field)
-  console.log(ground)
   return x?.stats?.length > 0 && x?.stats?.filter(x => x.identifier === field)[0][ground].map((x) => (
       <p key={x.player} className="player">
           <span className="stats">{players.find(player => player._id === x.player).appName}</span>
@@ -63,8 +61,6 @@ const createStats = (field, ground) => {
 }
 
 const statExists = (field) => {
-  console.log(x?.stats)
-  console.log(x?.stats?.findIndex(x => x.away.length === 0 && x.home.length === 0 && x.identifier === field))
   return x?.stats?.findIndex(x => x.away.length === 0 && x.home.length === 0 && x.identifier === field)
 }
   return (
@@ -144,7 +140,7 @@ const statExists = (field) => {
                             <div>
                                 {createStats('goalsScored', 'home')}
                             </div>
-
+                            <div className="vertical-line"></div>
                             <div>
                                 {createStats('goalsScored', 'away')}
                             </div>
@@ -157,7 +153,7 @@ const statExists = (field) => {
                                 <div>
                                     {createStats('assists', 'home')}
                                 </div>
-
+                                <div className="vertical-line"></div>
                                 <div>
                                     {createStats('assists', 'away')}
                                 </div>
@@ -169,7 +165,7 @@ const statExists = (field) => {
                                 <div>
                                     {createStats('ownGoals', 'home')}
                                 </div>
-
+                                <div className="vertical-line"></div>
                                 <div>
                                     {createStats('ownGoals', 'away')}
                                 </div>
@@ -181,7 +177,7 @@ const statExists = (field) => {
                                 <div>
                                     {createStats('penaltiesSaved', 'home')}
                                 </div>
-
+                                <div className="vertical-line"></div>
                                 <div>
                                     {createStats('penaltiesSaved', 'away')}
                                 </div>
@@ -193,7 +189,7 @@ const statExists = (field) => {
                                 <div>
                                     {createStats('penaltiesMissed', 'home')}
                                 </div>
-
+                                <div className="vertical-line"></div>
                                 <div>
                                     {createStats('penaltiesMissed', 'away')}
                                 </div>
@@ -205,7 +201,7 @@ const statExists = (field) => {
                                 <div>
                                     {createStats('yellowCards', 'home')}
                                 </div>
-
+                                <div className="vertical-line"></div>
                                 <div>
                                     {createStats('yellowCards', 'away')}
                                 </div>
@@ -217,7 +213,7 @@ const statExists = (field) => {
                                 <div>
                                     {createStats('redCards', 'home')}
                                 </div>
-
+                                <div className="vertical-line"></div>
                                 <div>
                                     {createStats('redCards', 'away')}
                                 </div>
@@ -229,7 +225,7 @@ const statExists = (field) => {
                                 <div>
                                     {createStats('saves', 'home')}
                                 </div>
-
+                                <div className="vertical-line"></div>
                                 <div>
                                     {createStats('saves', 'away')}
                                 </div>

@@ -84,7 +84,7 @@ const FixtureItem = (props) => {
                             <div>
                                 {createStats('goalsScored', 'home')}
                             </div>
-
+                            <div className="vertical-line"></div>
                             <div>
                                 {createStats('goalsScored', 'away')}
                             </div>
@@ -97,7 +97,7 @@ const FixtureItem = (props) => {
                                 <div>
                                     {createStats('assists', 'home')}
                                 </div>
-
+                                <div className="vertical-line"></div>
                                 <div>
                                     {createStats('assists', 'away')}
                                 </div>
@@ -109,7 +109,7 @@ const FixtureItem = (props) => {
                                 <div>
                                     {createStats('ownGoals', 'home')}
                                 </div>
-
+                                <div className="vertical-line"></div>
                                 <div>
                                     {createStats('ownGoals', 'away')}
                                 </div>
@@ -121,7 +121,7 @@ const FixtureItem = (props) => {
                                 <div>
                                     {createStats('penaltiesSaved', 'home')}
                                 </div>
-
+                                <div className="vertical-line"></div>
                                 <div>
                                     {createStats('penaltiesSaved', 'away')}
                                 </div>
@@ -133,7 +133,7 @@ const FixtureItem = (props) => {
                                 <div>
                                     {createStats('penaltiesMissed', 'home')}
                                 </div>
-
+                                <div className="vertical-line"></div>
                                 <div>
                                     {createStats('penaltiesMissed', 'away')}
                                 </div>
@@ -145,7 +145,7 @@ const FixtureItem = (props) => {
                                 <div>
                                     {createStats('yellowCards', 'home')}
                                 </div>
-
+                                <div className="vertical-line"></div>
                                 <div>
                                     {createStats('yellowCards', 'away')}
                                 </div>
@@ -157,7 +157,7 @@ const FixtureItem = (props) => {
                                 <div>
                                     {createStats('redCards', 'home')}
                                 </div>
-
+                                <div className="vertical-line"></div>
                                 <div>
                                     {createStats('redCards', 'away')}
                                 </div>
@@ -169,7 +169,7 @@ const FixtureItem = (props) => {
                                 <div>
                                     {createStats('saves', 'home')}
                                 </div>
-
+                                <div className="vertical-line"></div>
                                 <div>
                                     {createStats('saves', 'away')}
                                 </div>

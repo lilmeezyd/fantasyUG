@@ -82,7 +82,6 @@ const setInitialPoints = asyncHandler(async (req, res) => {
   const allLives = await ManagerLive.find({});
   const fixture = await Fixture.findById(req.params.id);
   const matchday = await Matchday.findById(req.params.mid);
-  const mid = matchday._id;
   const players = await PlayerHistory.find({
     matchday: req.params.mid, fixture: req.params.id
   })

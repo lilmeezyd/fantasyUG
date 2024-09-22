@@ -841,9 +841,7 @@ form.login-cs {
 }
 
 .score {
-  background: #1f2470;
   padding: 0.5rem;
-  color: #fff;
 }
 
 .home .score {
@@ -1044,6 +1042,10 @@ form.login-cs {
   margin: 0.1rem 0;
 }
 
+p.player:not(p.player:last-of-type) {
+  border-bottom: 1px solid #aaa;
+}
+
 .stats {
   font-size: 12px;
   text-align: center;
@@ -1053,20 +1055,26 @@ form.login-cs {
 h1.stats {
   padding: 0.5rem 0;
   margin: 0;
+  background: aquamarine;
+  margin-top: 0.5rem;
 }
 
 .info-container {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: 1fr 1px 1fr;
   grid-gap: 0.5rem;
   padding: 0.2rem 0;
   margin-top: 0.3rem;
   font-size: 11px;
 }
 
+.vertical-line {
+  height: 100%;
+  background: black;
+}
+
 .info-container > div {
-  background: aliceblue;
-  padding: 0.3rem;
+  padding: 0.3rem 0;
 }
 
 /* Player Info */
@@ -1089,9 +1097,18 @@ h1.stats {
 
 .actual-fixture {
   display: flex;
-  justify-content: space-between;
   align-items: center;
   padding: 0.2rem;
+}
+
+.actual-fixture-1 {
+  flex: 1 0 0;
+  display: flex;
+}
+
+.actual-fixture-1 div {
+  flex: 1 0 0%;
+  text-align: center;
 }
 
 .fdr {
