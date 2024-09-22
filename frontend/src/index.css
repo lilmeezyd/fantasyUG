@@ -1010,6 +1010,8 @@ form.login-cs {
   border-bottom-right-radius: 0.5rem;
 }
 
+
+
 .league-details {
   background: aliceblue;
   border-radius: 1rem;
@@ -1032,6 +1034,39 @@ form.login-cs {
 .play-class {
   box-shadow: 0 0 3px;
   border: none;
+}
+
+/* Fixture Info */
+.player {
+  display: grid;
+  place-items: center;
+  grid-template-columns: repeat(2, 1fr);
+  margin: 0.1rem 0;
+}
+
+.stats {
+  font-size: 12px;
+  text-align: center;
+  font-weight: 700;
+}
+
+h1.stats {
+  padding: 0.5rem 0;
+  margin: 0;
+}
+
+.info-container {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-gap: 0.5rem;
+  padding: 0.2rem 0;
+  margin-top: 0.3rem;
+  font-size: 11px;
+}
+
+.info-container > div {
+  background: aliceblue;
+  padding: 0.3rem;
 }
 
 /* Player Info */

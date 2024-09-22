@@ -47,9 +47,6 @@ export const fixtureApiSlice = apiSlice.injectEndpoints({
     depopulateFixture: builder.mutation({
       query: (data) => {
         const {y, x} = data
-        console.log(y)
-        console.log(x)
-        console.log(data)
         return {
         url: `${FIXTURES_URL}/${x}/depopulate/matchday/${y}`,
         method: 'PATCH'}
@@ -57,10 +54,15 @@ export const fixtureApiSlice = apiSlice.injectEndpoints({
       invalidatesTags: ['Fixture']
     }),
     editStats: builder.mutation({
-      query: (id) => ({
+      query: ({id, ...rest}) => {
+        console.log(id)
+        console.log(rest)
+        return {
         url: `${FIXTURES_URL}/${id}/stats`,
-        method: 'PATCH'
-      }),
+        method: 'PATCH',
+        body: rest
+        }
+      },
       invalidatesTags: ['Fixture']
     })
   }),
@@ -73,5 +75,6 @@ export const {
   useEditFixtureMutation,
   useDeleteFixtureMutation,
   usePopulateFixtureMutation,
-  useDepopulateFixtureMutation
+  useDepopulateFixtureMutation,
+  useEditStatsMutation
 } = fixtureApiSlice;

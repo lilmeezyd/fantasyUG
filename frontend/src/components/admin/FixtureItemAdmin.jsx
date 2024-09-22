@@ -5,16 +5,27 @@ import getTime from "../../utils/getTime";
 import { getPm, getPmString } from "../../utils/getPm";
 import { Button } from "react-bootstrap";
 import { useSetInitialPointsMutation } from "../../slices/livePicksApiSlice";
+import { useGetPlayersQuery } from "../../slices/playerApiSlice";
+import EditStatsModal from "./fixtureModals/EditStatsModal";
 
 const FixtureItemAdmin = (props) => {
   const { x, editFixturePop, deleteFixturePop } = props;
 
   const [stats, displayStats] = useState(false);
+  const [show, setShow] = useState(false)
   const { data: teams } = useGetQuery();
+  const { data: players } = useGetPlayersQuery()
   const [ populateFixture ] = usePopulateFixtureMutation()
   const [ depopulateFixture ] = useDepopulateFixtureMutation()
   const [ setInitialPoints ]  = useSetInitialPointsMutation()
 
+  const handleShow = () => {
+    setShow(true)
+  }
+
+  const handleClose = () => {
+    setShow(false)
+  }
   const onClick = () => {
     displayStats((prevState) => !prevState);
   };
@@ -40,8 +51,25 @@ const setInitial= async (x, y) => {
     console.log(error)
   }
 }
+
+const createStats = (field, ground) => {
+  console.log(field)
+  console.log(ground)
+  return x?.stats?.length > 0 && x?.stats?.filter(x => x.identifier === field)[0][ground].map((x) => (
+      <p key={x.player} className="player">
+          <span className="stats">{players.find(player => player._id === x.player).appName}</span>
+          <span>({x.value})</span></p>
+  ))
+}
+
+const statExists = (field) => {
+  console.log(x?.stats)
+  console.log(x?.stats?.findIndex(x => x.away.length === 0 && x.home.length === 0 && x.identifier === field))
+  return x?.stats?.findIndex(x => x.away.length === 0 && x.home.length === 0 && x.identifier === field)
+}
   return (
     <>
+    <div>
     <div
       onClick={() => onClick()}
       className={`${stats && "bg-teams"} teams-normal`}
@@ -71,11 +99,11 @@ const setInitial= async (x, y) => {
           {x?.stats?.length > 0
             ? x?.stats
                 ?.filter((x) => x.identifier === "goalsScored")[0]
-                .home.map((x) => x.value)
+                .away.map((x) => x.value)
                 .reduce((a, b) => a + b, 0) +
               x?.stats
                 ?.filter((x) => x.identifier === "ownGoals")[0]
-                .away.map((x) => x.value)
+                .home.map((x) => x.value)
                 .reduce((a, b) => a + b, 0)
             : getPm(x?.kickOffTime)}
         </div>
@@ -98,7 +126,7 @@ const setInitial= async (x, y) => {
                   </Button>}
                 </div>
                 <div>
-                  <Button>Edit Stats</Button>
+                  <Button onClick={handleShow}>Edit Stats</Button>
                 </div>
                 {x?.stats?.length > 0 &&<div>
                     <Button onClick={() => setInitial(x._id, x.matchday)}>
@@ -106,6 +134,112 @@ const setInitial= async (x, y) => {
                     </Button>
                 </div>}
               </div>
+    </div>
+
+    {stats && x?.stats?.length > 0 &&
+                <div>{statExists('goalsScored') === -1 &&
+                    <>
+                        <h1 className="stats">Goals Scored</h1>
+                        <div className="info-container">
+                            <div>
+                                {createStats('goalsScored', 'home')}
+                            </div>
+
+                            <div>
+                                {createStats('goalsScored', 'away')}
+                            </div>
+                        </div>
+                    </>}
+
+                    {statExists('assists') === -1 &&
+                        <><h1 className="stats">Assists</h1>
+                            <div className="info-container">
+                                <div>
+                                    {createStats('assists', 'home')}
+                                </div>
+
+                                <div>
+                                    {createStats('assists', 'away')}
+                                </div>
+                            </div></>}
+
+                    {statExists('ownGoals') === -1 &&
+                        <><h1 className="stats">Own Goals</h1>
+                            <div className="info-container">
+                                <div>
+                                    {createStats('ownGoals', 'home')}
+                                </div>
+
+                                <div>
+                                    {createStats('ownGoals', 'away')}
+                                </div>
+                            </div></>}
+
+                    {statExists('penaltiesSaved') === -1 &&
+                        <><h1 className="stats">Penalties Saved</h1>
+                            <div className="info-container">
+                                <div>
+                                    {createStats('penaltiesSaved', 'home')}
+                                </div>
+
+                                <div>
+                                    {createStats('penaltiesSaved', 'away')}
+                                </div>
+                            </div></>}
+
+                    {statExists('penaltiesMissed') === -1 &&
+                        <><h1 className="stats">Penalties Missed</h1>
+                            <div className="info-container">
+                                <div>
+                                    {createStats('penaltiesMissed', 'home')}
+                                </div>
+
+                                <div>
+                                    {createStats('penaltiesMissed', 'away')}
+                                </div>
+                            </div></>}
+
+                    {statExists('yellowCards') === -1 &&
+                        <><h1 className="stats">Yellow Cards</h1>
+                            <div className="info-container">
+                                <div>
+                                    {createStats('yellowCards', 'home')}
+                                </div>
+
+                                <div>
+                                    {createStats('yellowCards', 'away')}
+                                </div>
+                            </div></>}
+
+                    {statExists('redCards') === -1 &&
+                        <><h1 className="stats">Red Cards</h1>
+                            <div className="info-container">
+                                <div>
+                                    {createStats('redCards', 'home')}
+                                </div>
+
+                                <div>
+                                    {createStats('redCards', 'away')}
+                                </div>
+                            </div></>}
+
+                    {statExists('saves') === -1 &&
+                        <><h1 className="stats">Saves</h1>
+                            <div className="info-container">
+                                <div>
+                                    {createStats('saves', 'home')}
+                                </div>
+
+                                <div>
+                                    {createStats('saves', 'away')}
+                                </div>
+                            </div></>}
+                </div>}
+
+                <EditStatsModal
+                fixture={x}
+                show={show}
+                handleClose={handleClose}></EditStatsModal>
     </>
   );
 };
