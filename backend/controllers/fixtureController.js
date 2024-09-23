@@ -153,6 +153,7 @@ const dePopulateStats = asyncHandler(async (req, res) => {
   const players = await Player.find({
     $or: [{ playerTeam: fixture.teamHome }, { playerTeam: fixture.teamAway }],
   });
+  const affectedPlayers = await PlayerHistory.find({fixture: req.params.id, matchday: req.params.mid})
   // Find user
   const user = await User.findById(req.user.id).select("-password");
 
@@ -234,6 +235,21 @@ const dePopulateStats = asyncHandler(async (req, res) => {
   fixture.teamAwayScore = null;
   fixture.teamHomeScore = null;
   await PlayerHistory.deleteMany({ fixture: req.params.id });
+  affectedPlayers.forEach(async (play) => {
+    const { player, totalPoints, goalsScored, assists, ownGoals,
+      penaltiesSaved, penaltiesMissed, yellowCards, redCards, saves, cleansheets, starts,
+      bestPlayer
+    } = play
+    await Player.findByIdAndUpdate({_id: player}, 
+      {$inc: {
+        totalPoints: -totalPoints, goalsScored: -goalsScored,
+         assists: -assists, ownGoals: -ownGoals,
+      penaltiesSaved: -penaltiesSaved, penaltiesMissed: -penaltiesMissed, 
+      yellowCards: -yellowCards, redCards: -redCards, saves: -saves, cleansheets: -cleansheets, starts: -starts,
+      bestPlayer: -bestPlayer
+      }},
+      {new: true})
+  })
   const updatedFixture = await Fixture.findByIdAndUpdate(
     req.params.id,
     fixture,
@@ -352,7 +368,7 @@ const editStats = asyncHandler(async (req, res) => {
     [homeAway].some((x) => x.player.toString() === retrievedPlayer.toString());
   let newValue = +value;
   const playerPoints = await PlayerHistory.findOne({ player: retrievedPlayer });
-  let { totalPoints } = playerPoints;
+  let  totalPoints
 
   if (playerIn) {
     let playerIndex = fixture.stats
@@ -371,25 +387,38 @@ const editStats = asyncHandler(async (req, res) => {
       fixture.stats
         .filter((x) => x.identifier === identifier)[0]
         [homeAway].splice(playerIndex, 1);
-      totalPoints += weight[identifier] * newValue;
+      totalPoints = weight[identifier] * newValue;
       await PlayerHistory.findOneAndUpdate(
-        { player: retrievedPlayer },
-        { [identifier]: newValue + a, totalPoints },
+        { player: retrievedPlayer, fixture:  req.params.id},
+        {$inc: { [identifier]: newValue, totalPoints }},
         { new: true }
       );
+      await Player.findByIdAndUpdate(
+        player,
+        {$inc: {totalPoints, [identifier]: newValue}},
+        {new: true}
+      )
     } else {
-      totalPoints += weight[identifier] * newValue;
+      totalPoints = weight[identifier] * newValue;
+      console.log(totalPoints)
+      console.log(newValue)
+      console.log(totalPoints)
       fixture.stats
         .filter((x) => x.identifier === identifier)[0]
         [homeAway].splice(playerIndex, 1, {
           player: retrievedPlayer,
           value: newValue + a,
         });
-      await PlayerHistory.findOneAndUpdate(
-        { player: retrievedPlayer },
-        { [identifier]: newValue + a, totalPoints },
+        await PlayerHistory.findOneAndUpdate(
+        { player: retrievedPlayer, fixture:  req.params.id },
+        {$inc: { [identifier]: newValue, totalPoints }},
         { new: true }
       );
+      await Player.findByIdAndUpdate(
+        player,
+        {$inc: {totalPoints, [identifier]: newValue}},
+        {new: true}
+      )
     }
   } else {
     if (newValue <= -1) {
@@ -399,14 +428,20 @@ const editStats = asyncHandler(async (req, res) => {
     fixture.stats
       .filter((x) => x.identifier === identifier)[0]
       [homeAway].push({ player: retrievedPlayer, value: +value });
-    totalPoints += weight[identifier] * +value;
+    totalPoints = weight[identifier] * +value;
     await PlayerHistory.findOneAndUpdate(
-      { player: retrievedPlayer },
-      { [identifier]: +value, totalPoints },
+      { player: retrievedPlayer, fixture:  req.params.id },
+      {$inc: { [identifier]: +value, totalPoints }},
       { new: true }
     );
+    
+    await Player.findByIdAndUpdate(
+      player,
+      {$inc: {totalPoints, [identifier]: +value}},
+      {new: true}
+    )
   }
-
+  
   if (identifier === "goalsScored") {
     if (homeAway === "away") {
       fixture.teamAwayScore = teamAwayScore += newValue;

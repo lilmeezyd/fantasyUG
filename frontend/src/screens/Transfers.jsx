@@ -225,26 +225,21 @@ const Transfers = () => {
       },
     });
   };
-  if (isLoading) {
-    return (
-      <div className="spinner">
-        <Spinner> /</Spinner>
-      </div>
-    );
-  }
+  
   return (
     <div className="main">
       <div>
       <PicksPlatform
+      isLoading={isLoading}
         id={data}
-        teamValue={teamValue}
+        teamValue={teamValue} 
         reset={reset}
         itb={itb}
         totalPlayers={totalPlayers}
         picks={picks}
         removePlayer={removePlayer}
       />
-      <FixtureList />
+      <FixtureList mdParam={'next'}/> 
       </div>
       <Players
         GKP={GKP}

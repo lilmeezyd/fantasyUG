@@ -14,6 +14,7 @@ const Points = () => {
   const { data: managerInfo } = useGetManagerInfoQuery();
   const { data: managerPicks } = useGetPicksQuery();
   const { data: matchdays } = useGetMatchdaysQuery()
+  console.log(picks)
   if(isLoading) {
     <div className="spinner">
       <Spinner />
@@ -25,12 +26,18 @@ const Points = () => {
     <div className="main">
       {picks?.map((pick, idx) => <div key={idx+1}>
         {pick?.livePicks?.map((lp) => <div key={lp.matchday}>
-          <div>
+          <div className="pt-matchday">
           <div>Matchday&nbsp;{lp?.matchday}</div>
-          <div>Points&nbsp;{+lp?.matchdayPoints}</div>
-          <div>Rank&nbsp;{lp?.matchdayRank === null ? `-` : lp?.matchdayRank}</div>
-          <div>Average {matchdays?.find(x => x.id === lp?.matchday)?.avergeScore}</div>
-          <div>Highest {matchdays?.find(x => x.id === lp?.matchday)?.highestScore}</div>
+          </div>
+          <div className="pt-md-wrapper">
+          <div className="pt-points"><div>Points</div><div>{+lp?.matchdayPoints}</div></div>
+          <div className="pt-rank">
+          <div><div>Rank</div><div>{lp?.matchdayRank === null ? `-` : lp?.matchdayRank}</div></div>
+          </div>
+          <div className="pt-ht-av">
+          <div><div>Average</div><div> {matchdays?.find(x => x.id === lp?.matchday)?.avergeScore}</div></div>
+          <div><div>Highest</div><div> {matchdays?.find(x => x.id === lp?.matchday)?.highestScore}</div></div>
+          </div>
           </div>
 
           <ManagerLivePicks matchday={lp?.matchday} 

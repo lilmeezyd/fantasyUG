@@ -12,13 +12,13 @@ import {
 } from "../slices/leagueApiSlice";
 import { useSetPicksMutation, useUpdatePicksMutation } from "../slices/picksSlice";
 import { useUpdateUserMutation } from "../slices/userApiSlice";
-import { Button } from "react-bootstrap";
+import { Button, Spinner } from "react-bootstrap";
 import SquadPlayer from "./SquadPlayer";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { setCredentials } from "../slices/authSlice";
 const PicksPlatform = (props) => {
-  const { picks, removePlayer, totalPlayers, itb, reset, teamValue, id } = props;
+  const { isLoading, picks, removePlayer, totalPlayers, itb, reset, teamValue, id } = props;
   const [teamName, setTeamName] = useState("");
   const [playerLeague, setPlayerLeague] = useState("");
 
@@ -74,6 +74,14 @@ const PicksPlatform = (props) => {
     setTeamName(e.target.value);
   };
 
+  if (isLoading) {
+    return (
+      <div className="spinner">
+        <Spinner> /</Spinner>
+      </div>
+    );
+  }
+
   return (
     <div>
       <div className="transfer-data p-2">
@@ -113,7 +121,7 @@ const PicksPlatform = (props) => {
               <SquadPlayer
                 removePlayer={removePlayer}
                 baller={x}
-                posName={"GKP"}
+                posName={"GKP"} 
               ></SquadPlayer>
             </div>
           ))}

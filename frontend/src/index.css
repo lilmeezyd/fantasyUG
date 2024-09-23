@@ -456,7 +456,7 @@ form.login-cs {
   display: flex;
   padding-left: 0.2rem;
   margin-top: 0.2rem;
-  gap: 0.2rem;
+  gap: 0.5rem;
 }
 
 .btn-table {
@@ -479,7 +479,14 @@ form.login-cs {
   padding-top: 0.2rem;
   padding-bottom: 0.2rem;
   font-weight: 600;
+  text-align: center;
 }
+
+.money, .others {
+  text-align: center;
+}
+
+
 
 .p-t-1 {
   border: 1px solid;
@@ -502,6 +509,67 @@ form.login-cs {
   /*grid-template-rows: repeat(2, 1fr);*/
   grid-gap: 1rem;
   /*margin-top: 61px;*/
+}
+
+/*Points Display*/
+.pt-md-wrapper {
+  position: relative;
+  height: 80px;
+  border: 1px solid #aaa;
+  border-radius: 1rem;
+  background: linear-gradient(88deg, aquamarine, #0000ff57);
+}
+
+.pt-points {
+  background: white;
+  box-shadow: #0000ff57 0 0 5px;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.5rem;
+  font-weight: 700;
+  border-radius: 1rem;
+  padding: 0.5rem;
+}
+.pt-matchday {
+  text-align: center;
+  font-weight: 700;
+  font-size: 1.2rem;
+}
+
+.pt-ht-av {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  font-weight: 700;
+  padding: 1rem;
+  transform: translate(-0, -50%);
+  display: flex;
+  flex-direction: column;
+}
+
+.pt-rank {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  font-weight: 700;
+  padding: 1rem;
+  /* font-size: 12px; */
+  transform: translate(-0, -50%);
+  display: flex;
+  flex-direction: column;
+}
+
+.pt-rank div, .pt-ht-av div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 0.5rem
 }
 
 @media (max-width: 970px) {
@@ -853,7 +921,7 @@ form.login-cs {
 }
 
 .bg-teams {
-  background: rgba(95, 230, 129, 0.3);
+  background: linear-gradient(45deg, aquamarine, #0000ff57);
   border-left: 5px solid rgb(21, 90, 21);
   border-bottom: none;
   border-top: none;
@@ -1011,7 +1079,7 @@ form.login-cs {
 
 
 .league-details {
-  background: aliceblue;
+  background: linear-gradient(88deg, aquamarine, #0000ff57);
   border-radius: 1rem;
   padding: 0.5rem;
 }

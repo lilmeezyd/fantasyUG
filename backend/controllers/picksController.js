@@ -49,6 +49,8 @@ const setPicks = asyncHandler(async (req, res) => {
     throw new Error("Not enough funds");
   }
 
+  console.log(picks)
+
 
   const managerInfo = await ManagerInfo.create({
     user: req.user.id, 
@@ -156,7 +158,8 @@ const updatePicks = asyncHandler(async (req, res) => {
   const playerPicks = await Picks.findById(req.params.id);
   const user = await User.findById(req.user.id);
   const { picks, teamValue, bank } = req.body;
-
+  const picksIds = picks.map(pick => pick._id)
+  console.log(picksIds)
   //Check for user
   if (!user) {
     res.status(400);

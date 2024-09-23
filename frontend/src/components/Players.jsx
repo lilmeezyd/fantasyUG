@@ -1,4 +1,4 @@
-import { useMemo, useState, Suspense } from "react";
+import { useMemo, useState, Suspense, useReducer } from "react";
 import { useGetPlayersQuery } from "../slices/playerApiSlice";
 import {useGetPositionsQuery} from "../slices/positionApiSlice"
 import { useGetQuery } from "../slices/teamApiSlice"
@@ -19,10 +19,44 @@ const Players = (props) => {
   const [curPage, setCurPage] = useState(1);
   const [page, setPage] = useState(1);
   const pageSize = 20;
-  const [sort, setSort] = useState("totalPoints");
-  const [view, setView] = useState("allPlayers");
-  const [word, setWord] = useState("");
-  const [cutPrice, setCutPrice] = useState(25);
+  const reducer = (state, action) => {
+    if(action.type === 'PRICE') {
+      return {
+        ...state,
+        cutPrice: action.data
+      }
+    }
+    if(action.type === 'WORD') {
+      return {
+        ...state,
+        word: action.data
+      }
+    }
+    if(action.type === 'SORT') {
+      const wordObj ={ "nowCost": 'Points', 'totalPoints':'Points',
+        "goalsScored":'Goals', "assists":'Assists', "yellowCards":'Yellow cards',
+        "redCards":'Red cards', "penaltiesSaved":'Penalties Saved',
+        "penaltiesMissed":'Penalties Missed', "cleansheets":'Clean sheets',
+        "nowAge":'%age'
+      }
+      const sortWord = wordObj[action.data]
+      return {
+        ...state,
+        sort: action.data,
+        sortWord
+      }
+    }
+    if(action.type === 'VIEW') {
+      return {
+        ...state,
+        view: action.data
+      }
+    }
+  }
+  const [state, dispatch] = useReducer(reducer, 
+    {sort:'totalPoints', view: 'allPlayers', word:'', sortWord: 'Points', cutPrice: 25})
+  
+  const {sort, view, word, cutPrice, sortWord} = state
   const allPlayers = getPlayers(
     players,
     sort,
@@ -93,22 +127,22 @@ const Players = (props) => {
   };
 
   const onPrice = (e) => {
-    setCutPrice(+e.target.value)
+    dispatch({type: 'PRICE', data: +e.target.value})
     setCurPage(1)
 }
 
 const onSearch = (e) => {
-    setWord(e.target.value)
+  dispatch({type: 'WORD', data: e.target.value})
     setCurPage(1)
 }
 
 const onSort = (e) => {
-    setSort(e.target.value)
+  dispatch({type: 'SORT', data: e.target.value})
     setCurPage(1)
 }
 
   const onView = (e) => {
-    setView(e.target.value)
+    dispatch({type: 'VIEW', data: e.target.value})
     setCurPage(1)
 }
 
@@ -123,7 +157,7 @@ const onSort = (e) => {
 
   return (
     <>
-        <div className="players-col">
+        <div className="players-col"> 
           <div className="players small">
             <div className="players-container">
               <div className="players-heading-container">
@@ -171,8 +205,17 @@ const onSort = (e) => {
                       id="sort_by"
                     >
                       <option value="totalPoints">Total points</option>
-                      <option value="event_points">Round points</option>
                       <option value="nowCost">Price</option>
+                      {/*<option value="event_points">Round points</option>*/}
+                      {/*<option value="nowAge">%age ownership</option>*/}
+                      <option value="goalsScored">Goals</option>
+                      <option value="assists">Assists</option>
+                      <option value="yellowCards">Yellow cards</option>
+                      <option value="redCards">Red cards</option>
+                      <option value="penaltiesSaved">Penalties Saved</option>
+                      <option value="penaltiesMissed">Penalties Missed</option>
+                      <option value="cleansheets">Clean sheets</option>
+                      
                     </select>
                   </div>
                   <div className="search">
@@ -223,7 +266,7 @@ const onSort = (e) => {
             <div className="p-t-1">
             Goalkeepers</div></div>
           <div className='money'>£</div>
-          <div className='others'>Points</div>
+          <div className='others'>{sortWord}</div>
       </div>
       <div>
           {goalkeepers.map((goalkeeper) => {
@@ -258,7 +301,7 @@ const onSort = (e) => {
           <div className='position-table-1'><div className="p-t-1">
           Defenders</div></div>
           <div className='money'>£</div>
-          <div className='others'>Points</div>
+          <div className='others'>{sortWord}</div>
       </div>
       <div>
           {defenders.map((defender) => {
@@ -272,7 +315,7 @@ const onSort = (e) => {
                 bgColor='rgb(0, 255, 0, 0.5)'
                 picks={picks}
                 DEF={DEF}
-                errorMsg={errorMsg}
+                errorMsg={errorMsg} 
                 addPlayer={addPlayer}
                 removePlayer={removePlayer}
                       key={defender?._id}
@@ -294,7 +337,7 @@ const onSort = (e) => {
           Midfielders</div>
           </div>
           <div className='money'>£</div>
-          <div className='others'>Points</div>
+          <div className='others'>{sortWord}</div>
       </div>
       <div>
           {midfielders.map((midfielder) => {
@@ -330,7 +373,7 @@ const onSort = (e) => {
           Forwards</div>
           </div>
           <div className='money'>£</div>
-          <div className='others'>Points</div>
+          <div className='others'>{sortWord}</div>
       </div>
       <div>
           {forwards.map((forward) => {

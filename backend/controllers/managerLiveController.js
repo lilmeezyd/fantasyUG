@@ -110,7 +110,8 @@ const setInitialPoints = asyncHandler(async (req, res) => {
     const inPlayers = players.findIndex(y => x._id.toString() === y.player.toString())
     inPlayers > -1 ? formatted.push({
       _id, playerPosition, playerTeam, multiplier, nowCost, IsCaptain, IsViceCaptain, slot,
-      points:players.find(y => x._id.toString() === y.player.toString())?.totalPoints}
+      points:IsCaptain ? players.find(y => x._id.toString() === y.player.toString())?.totalPoints*2 : 
+      players.find(y => x._id.toString() === y.player.toString())?.totalPoints}
     ) : formatted.push(x)
   }
    )
