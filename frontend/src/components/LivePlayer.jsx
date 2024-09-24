@@ -7,18 +7,15 @@ import { useGetQuery } from "../slices/teamApiSlice";
 import { useGetPositionsQuery } from "../slices/positionApiSlice";
 import { useGetMatchdaysQuery } from "../slices/matchdayApiSlice";
 import { useGetFixturesQuery } from "../slices/fixtureApiSlice";
-import { Button, Modal } from "react-bootstrap";
+import { Button, Modal, Spinner } from "react-bootstrap";
 import PlayerInfo from "./PlayerInfo";
 
 const LivePlayer = (props) => {
-  const { baller, posName, slot, multiplier, matchday, matchdayId } = props;
+  const { baller, posName, slot, multiplier, matchday, matchdayId, teams, players } = props;
   const [show, setShow] = useState(false);
-  const { data: teams } = useGetQuery();
-  const { data: players } = useGetPlayersQuery();
   const { data: elementTypes } = useGetPositionsQuery();
-  const { data: fixtures } = useGetFixturesQuery();
+  const { data: fixtures, isLoading } = useGetFixturesQuery();
   const { data: matchdays } = useGetMatchdaysQuery();
-  console.log(baller);
 
   const mdFixs = fixtures?.find((x) => x?._id?.id === matchday)?.fixtures;
   const appName = players?.find((player) => player._id === baller._id)?.appName;
@@ -41,6 +38,13 @@ const LivePlayer = (props) => {
   const handleShow = () => {
     setShow(true);
   };
+  if(isLoading) {
+    return (
+    <div className="spinner">
+      <Spinner />
+    </div>
+    )
+  }
   return (
     <>
       <div className="element">

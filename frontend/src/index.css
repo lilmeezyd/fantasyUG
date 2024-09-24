@@ -482,7 +482,8 @@ form.login-cs {
   text-align: center;
 }
 
-.money, .others {
+.money,
+.others {
   text-align: center;
 }
 
@@ -536,10 +537,23 @@ form.login-cs {
   border-radius: 1rem;
   padding: 0.5rem;
 }
+
 .pt-matchday {
   text-align: center;
   font-weight: 700;
   font-size: 1.2rem;
+  padding: 0.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.pt-matchday div {
+  border: 1px solid #aaa;
+  padding: 0 1rem;
+  border-bottom-left-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
+  background: aquamarine;
 }
 
 .pt-ht-av {
@@ -565,7 +579,8 @@ form.login-cs {
   flex-direction: column;
 }
 
-.pt-rank div, .pt-ht-av div {
+.pt-rank div,
+.pt-ht-av div {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -870,7 +885,8 @@ form.login-cs {
   padding-bottom: 0.5rem;
 }
 
-.home div, .away div {
+.home div,
+.away div {
   flex: 1 0 0%;
   align-self: center;
 }
@@ -982,7 +998,6 @@ form.login-cs {
 
 .fix-body {
   padding: 1rem 0;
-  overflow: auto;
 }
 
 .fix-admin-buttons {
@@ -1083,9 +1098,11 @@ form.login-cs {
   border-radius: 1rem;
   padding: 0.5rem;
 }
+
 .info-tabs {
   display: flex;
 }
+
 .info-tabs div {
   flex: 1 0 0;
   text-align: center;
@@ -1141,7 +1158,7 @@ h1.stats {
   background: black;
 }
 
-.info-container > div {
+.info-container>div {
   padding: 0.3rem 0;
 }
 
@@ -1151,6 +1168,7 @@ h1.stats {
   border: 1px solid #aaa;
   margin-top: 1rem;
 }
+
 .fix-grid {
   display: grid;
   grid-template-columns: 30% 10% 50%;

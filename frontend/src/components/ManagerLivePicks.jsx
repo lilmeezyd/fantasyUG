@@ -13,9 +13,9 @@ import {Spinner} from "react-bootstrap";
 
 const ManagerPicks = (props) => {
   const {picks, isLoading, matchday, matchdayId } = props;
-  const { data: teams } = useGetQuery();
-  const { data: players } = useGetPlayersQuery();
-  const { data: positions } = useGetPositionsQuery();
+  const { data: teams, isLoading: teamLoading } = useGetQuery();
+  const { data: players, isLoading: playerLoading } = useGetPlayersQuery();
+  const { data: positions, isLoading: positionLoading } = useGetPositionsQuery();
   const { data: matchdays } = useGetMatchdaysQuery()
   const navigate = useNavigate();
   const md = matchdays?.find(matchday => matchday?.next === true)
@@ -42,11 +42,15 @@ const ManagerPicks = (props) => {
   const bench = picks?.filter((pick) => pick.multiplier === 0)?.sort((a,b) => a.slot > b.slot ? 1 : -1);
   const teamValue = picks?.reduce((x,y) => x+(+y.nowCost), 0)
   const itb = 100 - teamValue 
+  console.log(isLoading)
+  console.log(playerLoading)
 
-  if(isLoading) {
+  if(playerLoading && teamLoading && positionLoading) {
+    return (
     <div className="spinner">
       <Spinner />
     </div>
+    )
   }
   return (
     <div>
@@ -54,7 +58,8 @@ const ManagerPicks = (props) => {
         <div className="default-player">
           {goalkeepers?.map((x) => (
             <div key={x.slot} className="squad-player">
-              <LivePlayer 
+              <LivePlayer teams={teams}
+              players={players}
               matchday={matchday} matchdayId={matchdayId}
               slot={x.slot} posName={"GKP"} multiplier={x.multiplier} baller={x} />
             </div>
@@ -63,21 +68,26 @@ const ManagerPicks = (props) => {
         <div className="default-player">
           {defenders?.map((x) => (
             <div key={x.slot} className="squad-player">
-              <LivePlayer matchday={matchday} matchdayId={matchdayId} slot={x.slot} posName={"DEF"} multiplier={x.multiplier} baller={x} />
+              <LivePlayer
+              teams={teams}
+              players={players} matchday={matchday} matchdayId={matchdayId} slot={x.slot} posName={"DEF"} multiplier={x.multiplier} baller={x} />
             </div>
           ))}
         </div>
         <div className="default-player">
           {midfielders?.map((x) => (
             <div key={x.slot} className="squad-player">
-              <LivePlayer matchday={matchday} matchdayId={matchdayId} slot={x.slot} posName={"MID"} multiplier={x.multiplier} baller={x} />
+              <LivePlayer
+              teams={teams}
+              players={players} matchday={matchday} matchdayId={matchdayId} slot={x.slot} posName={"MID"} multiplier={x.multiplier} baller={x} />
             </div>
           ))}
         </div>
         <div className="default-player">
           {forwards?.map((x) => (
             <div key={x.slot} className="squad-player">
-              <LivePlayer matchday={matchday} matchdayId={matchdayId} slot={x.slot} posName={"FWD"} multiplier={x.multiplier} baller={x} />
+              <LivePlayer teams={teams}
+              players={players} matchday={matchday} matchdayId={matchdayId} slot={x.slot} posName={"FWD"} multiplier={x.multiplier} baller={x} />
             </div>
           ))}
         </div>
@@ -92,7 +102,8 @@ const ManagerPicks = (props) => {
                     )?.shortName
                   }
                 </div>
-                <LivePlayer slot={x.slot} 
+                <LivePlayer teams={teams}
+              players={players} slot={x.slot} 
                 matchday={matchday} matchdayId={matchdayId}
                 posName={`${
                   positions?.find(

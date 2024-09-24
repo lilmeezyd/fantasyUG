@@ -10,19 +10,27 @@ import ManagerLivePicks from '../components/ManagerLivePicks'
 
 const Points = () => {
   const { userInfo } = useSelector((state) => state.auth)
-  const { data: picks, isLoading } = useGetLivePicksQuery(userInfo?._id)
+  const { data: picks, isLoading, isSuccess } = useGetLivePicksQuery(userInfo?._id)
   const { data: managerInfo } = useGetManagerInfoQuery();
   const { data: managerPicks } = useGetPicksQuery();
   const { data: matchdays } = useGetMatchdaysQuery()
-  console.log(picks)
-  if(isLoading) {
+  console.log(useGetLivePicksQuery(userInfo?._id))
+  if(isLoading && picks === undefined) {
+    return (
     <div className="spinner">
       <Spinner />
     </div>
+    )
+  }
+  if(isSuccess && picks?.length === 0) {
+    return (
+    <div className='tx-center'>Live scores will appear here when matchday starts!</div>
+    )
   }
   return (
-    picks?.length > 0 ? 
     <>
+    {picks?.length > 0 &&
+    <> 
     <div className="main">
       {picks?.map((pick, idx) => <div key={idx+1}>
         {pick?.livePicks?.map((lp) => <div key={lp.matchday}>
@@ -57,8 +65,8 @@ const Points = () => {
       <Container className="main">
         <FixtureList mdParam={'current'} />
       </Container>
-      </> : 
-      <div className='tx-center'>Live scores will appear here when matchday starts!</div>
+      </>}
+      </>
     
   )
 }

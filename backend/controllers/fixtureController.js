@@ -8,6 +8,7 @@ import User from "../models/userModel.js";
 import Matchday from "../models/matchdayModel.js";
 import Team from "../models/teamModel.js";
 import ManagerLive from "../models/managerLive.js";
+import ManagerInfo from "../models/managerInfoModel.js";
 
 //@desc Set Fixture
 //@route POST /api/fixtures
@@ -148,12 +149,15 @@ const populateStats = asyncHandler(async (req, res) => {
 //@role ADMIN & EDITOR
 const dePopulateStats = asyncHandler(async (req, res) => {
   const fixture = await Fixture.findById(req.params.id);
-  const matchday  = await Matchday.findById(req.params.mid);
+  const matchday = await Matchday.findById(req.params.mid);
   const allLives = await ManagerLive.find({});
   const players = await Player.find({
     $or: [{ playerTeam: fixture.teamHome }, { playerTeam: fixture.teamAway }],
   });
-  const affectedPlayers = await PlayerHistory.find({fixture: req.params.id, matchday: req.params.mid})
+  const affectedPlayers = await PlayerHistory.find({
+    fixture: req.params.id,
+    matchday: req.params.mid,
+  });
   // Find user
   const user = await User.findById(req.user.id).select("-password");
 
@@ -216,40 +220,91 @@ const dePopulateStats = asyncHandler(async (req, res) => {
         : formatted.push(x);
     });
 
+    const newMdPoints = formatted.reduce((x, y) => x + y.points, 0);
+
     const newFormatted = {
       picks: formatted,
       matchday,
       matchdayId,
       activeChip,
       matchdayRank,
-      matchdayPoints,
+      matchdayPoints: newMdPoints,
     };
 
-    await ManagerLive.findOneAndUpdate(
+    const managerlive = await ManagerLive.findOneAndUpdate(
       { user: allLives[i].user, "livePicks.matchdayId": req.params.mid },
       { livePicks: newFormatted },
       { new: true }
     );
+    const managerinfo = await ManagerInfo.findOneAndUpdate(
+      { user: allLives[i].user },
+      {
+        matchdayPoints: newMdPoints,
+        "teamLeagues.0.matchdayPoints": newMdPoints,
+        "overallLeagues.0.matchdayPoints": newMdPoints,
+      },
+      { new: true }
+    );
+
+    const { teamLeagues, overallLeagues } = managerinfo
+    const startTeamMd = await Matchday.findById(teamLeagues[0].startMatchday.toString())
+    const endTeamMd = await Matchday.findById(teamLeagues[0].endMatchday.toString())
+    const startOverallMd = await Matchday.findById(overallLeagues[0].startMatchday.toString())
+    const endOverallMd = await Matchday.findById(overallLeagues[0].endMatchday.toString())
+    const { livePicks } = managerlive
+    const overallTeamPts = livePicks.filter(x => x.matchday >= startTeamMd.id && x.matchday <= endTeamMd.id)
+    .map(x => x.matchdayPoints).reduce((x, y) => x + y, 0)
+    const overallOverallPts = livePicks.filter(x => x.matchday >= startOverallMd.id && x.matchday <= endOverallMd.id)
+    .map(x => x.matchdayPoints).reduce((x, y) => x + y, 0)
+    const overallPts = livePicks.map(x => x.matchdayPoints).reduce((a,b) => a+b, 0)
+    managerinfo.$set('overallPoints', overallPts)
+    managerinfo.$set('teamLeagues.0.overallPoints', overallTeamPts)
+    managerinfo.$set('overallLeagues.0.overallPoints', overallOverallPts)
+    await managerinfo.save()
+    
   }
+  
   fixture.stats.length = 0;
   fixture.teamAwayScore = null;
   fixture.teamHomeScore = null;
   await PlayerHistory.deleteMany({ fixture: req.params.id });
   affectedPlayers.forEach(async (play) => {
-    const { player, totalPoints, goalsScored, assists, ownGoals,
-      penaltiesSaved, penaltiesMissed, yellowCards, redCards, saves, cleansheets, starts,
-      bestPlayer
-    } = play
-    await Player.findByIdAndUpdate({_id: player}, 
-      {$inc: {
-        totalPoints: -totalPoints, goalsScored: -goalsScored,
-         assists: -assists, ownGoals: -ownGoals,
-      penaltiesSaved: -penaltiesSaved, penaltiesMissed: -penaltiesMissed, 
-      yellowCards: -yellowCards, redCards: -redCards, saves: -saves, cleansheets: -cleansheets, starts: -starts,
-      bestPlayer: -bestPlayer
-      }},
-      {new: true})
-  })
+    const {
+      player,
+      totalPoints,
+      goalsScored,
+      assists,
+      ownGoals,
+      penaltiesSaved,
+      penaltiesMissed,
+      yellowCards,
+      redCards,
+      saves,
+      cleansheets,
+      starts,
+      bestPlayer,
+    } = play;
+    await Player.findByIdAndUpdate(
+      { _id: player },
+      {
+        $inc: {
+          totalPoints: -totalPoints,
+          goalsScored: -goalsScored,
+          assists: -assists,
+          ownGoals: -ownGoals,
+          penaltiesSaved: -penaltiesSaved,
+          penaltiesMissed: -penaltiesMissed,
+          yellowCards: -yellowCards,
+          redCards: -redCards,
+          saves: -saves,
+          cleansheets: -cleansheets,
+          starts: -starts,
+          bestPlayer: -bestPlayer,
+        },
+      },
+      { new: true }
+    );
+  });
   const updatedFixture = await Fixture.findByIdAndUpdate(
     req.params.id,
     fixture,
@@ -367,8 +422,7 @@ const editStats = asyncHandler(async (req, res) => {
     .filter((x) => x.identifier === identifier)[0]
     [homeAway].some((x) => x.player.toString() === retrievedPlayer.toString());
   let newValue = +value;
-  const playerPoints = await PlayerHistory.findOne({ player: retrievedPlayer });
-  let  totalPoints
+  let totalPoints;
 
   if (playerIn) {
     let playerIndex = fixture.stats
@@ -389,36 +443,33 @@ const editStats = asyncHandler(async (req, res) => {
         [homeAway].splice(playerIndex, 1);
       totalPoints = weight[identifier] * newValue;
       await PlayerHistory.findOneAndUpdate(
-        { player: retrievedPlayer, fixture:  req.params.id},
-        {$inc: { [identifier]: newValue, totalPoints }},
+        { player: retrievedPlayer, fixture: req.params.id },
+        { $inc: { [identifier]: newValue, totalPoints } },
         { new: true }
       );
       await Player.findByIdAndUpdate(
         player,
-        {$inc: {totalPoints, [identifier]: newValue}},
-        {new: true}
-      )
+        { $inc: { totalPoints, [identifier]: newValue } },
+        { new: true }
+      );
     } else {
       totalPoints = weight[identifier] * newValue;
-      console.log(totalPoints)
-      console.log(newValue)
-      console.log(totalPoints)
       fixture.stats
         .filter((x) => x.identifier === identifier)[0]
         [homeAway].splice(playerIndex, 1, {
           player: retrievedPlayer,
           value: newValue + a,
         });
-        await PlayerHistory.findOneAndUpdate(
-        { player: retrievedPlayer, fixture:  req.params.id },
-        {$inc: { [identifier]: newValue, totalPoints }},
+      await PlayerHistory.findOneAndUpdate(
+        { player: retrievedPlayer, fixture: req.params.id },
+        { $inc: { [identifier]: newValue, totalPoints } },
         { new: true }
       );
       await Player.findByIdAndUpdate(
         player,
-        {$inc: {totalPoints, [identifier]: newValue}},
-        {new: true}
-      )
+        { $inc: { totalPoints, [identifier]: newValue } },
+        { new: true }
+      );
     }
   } else {
     if (newValue <= -1) {
@@ -430,18 +481,18 @@ const editStats = asyncHandler(async (req, res) => {
       [homeAway].push({ player: retrievedPlayer, value: +value });
     totalPoints = weight[identifier] * +value;
     await PlayerHistory.findOneAndUpdate(
-      { player: retrievedPlayer, fixture:  req.params.id },
-      {$inc: { [identifier]: +value, totalPoints }},
+      { player: retrievedPlayer, fixture: req.params.id },
+      { $inc: { [identifier]: +value, totalPoints } },
       { new: true }
     );
-    
+
     await Player.findByIdAndUpdate(
       player,
-      {$inc: {totalPoints, [identifier]: +value}},
-      {new: true}
-    )
+      { $inc: { totalPoints, [identifier]: +value } },
+      { new: true }
+    );
   }
-  
+
   if (identifier === "goalsScored") {
     if (homeAway === "away") {
       fixture.teamAwayScore = teamAwayScore += newValue;
@@ -466,7 +517,6 @@ const editStats = asyncHandler(async (req, res) => {
   );
   res.status(200).json(updatedFixture);
 });
-
 
 //@desc Get Fixture
 //@route GET /api/fixtures/:id
