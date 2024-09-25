@@ -100,6 +100,15 @@ const getPlayer = asyncHandler(async (req, res) => {
   res.status(200).json(newPlayer);
 });
 
+//@desc Get Players
+//@route GET /api/players/:id/history
+//@access public
+//@role not restricted 
+const getPlayerHistory = asyncHandler(async (req, res) => {
+  const playerHistory = await PlayerHistory.find({player: req.params.id})
+  res.status(200).json(playerHistory)
+})
+
 //@desc update player
 //@route PUT /api/players/:id
 //@access private
@@ -386,4 +395,4 @@ const deletePlayer = asyncHandler(async (req, res) => {
   res.status(200).json({ id: req.params.id });
 });
 
-export { setPlayer, getPlayers, getPlayer, updatePlayer, deletePlayer };
+export { setPlayer, getPlayers, getPlayer, getPlayerHistory, updatePlayer, deletePlayer };

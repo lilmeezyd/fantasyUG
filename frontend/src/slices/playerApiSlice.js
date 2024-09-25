@@ -37,6 +37,13 @@ export const playerApiSlice = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ['Player']
     }),
+    getHistory: builder.query({
+      query: (id) => {
+        return {
+          url: `${PLAYERS_URL}/${id}/history`
+        }
+      }
+    })
   }),
 });
 
@@ -44,6 +51,7 @@ export const {
   useGetPlayersQuery,
   useGetPlayerQuery,
   useAddPlayerMutation,
+  useGetHistoryQuery,
   useEditPlayerMutation,
   useDeletePlayerMutation,
   useGetSomeQuery

@@ -2,6 +2,7 @@ import express from "express";
 import {
   getPlayers,
   getPlayer,
+  getPlayerHistory,
   setPlayer,
   updatePlayer,
   deletePlayer,
@@ -17,5 +18,6 @@ router
   .get(getPlayer)
   .patch(protect, roles(ROLES.ADMIN, ROLES.EDITOR), updatePlayer)
   .delete(protect, roles(ROLES.ADMIN), deletePlayer);
+router.route("/:id/history").get(getPlayerHistory);
 
 export default router;

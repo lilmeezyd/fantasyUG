@@ -1178,7 +1178,11 @@ h1.stats {
 }
 
 .fix-row:nth-child(odd) {
-  background-color: #7fffd438;
+  background-color: aquamarine;
+}
+
+.player-his {
+  cursor: pointer;
 }
 
 .actual-fixture {
@@ -1207,10 +1211,41 @@ h1.stats {
   font-weight: 600;
 }
 
+.player-info-1 {
+  border: 1px solid #aaa;
+  width: 90%;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  padding: 0.5rem;
+  margin-bottom: 0.5rem;
+  margin-top: 0.5rem;
+  border-radius: 0.5rem;
+}
+
+.player-info-2 {
+  margin: 0.25rem;
+  display: flex;
+  font-weight: 700;
+}
+
+.player-info-2:nth-child(odd) {
+  background: aquamarine;
+}
+
+.player-info-2 div {
+  flex: 1 0 0%;
+  padding: 0 0.25rem;
+}
+
+.player-info-2 div:last-of-type {
+  text-align: right;
+}
+
 
 
 .footer {
-  background: #cff7d9;
+  background: aquamarine;
   height: 75px;
   display: flex;
   justify-content: center;

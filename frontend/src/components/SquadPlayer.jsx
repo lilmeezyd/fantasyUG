@@ -4,21 +4,25 @@ import { useGetQuery } from "../slices/teamApiSlice";
 import { useGetPositionsQuery } from "../slices/positionApiSlice";
 import { useGetMatchdaysQuery } from "../slices/matchdayApiSlice";
 import { useGetFixturesQuery } from "../slices/fixtureApiSlice";
-import { Modal, Button } from "react-bootstrap";
+import { Modal, Button, Spinner } from "react-bootstrap";
 import PlayerInfo from "./PlayerInfo";
 
 const SquadPlayer = (props) => {
   const { baller, posName, removePlayer } = props;
   const [show, setShow] = useState(false);
-  const { data: teams } = useGetQuery();
-  const { data: players } = useGetPlayersQuery();
+  const { data: teams, isLoading: teamLoading } = useGetQuery();
+  const { data: players, isLoading: playerLoading } = useGetPlayersQuery();
   const { data: elementTypes } = useGetPositionsQuery();
-  const { data: fixtures } = useGetFixturesQuery();
+  const { data: fixtures, isLoading: fixtureLoading } = useGetFixturesQuery();
   const { data: matchdays } = useGetMatchdaysQuery();
   const appName = players?.find((player) => player._id === baller._id)?.appName;
   const nowCost = players?.find((player) => player._id === baller._id)?.nowCost;
   const image = teams?.find((team) => team?._id === baller?.playerTeam)?.code
-
+  console.log(useGetFixturesQuery())
+  console.log(useGetMatchdaysQuery())
+  console.log(useGetPlayersQuery())
+  console.log(useGetQuery())
+  console.log(useGetPositionsQuery())
   const mdId = matchdays?.find((matchday) => matchday?.next === true)?.id;
   const mdFixs = fixtures?.find((x) => x?._id?.id === mdId)?.fixtures;
   const opponentFix = mdFixs?.find(
@@ -35,6 +39,14 @@ const SquadPlayer = (props) => {
   const handleShow = () => {
     setShow(true);
   };
+  
+  if (fixtureLoading && teamLoading && playerLoading) {
+    return (
+      <div className="spinner">
+        <Spinner/>
+      </div>
+    );
+  } 
   return (
     <>
       <div className="element">

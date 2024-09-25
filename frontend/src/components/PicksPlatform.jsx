@@ -73,7 +73,6 @@ const PicksPlatform = (props) => {
   const onChange = (e) => {
     setTeamName(e.target.value);
   };
-  console.log(isLoading)
 
   if (isLoading) {
     return (
