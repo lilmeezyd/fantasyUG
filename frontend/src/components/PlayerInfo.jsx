@@ -78,7 +78,7 @@ const PlayerInfo = (props) => {
                     : teams?.find((tname) => tname._id === x.teamAway)
                         ?.shortName;
                         return (
-                    <div onClick={() => showHistory(x.matchday, 'res', x)} className="playerFix" key={idx+1}>
+                    <div style={{background : matchday === x.matchday && 'linear-gradient(88deg, aquamarine, #0000ff57)' }} onClick={() => showHistory(x.matchday, 'res', x)} className="playerFix" key={idx+1}>
                     <div className="ticker-image">
         <img src={`../${teamImg}.png`} alt="logo" />
         </div></div>)
@@ -95,7 +95,7 @@ const PlayerInfo = (props) => {
                         ?.shortName;
                   
                     return (
-                    <div onClick={() => showHistory(x.matchday, 'fix', x)} className="playerFix" key={idx+1}>
+                    <div style={{background : matchday === x.matchday && 'linear-gradient(88deg, aquamarine, #0000ff57)' }} onClick={() => showHistory(x.matchday, 'fix', x)} className="playerFix" key={idx+1}>
                       <div className="ticker-image">
           <img src={`../${teamImg}.png`} alt="logo" />
         </div>
