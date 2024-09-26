@@ -4,9 +4,13 @@ import { useGetPositionsQuery } from "../slices/positionApiSlice";
 import { useGetMatchdaysQuery } from "../slices/matchdayApiSlice";
 import { useGetHistoryQuery } from "../slices/playerApiSlice";
 import { Modal } from "react-bootstrap";
+import { getPm, getPmString } from "../utils/getPm";
+import getTime from "../utils/getTime";
 const PlayerInfo = (props) => {
   const { showPInfo, handleCloseInfo, player } = props;
-  const [matchday, setMatchday] = useState('669a668a212789c00133c756')
+  const [matchdayAndWord, setMatchdayAndWord] = useState({matchday: '669a668a212789c00133c756', infoWord: 'res', 
+    realInfo: ''
+  })
   const [results, setResults] = useState(true);
   const [fixtures, setFixtures] = useState(false);
   const [copyFix, setCopyFix] = useState([]);
@@ -15,6 +19,7 @@ const PlayerInfo = (props) => {
   const { data: elementTypes } = useGetPositionsQuery();
   const { data: matchdays } = useGetMatchdaysQuery();
   const { data: history } = useGetHistoryQuery(player?._id)
+  const { matchday, infoWord, realInfo } = matchdayAndWord
   const playerTeam = teams?.find(
     (team) => team?._id === player?.playerTeam
   )?.name;
@@ -29,21 +34,23 @@ const PlayerInfo = (props) => {
     setCopyFix(copyFix?.filter(x => x?.stats.length === 0));
   }, [player]);
 
-  const resultsView = () => {
-    setResults(true);
-    setFixtures(false);
-  };
-  const fixturesView = () => {
-    setResults(false);
-    setFixtures(true);
-  };
-  const showHistory = async (md) => {
-    setMatchday(md)
+  const showHistory = async (md, word, x) => {
+    setMatchdayAndWord({matchday: md, infoWord: word, realInfo: x})
   }
 
+
   const showPlayerHistory = useMemo(() => {
-    return history?.find(x => x.matchday.toString() === matchday.toString())
-  }, [matchday, history])
+    if(infoWord === 'res') {
+      console.log(realInfo)
+      const results = copyRes?.find(x => x.matchday.toString() === matchday.toString())
+      const hist = history?.find(x => x.matchday.toString() === matchday.toString())
+    return {...results, ...hist}
+    }
+    if(infoWord === 'fix') {
+      console.log(realInfo)
+      return copyFix?.find(x => x.matchday.toString() === matchday.toString())
+    }
+  }, [matchday, history, infoWord, copyFix, realInfo, copyRes])
   console.log(showPlayerHistory)
   return (
     <>
@@ -60,116 +67,120 @@ const PlayerInfo = (props) => {
           </Modal.Title>
         </Modal.Header>
         <Modal.Body className="p-3">
-          <div className="info-tabs">
-            <div
-              className={`${results ? "play-class" : "no-play"} py-2`}
-              onClick={resultsView}
-            >
-              Results
-            </div>
-            <div
-              className={`${fixtures ? "play-class" : "no-play"} py-2`}
-              onClick={fixturesView}
-            >
-              Fixtures
-            </div>
-          </div>
-          {fixtures &&
-            (copyFix?.length > 0 ? (
+          <div className="player-info-wrapper">
+          {
+            (player?.results?.length > 0 ? (
               <div className="games-info-fixtures">
-                <div style={{ fontWeight: 700 }} className="fix-grid p-2">
-                  <div>Date</div>
-                  <div className="fdr">GW</div>
-                  <div className="fdr">Fixture</div>
-                </div>
-                <div>
-                  {copyFix?.map((x, idx) => {
-                    let teamName =
-                      player?.playerTeam === x.teamAway
-                        ? teams?.find((tname) => tname._id === x.teamHome)?.name
-                        : teams?.find((tname) => tname._id === x.teamAway)
-                            ?.name;
-                    let venue =
-                      player?.playerTeam === x.teamAway ? "Away" : "Home";
-                    let matchday = matchdays?.find(
-                      (y) => y._id === x.matchday
-                    )?.id;
-                    return (
-                      <div
-                        style={{ fontWeight: 700 }}
-                        className="fix-grid p-2 fix-row"
-                        key={idx+1}
-                      >
-                        <div>
-                          {x.kickOffTime === ""
-                            ? ""
-                            : new Date(x.kickOffTime).toDateString()}
-                        </div>
-                        <div className="fdr">{matchday}</div>
-                        <div className="actual-fixture">
-                          <div className="actual-fixture-1">{teamName}</div>
-                          <div className="actual-fixture-1">{venue}</div>
-                        </div>
-                      </div>
-                    );
+                <div className="playerInfoFix">
+                  {copyRes?.map((x, idx) => {
+                    let teamImg = player?.playerTeam === x.teamAway
+                    ? teams?.find((tname) => tname._id === x.teamHome)?.shortName
+                    : teams?.find((tname) => tname._id === x.teamAway)
+                        ?.shortName;
+                        return (
+                    <div onClick={() => showHistory(x.matchday, 'res', x)} className="playerFix" key={idx+1}>
+                    <div className="ticker-image">
+        <img src={`../${teamImg}.png`} alt="logo" />
+        </div></div>)
                   })}
+
+{
+            (copyFix?.length > 0 ? (
+                <div>
+                  <div className="playerInfoFix">
+                  {copyFix?.map((x, idx) => {
+                    let teamImg = player?.playerTeam === x.teamAway
+                    ? teams?.find((tname) => tname._id === x.teamHome)?.shortName
+                    : teams?.find((tname) => tname._id === x.teamAway)
+                        ?.shortName;
+                  
+                    return (
+                    <div onClick={() => showHistory(x.matchday, 'fix', x)} className="playerFix" key={idx+1}>
+                      <div className="ticker-image">
+          <img src={`../${teamImg}.png`} alt="logo" />
+        </div>
+                    </div>)
+                  })}
+                  </div>
+                </div>
+                
+            ) : (
+              ''
+            ))}
+
                 </div>
               </div>
             ) : (
-              <div className="tx-center">Fixtures will appear here!</div>
+              ''
             ))}
-          {results &&
-            (player?.results?.length > 0 ? (
-              <div className="games-info-fixtures">
-                <div style={{ fontWeight: 700 }} className="fix-grid p-2">
-                  <div>Date</div>
-                  <div className="fdr">GW</div>
-                  <div className="fdr">Fixture</div>
-                </div>
-                <div>
-                  {copyRes?.map((x, idx) => {
-                    let teamHomeScore = x.teamHomeScore
-                    let teamAwayScore = x.teamAwayScore
-                    let teamName =
-                      player?.playerTeam === x.teamAway
-                        ? teams?.find((tname) => tname._id === x.teamHome)?.name
-                        : teams?.find((tname) => tname._id === x.teamAway)
-                            ?.name;
-                    let venue =
-                      player?.playerTeam === x.teamAway ? "(A)" : "(H)";
-                    let matchday = matchdays?.find(
-                      (y) => y._id === x.matchday
-                    )?.id;
-                    return (
-                      <div
-                      onClick={() => showHistory(x.matchday)}
-                        style={{ fontWeight: 700 }}
-                        className="fix-grid p-2 fix-row player-his"
-                        key={idx+1}
-                      >
-                        <div>
-                          {x.kickOffTime === ""
-                            ? ""
-                            : new Date(x.kickOffTime).toDateString()}
-                        </div>
-                        <div className="fdr">{matchday}</div>
-                        <div className="actual-fixture">
-                          <div className="actual-fixture-1">
-                            <div>{teamName}</div>
-                            <div>{venue}</div>
+          
+            <div className="player-info-3">
+                  <> 
+                  {infoWord === 'fix' && 
+                  <>
+                  <div>
+                  {matchdays?.find(
+                    (y) => y._id === showPlayerHistory?.matchday
+                  )?.name}
+                  </div>
+                  <div>
+                    <div>
+                  {player?.playerTeam === showPlayerHistory?.teamAway
+                      ? teams?.find((tname) => tname._id === showPlayerHistory?.teamHome)?.name
+                      : teams?.find((tname) => tname._id === showPlayerHistory?.teamAway)
+                          ?.name}
                           </div>
-                          <div className="actual-fixture-1">
-                          <div className="border" style={{borderRadius: 0.2+'rem'}}>{teamHomeScore}</div>
-                          &nbsp;
-                          <div className="border" style={{borderRadius: 0.2+'rem'}}>{teamAwayScore}</div>
+                          <div>{player?.playerTeam === showPlayerHistory?.teamAway ? "Away" : "Home"}</div>
+                  </div>
+                  <div>
+                          {showPlayerHistory?.kickOffTime === ""
+                            ? ""
+                            : <div>{new Date(showPlayerHistory?.kickOffTime).toDateString()}</div>}
+                            {showPlayerHistory?.kickOffTime === "" ? "" : 
+                            <div>
+                            {getPmString(new Date(getTime(showPlayerHistory?.kickOffTime)).toLocaleTimeString())}
+                            {getPm(showPlayerHistory?.kickOffTime)}
+                            </div>
+                            }
                         </div>
-                        </div>
-                        
-                      </div>
-                    );
-                  })}
-                </div>
-                <div className="player-info-1">
+                  </>
+                  }
+                  {infoWord === 'res' && <><div>
+                  {matchdays?.find(
+                    (y) => y._id === showPlayerHistory?.matchday
+                  )?.name}
+                  </div>
+                  <div className="pf">
+                    <div>
+                    {player?.playerTeam === showPlayerHistory?.teamAway
+                      ? teams?.find((tname) => tname._id === showPlayerHistory?.teamHome)?.name
+                      : teams?.find((tname) => tname._id === showPlayerHistory?.teamAway)
+                          ?.name}
+                          </div>
+                          <div>{showPlayerHistory?.home ?  "Home" : "Away" }</div>
+                  </div>
+                  {typeof(showPlayerHistory?.teamHomeScore)=== 'number' && 
+                  typeof(showPlayerHistory?.teamAwayScore) === 'number' && <div>
+                    <div>
+                    {typeof(showPlayerHistory?.teamHomeScore)=== 'number' ? showPlayerHistory?.teamHomeScore : ''}&nbsp;:&nbsp;
+                    {typeof(showPlayerHistory?.teamHomeScore)=== 'number' ? showPlayerHistory?.teamAwayScore : ''}
+                    </div>
+                  </div>}
+                  <div>
+                          {showPlayerHistory?.kickOffTime === ""
+                            ? ""
+                            : <div>{new Date(showPlayerHistory?.kickOffTime).toDateString()}</div>}
+                            {showPlayerHistory?.kickOffTime === "" ? "" : 
+                            <div>
+                            {getPmString(new Date(getTime(showPlayerHistory?.kickOffTime)).toLocaleTimeString())}
+                            {getPm(showPlayerHistory?.kickOffTime)}
+                            </div>
+                            }
+                        </div></>}
+                  </>
+
+
+                        {infoWord === 'res' && <div className="player-info-1">
                   <div className="player-info-2">
                     <div>Points</div>
                     <div>{showPlayerHistory?.totalPoints}</div>
@@ -208,11 +219,15 @@ const PlayerInfo = (props) => {
                   </div>
                   <div>{showPlayerHistory?.penaltiesSaved}</div>
                   </div> : ''}
+                </div>}
                 </div>
-              </div>
-            ) : (
-              <div className="tx-center">Results will appear here!</div>
-            ))}
+                
+                
+                
+                
+               
+            </div>
+          
         </Modal.Body>
       </Modal>
     </>

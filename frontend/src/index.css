@@ -1164,9 +1164,16 @@ h1.stats {
 
 /* Player Info */
 .games-info-fixtures {
+  /*border-radius: 1rem;
+  border: 1px solid #aaa;
+  margin-top: 1rem;
+  padding: 0.5rem;*/
+}
+.player-info-wrapper {
   border-radius: 1rem;
   border: 1px solid #aaa;
   margin-top: 1rem;
+  padding: 0.5rem;
 }
 
 .fix-grid {
@@ -1229,8 +1236,27 @@ h1.stats {
   font-weight: 700;
 }
 
+.player-info-3 {
+  text-align: center;
+  padding: 0.5rem;
+  margin: auto;
+  margin-bottom: 0.5rem;
+  margin-top: 0.5rem;
+  border-radius: 0.5rem;
+  /*width: 90%;*/
+  font-weight: 700;
+  background: linear-gradient(88deg, aquamarine, #0000ff57);
+}
+
+.pf {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+}
+
 .player-info-2:nth-child(odd) {
-  background: aquamarine;
+  background: white;
 }
 
 .player-info-2 div {
@@ -1240,6 +1266,30 @@ h1.stats {
 
 .player-info-2 div:last-of-type {
   text-align: right;
+}
+
+.playerInfoFix {
+  display: flex;
+  overflow: auto;
+  /* border: 1px solid; */
+  gap: 0.5rem;
+  height: 100px;
+  border-radius: 0.5rem;
+  padding: 0 0.25rem;
+  padding-bottom: 0.5rem;
+}
+
+.playerFix {
+  border: 1px solid #aaa;
+  /* width: 50px; */
+  border-top-left-radius: 0.5rem;
+  border-top-right-radius: 0.5rem;
+  padding: 0.25rem;
+  cursor: pointer;
+}
+
+.playerInfoFix img {
+  width: 30px;
 }
 
 
