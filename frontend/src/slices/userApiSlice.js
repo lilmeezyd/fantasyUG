@@ -33,6 +33,11 @@ export const userApiSlice = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ['User']
     }),
+    getTotal: builder.query({
+      query: () => ({
+        url: `${USERS_URL}/totalManagers`
+      })
+    })
   }),
 });
 
@@ -41,4 +46,5 @@ export const {
   useRegisterMutation,
   useLogoutMutation,
   useUpdateUserMutation,
+  useGetTotalQuery
 } = userApiSlice;

@@ -8,6 +8,7 @@ import {
   getUserProfile,
   updateUserProfile,
   getAllUsers,
+  getTotalManagers
 } from "../controllers/userController.js";
 const router = express.Router();
 
@@ -15,6 +16,7 @@ router.post("/", registerUser);
 router.post("/auth", authUser);
 router.post("/logout", logoutUser);
 router.get("/all", protect, roles(ROLES.ADMIN), getAllUsers)
+router.get("/totalManagers", protect, getTotalManagers)
 router
   .route("/profile")
   .get(protect, getUserProfile)

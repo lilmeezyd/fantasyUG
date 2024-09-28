@@ -44,10 +44,10 @@ const RegisterScreen = () => {
     }
     return (
         <FormContainer>
-            <h1>Register</h1>
+            <h4>Register</h4>
             <Form onSubmit={onSubmit}>
-            <Form.Group className="my-2" controlId="firstName">
-                    <Form.Label>Name</Form.Label>
+            <Form.Group className="my-2 login-cs-child" controlId="firstName">
+                    <Form.Label>First Name</Form.Label>
                     <Form.Control
                         type="text"
                         placeholder="Enter First Name"
@@ -55,8 +55,8 @@ const RegisterScreen = () => {
                         onChange={(e) => setFirstName(e.target.value)}
                     ></Form.Control>
                 </Form.Group>
-                <Form.Group className="my-2" controlId="lastName">
-                    <Form.Label>Name</Form.Label>
+                <Form.Group className="my-2 login-cs-child" controlId="lastName">
+                    <Form.Label>Last Name</Form.Label>
                     <Form.Control
                         type="text"
                         placeholder="Enter Last Name"
@@ -64,7 +64,7 @@ const RegisterScreen = () => {
                         onChange={(e) => setLastName(e.target.value)}
                     ></Form.Control>
                 </Form.Group>
-                <Form.Group className="my-2" controlId="email">
+                <Form.Group className="my-2 login-cs-child" controlId="email">
                     <Form.Label>Email Address</Form.Label>
                     <Form.Control
                         type="email"
@@ -73,7 +73,7 @@ const RegisterScreen = () => {
                         onChange={(e) => setEmail(e.target.value)}
                     ></Form.Control>
                 </Form.Group>
-                <Form.Group className="my-2" controlId="password">
+                <Form.Group className="my-2 login-cs-child" controlId="password">
                     <Form.Label>Password</Form.Label>
                     <Form.Control
                         type="password"
@@ -82,7 +82,7 @@ const RegisterScreen = () => {
                         onChange={(e) => setPassword(e.target.value)}
                     ></Form.Control>
                 </Form.Group>
-                <Form.Group className="my-2" controlId="password">
+                <Form.Group className="my-2 login-cs-child" controlId="password">
                     <Form.Label>Confirm Password</Form.Label>
                     <Form.Control
                         type="password"
@@ -92,13 +92,14 @@ const RegisterScreen = () => {
                     ></Form.Control>
                 </Form.Group>
                 {isLoading && <Loader />}
-                <Button type="submit" variant="primary" className="mt-3">
+                <Button type="submit" variant="primary" className="mt-3 form-control">
                     Register
                 </Button>
 
-                <Row className="py-3">
-                    <Col>
-                    Already have an account? <Link to='/login'>Sign In</Link></Col>
+                <Row className="py-3 login-cs-child">
+                <div></div>
+                <div style={{fontWeight: 600}}>
+                    Already have an account? <Link to='/login'>Sign In</Link></div>
                 </Row>
             </Form>
         </FormContainer>

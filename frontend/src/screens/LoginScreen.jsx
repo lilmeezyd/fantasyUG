@@ -58,13 +58,15 @@ const LoginScreen = () => {
                 </Form.Group>
                 {isLoading && <Loader />}
                 <div className="login-cs-child">
+                    <div></div>
                 <Button type="submit" variant="primary" className=" form-control">
                     Sign In
                 </Button>
                 </div>
                 <Row className="login-cs-child">
-                    <Col>
-                    New User? <Link to='/register'>Register</Link></Col>
+                    <div></div>
+                    <div style={{fontWeight: 600}}>
+                    New User? <Link to='/register'>Register</Link></div>
                 </Row>
             </Form>
             </>

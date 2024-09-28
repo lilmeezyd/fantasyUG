@@ -60,6 +60,9 @@ const Points = () => {
         teamName={managerInfo?.teamName}
         teamValue={managerPicks?.teamValue}
         bank={managerPicks?.bank}
+        matchdayPoints={managerInfo?.matchdayPoints}
+        overallPoints={managerInfo?.overallPoints}
+        overallRank={managerInfo?.overallRank}
          />
       </div>
       <Container className="main">

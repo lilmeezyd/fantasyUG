@@ -1,14 +1,18 @@
 import { useGetQuery } from "../slices/teamApiSlice";
 import { useSelector } from "react-redux";
 import { useNavigate, Link } from "react-router-dom";
+import { useGetTotalQuery } from "../slices/userApiSlice";
 const LeagueDetails = (props) => {
-  const { privateLeagues, overallLeagues, teamLeagues, teamName, teamValue, bank } = props;
+  const { privateLeagues, overallLeagues, teamLeagues, teamName, teamValue, bank,
+    overallPoints, matchdayPoints, overallRank
+   } = props;
   const { data: teams } = useGetQuery();
+  const { data: totalPlayers } = useGetTotalQuery()
   const { userInfo } = useSelector((state) => state.auth);
   const navigate = useNavigate();
-  console.log(userInfo);
+  //console.log(userInfo);
   return (
-    <div className="league-details">
+    <div className="league-details"> 
       <div className="ranks">
         <div className="ld-1">
           <h5 style={{ fontWeight: 700 }}>
@@ -20,19 +24,19 @@ const LeagueDetails = (props) => {
           <h5 className="ld-2">Ranking</h5>
           <div className="my-ranking">
             <div>Total points</div>
-            <div></div>
+            <div>{overallPoints}</div>
           </div>
           <div className="my-ranking">
             <div>Overall rank</div>
-            <div></div>
+            <div>{overallRank === null ? '-' : overallRank}</div>
           </div>
           <div className="my-ranking">
             <div>Total players</div>
-            <div></div>
+            <div>{totalPlayers?.total}</div>
           </div>
           <div className="my-ranking">
             <div>Matchday points</div>
-            <div></div>
+            <div>{matchdayPoints}</div>
           </div>
         </div>
       </div>
@@ -48,15 +52,15 @@ const LeagueDetails = (props) => {
           {overallLeagues?.map((x) => (
             <div className="my-leagues" key={x._id}>
               <div></div>
-              <div>{x.currentRank}</div>
-              <div>{x.name}</div>
+              <h6>{x.currentRank === null ? '-' : x.currentRank}</h6>
+              <Link to={`/userleagues/overall/${x.id}`}><h6>{x.name}</h6></Link>
             </div>
           ))}
           {teamLeagues?.map((x) => (
             <div className="my-leagues" key={x._id}>
               <div></div>
-              <div>{x.currentRank}</div>
-              <div>{teams?.find((team) => team._id === x.team)?.name}</div>
+              <h6>{x.currentRank === null ? '-' : x.currentRank}</h6>
+              <Link to={`/userleagues/team/${x.id}`}><h6>{teams?.find((team) => team._id === x.team)?.name}</h6></Link>
             </div>
           ))}
         </div>
@@ -74,8 +78,8 @@ const LeagueDetails = (props) => {
               {privateLeagues?.map((x) => (
                 <div className="my-leagues" key={x._id}>
                   <div></div>
-                  <h6>{x.currentRank}</h6>
-                  <h6>{x.name}</h6>
+                  <h6>{x.currentRank === null ? '-' : x.currentRank}</h6>
+                  <Link to={`/userleagues/private/${x.id}`}><h6>{x.name}</h6></Link>
                 </div>
               ))}
             </>

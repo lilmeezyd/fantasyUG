@@ -22,7 +22,7 @@ const setLeague = asyncHandler(async (req, res) => {
     endMatchday,
     creator: req.user,
     entrants: [],
-    entryCode
+    entryCode,
   });
 
   res.status(200).json(league);
@@ -44,13 +44,13 @@ const setOverallLeague = asyncHandler(async (req, res) => {
     startMatchday,
     endMatchday,
     creator: req.user,
-    entrants: []
+    entrants: [],
   });
 
   res.status(200).json(league);
-})
+});
 
-//@desc Set team League 
+//@desc Set team League
 //@toute POST /api/leagues/teamleagues
 //@access Private
 //@role ADMIN
@@ -66,18 +66,18 @@ const setTeamLeague = asyncHandler(async (req, res) => {
     startMatchday,
     endMatchday,
     creator: req.user,
-    entrants: []
+    entrants: [],
   });
 
   res.status(200).json(league);
-})
+});
 
 //@desc Join Overall league
 //@route PATCH /api/leagues/overallleagues/:id/join
 //@access Private
 const joinOverallLeague = asyncHandler(async (req, res) => {
   const managerInfo = await ManagerInfo.findOne({ user: req.user.id });
-  const oldLeagues = managerInfo ? managerInfo.overallLeagues: [];
+  const oldLeagues = managerInfo ? managerInfo.overallLeagues : [];
   const oldLeaguesIds = oldLeagues.map((x) => x.id);
   const requiredLeague = await OverallLeague.findById(req.params.id);
   const oldEntrants = requiredLeague.entrants;
@@ -137,17 +137,19 @@ const joinOverallLeague = asyncHandler(async (req, res) => {
 //@access Private
 const joinTeamLeague = asyncHandler(async (req, res) => {
   const managerInfo = await ManagerInfo.findOne({ user: req.user.id });
-  const oldLeagues = managerInfo ? managerInfo.teamLeagues: [];
+  const oldLeagues = managerInfo ? managerInfo.teamLeagues : [];
   const oldLeaguesIds = oldLeagues.map((x) => x.id);
   const requiredLeague = await TeamLeague.findById(req.params.id);
-  const teamLeagues = await TeamLeague.find({})
-  const teamLeagueIds = teamLeagues.map(x => x.id)
+  const teamLeagues = await TeamLeague.find({});
+  const teamLeagueIds = teamLeagues.map((x) => x.id);
   const oldEntrants = requiredLeague.entrants;
   const oldEntrantsIds = oldEntrants.map((x) => x.toString());
   const entrants = [...oldEntrants, req.user.id];
   const { creator, team, id, startMatchday, endMatchday } = requiredLeague;
-  const inTeamLeagueArray = oldLeaguesIds.map(x => teamLeagueIds.includes(x) ? true : false)
-  
+  const inTeamLeagueArray = oldLeaguesIds.map((x) =>
+    teamLeagueIds.includes(x) ? true : false
+  );
+
   if (oldLeaguesIds.includes(id)) {
     res.status(400);
     throw new Error("Already in the league");
@@ -157,7 +159,7 @@ const joinTeamLeague = asyncHandler(async (req, res) => {
     throw new Error("Already in the league");
   }
 
-  if(inTeamLeagueArray.includes(true)) {
+  if (inTeamLeagueArray.includes(true)) {
     res.status(400);
     throw new Error("Already in a team league, can only be in one!");
   }
@@ -204,7 +206,7 @@ const joinTeamLeague = asyncHandler(async (req, res) => {
 //@access Private
 const joinPrivateLeague = asyncHandler(async (req, res) => {
   const managerInfo = await ManagerInfo.findOne({ user: req.user.id });
-  const oldLeagues = managerInfo ? managerInfo.privateLeagues: [];
+  const oldLeagues = managerInfo ? managerInfo.privateLeagues : [];
   const oldLeaguesIds = oldLeagues.map((x) => x.id);
   const requiredLeague = await League.findById(req.params.id);
   const oldEntrants = requiredLeague.entrants;
@@ -258,13 +260,13 @@ const joinPrivateLeague = asyncHandler(async (req, res) => {
   res.status(200).json(league);
 });
 
-//@desc Get default leagues 
+//@desc Get default leagues
 //@route GET /api/leagues/teamleagues
 //@access Public
 const getTeamLeagues = asyncHandler(async (req, res) => {
   const leagues = await TeamLeague.find({}).populate("team");
   res.status(200).json(leagues);
-}); 
+});
 
 //@desc Get default leagues
 //@route GET /api/leagues/overallleagues
@@ -291,7 +293,7 @@ const getLeagues = asyncHandler(async (req, res) => {
   }
 
   res.status(200).json(leagues);*/
-  
+
   const league = await League.find({});
   res.status(200).json(league);
 });
@@ -300,8 +302,8 @@ const getLeagues = asyncHandler(async (req, res) => {
 //@route GET /api/leagues/:id
 //@access Private
 const getLeague = asyncHandler(async (req, res) => {
-  const league = await League.findById(req.params.id)
-    /*.populate("entrants")
+  const league = await League.findById(req.params.id);
+  /*.populate("entrants")
     .sort("overallPoints")
     .sort("matchdayPoints")
     .sort("mgrId");*/
@@ -313,8 +315,8 @@ const getLeague = asyncHandler(async (req, res) => {
 //@access Private
 //@access ADMIN & NORMAL_USER
 const getTeamLeague = asyncHandler(async (req, res) => {
-  const league = await TeamLeague.findById(req.params.id)
-    /*.populate("entrants")
+  const league = await TeamLeague.findById(req.params.id);
+  /*.populate("entrants")
     .sort("overallPoints")
     .sort("matchdayPoints")
     .sort("mgrId");*/
@@ -322,7 +324,7 @@ const getTeamLeague = asyncHandler(async (req, res) => {
 });
 
 //@desc Get an Overall League
-//@route GET /api/overallleagues
+//@route GET /api/overallleagues/:id
 //@access Private
 //@access ADMIN & NORMAL_USER
 const getOverallLeague = asyncHandler(async (req, res) => {
@@ -335,22 +337,26 @@ const getOverallLeague = asyncHandler(async (req, res) => {
 //@access Private
 //@role ADMIN
 const editTeamLeague = asyncHandler(async (req, res) => {
-  const league = TeamLeague.findById(req.params.id)
+  const league = TeamLeague.findById(req.params.id);
   const user = await User.findById(req.user.id).select("-password");
   if (!user) {
     res.status(404);
     throw new Error("User not found");
   }
 
-  if(!league) {
-    res.status(404)
-    throw new Error(`League not found`)
+  if (!league) {
+    res.status(404);
+    throw new Error(`League not found`);
   }
 
-  const updatedTeamLeague = await TeamLeague.findByIdAndUpdate(req.params.id, req.body, {
-    new: true,
-  });
-  res.status(200).json(updatedTeamLeague)
+  const updatedTeamLeague = await TeamLeague.findByIdAndUpdate(
+    req.params.id,
+    req.body,
+    {
+      new: true,
+    }
+  );
+  res.status(200).json(updatedTeamLeague);
 });
 
 //@desc Update team League details
@@ -358,22 +364,26 @@ const editTeamLeague = asyncHandler(async (req, res) => {
 //@access Private
 //@role ADMIN
 const editOverallLeague = asyncHandler(async (req, res) => {
-  const league = OverallLeague.findById(req.params.id)
+  const league = OverallLeague.findById(req.params.id);
   const user = await User.findById(req.user.id).select("-password");
   if (!user) {
     res.status(404);
     throw new Error("User not found");
   }
 
-  if(!league) {
-    res.status(404)
-    throw new Error(`League not found`)
+  if (!league) {
+    res.status(404);
+    throw new Error(`League not found`);
   }
 
-  const updatedOverallLeague = await OverallLeague.findByIdAndUpdate(req.params.id, req.body, {
-    new: true,
-  });
-  res.status(200).json(updatedOverallLeague)
+  const updatedOverallLeague = await OverallLeague.findByIdAndUpdate(
+    req.params.id,
+    req.body,
+    {
+      new: true,
+    }
+  );
+  res.status(200).json(updatedOverallLeague);
 });
 
 //@desc Update team League details
@@ -381,22 +391,26 @@ const editOverallLeague = asyncHandler(async (req, res) => {
 //@access Private
 //@role ADMIN
 const editLeague = asyncHandler(async (req, res) => {
-  const league = League.findById(req.params.id)
+  const league = League.findById(req.params.id);
   const user = await User.findById(req.user.id).select("-password");
   if (!user) {
     res.status(404);
     throw new Error("User not found");
   }
 
-  if(!league) {
-    res.status(404)
-    throw new Error(`League not found`)
+  if (!league) {
+    res.status(404);
+    throw new Error(`League not found`);
   }
 
-  const updatedLeague = await League.findByIdAndUpdate(req.params.id, req.body, {
-    new: true,
-  });
-  res.status(200).json(updatedLeague)
+  const updatedLeague = await League.findByIdAndUpdate(
+    req.params.id,
+    req.body,
+    {
+      new: true,
+    }
+  );
+  res.status(200).json(updatedLeague);
 });
 
 //@desc Delete League
@@ -472,7 +486,7 @@ const deleteOverallLeague = asyncHandler(async (req, res) => {
     throw new Error("User not found");
   }
 
-    await OverallLeague.findByIdAndDelete(req.params.id);
+  await OverallLeague.findByIdAndDelete(req.params.id);
   res.status(200).json({ id: req.params.id });
 });
 

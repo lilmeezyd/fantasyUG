@@ -9,6 +9,7 @@ import { useGetPicksQuery } from "../slices/picksSlice";
 const PickTeam = () => {
   const { data: managerInfo } = useGetManagerInfoQuery();
   const { data: managerPicks, isLoading } = useGetPicksQuery();
+  console.log(managerInfo)
 
   const reducer = (state, action) => {
     const ids = state?.picks?.map(x => x.slot)
@@ -374,10 +375,13 @@ const PickTeam = () => {
         <LeagueDetails privateLeagues={managerInfo?.privateLeagues}
         teamLeagues={managerInfo?.teamLeagues}
         overallLeagues={managerInfo?.overallLeagues}
+        matchdayPoints={managerInfo?.matchdayPoints}
+        overallPoints={managerInfo?.overallPoints}
+        overallRank={managerInfo?.overallRank}
         teamName={managerInfo?.teamName}
         teamValue={managerPicks?.teamValue}
         bank={managerPicks?.bank}
-         />
+         /> 
       </div>
       <Container className="main">
         <FixtureList mdParam={'next'} />

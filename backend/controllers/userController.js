@@ -125,11 +125,20 @@ const getAllUsers = asyncHandler(async (req, res) => {
   res.status(200).json(users);
 });
 
+//@desc Get total number of managers
+//@route GET /api/users/totalManagers
+const getTotalManagers = asyncHandler(async (req, res) => {
+  const users = await User.find({hasPicks: true})
+  const managerLength = users.length
+  res.status(200).json({total: managerLength})
+})
+
 export {
   authUser,
   registerUser,
   logoutUser,
   getUserProfile,
   updateUserProfile,
+  getTotalManagers,
   getAllUsers,
 };

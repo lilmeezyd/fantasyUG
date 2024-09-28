@@ -48,6 +48,10 @@ const OverallLeagues = () => {
     }))
     setOverallLeagueId(id)
   }
+
+  const updateOverallLeaguePop = (id) => {
+    console.log(id)
+  }
    const submit = async (data) => {
     try {
       await addOverallLeague(data).unwrap()
@@ -185,6 +189,13 @@ const OverallLeagues = () => {
               style={{background: 'white', border: 'white'}}
             >
               <AiFillDelete color="black" />
+            </Button>
+          </div>
+          <div>
+            <Button
+              onClick={() => updateOverallLeaguePop(x._id)}
+            >
+              Update Table
             </Button>
           </div>
       </div>)
