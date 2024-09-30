@@ -1304,6 +1304,30 @@ h1.stats {
   width: 30px;
 }
 
+/* Manager Standings */
+.standing-header {
+  font-weight: 700;
+  font-size: 1.1rem;
+  text-align: center;
+  padding: 0.5rem;
+}
+
+.standing-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  padding: 0.25rem;
+}
+
+.standing-grid-header {
+  font-weight: 700;
+}
+
+.standing-grid-manager {
+  /* border: 1px solid; */
+  display: flex;
+  gap: 1rem;
+}
+
 
 
 .footer {

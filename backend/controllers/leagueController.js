@@ -4,6 +4,8 @@ import OverallLeague from "../models/overallLeagueModel.js";
 import TeamLeague from "../models/teamLeagueModel.js";
 import User from "../models/userModel.js";
 import ManagerInfo from "../models/managerInfoModel.js";
+import ManagerLive from "../models/managerLive.js";
+import Matchday from "../models/matchdayModel.js";
 
 //@desc Set League
 //@route POST /api/leagues/privateleagues
@@ -75,76 +77,79 @@ const setTeamLeague = asyncHandler(async (req, res) => {
 //@desc Join Overall league
 //@route PATCH /api/leagues/overallleagues/:id/join
 //@access Private
-const joinOverallLeague = asyncHandler(async (req, res) => {
-  const managerInfo = await ManagerInfo.findOne({ user: req.user.id });
-  const oldLeagues = managerInfo ? managerInfo.overallLeagues : [];
-  const oldLeaguesIds = oldLeagues.map((x) => x.id);
-  const requiredLeague = await OverallLeague.findById(req.params.id);
-  const oldEntrants = requiredLeague.entrants;
-  const oldEntrantsIds = oldEntrants.map((x) => x.toString());
-  const entrants = [...oldEntrants, req.user.id];
-  const { creator, name, id, startMatchday, endMatchday } = requiredLeague;
+const joinOverallLeague = asyncHandler(
+  async (userObj, manager, overallLeague, req, res) => {
+    const managerInfo = await ManagerInfo.findById(manager);
+    const oldLeagues = managerInfo ? managerInfo.overallLeagues : [];
+    const oldLeaguesIds = oldLeagues.map((x) => x.id);
+    const requiredLeague = await OverallLeague.findById(overallLeague);
+    const oldEntrants = requiredLeague.entrants;
+    const oldEntrantsIds = oldEntrants.map((x) => x.toString());
+    const { creator, name, id, startMatchday, endMatchday } = requiredLeague;
 
-  if (oldLeaguesIds.includes(id)) {
-    res.status(400);
-    throw new Error("Already in the league");
-  }
-
-  if (oldEntrantsIds.includes(req.user.id)) {
-    res.status(400);
-    throw new Error("Already in the league");
-  }
-
-  //Find user
-  if (!req.user) {
-    res.status(400);
-    throw new Error("User not found");
-  }
-
-  const newLeague = {
-    creator,
-    name,
-    id,
-    startMatchday,
-    endMatchday,
-    lastRank: null,
-    currentRank: null,
-    matchdayPoints: 0,
-    overallPoints: 0,
-  };
-
-  const leagues = [...oldLeagues, newLeague];
-
-  await ManagerInfo.findOneAndUpdate(
-    { user: req.user.id },
-    { overallLeagues: leagues },
-    { new: true }
-  );
-
-  const league = await OverallLeague.findByIdAndUpdate(
-    req.params.id,
-    { entrants: entrants },
-    {
-      new: true,
+    if (oldLeaguesIds.includes(id)) {
+      res.status(400);
+      throw new Error("Already in the league");
     }
-  );
 
-  res.status(200).json(league);
-});
+    if (oldEntrantsIds.includes(manager)) {
+      res.status(400);
+      throw new Error("Already in the league");
+    }
+
+    //Find user
+    if (!userObj) {
+      res.status(400);
+      throw new Error("User not found");
+    }
+
+    const newLeague = {
+      creator,
+      name,
+      id,
+      startMatchday,
+      endMatchday,
+      lastRank: null,
+      currentRank: null,
+      matchdayPoints: 0,
+      overallPoints: 0,
+    };
+
+    //const leagues = [...oldLeagues, newLeague];
+
+    const updatedManagerInfo = await ManagerInfo.findByIdAndUpdate(
+      manager,
+      { $push: { overallLeagues: newLeague } },
+      { new: true }
+    );
+
+    if (updatedManagerInfo) {
+      await OverallLeague.findByIdAndUpdate(
+        overallLeague,
+        { $push: { entrants: manager } },
+        {
+          new: true,
+        }
+      );
+
+      //res.status(200).json(league);
+    }
+  }
+);
 
 //@desc Join Overall league
 //@route PATCH /api/leagues/teamleagues/:id/join
 //@access Private
-const joinTeamLeague = asyncHandler(async (req, res) => {
-  const managerInfo = await ManagerInfo.findOne({ user: req.user.id });
+const joinTeamLeague = asyncHandler(async (userObj, manager, playerLeague, req, res) => {
+  const managerInfo = await ManagerInfo.findById(manager);
   const oldLeagues = managerInfo ? managerInfo.teamLeagues : [];
   const oldLeaguesIds = oldLeagues.map((x) => x.id);
-  const requiredLeague = await TeamLeague.findById(req.params.id);
+  const requiredLeague = await TeamLeague.findById(playerLeague);
   const teamLeagues = await TeamLeague.find({});
   const teamLeagueIds = teamLeagues.map((x) => x.id);
   const oldEntrants = requiredLeague.entrants;
   const oldEntrantsIds = oldEntrants.map((x) => x.toString());
-  const entrants = [...oldEntrants, req.user.id];
+  //const entrants = [...oldEntrants, manager];
   const { creator, team, id, startMatchday, endMatchday } = requiredLeague;
   const inTeamLeagueArray = oldLeaguesIds.map((x) =>
     teamLeagueIds.includes(x) ? true : false
@@ -154,7 +159,7 @@ const joinTeamLeague = asyncHandler(async (req, res) => {
     res.status(400);
     throw new Error("Already in the league");
   }
-  if (oldEntrantsIds.includes(req.user.id)) {
+  if (oldEntrantsIds.includes(manager)) {
     res.status(400);
     throw new Error("Already in the league");
   }
@@ -165,7 +170,7 @@ const joinTeamLeague = asyncHandler(async (req, res) => {
   }
 
   //Find user
-  if (!req.user) {
+  if (!userObj) {
     res.status(400);
     throw new Error("User not found");
   }
@@ -182,24 +187,27 @@ const joinTeamLeague = asyncHandler(async (req, res) => {
     overallPoints: 0,
   };
 
-  const leagues = [...oldLeagues, newLeague];
+  //const leagues = [...oldLeagues, newLeague];
 
-  await ManagerInfo.findOneAndUpdate(
-    { user: req.user.id },
-    { teamLeagues: leagues },
-    { new: true }
-  );
+  const updatedManagerInfo = await ManagerInfo.findByIdAndUpdate(
+      manager,
+      { $push: { teamLeagues: newLeague } },
+      { new: true }
+    );
 
-  const league = await TeamLeague.findByIdAndUpdate(
-    req.params.id,
-    { entrants: entrants },
-    {
-      new: true,
+    if (updatedManagerInfo) {
+      await TeamLeague.findByIdAndUpdate(
+        playerLeague,
+        { $push: { entrants: manager } },
+        {
+          new: true,
+        }
+      );
+
+      //res.status(200).json(league);
     }
-  );
 
-  res.status(200).json(league);
-});
+  });
 
 //@desc Join Overall league
 //@route PATCH /api/leagues/privateleagues/:id/join
@@ -315,7 +323,9 @@ const getLeague = asyncHandler(async (req, res) => {
 //@access Private
 //@access ADMIN & NORMAL_USER
 const getTeamLeague = asyncHandler(async (req, res) => {
-  const league = await TeamLeague.findById(req.params.id);
+  const league = await TeamLeague.findById(req.params.id)
+  .populate("entrants")
+    .exec();;
   /*.populate("entrants")
     .sort("overallPoints")
     .sort("matchdayPoints")
@@ -329,6 +339,8 @@ const getTeamLeague = asyncHandler(async (req, res) => {
 //@access ADMIN & NORMAL_USER
 const getOverallLeague = asyncHandler(async (req, res) => {
   const league = await OverallLeague.findById(req.params.id)
+    .populate("entrants")
+    .exec();
   res.status(200).json(league);
 });
 
@@ -490,6 +502,52 @@ const deleteOverallLeague = asyncHandler(async (req, res) => {
   res.status(200).json({ id: req.params.id });
 });
 
+const updateOverallTable = asyncHandler(async (req, res) => {
+  const overallLeagues = await OverallLeague.find({})
+  const matchday = await Matchday.findOne({current: true})
+  //console.log(overallLeagues)
+  const { id } = matchday
+  
+  if(matchday) {
+    overallLeagues.forEach(league => {
+      const { entrants } = league
+      if(entrants.length > 0) {
+        entrants.forEach(async entrant => {
+          const entrantHasLives = await ManagerLive.findOne({manager: entrant})
+          if(entrantHasLives) {
+            const mid = {}
+            const managerInfo = await ManagerInfo.findById(entrant)
+            const { firstName, lastName, teamName, overallLeagues: [ligi] } = managerInfo
+            //console.log(managerInfo)
+            
+            const { lastRank, currentRank, matchdayPoints, overallPoints } = ligi
+            mid[id] = matchdayPoints
+            await OverallLeague.findByIdAndUpdate(league._id,
+              {$pull: {entrants: entrant}, 
+              $push: {
+                standings: {firstName, lastName, teamName, lastRank, currentRank, overallPoints, 
+                  matchdays: mid}
+              }},{new: true})
+           /* if(updatedLeague) {
+              console.log(entrant)
+              updatedLeague.$pull('entrants', entrant)
+              await updatedLeague.save()
+            }*/
+          }
+        })
+      }
+    })
+  }
+})
+const updateTeamTables = asyncHandler(async (req, res) => {
+  const teamLeagues = await OverallLeague.find({})
+  console.log(teamLeagues)
+})
+const updatePrivateTables = asyncHandler(async (req, res) => {
+  const privateLeagues = await League.find({})
+  console.log(privateLeagues)
+})
+
 export {
   setLeague,
   setOverallLeague,
@@ -509,4 +567,7 @@ export {
   deleteOverallLeague,
   getTeamLeagues,
   getOverallLeagues,
+  updateOverallTable,
+  updateTeamTables,
+  updatePrivateTables
 };

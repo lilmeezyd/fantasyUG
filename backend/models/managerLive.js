@@ -1,10 +1,11 @@
 import mongoose from "mongoose";
  
 const managerLiveSchema = mongoose.Schema({
-  user: { 
+  manager: { 
     type: mongoose.Schema.Types.ObjectId,
     required: true,
-    ref: "User",
+    unique: true,
+    ref: "ManagerInfo",
   },
   livePicks: [ 
     {

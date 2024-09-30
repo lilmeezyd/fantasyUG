@@ -10,7 +10,6 @@ const LeagueDetails = (props) => {
   const { data: totalPlayers } = useGetTotalQuery()
   const { userInfo } = useSelector((state) => state.auth);
   const navigate = useNavigate();
-  //console.log(userInfo);
   return (
     <div className="league-details"> 
       <div className="ranks">

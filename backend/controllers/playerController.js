@@ -361,6 +361,11 @@ const updatePlayer = asyncHandler(async (req, res) => {
   }*/
 });
 
+//Increment Player number
+const playerIncrement = asyncHandler(async (playerId, increment,  req, res) => {
+  await Player.findByIdAndUpdate(playerId, {$inc: {playerCount: increment}})
+})
+
 //@desc delete player
 //@route DELETE /api/players/:id
 //@access private
@@ -395,4 +400,4 @@ const deletePlayer = asyncHandler(async (req, res) => {
   res.status(200).json({ id: req.params.id });
 });
 
-export { setPlayer, getPlayers, getPlayer, getPlayerHistory, updatePlayer, deletePlayer };
+export { setPlayer, getPlayers, playerIncrement, getPlayer, getPlayerHistory, updatePlayer, deletePlayer };

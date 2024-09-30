@@ -18,6 +18,9 @@ import {
   joinPrivateLeague,
   getTeamLeagues,
   getOverallLeagues,
+  updateOverallTable,
+  updateTeamTables,
+  updatePrivateTables,
 } from "../controllers/leagueController.js";
 import { protect, roles } from "../middleware/authMiddleware.js";
 import ROLES from "../config/permissions.js";
@@ -30,9 +33,18 @@ router.route("/teamleagues").post(protect, roles(ROLES.ADMIN), setTeamLeague);
 router
   .route("/privateleagues")
   .post(protect, roles(ROLES.NORMAL_USER, ROLES.ADMIN), setLeague);
-router.route("/teamleagues").get(getTeamLeagues);
-router.route("/overallleagues").get(getOverallLeagues);
-router.route("/privateleagues").get(getLeagues);
+router
+  .route("/teamleagues")
+  .get(getTeamLeagues)
+  .patch(protect, roles(ROLES.NORMAL_USER, ROLES.ADMIN), updateTeamTables);
+router
+  .route("/overallleagues")
+  .get(getOverallLeagues)
+  .patch(protect, roles(ROLES.NORMAL_USER, ROLES.ADMIN), updateOverallTable);
+router
+  .route("/privateleagues")
+  .get(getLeagues)
+  .patch(protect, roles(ROLES.NORMAL_USER, ROLES.ADMIN), updatePrivateTables);
 router
   .route("/overallleagues/:id")
   .get(getOverallLeague)

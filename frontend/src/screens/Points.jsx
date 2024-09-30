@@ -14,7 +14,7 @@ const Points = () => {
   const { data: managerInfo } = useGetManagerInfoQuery();
   const { data: managerPicks } = useGetPicksQuery();
   const { data: matchdays } = useGetMatchdaysQuery()
-  console.log(useGetLivePicksQuery(userInfo?._id))
+  console.log( picks)
   if(isLoading && picks === undefined) {
     return (
     <div className="spinner">

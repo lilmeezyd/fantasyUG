@@ -1,3 +1,4 @@
+import {Spinner} from "react-bootstrap";
 import { useReducer, useEffect } from "react";
 import LeagueDetails from "../components/LeagueDetails";
 import ManagerPicks from "../components/ManagerPicks";
@@ -10,6 +11,7 @@ const PickTeam = () => {
   const { data: managerInfo } = useGetManagerInfoQuery();
   const { data: managerPicks, isLoading } = useGetPicksQuery();
   console.log(managerInfo)
+  console.log(managerPicks)
 
   const reducer = (state, action) => {
     const ids = state?.picks?.map(x => x.slot)
@@ -361,6 +363,11 @@ const PickTeam = () => {
   }
   const inform = (data) => {
     console.log('view info')
+  }
+  if(isLoading) {
+    return (
+      <div className="spinner"><Spinner /></div>
+    )
   }
   return (
     <>

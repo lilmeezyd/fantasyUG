@@ -7,24 +7,25 @@ const leagueSchema = mongoose.Schema(
       required: true,
     },
     startMatchday: {
-      type: mongoose.Schema.Types.Number,
-      ref: "Matchday",
-      required: true,
-    },
-    endMatchday: {
-      type: mongoose.Schema.Types.Number,
-      ref: "Matchday",
-      default: 30,
-    },
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Matchday',
+      required: true 
+  },
+  endMatchday: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Matchday',
+      required: true
+  },
     creator: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true 
     },
     entrants: {
-      type: [mongoose.Schema.Types.ObjectId],
-      ref: "User",
+        type: [mongoose.Schema.Types.ObjectId],
+        ref: "ManagerInfo",
     },
+    standings: [],
     entryCode: {
       type: String
     }

@@ -23,8 +23,9 @@ const teamLeagueSchema = mongoose.Schema({
     },
     entrants: {
         type: [mongoose.Schema.Types.ObjectId],
-        ref: "User",
-    }
+        ref: "ManagerInfo",
+    },
+    standings: []
 }, {
     timestamps: true,
 })

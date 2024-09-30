@@ -1,10 +1,10 @@
 import mongoose from 'mongoose' 
 
 const picksSchema = mongoose.Schema({
-    user: {
+    manager: {
         type: mongoose.Schema.Types.ObjectId,
         required: true,
-        ref: 'User'
+        ref: 'ManagerInfo'
     }, 
     picks: [
        { _id: { type: mongoose.Schema.Types.ObjectId, ref: 'Player', required: true},

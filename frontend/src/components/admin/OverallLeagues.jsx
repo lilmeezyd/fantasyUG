@@ -3,7 +3,7 @@ import { Container, Spinner, Button } from "react-bootstrap"
 import { BsPencilFill } from "react-icons/bs";
 import { AiFillDelete} from "react-icons/ai"
 import Pagination from "../Pagination"
-import { useGetOverallLeaguesQuery, useAddOverallLeagueMutation, useDeleteOverallLeagueMutation } from "../../slices/leagueApiSlice"
+import { useUpdateOverallTableMutation, useGetOverallLeaguesQuery, useAddOverallLeagueMutation, useDeleteOverallLeagueMutation } from "../../slices/leagueApiSlice"
 import AddModal from "./overallLeagueModals/AddModal"
 import EditModal from "./overallLeagueModals/EditModal"
 import DeleteModal from "./overallLeagueModals/DeleteModal"
@@ -20,6 +20,9 @@ const OverallLeagues = () => {
   const { data: overallLeagues, isLoading} = useGetOverallLeaguesQuery()
   const [addOverallLeague ] = useAddOverallLeagueMutation()
   const [ deleteOverallLeague ] = useDeleteOverallLeagueMutation() 
+  const [ updateOverallTable, {isLoading: a} ] = useUpdateOverallTableMutation()
+  console.log(updateOverallTable)
+  console.log(a)
 
   const { deleted, edited, added } = show
   const pageSize = 5
@@ -49,8 +52,9 @@ const OverallLeagues = () => {
     setOverallLeagueId(id)
   }
 
-  const updateOverallLeaguePop = (id) => {
-    console.log(id)
+  const updateOverallLeaguePop = async (id) => {
+    const res = await updateOverallTable().unwrap()
+    console.log(res)
   }
    const submit = async (data) => {
     try {

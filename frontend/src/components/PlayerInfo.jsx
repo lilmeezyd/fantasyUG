@@ -41,17 +41,14 @@ const PlayerInfo = (props) => {
 
   const showPlayerHistory = useMemo(() => {
     if(infoWord === 'res') {
-      console.log(realInfo)
       const results = copyRes?.find(x => x.matchday.toString() === matchday.toString())
       const hist = history?.find(x => x.matchday.toString() === matchday.toString())
     return {...results, ...hist}
     }
     if(infoWord === 'fix') {
-      console.log(realInfo)
       return copyFix?.find(x => x.matchday.toString() === matchday.toString())
     }
-  }, [matchday, history, infoWord, copyFix, realInfo, copyRes])
-  console.log(showPlayerHistory)
+  }, [matchday, history, infoWord, copyFix, copyRes])
   return (
     <>
       <Modal show={showPInfo} onHide={handleCloseInfo}>

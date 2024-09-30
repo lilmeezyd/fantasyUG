@@ -55,24 +55,33 @@ const PicksPlatform = (props) => {
   }
   const onSubmit = async (e) => {
     e.preventDefault();
-    const create_team = [setPicks({ picks, teamName, bank: itb, teamValue }).unwrap(),
-      joinOverallLeague({ id: "66c13c3d1f44b30a427fb02f" }).unwrap(),
-      joinTeamLeague({ id: playerLeague }).unwrap(), updateUser({ hasPicks: true }).unwrap()
-    ]
-    try {
-     const res =  await Promise.all(create_team)
-      dispatch(setCredentials({ ...res[3] }));
-      navigate("/pickteam")
-    } catch (error) {
-      console.log(error);
+    if(goalkeepers.length === 2 && defenders.length === 5 && midfielders.length === 5 && forwards.length === 3) {
+      console.log('team is full')
     }
+    console.log(picks)
+    console.log(teamName)
+    console.log(teamValue)
+    console.log(itb)
+    console.log({teamLeague: playerLeague})
+    console.log({overall: "66c13c3d1f44b30a427fb02f"})
+
+    try {
+      const res = await setPicks({
+        picks, teamName, bank: itb, teamValue, playerLeague, 
+        overallLeague: "66c13c3d1f44b30a427fb02f"}).unwrap()
+        dispatch(setCredentials({ ...res.hasPicks }))
+        navigate("/pickteam")
+    } catch (error) {
+      console.log(error)
+    }
+    
   };
   const selectLeague = (e) => {
     setPlayerLeague(e.target.value);
   };
   const onChange = (e) => {
     setTeamName(e.target.value);
-  };
+  }; 
 
   if (isLoading) {
     return (
