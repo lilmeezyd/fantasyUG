@@ -133,6 +133,12 @@ const getTotalManagers = asyncHandler(async (req, res) => {
   res.status(200).json({total: managerLength})
 })
 
+const getAllManagers = asyncHandler(async (req, res) => {
+  const users = await User.find({hasPicks: true})
+  const managerLength = users.length
+  return managerLength
+})
+
 const updateHasPicks = asyncHandler(async (userId, req, res) => {
   const user = await User.findByIdAndUpdate(userId, {hasPicks: true}, {new: true}).select('-password')
   return user
@@ -147,4 +153,5 @@ export {
   updateUserProfile,
   getTotalManagers,
   getAllUsers,
+  getAllManagers
 };

@@ -4,6 +4,7 @@ import { BsPencilFill } from "react-icons/bs";
 import { AiFillDelete} from "react-icons/ai"
 import Pagination from "../Pagination"
 import {
+  useUpdateTeamTablesMutation,
   useGetTeamLeaguesQuery,
   useAddTeamLeagueMutation,
   useDeleteTeamLeagueMutation,
@@ -23,6 +24,7 @@ const TeamLeagues = () => {
   const { data: teamLeagues, isLoading } = useGetTeamLeaguesQuery();
   const [addTeamLeague ] = useAddTeamLeagueMutation()
   const [ deleteTeamLeague ] = useDeleteTeamLeagueMutation() 
+  const [ updateTeamTables, {isLoading: a} ] = useUpdateTeamTablesMutation()
 
   const { deleted, edited, added } = show
   const pageSize = 5
@@ -100,6 +102,11 @@ const TeamLeagues = () => {
       ...prevState, deleted: false
     }))
     setTeamLeagueId('')
+  }
+
+  const updateTeamLeagues = async () => {
+    const res = await updateTeamTables().unwrap()
+    console.log(res)
   }
   
   {/* Button Controls */}
@@ -200,6 +207,10 @@ const TeamLeagues = () => {
         <Button onClick={addTeamLeaguePop} className="btn btn-success">
           Add Team League
         </Button>
+        <Button
+              onClick={updateTeamLeagues}
+            >{a === true ? <Spinner /> : `Update Table`}
+            </Button>
       </div>
       <AddModal
       submit={submit}

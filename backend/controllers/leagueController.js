@@ -505,43 +505,98 @@ const deleteOverallLeague = asyncHandler(async (req, res) => {
 const updateOverallTable = asyncHandler(async (req, res) => {
   const overallLeagues = await OverallLeague.find({})
   const matchday = await Matchday.findOne({current: true})
-  //console.log(overallLeagues)
   const { id } = matchday
   
-  if(matchday) {
-    overallLeagues.forEach(league => {
-      const { entrants } = league
-      if(entrants.length > 0) {
-        entrants.forEach(async entrant => {
-          const entrantHasLives = await ManagerLive.findOne({manager: entrant})
-          if(entrantHasLives) {
-            const mid = {}
-            const managerInfo = await ManagerInfo.findById(entrant)
-            const { firstName, lastName, teamName, overallLeagues: [ligi] } = managerInfo
-            //console.log(managerInfo)
-            
-            const { lastRank, currentRank, matchdayPoints, overallPoints } = ligi
-            mid[id] = matchdayPoints
-            await OverallLeague.findByIdAndUpdate(league._id,
-              {$pull: {entrants: entrant}, 
-              $push: {
-                standings: {firstName, lastName, teamName, lastRank, currentRank, overallPoints, 
-                  matchdays: mid}
-              }},{new: true})
-           /* if(updatedLeague) {
-              console.log(entrant)
-              updatedLeague.$pull('entrants', entrant)
-              await updatedLeague.save()
-            }*/
-          }
-        })
+
+    if(matchday) {
+      async function makeCall (entrant) {
+        const response = await ManagerLive.findOne({manager: entrant})
+        return response
       }
-    })
-  }
+      async function makeCalls (entrants) {
+        const promises = entrants.map(makeCall)
+        const responses = await Promise.all(promises)
+        return responses
+      }
+       overallLeagues.forEach(async league => {
+        const { standings, entrants } = league
+        const a = await makeCalls(entrants)
+        const entrantsWithNoLives = a.every(x => x === null)
+        if(entrantsWithNoLives === true) {
+          if(standings.length > 0) {
+            await OverallLeague.findById(league.id).sort({'standings.overallPoints': -1})
+           }
+        } else {
+          entrants.forEach(async entrant => {
+            const entrantHasLives = await ManagerLive.findOne({manager: entrant})
+            if(entrantHasLives) {
+              const mid = {}
+              const managerInfo = await ManagerInfo.findById(entrant)
+              const { user, firstName, lastName, teamName, overallLeagues: [ligi] } = managerInfo
+                          
+              const { lastRank, currentRank, matchdayPoints, overallPoints } = ligi
+              mid[id] = matchdayPoints
+              await OverallLeague.findByIdAndUpdate(league._id,
+                {$pull: {entrants: entrant}, 
+                $push: {
+                  standings: {user, firstName, lastName, teamName, lastRank, currentRank, overallPoints, 
+                    matchdays: mid}
+                }},{new: true})
+            }
+          })
+        }
+      })
+      
+      res.status(200).json(`Tables updated`)
+    }
 })
 const updateTeamTables = asyncHandler(async (req, res) => {
-  const teamLeagues = await OverallLeague.find({})
-  console.log(teamLeagues)
+  const teamLeagues = await TeamLeague.find({})
+  const matchday = await Matchday.findOne({current: true})
+  const { id } = matchday
+  
+
+    if(matchday) {
+      async function makeCall (entrant) {
+        const response = await ManagerLive.findOne({manager: entrant})
+        return response
+      }
+      async function makeCalls (entrants) {
+        const promises = entrants.map(makeCall)
+        const responses = await Promise.all(promises)
+        return responses
+      }
+       teamLeagues.forEach(async league => {
+        const { standings, entrants } = league
+        const a = await makeCalls(entrants)
+        const entrantsWithNoLives = a.every(x => x === null)
+        if(entrantsWithNoLives === true) {
+          if(standings.length > 0) {
+            await TeamLeague.findById(league.id).sort({'standings.overallPoints': -1})
+           }
+        } else {
+          entrants.forEach(async entrant => {
+            const entrantHasLives = await ManagerLive.findOne({manager: entrant})
+            if(entrantHasLives) {
+              const mid = {}
+              const managerInfo = await ManagerInfo.findById(entrant)
+              const { user, firstName, lastName, teamName, teamLeagues: [ligi] } = managerInfo
+                          
+              const { lastRank, currentRank, matchdayPoints, overallPoints } = ligi
+              mid[id] = matchdayPoints
+              await TeamLeague.findByIdAndUpdate(league._id,
+                {$pull: {entrants: entrant}, 
+                $push: {
+                  standings: {user, firstName, lastName, teamName, lastRank, currentRank, overallPoints, 
+                    matchdays: mid}
+                }},{new: true})
+                res.status(200).json(`Tables updated`)
+            }
+          })
+        }
+      })
+      res.status(200).json(`Tables updated`)
+    }
 })
 const updatePrivateTables = asyncHandler(async (req, res) => {
   const privateLeagues = await League.find({})

@@ -21,7 +21,6 @@ const OverallLeagues = () => {
   const [addOverallLeague ] = useAddOverallLeagueMutation()
   const [ deleteOverallLeague ] = useDeleteOverallLeagueMutation() 
   const [ updateOverallTable, {isLoading: a} ] = useUpdateOverallTableMutation()
-  console.log(updateOverallTable)
   console.log(a)
 
   const { deleted, edited, added } = show
@@ -199,7 +198,7 @@ const OverallLeagues = () => {
             <Button
               onClick={() => updateOverallLeaguePop(x._id)}
             >
-              Update Table
+              {a === true ? <Spinner /> : `Update Table`}
             </Button>
           </div>
       </div>)

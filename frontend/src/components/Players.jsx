@@ -6,10 +6,11 @@ import { Spinner, Container } from "react-bootstrap";
 import Pagination from "./Pagination";
 import PlayerCard from "./PlayerCard";
 import {
-  getMinMax,
+  getMinMax, 
   getPlayers,
   getArrangedPlayers,
 } from "../helpers/playersHelper";
+import { useGetTotalQuery } from "../slices/userApiSlice";
 
 const Players = (props) => {
   const { addPlayer, removePlayer, picks, GKP, DEF, MID, FWD, errorMsg } = props
@@ -37,7 +38,7 @@ const Players = (props) => {
         "goalsScored":'Goals', "assists":'Assists', "yellowCards":'Yellow cards',
         "redCards":'Red cards', "penaltiesSaved":'Penalties Saved',
         "penaltiesMissed":'Penalties Missed', "cleansheets":'Clean sheets',
-        "nowAge":'%age'
+        "ownership":'Ownership', "ownGoals": "Own goals"
       }
       const sortWord = wordObj[action.data]
       return {
@@ -57,12 +58,15 @@ const Players = (props) => {
     {sort:'totalPoints', view: 'allPlayers', word:'', sortWord: 'Points', cutPrice: 25})
   
   const {sort, view, word, cutPrice, sortWord} = state
+  const { data: totalPlayers } = useGetTotalQuery()
+  
   const allPlayers = getPlayers(
     players,
     sort,
     view,
     word,
-    cutPrice
+    cutPrice,
+    totalPlayers
   ).returnedPlayers;
   const goalkeepers = getArrangedPlayers(
     allPlayers,
@@ -207,7 +211,7 @@ const onSort = (e) => {
                       <option value="totalPoints">Total points</option>
                       <option value="nowCost">Price</option>
                       {/*<option value="event_points">Round points</option>*/}
-                      {/*<option value="nowAge">%age ownership</option>*/}
+                      <option value="ownership">%age ownership</option>
                       <option value="goalsScored">Goals</option>
                       <option value="assists">Assists</option>
                       <option value="yellowCards">Yellow cards</option>
@@ -215,6 +219,7 @@ const onSort = (e) => {
                       <option value="penaltiesSaved">Penalties Saved</option>
                       <option value="penaltiesMissed">Penalties Missed</option>
                       <option value="cleansheets">Clean sheets</option>
+                      <option value="ownGoals">Own Goals</option>
                       
                     </select>
                   </div>

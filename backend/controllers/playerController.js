@@ -4,6 +4,7 @@ import User from "../models/userModel.js";
 import Position from "../models/positionModel.js";
 import Fixture from "../models/fixtureModel.js";
 import PlayerHistory from "../models/playerHistoryModel.js";
+import { getAllManagers } from "./userController.js";
 
 //@desc Set Player
 //@route POST /api/players
@@ -76,7 +77,12 @@ const setPlayer = asyncHandler(async (req, res) => {
 //@role not restricted
 const getPlayers = asyncHandler(async (req, res) => {
   const players = await Player.find({});
-  res.status(200).json(players);
+  const numberOfManagers =  await getAllManagers()
+  const updatedPlayers =  Array.from(players).map(x => {
+    const b = x.playerCount/numberOfManagers*100
+    return {...x._doc, ownership: `${b.toFixed(0)}%`}
+  })
+  res.status(200).json(updatedPlayers);
 });
 
 //@desc Get Players
@@ -95,8 +101,7 @@ const getPlayer = asyncHandler(async (req, res) => {
   const pFixtures = await Fixture.find({$or: [{ teamHome: team }, { teamAway: team }]})
   const pResults = await PlayerHistory.find({player: req.params.id})
   const { _doc } = player
-  const newPlayer = {..._doc, fixtures: pFixtures, results: pResults}
-
+  const newPlayer = {..._doc, fixtures: pFixtures, results: pResults} 
   res.status(200).json(newPlayer);
 });
 

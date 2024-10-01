@@ -1316,6 +1316,9 @@ h1.stats {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   padding: 0.25rem;
+  max-width: 900px;
+    margin: auto;
+    place-items: center;
 }
 
 .standing-grid-header {
@@ -1326,6 +1329,26 @@ h1.stats {
   /* border: 1px solid; */
   display: flex;
   gap: 1rem;
+}
+
+.standing-grid-1 {
+  display: grid;
+  grid-template-columns: 20px 50px 1fr 1fr 50px;
+  place-items: center;
+  max-width: 900px;
+  margin: auto;
+  padding: 0.25rem;
+}
+
+.standing-grid-1 > div, .standing-grid > div {
+  width: 100%;
+  text-align: center;
+}
+
+.standing-grid-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 
