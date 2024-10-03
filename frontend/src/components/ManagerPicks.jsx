@@ -13,15 +13,16 @@ import {Spinner} from "react-bootstrap";
 
 const ManagerPicks = (props) => {
   const { teamName, switchPlayer,switchCaptain,
-  switchVice, inform, picks, blocked, okayed, switcher, id } = props;
+  switchVice, inform, picks, blocked, okayed, switcher, id, isLoading } = props;
   const { data: teams } = useGetQuery();
   const { data: players } = useGetPlayersQuery();
   const { data: managerPicks } = useGetPicksQuery();
-  const [updatePicks, {isLoading}] = useUpdatePicksMutation()
+  const [updatePicks] = useUpdatePicksMutation()
   const { data: positions } = useGetPositionsQuery();
-  const { data: matchdays } = useGetMatchdaysQuery()
+  const { data: matchdays, isLoading: isMatchday } = useGetMatchdaysQuery()
   const navigate = useNavigate();
   const md = matchdays?.find(matchday => matchday?.next === true)
+  console.log(picks)
 
   const goalkeepers = picks?.filter(
     (pick) =>
@@ -53,14 +54,20 @@ const ManagerPicks = (props) => {
     navigate('/pickteam')
   }
   if(isLoading) {
+    return (
     <div className="spinner">
       <Spinner />
     </div>
+    )
   }
   return (
     <div>
-      <div className="pick-team-header p-2">
-        <h5 className="pick-team-name">{teamName}</h5>
+      {isMatchday ? <div style={{height : '100px'}} className="spinner">
+      <Spinner />
+    </div> : <div className="pick-team-header p-2">
+    <div className="pt-matchday">
+        <div className="pick-team-name">{teamName}</div>
+        </div>
         <div className="deadline">
           <div className="pick-team-name">{md?.name}</div>
           <div className="pick-team-name">
@@ -71,7 +78,7 @@ const ManagerPicks = (props) => {
                         {getPm(md?.kickOffTime)}
           </div>
         </div>
-      </div>
+      </div>}
       <div className="no-picks-team">
         <div className="default-player">
           {goalkeepers?.map((x) => (

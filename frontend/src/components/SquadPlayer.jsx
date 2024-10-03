@@ -18,11 +18,6 @@ const SquadPlayer = (props) => {
   const appName = players?.find((player) => player._id === baller._id)?.appName;
   const nowCost = players?.find((player) => player._id === baller._id)?.nowCost;
   const image = teams?.find((team) => team?._id === baller?.playerTeam)?.code
- /* console.log(useGetFixturesQuery())
-  console.log(useGetMatchdaysQuery())
-  console.log(useGetPlayersQuery())
-  console.log(useGetQuery())
-  console.log(useGetPositionsQuery())*/
   const mdId = matchdays?.find((matchday) => matchday?.next === true)?.id;
   const mdFixs = fixtures?.find((x) => x?._id?.id === mdId)?.fixtures;
   const opponentFix = mdFixs?.find(

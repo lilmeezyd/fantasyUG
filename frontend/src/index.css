@@ -126,7 +126,17 @@ form.login-cs {
   flex: 1 0 0%;
   text-align: center;
   padding: 1rem 0;
-  border: 1px solid;
+  border: 1px solid #aaa;
+  background: linear-gradient(45deg, aquamarine, #0000ff57);
+  border-radius: 0.5rem;
+  font-weight: 700;
+}
+
+.stars {
+  background: linear-gradient(45deg, aquamarine, #0000ff57);
+  border-radius: 0.5rem;
+  border: 1px solid #aaa;
+  font-weight: 700;
 }
 
 
@@ -530,6 +540,7 @@ form.login-cs {
   border: 1px solid #aaa;
   border-radius: 1rem;
   background: linear-gradient(88deg, aquamarine, #0000ff57);
+  margin-top: 0.5rem;
 }
 
 .pt-points {
@@ -557,14 +568,16 @@ form.login-cs {
   display: flex;
   justify-content: center;
   align-items: center;
-}
-
-.pt-matchday div {
-  border: 1px solid #aaa;
-  padding: 0 1rem;
   border-bottom-left-radius: 0.5rem;
   border-bottom-right-radius: 0.5rem;
   background: aquamarine;
+  border: 1px solid #aaa;
+  width: 50%;
+  margin: auto;
+}
+
+.pt-matchday div {
+  padding: 0 1rem;
 }
 
 .pt-ht-av {
@@ -741,6 +754,7 @@ form.login-cs {
   border: 0;
   width: 100%;
   position: relative;
+  box-shadow: 0 0 5px 0;
 }
 
 .player-in-btn {
@@ -810,8 +824,8 @@ form.login-cs {
 
 .captain {
   position: absolute;
-  top: 0;
-  left: 0;
+  top: 0.05rem;
+  left: 0.05rem;
 }
 
 @media (max-width: 720px) {
@@ -1029,7 +1043,7 @@ form.login-cs {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background: aliceblue;
+  background: linear-gradient(88deg, aquamarine, #0000ff57);
   border-radius: 1rem;
 }
 
@@ -1181,6 +1195,7 @@ h1.stats {
   margin-top: 1rem;
   padding: 0.5rem;*/
 }
+
 .player-info-wrapper {
   border-radius: 1rem;
   border: 1px solid #aaa;
@@ -1317,8 +1332,8 @@ h1.stats {
   grid-template-columns: repeat(2, 1fr);
   padding: 0.25rem;
   max-width: 900px;
-    margin: auto;
-    place-items: center;
+  margin: auto;
+  place-items: center;
 }
 
 .standing-grid-header {
@@ -1340,7 +1355,17 @@ h1.stats {
   padding: 0.25rem;
 }
 
-.standing-grid-1 > div, .standing-grid > div {
+.standing-grid-2 {
+  display: grid;
+  grid-template-columns: 100px 100px 100px 50px 50px;
+  place-items: center;
+  margin: auto;
+  padding: 0.25rem;
+}
+
+.standing-grid-1>div,
+.standing-grid-2>div,
+.standing-grid>div {
   width: 100%;
   text-align: center;
 }
@@ -1349,6 +1374,24 @@ h1.stats {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.league-bg {
+  background: linear-gradient(45deg, aquamarine, #0000ff57);
+  border-radius: 0.5rem;
+  max-width: 900px;
+  margin: auto;
+  padding: 1rem;
+}
+
+.standing-wrap {
+  border: 1px solid #aaa;
+  margin: auto;
+  border-radius: 0.5rem;
+  background: white;
+    padding: 0.5rem;
+    overflow: auto;
+    display: grid;
 }
 
 

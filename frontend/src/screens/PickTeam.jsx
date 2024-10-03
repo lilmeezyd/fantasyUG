@@ -10,8 +10,9 @@ import { useGetPicksQuery } from "../slices/picksSlice";
 const PickTeam = () => {
   const { data: managerInfo } = useGetManagerInfoQuery();
   const { data: managerPicks, isLoading } = useGetPicksQuery();
-  console.log(managerInfo)
+  /*console.log(isLoading)
   console.log(managerPicks)
+  console.log(useGetPicksQuery())*/
 
   const reducer = (state, action) => {
     const ids = state?.picks?.map(x => x.slot)
@@ -364,7 +365,7 @@ const PickTeam = () => {
   const inform = (data) => {
     console.log('view info')
   }
-  if(isLoading) {
+  if(isLoading && managerPicks === undefined) {
     return (
       <div className="spinner"><Spinner /></div>
     )

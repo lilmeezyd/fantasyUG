@@ -10,7 +10,7 @@ const HomeScreen = () => {
     <>
     {userInfo ? 
     <div className="py-2" style={{fontWeight: 600}}>You&#39;re logged in as, {userInfo?.firstName}&nbsp;{userInfo?.lastName}</div> : <LoginScreen />}
-    <div className="home-section">
+    <div className="home-section my-2 py-2">
       <MostOwned/>
       <TeamOfWeek/>
     </div>

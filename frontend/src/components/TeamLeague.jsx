@@ -32,7 +32,7 @@ const TeamLeague = () => {
         style={{background: `${userInfo._id === entrant.user.toString() ? '#ffd70063' : 'white'}`, 
         border: `${userInfo._id === entrant.user.toString() ? '2px solid gold' : 'none'}`}} key={entrant._id} className="standing-grid-1">
             <div></div>
-            <div>{idx+1}</div>
+            <div>{entrant?.currentRank}</div>
           <div className="standing-grid-name">{entrant?.teamName}</div>
           <div className="standing-grid-name">
             {entrant?.firstName}&nbsp;&nbsp;{entrant?.lastName}

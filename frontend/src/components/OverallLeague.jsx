@@ -6,6 +6,7 @@ const OverallLeague = () => {
   const { id } = useParams()
   const { data, isLoading } = useGetOverallLeagueQuery(id)
   const { userInfo } = useSelector(state => state.auth)
+  console.log(data)
   if(isLoading) {
     return (
       <div className="spinner">
@@ -17,8 +18,8 @@ const OverallLeague = () => {
     <>
     <div>
       {data?.standings?.length > 0 && 
-      <>
-      <div className="standing-header">Leaderboard</div>
+      <div>
+      <div className="standing-header">{data?.name}&nbsp;&nbsp;Leaderboard</div>
       <div className="standing-grid-1 standing-grid-header">
         <div></div>
         <div>Rank</div>
@@ -32,7 +33,7 @@ const OverallLeague = () => {
         style={{background: `${userInfo._id === entrant.user.toString() ? '#ffd70063' : 'white'}`, 
         border: `${userInfo._id === entrant.user.toString() ? '2px solid gold' : 'none'}`}} key={entrant._id} className="standing-grid-1">
             <div></div>
-            <div>{idx+1}</div>
+            <div>{entrant?.currentRank}</div>
           <div className="standing-grid-name">{entrant?.teamName}</div>
           <div className="standing-grid-name">
             {entrant?.firstName}&nbsp;&nbsp;{entrant?.lastName}
@@ -40,7 +41,7 @@ const OverallLeague = () => {
           <div>{entrant?.overallPoints}</div>
           </div>
       )}
-      </>
+      </div>
       }
     </div>
 

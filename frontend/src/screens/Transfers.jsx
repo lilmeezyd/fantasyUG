@@ -17,8 +17,19 @@ const Transfers = () => {
         (x) => x._id === "" && x.playerPosition === "669a41e50f8891d8e0b4eb2a"
       );
       const newPlayer = { ...state.picks[openSlot], ...data };
+      /*const ids = state.transfersOut.map(x => x._id)
+      console.log(ids)
+      console.log(data._id)
+      const transfersIn = ids.includes(data._id) ? 'yes' : 'no'*/
+      const slotIndex = state.transfersOut.findIndex(x => x._id === data._id)
+     /* const transfersOut = ids.includes(data._id) ? state.transfersOut.splice(slotIndex,1) : state.transfersOut
+      console.log(ids)
+      console.log(transfersOut)
+      console.log(transfersIn)*/
       return {
         ...state,
+        transfersIn: state.transfersOut.map(x => x._id).includes(data._id) ? 'yes' : 'no',
+        transfersOut: state.transfersOut.map(x => x._id).includes(data._id) ? state.transfersOut.splice(slotIndex,1) : state.transfersOut,
         picks: state.picks.map((x, idx) =>
           idx === openSlot ? (x = newPlayer) : x
         ),
@@ -40,6 +51,7 @@ const Transfers = () => {
       const newPlayer = { ...state.picks[openSlot], ...data };
       return {
         ...state,
+        transfersIn: [...state.transfersIn, newPlayer],
         picks: state.picks.map((x, idx) =>
           idx === openSlot ? (x = newPlayer) : x
         ),
@@ -62,6 +74,7 @@ const Transfers = () => {
       const newPlayer = { ...state.picks[openSlot], ...data };
       return {
         ...state,
+        transfersIn: [...state.transfersIn, newPlayer],
         picks: state.picks.map((x, idx) =>
           idx === openSlot ? (x = newPlayer) : x
         ),
@@ -83,6 +96,7 @@ const Transfers = () => {
       const newPlayer = { ...state.picks[openSlot], ...data };
       return {
         ...state,
+        transfersIn: [...state.transfersIn, newPlayer],
         picks: state.picks.map((x, idx) =>
           idx === openSlot ? (x = newPlayer) : x
         ),
@@ -106,6 +120,7 @@ const Transfers = () => {
       const newPlayer = { ...state.picks[openSlot], ...newData };
       return {
         ...state,
+        transfersOut: [...state.transfersOut, data],
         picks: state.picks.map((x, idx) =>
           idx === openSlot ? (x = newPlayer) : x
         ),
@@ -123,6 +138,7 @@ const Transfers = () => {
       const newPlayer = { ...state.picks[openSlot], ...newData };
       return {
         ...state,
+        transfersOut: [...state.transfersOut, data],
         picks: state.picks.map((x, idx) =>
           idx === openSlot ? (x = newPlayer) : x
         ),
@@ -140,6 +156,7 @@ const Transfers = () => {
       const newPlayer = { ...state.picks[openSlot], ...newData };
       return {
         ...state,
+        transfersOut: [...state.transfersOut, data],
         picks: state.picks.map((x, idx) =>
           idx === openSlot ? (x = newPlayer) : x
         ),
@@ -157,6 +174,7 @@ const Transfers = () => {
       const newPlayer = { ...state.picks[openSlot], ...newData };
       return {
         ...state,
+        transfersOut: [...state.transfersOut, data],
         picks: state.picks.map((x, idx) =>
           idx === openSlot ? (x = newPlayer) : x
         ),
@@ -170,7 +188,8 @@ const Transfers = () => {
         DEF: 5,
         MID: 5,
         FWD: 3,
-        picks: initialState,
+        transfersIn: [],
+        transfersOut: [],
         errorMsg: "",
       };
     }
@@ -182,8 +201,13 @@ const Transfers = () => {
     FWD: 0,
     picks: [],
     errorMsg: "",
+    transfersOut: [],
+    transfersIn: [],
+    oldTransfersOut: [],
+    oldTransfersIn: []
   });
-  const { GKP, DEF, MID, FWD, picks, errorMsg } = state;
+  const { GKP, DEF, MID, FWD, picks, errorMsg, transfersOut, transfersIn } =
+    state;
   const totalPlayers = GKP + DEF + MID + FWD;
   const teamValue = picks?.reduce((x, y) => x + +y.nowCost, 0);
   const itb = 100 - teamValue;
@@ -203,11 +227,13 @@ const Transfers = () => {
   }, [data]);
 
   const addPlayer = (data) => {
+    console.log(data);
     const { shortPos, ...rest } = data;
     dispatch({ type: `${shortPos}_ADD`, data: rest });
   };
 
   const removePlayer = (data) => {
+    console.log(data);
     const { shortPos, ...rest } = data;
     dispatch({ type: `${shortPos}_REMOVE`, data: rest });
   };
@@ -218,6 +244,9 @@ const Transfers = () => {
       payload: {
         ...state,
         picks: data?.picks,
+        errorMsg: "",
+        transfersOut: [],
+        transfersIn: [],
         GKP: 2,
         DEF: 5,
         MID: 5,
@@ -225,21 +254,21 @@ const Transfers = () => {
       },
     });
   };
-  
+
   return (
     <div className="main">
       <div>
-      <PicksPlatform
-      isLoading={isLoading}
-        id={data}
-        teamValue={teamValue} 
-        reset={reset}
-        itb={itb}
-        totalPlayers={totalPlayers}
-        picks={picks}
-        removePlayer={removePlayer}
-      />
-      <FixtureList mdParam={'next'}/> 
+        <PicksPlatform
+          isLoading={isLoading}
+          id={data}
+          teamValue={teamValue}
+          reset={reset}
+          itb={itb}
+          totalPlayers={totalPlayers}
+          picks={picks}
+          removePlayer={removePlayer}
+        />
+        <FixtureList mdParam={"next"} />
       </div>
       <Players
         GKP={GKP}

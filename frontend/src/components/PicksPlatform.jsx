@@ -92,7 +92,7 @@ const PicksPlatform = (props) => {
   } 
 
   return (
-    <div>
+    <div> 
       <div className="transfer-data p-2">
         <div className="transfer-item p-2">
           <div>Selected</div>
