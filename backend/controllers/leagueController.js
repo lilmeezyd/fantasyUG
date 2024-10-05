@@ -524,9 +524,37 @@ const updateOverallTable = asyncHandler(async (req, res) => {
         const entrantsWithNoLives = a.every(x => x === null)
         if(entrantsWithNoLives === true) {
           if(standings.length > 0) {
+            const currentMd = await Matchday.findOne({current: true})
             const updatedLeague = await OverallLeague.findById(league.id).sort({'standings.overallPoints': -1})
+            
+            const { id } = currentMd
+            const sortParam = `standings.matchdays.${id}`
+            //console.log(sortParam)
+            const updatedByMatchday = await OverallLeague.findById(league.id).sort({sortParam: -1})
+            
+            if(updatedByMatchday) {
+              const { standings } = updatedByMatchday
+              standings.forEach(async (x, idx) => {
+                const man = await ManagerInfo.findOne({user: x.user})
+                if(man) {
+                  const { _id } = man
+                  const lives = await ManagerLive.findOne({manager: _id})
+                  const { livePicks } = lives
+                  const newLives = livePicks.map(live => {
+                    const {
+                      teamValue, bank, matchday, matchdayId, activeChip, matchdayPoints, picks, _id } = live
+                    return live.matchday === id ? {
+                      teamValue, bank,
+                      picks, _id,
+                      matchday, matchdayId, activeChip, matchdayPoints, matchdayRank: idx+1} : live
+                    
+                  })
+                  lives.$set('livePicks', newLives)
+                  await lives.save()
+                }
+              })
+            }
             if(updatedLeague) {
-              console.log(updatedLeague)
               const { standings } = updatedLeague
               const newStandings = standings.map((x, idx) => {
                 const y = {...x, lastRank: x.currentRank,currentRank: idx+1}
@@ -535,7 +563,7 @@ const updateOverallTable = asyncHandler(async (req, res) => {
               newStandings.forEach(async x => {
                 const man = await ManagerInfo.findOne({user: x.user})
                 if(man) {
-                  const { overallLeagues } = man
+                  const { overallLeagues, _id } = man
                   const newTeamLs = overallLeagues.map(overallLeague => {
                     return overallLeague.id === league.id && {...overallLeague, lastRank: x.lastRank, currentRank: x.currentRank}
                   })

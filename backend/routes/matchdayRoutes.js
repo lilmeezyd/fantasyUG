@@ -1,5 +1,7 @@
 import express from "express";
 import {
+  updateMDdata,
+  endMatchday,
   setMatchday,
   getMatchdays,
   getMatchday,
@@ -21,5 +23,12 @@ router
   .patch(protect, roles(ROLES.ADMIN), startMatchday)
   .patch(protect, roles(ROLES.ADMIN, ROLES.EDITOR), updateMatchday)
   .delete(protect, roles(ROLES.ADMIN), deleteMatchday);
+
+router
+  .route("/endmatchday/:id")
+  .patch(protect, roles(ROLES.ADMIN), endMatchday);
+router
+  .route("/updateMdData/:id")
+  .patch(protect, roles(ROLES.ADMIN), updateMDdata);
 
 export default router;

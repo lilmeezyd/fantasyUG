@@ -44,10 +44,26 @@ export const matchdayApiSlice = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ['Matchday']
     }),
+    updateMatchdayData: builder.mutation({
+      query: (id) => ({
+        url: `${MATCHDAYS_URL}/updateMdData/${id}`,
+        method: 'PATCH'
+      }),
+      invalidatesTags: ['Matchday']
+    }),
+    endMatchdayData: builder.mutation({
+      query: (id) => ({
+        url: `${MATCHDAYS_URL}/endmatchday/${id}`,
+        method: 'PATCH'
+      }),
+      invalidatesTags: ['Matchday']
+    })
   }),
 });
 
 export const {
+  useEndMatchdayDataMutation,
+  useUpdateMatchdayDataMutation,
   useGetMatchdaysQuery,
   useGetMatchdayQuery,
   useAddMatchdayMutation,

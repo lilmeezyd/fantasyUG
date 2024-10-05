@@ -3,7 +3,9 @@ import {
   useGetMatchdaysQuery,
   useStartMatchdayMutation,
   useAddMatchdayMutation,
-  useDeleteMatchdayMutation
+  useDeleteMatchdayMutation,
+  useUpdateMatchdayDataMutation,
+  useEndMatchdayDataMutation
 } from "../../slices/matchdayApiSlice";
 import { useSetLivePicksMutation } from "../../slices/livePicksApiSlice";
 import { Container, Button, Spinner } from "react-bootstrap";
@@ -29,6 +31,8 @@ const Matchdays = () => {
   const [ deleteMatchday ] = useDeleteMatchdayMutation()
   const [ startMatchday ] = useStartMatchdayMutation()
   const [ setLivePicks ] = useSetLivePicksMutation()
+  const [ endMatchdayData ] = useEndMatchdayDataMutation()
+  const [ updateMatchdayData ] = useUpdateMatchdayDataMutation()
   const {deleted, edited, added, start } = show
   const pageSize = 5
   let totalPages = Math.ceil(matchdays?.length / pageSize);
@@ -160,6 +164,23 @@ const setLive = async () => {
   }
 }
 
+const updateMDdata = async (id) => {
+  try {
+    const res = await updateMatchdayData(id).unwrap()
+    console.log(res)
+  } catch (error) {
+    console.log(error)
+  }
+}
+const endMatchday = async (id) => {
+  try {
+    const res = await endMatchdayData(id).unwrap()
+    console.log(res)
+  } catch (error) {
+    console.log(error)
+  }
+}
+
 {/* Button Controls */}
 const onSubmit = (e) => {
   e.preventDefault();
@@ -221,6 +242,8 @@ const memoMatchdays = useMemo(() => {
           <div><Button onClick={()=>startMatchdayPop(x._id)}>Start</Button></div>
           <div><Button onClick={() => editMatchdayPop(x._id)} className="btn btn-warning">Edit</Button></div>
           <div><Button onClick={() => deleteMatchdayPop(x._id)} className="btn btn-danger">Delete</Button></div>
+          <div><Button onClick={() => updateMDdata(x._id)} className="btn btn-success">Update Data</Button></div>
+          <div><Button onClick={() => endMatchday(x._id)} className="btn btn-success">End MD</Button></div>
       </div>)}
       <div>
       <div className="add-button p-2">
