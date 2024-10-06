@@ -239,17 +239,10 @@ const endMatchday = asyncHandler(async (req, res) => {
     res.status(400)
     throw new Error(`Matchday not current Matchday!`)
   }
-/*
   if (prev === 0) {
     const updated = await Matchday.findByIdAndUpdate(
       req.params.id,
-      { next: false, current: true, pastDeadline: true },
-      { new: true }
-    );
-
-    await Matchday.findOneAndUpdate(
-      { id: next },
-      { next: true },
+      { current: false, finished: true },
       { new: true }
     );
 
@@ -266,22 +259,12 @@ const endMatchday = asyncHandler(async (req, res) => {
     }
     const updated = await Matchday.findByIdAndUpdate(
       req.params.id,
-      { next: false, current: true, pastDeadline: true },
+      { current: false, finished: true },
       { new: true }
     );
 
-    if (nextMatchday) {
-      nextMatch = nextMatchday?._id;
-
-      await Matchday.findByIdAndUpdate(
-        nextMatch,
-        { next: true },
-        { new: true }
-      );
-    }
-
     res.status(200).json(updated);
-  }*/
+  }
 });
 
 //@desc Delete Matchday
