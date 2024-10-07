@@ -130,7 +130,7 @@ const PicksPlatform = (props) => {
               <SquadPlayer
                 removePlayer={removePlayer}
                 baller={x}
-                posName={"GKP"} 
+                posName={"GKP"}  
               ></SquadPlayer>
             </div>
           ))}
