@@ -84,7 +84,7 @@ const PlayerCard = (props) => {
           </button>
         </div>
         <div className="price money">{playerPos.nowCost.toFixed(1)}</div>
-        <div className="points others">{sort === 'nowCost' ? playerPos.totalPoints : playerPos[sort]}</div>
+        <div className="points others">{sort === 'nowCost' ? playerPos.totalPoints : sort === 'ownership' ? `${playerPos[sort]}%` : playerPos[sort]}</div>
       </div>
 
       <TransferPopUp

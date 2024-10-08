@@ -18,7 +18,7 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { setCredentials } from "../slices/authSlice";
 const PicksPlatform = (props) => {
-  const { isLoading, picks, removePlayer, totalPlayers, itb, reset, teamValue, id } = props;
+  const { isLoading, picks, removePlayer, totalPlayers, itb, reset, teamValue, id, transfersIn, transfersOut } = props;
   const [teamName, setTeamName] = useState("");
   const [playerLeague, setPlayerLeague] = useState("");
 
@@ -45,12 +45,14 @@ const PicksPlatform = (props) => {
   const [updateUser] = useUpdateUserMutation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  console.log(transfersIn)
+  console.log(transfersOut)
 
   const { userInfo } = useSelector((state) => state.auth);
 
   const onSave = async (e) => {
     e.preventDefault()
-    const res = await updatePicks({id: id?._id, picks, teamValue, bank: itb}).unwrap()
+    const res = await updatePicks({id: id?._id, picks, teamValue, bank: itb, transfersIn, transfersOut}).unwrap()
     navigate('/pickteam')
   }
   const onSubmit = async (e) => {
@@ -58,12 +60,6 @@ const PicksPlatform = (props) => {
     if(goalkeepers.length === 2 && defenders.length === 5 && midfielders.length === 5 && forwards.length === 3) {
       console.log('team is full')
     }
-    console.log(picks)
-    console.log(teamName)
-    console.log(teamValue)
-    console.log(itb)
-    console.log({teamLeague: playerLeague})
-    console.log({overall: "66c13c3d1f44b30a427fb02f"})
 
     try {
       const res = await setPicks({
@@ -238,7 +234,7 @@ const PicksPlatform = (props) => {
               type="submit"
               disabled={
                 itb < 0 ||
-                totalPlayers < 15
+                totalPlayers < 15 || transfersIn?.length === 0 ||transfersOut?.length === 0
               }
               className="btn-success form-control"
             >

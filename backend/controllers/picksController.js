@@ -199,16 +199,16 @@ const previousPicks = asyncHandler(async (req, res) => {
   res.status(200).json(picks);
 });
 
-//@desc Update Picks before deadline
+//@desc Update Picks before deadline 
 //@route PATCh /api/picks/:id
 //@access Private
 const updatePicks = asyncHandler(async (req, res) => {
   const playerPicks = await Picks.findById(req.params.id);
   const user = await User.findById(req.user.id);
   const userManager = await ManagerInfo.findOne({user: req.user.id});
-  const { picks, teamValue, bank } = req.body;
-  const picksIds = picks.map(pick => pick._id)
-  console.log(picksIds)
+  const { picks, teamValue, bank, transfersOut, transfersIn } = req.body;
+  const inIds = transfersIn.map(x => x._id)
+  const outIds = transfersOut.map(x => x._id)
   //Check for user
   if (!user) {
     res.status(400);
@@ -251,6 +251,15 @@ const updatePicks = asyncHandler(async (req, res) => {
   const updatedPicks = await Picks.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
   });
+
+  if(updatedPicks) {
+    inIds.forEach(async (pick) => {
+      playerIncrement(pick, 1)
+    })
+    outIds.forEach(async (pick) => {
+      playerIncrement(pick, -1)
+    })
+  }
   res.status(200).json(updatedPicks);
 });
 

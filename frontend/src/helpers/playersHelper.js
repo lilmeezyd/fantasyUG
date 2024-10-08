@@ -23,7 +23,6 @@ export const getPlayers = (players, sort, view, word, cutPrice) => {
         id = view.slice(9)
         filteredPlayers.push(...players.filter(x => x.playerPosition === id))
     } else if(view.startsWith('team')) {
-        console.log('team')
         id = view.slice(5)
         filteredPlayers.push(...players.filter(x => x.playerTeam === id))
     } else {
@@ -31,8 +30,8 @@ export const getPlayers = (players, sort, view, word, cutPrice) => {
     }
 }
     const sortPlayer = (x,y) => {
-        if(x[sort]>y[sort]) return -1
-        if(x[sort]<y[sort]) return 1
+        if(+x[sort]>+y[sort]) return -1
+        if(+x[sort]<+y[sort]) return 1
     }
     
     const returnedPlayers = filteredPlayers
