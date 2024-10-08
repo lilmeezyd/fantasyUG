@@ -45,8 +45,6 @@ const PicksPlatform = (props) => {
   const [updateUser] = useUpdateUserMutation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  console.log(transfersIn)
-  console.log(transfersOut)
 
   const { userInfo } = useSelector((state) => state.auth);
 
