@@ -4,7 +4,7 @@ import { useGetPositionsQuery } from "../slices/positionApiSlice";
 import { useGetMatchdaysQuery } from "../slices/matchdayApiSlice";
 import { useGetHistoryQuery } from "../slices/playerApiSlice";
 import { Modal } from "react-bootstrap";
-import { getPm, getPmString } from "../utils/getPm";
+import { getPm, getPmString } from "../utils/getPm"; 
 import getTime from "../utils/getTime";
 const PlayerInfo = (props) => {
   const { showPInfo, handleCloseInfo, player } = props;

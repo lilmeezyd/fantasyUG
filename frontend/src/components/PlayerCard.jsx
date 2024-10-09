@@ -30,12 +30,9 @@ const PlayerCard = (props) => {
 
   const handleShowTransfer = () => {
     setShowPop(true);
-    //setShowTransfer(true)
-    //handleShow()
   };
   const handleCloseTransfer = () => {
     setShowPop(false);
-    //handleClose()
   };
 
   const getInfo = () => {

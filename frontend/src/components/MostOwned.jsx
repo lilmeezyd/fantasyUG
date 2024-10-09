@@ -1,15 +1,12 @@
 import { useGetPlayersQuery } from "../slices/playerApiSlice"
-import {useGetPositionsQuery} from "../slices/positionApiSlice"
-import {useGetQuery} from "../slices/teamApiSlice"
 import { Spinner } from "react-bootstrap"
+import PlayerDetails from "./PlayerDetails"
 import { 
   getPlayers
 } from "../helpers/playersHelper";
 
 const MostOwned = () => {
   const { data, isLoading } = useGetPlayersQuery()
-  const { data: teams } = useGetQuery()
-  const { data: positions } = useGetPositionsQuery()
   const params = 
   {sort:'ownership', view: 'allPlayers', word:'', sortWord: 'Points', cutPrice: 25}
   const { sort, view, word, cutPrice} = params
@@ -20,6 +17,8 @@ const MostOwned = () => {
     word,
     cutPrice
   ).returnedPlayers.slice(0,10);
+
+  
 if(isLoading) {
   return (
     <div className="spinner">
@@ -28,17 +27,17 @@ if(isLoading) {
   )
 }
   return (
-    <div>
+    <>
+    <div className="home-section-sub">
       <h5>Most owned players</h5>
     {allPlayers.map(player => 
-      <div key={player._id}>
-        <div>{player.appName}</div>
-        <div>{positions?.find(x => x._id === player.playerPosition)?.shortName}</div>
-        <div>{teams?.find(x => x._id === player.playerTeam)?.shortName}</div>
+      <div className="home-section-details" key={player._id}>
+        <PlayerDetails playerId={player._id}></PlayerDetails>
         <div>{player.ownership}%</div>
       </div>
     )}
     </div>
+    </>
   )
 }
 
