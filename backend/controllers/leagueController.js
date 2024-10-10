@@ -505,7 +505,7 @@ const deleteOverallLeague = asyncHandler(async (req, res) => {
 const updateOverallTable = asyncHandler(async (req, res) => {
   const overallLeagues = await OverallLeague.find({})
   const matchday = await Matchday.findOne({current: true})
-  const { id } = matchday
+  const { id } = matchday 
   
 
     if(matchday) {
@@ -529,9 +529,9 @@ const updateOverallTable = asyncHandler(async (req, res) => {
             
             const { id } = currentMd
             const sortParam = `standings.matchdays.${id}`
-            //console.log(sortParam)
             const updatedByMatchday = await OverallLeague.findById(league.id).sort({sortParam: -1})
             
+            // update manager info
             if(updatedByMatchday) {
               const { standings } = updatedByMatchday
               standings.forEach(async (x, idx) => {
@@ -554,25 +554,37 @@ const updateOverallTable = asyncHandler(async (req, res) => {
                 }
               })
             }
+            //update league standings
             if(updatedLeague) {
               const { standings } = updatedLeague
-              const newStandings = standings.map((x, idx) => {
-                const y = {...x, lastRank: x.currentRank,currentRank: idx+1}
-                return y
-              })
-              newStandings.forEach(async x => {
+              const newStandings = await Promise.all(standings.map(async(x, idx) => {
                 const man = await ManagerInfo.findOne({user: x.user})
-                if(man) {
-                  const { overallLeagues, _id } = man
-                  const newTeamLs = overallLeagues.map(overallLeague => {
-                    return overallLeague.id === league.id && {...overallLeague, lastRank: x.lastRank, currentRank: x.currentRank}
-                  })
-                  man.$set('overallLeagues', newTeamLs)
-                  await man.save()
-                }
-              })
-              updatedLeague.$set('standings', newStandings)
-              await updatedLeague.save()
+                const { matchdayPoints} = man
+                const mid = {}
+                mid[id] = matchdayPoints
+                const newMid = {...x.matchdays, ...mid}
+                const overallPoints = Object.values(newMid).reduce((a,b) => a+b,0)
+                const y = {...x, lastRank: x.currentRank,currentRank: idx+1, matchdays: newMid, overallPoints}
+                return y
+              }))
+              if(newStandings) {
+                newStandings.forEach(async x => {
+                  const man = await ManagerInfo.findOne({user: x.user})
+                  if(man) {
+                    const { overallLeagues, _id } = man
+                    const newTeamLs = overallLeagues.map(overallLeague => {
+                      return overallLeague.id === league.id && {...overallLeague, lastRank: x.lastRank, currentRank: x.currentRank}
+                    })
+                    
+                    man.$set('overallLeagues', newTeamLs)
+                    man.$set('matchdayRank', x.currenRank)
+                    await man.save()
+                  }
+                })
+                
+                updatedLeague.$set('standings', newStandings)
+                await updatedLeague.save()
+              }
             }
            }
         } else {
@@ -603,7 +615,6 @@ const updateTeamTables = asyncHandler(async (req, res) => {
   const teamLeagues = await TeamLeague.find({})
   const matchday = await Matchday.findOne({current: true})
   const { id } = matchday
-  
 
     if(matchday) {
       async function makeCall (entrant) {
@@ -628,6 +639,7 @@ const updateTeamTables = asyncHandler(async (req, res) => {
                 const y = {...x, lastRank: x.currentRank, currentRank: idx+1}
                 return y
               })
+              console.log(newStandings)
               newStandings.forEach(async x => {
                 const man = await ManagerInfo.findOne({user: x.user})
                 if(man) {
@@ -659,7 +671,7 @@ const updateTeamTables = asyncHandler(async (req, res) => {
                   standings: {user, firstName, lastName, teamName, lastRank, currentRank, overallPoints, 
                     matchdays: mid}
                 }},{new: true})
-                res.status(200).json(`Tables updated`)
+                //res.status(200).json(`Tables updated`)
             }
           })
         }

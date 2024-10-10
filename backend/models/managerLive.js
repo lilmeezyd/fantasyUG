@@ -42,8 +42,8 @@ const managerLiveSchema = mongoose.Schema({
          points: { type: Number, default: null}
       }
       ],
-      teamValue: { type: Number, required: true},
-      bank: { type: Number, required: true}
+      teamValue: { type: Number},
+      bank: { type: Number}
     }
   ],
 });

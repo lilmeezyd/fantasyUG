@@ -43,7 +43,6 @@ const setLivePicks = asyncHandler(async (req, res) => {
         });
       }
     } else {
-      const mLivePicks = mLive.livePicks;
       let idIndex = mLive.livePicks.findIndex((x) => x.matchday === id);
       let midIndex = mLive.livePicks.findIndex(
         (X) => X.matchdayId.toString() === mid.toString()
@@ -52,8 +51,7 @@ const setLivePicks = asyncHandler(async (req, res) => {
         res.status(400);
         throw new Error("Matchday scores already exist");
       }
-      const newLivePicks = [
-        ...mLivePicks,
+      const newLivePicks = 
         {
           matchday: id,
           matchdayId: mid,
@@ -61,11 +59,10 @@ const setLivePicks = asyncHandler(async (req, res) => {
           picks: allPicks[i].picks,
           teamValue: allPicks[i].teamValue,
           bank: allPicks[i].bank,
-        },
-      ];
+        };
       await ManagerLive.findOneAndUpdate(
         { manager: allPicks[i].manager },
-        { livePicks: newLivePicks },
+        {$push: {livePicks: newLivePicks}},
         { new: true }
       );
     }
@@ -99,7 +96,7 @@ const setInitialPoints = asyncHandler(async (req, res) => {
   }
 
   for (let i = 0; i < allLives.length; i++) {
-    const mLive = await ManagerLive.findOne({ user: allLives[i].user });
+    const mLive = await ManagerLive.findOne({ manager: allLives[i].manager });
     const mLivePicks = mLive.livePicks;
     const mdPicks = mLivePicks.find(
       (x) => x.matchdayId.toString() === req.params.mid.toString()

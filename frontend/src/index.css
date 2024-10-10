@@ -130,6 +130,7 @@ form.login-cs {
 
 .stars-mds .button-wrapper {
   margin: auto;
+  width: 100%;
 }
 
 .home-section {
@@ -794,7 +795,7 @@ form.login-cs {
 }
 
 .player-btn {
-  background: transparent;
+  background: #00000026;
   outline: none;
   border: 0;
   width: 100%;

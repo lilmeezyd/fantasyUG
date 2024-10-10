@@ -11,7 +11,6 @@ const MDStar = (props) => {
   const nowCost = players?.find((play) => play._id === highestScoringEntry)?.nowCost;
   const image = teams?.find((team) => team?._id === player?.playerTeam)?.code;
   const points = player?.results?.find(x => x?.matchday === _id)?.totalPoints
-  console.log(id)
   const handleShow = () => {}
   return (
     <>

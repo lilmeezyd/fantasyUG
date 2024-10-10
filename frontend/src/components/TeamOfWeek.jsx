@@ -1,8 +1,12 @@
-import React from 'react'
+import { useGetPlayersQuery } from "../slices/playerApiSlice"
 
 const TeamOfWeek = () => {
   return (
-    <div className='home-section-sub'>TeamOfWeek</div>
+    <>
+    <div className="home-section-sub">
+      <h5>Team of the week</h5>
+    </div>
+    </>
   )
 }
 

@@ -207,8 +207,6 @@ const updatePicks = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user.id);
   const userManager = await ManagerInfo.findOne({user: req.user.id});
   const { picks, teamValue, bank, transfersOut, transfersIn } = req.body;
-  const inIds = transfersIn.map(x => x._id)
-  const outIds = transfersOut.map(x => x._id)
   //Check for user
   if (!user) {
     res.status(400);
@@ -252,7 +250,9 @@ const updatePicks = asyncHandler(async (req, res) => {
     new: true,
   });
 
-  if(updatedPicks) {
+  if(updatedPicks && transfersOut && transfersIn) {
+    const inIds = transfersIn.map(x => x._id)
+    const outIds = transfersOut.map(x => x._id)
     inIds.forEach(async (pick) => {
       playerIncrement(pick, 1)
     })
