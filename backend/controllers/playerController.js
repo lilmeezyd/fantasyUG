@@ -79,7 +79,7 @@ const getPlayers = asyncHandler(async (req, res) => {
   const players = await Player.find({});
   const numberOfManagers =  await getAllManagers()
   const updatedPlayers =  Array.from(players).map(x => {
-    const b = x.playerCount/numberOfManagers*100
+    const b = numberOfManagers === 0 ? 0 : x.playerCount/numberOfManagers*100 
     return {...x._doc, ownership: `${b.toFixed(1)}`}
   })
   res.status(200).json(updatedPlayers);

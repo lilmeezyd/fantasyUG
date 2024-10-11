@@ -1,5 +1,6 @@
 import LeagueDetails from "../components/LeagueDetails";
 import FixtureList from "../components/FixtureList";
+import { Link } from "react-router-dom";
 import { Container, Spinner } from "react-bootstrap";
 import { useGetManagerInfoQuery } from "../slices/managerInfoApiSlice";
 import { useSelector } from 'react-redux'
@@ -14,6 +15,7 @@ const Points = () => {
   const { data: managerInfo } = useGetManagerInfoQuery();
   const { data: managerPicks } = useGetPicksQuery();
   const { data: matchdays } = useGetMatchdaysQuery()
+  console.log(picks)
   if(isLoading && picks === undefined) {
     return (
     <div className="spinner">
@@ -28,7 +30,7 @@ const Points = () => {
   }
   return (
     <>
-    {picks?.length > 0 &&
+    {picks?.length > 0 && 
     <> 
     <div className="main">
       {picks?.map((pick, idx) => <div key={idx+1}>
@@ -43,7 +45,9 @@ const Points = () => {
           </div>
           <div className="pt-ht-av">
           <div><div>Average</div><div> {matchdays?.find(x => x.id === lp?.matchday)?.avergeScore}</div></div>
+          <Link>
           <div><div>Highest</div><div> {matchdays?.find(x => x.id === lp?.matchday)?.highestScore}</div></div>
+          </Link>
           </div>
           </div>
 

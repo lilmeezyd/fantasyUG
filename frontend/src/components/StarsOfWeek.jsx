@@ -20,7 +20,7 @@ const StarsOfWeek = () => {
         <div key={matchday._id}>
           <MDStar id={matchday?.id}
           _id={matchday?._id}
-          highestScoringEntry={matchday?.highestScoringEntry}
+          topPlayer={matchday?.topPlayer}
           ></MDStar>
         </div>
       )}

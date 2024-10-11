@@ -138,7 +138,6 @@ const setInitialPoints = asyncHandler(async (req, res) => {
     });
 
     const newMdPoints = formatted.reduce((x, y) => x + y.points, 0);
-
     const newFormatted = {
       picks: formatted,
       matchday,

@@ -11,7 +11,7 @@ const matchdaySchema = mongoose.Schema({
   highestScore: { type: Number, default: 0 },
   highestScoringEntry: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
+    ref: "ManagerInfo",
     default: null,
   },
   current: { type: Boolean, default: false },

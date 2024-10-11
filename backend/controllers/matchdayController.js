@@ -213,16 +213,24 @@ const updateMDdata = asyncHandler(async (req, res) => {
       "livePicks.matchdayId": req.params.id,
     })
       .sort({"livePicks.matchdayPoints": -1})
+      //const entriesWithScore = allLives.map(x => )
     const livesArr = allLives.map(x => x.livePicks).flat()
-    const highestScore = Math.max(...livesArr.map(x => x.matchdayPoints))
-    const totalPts = livesArr.map(x => x.matchdayPoints).reduce((a,b) => a+b,0)
+    const entriesWithScore = allLives.map(x => {
+      const y = {}
+          y.manager = x.manager
+      const z = x.livePicks.find(q => q.matchdayId = req.params.id).matchdayPoints
+      y.matchdayPoints = z
+      return y })
+    const highestScore = Math.max(...entriesWithScore.map(x => x.matchdayPoints))
+    const totalPts = entriesWithScore.map(x => x.matchdayPoints).reduce((a,b) => a+b,0)
     const avergeScore = totalPts/allLives.length
+    const highestScoringEntry = entriesWithScore.find(x => x.matchdayPoints === highestScore).manager
     if(allPlayers.length > 0) {
       const highestPoints = Math.max(...allPlayers.map(x => x.totalPoints))
-      const highestScoringEntry = allPlayers.find(x => x.totalPoints === highestPoints)
-      const { player } = highestScoringEntry
+      const topPlayer = allPlayers.find(x => x.totalPoints === highestPoints)
+      const { player } = topPlayer
   const updatedMatchday = await Matchday.findByIdAndUpdate(req.params.id, {$set: {
-    highestScoringEntry: player, avergeScore, highestScore}})
+    highestScoringEntry, topPlayer: player, avergeScore, highestScore}})
   res.status(201).json(updatedMatchday)
     }
 });

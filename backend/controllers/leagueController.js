@@ -140,56 +140,57 @@ const joinOverallLeague = asyncHandler(
 //@desc Join Overall league
 //@route PATCH /api/leagues/teamleagues/:id/join
 //@access Private
-const joinTeamLeague = asyncHandler(async (userObj, manager, playerLeague, req, res) => {
-  const managerInfo = await ManagerInfo.findById(manager);
-  const oldLeagues = managerInfo ? managerInfo.teamLeagues : [];
-  const oldLeaguesIds = oldLeagues.map((x) => x.id);
-  const requiredLeague = await TeamLeague.findById(playerLeague);
-  const teamLeagues = await TeamLeague.find({});
-  const teamLeagueIds = teamLeagues.map((x) => x.id);
-  const oldEntrants = requiredLeague.entrants;
-  const oldEntrantsIds = oldEntrants.map((x) => x.toString());
-  //const entrants = [...oldEntrants, manager];
-  const { creator, team, id, startMatchday, endMatchday } = requiredLeague;
-  const inTeamLeagueArray = oldLeaguesIds.map((x) =>
-    teamLeagueIds.includes(x) ? true : false
-  );
+const joinTeamLeague = asyncHandler(
+  async (userObj, manager, playerLeague, req, res) => {
+    const managerInfo = await ManagerInfo.findById(manager);
+    const oldLeagues = managerInfo ? managerInfo.teamLeagues : [];
+    const oldLeaguesIds = oldLeagues.map((x) => x.id);
+    const requiredLeague = await TeamLeague.findById(playerLeague);
+    const teamLeagues = await TeamLeague.find({});
+    const teamLeagueIds = teamLeagues.map((x) => x.id);
+    const oldEntrants = requiredLeague.entrants;
+    const oldEntrantsIds = oldEntrants.map((x) => x.toString());
+    //const entrants = [...oldEntrants, manager];
+    const { creator, team, id, startMatchday, endMatchday } = requiredLeague;
+    const inTeamLeagueArray = oldLeaguesIds.map((x) =>
+      teamLeagueIds.includes(x) ? true : false
+    );
 
-  if (oldLeaguesIds.includes(id)) {
-    res.status(400);
-    throw new Error("Already in the league");
-  }
-  if (oldEntrantsIds.includes(manager)) {
-    res.status(400);
-    throw new Error("Already in the league");
-  }
+    if (oldLeaguesIds.includes(id)) {
+      res.status(400);
+      throw new Error("Already in the league");
+    }
+    if (oldEntrantsIds.includes(manager)) {
+      res.status(400);
+      throw new Error("Already in the league");
+    }
 
-  if (inTeamLeagueArray.includes(true)) {
-    res.status(400);
-    throw new Error("Already in a team league, can only be in one!");
-  }
+    if (inTeamLeagueArray.includes(true)) {
+      res.status(400);
+      throw new Error("Already in a team league, can only be in one!");
+    }
 
-  //Find user
-  if (!userObj) {
-    res.status(400);
-    throw new Error("User not found");
-  }
+    //Find user
+    if (!userObj) {
+      res.status(400);
+      throw new Error("User not found");
+    }
 
-  const newLeague = {
-    creator,
-    team,
-    id,
-    startMatchday,
-    endMatchday,
-    lastRank: null,
-    currentRank: null,
-    matchdayPoints: 0,
-    overallPoints: 0,
-  };
+    const newLeague = {
+      creator,
+      team,
+      id,
+      startMatchday,
+      endMatchday,
+      lastRank: null,
+      currentRank: null,
+      matchdayPoints: 0,
+      overallPoints: 0,
+    };
 
-  //const leagues = [...oldLeagues, newLeague];
+    //const leagues = [...oldLeagues, newLeague];
 
-  const updatedManagerInfo = await ManagerInfo.findByIdAndUpdate(
+    const updatedManagerInfo = await ManagerInfo.findByIdAndUpdate(
       manager,
       { $push: { teamLeagues: newLeague } },
       { new: true }
@@ -206,8 +207,8 @@ const joinTeamLeague = asyncHandler(async (userObj, manager, playerLeague, req, 
 
       //res.status(200).json(league);
     }
-
-  });
+  }
+);
 
 //@desc Join Overall league
 //@route PATCH /api/leagues/privateleagues/:id/join
@@ -324,8 +325,8 @@ const getLeague = asyncHandler(async (req, res) => {
 //@access ADMIN & NORMAL_USER
 const getTeamLeague = asyncHandler(async (req, res) => {
   const league = await TeamLeague.findById(req.params.id)
-  .populate("entrants")
-    .exec();;
+    .populate("entrants")
+    .exec();
   /*.populate("entrants")
     .sort("overallPoints")
     .sort("matchdayPoints")
@@ -503,186 +504,300 @@ const deleteOverallLeague = asyncHandler(async (req, res) => {
 });
 
 const updateOverallTable = asyncHandler(async (req, res) => {
-  const overallLeagues = await OverallLeague.find({})
-  const matchday = await Matchday.findOne({current: true})
-  const { id } = matchday 
-  
+  const overallLeagues = await OverallLeague.find({});
+  const matchday = await Matchday.findOne({ current: true });
+  const { id } = matchday;
 
-    if(matchday) {
-      async function makeCall (entrant) {
-        const response = await ManagerLive.findOne({manager: entrant})
-        return response
-      }
-      async function makeCalls (entrants) {
-        const promises = entrants.map(makeCall)
-        const responses = await Promise.all(promises)
-        return responses
-      }
-       overallLeagues.forEach(async league => {
-        const { standings, entrants } = league
-        const a = await makeCalls(entrants)
-        const entrantsWithNoLives = a.every(x => x === null)
-        if(entrantsWithNoLives === true) {
-          if(standings.length > 0) {
-            const currentMd = await Matchday.findOne({current: true})
-            const updatedLeague = await OverallLeague.findById(league.id).sort({'standings.overallPoints': -1})
-            
-            const { id } = currentMd
-            const sortParam = `standings.matchdays.${id}`
-            const updatedByMatchday = await OverallLeague.findById(league.id).sort({sortParam: -1})
-            
-            // update manager info
-            if(updatedByMatchday) {
-              const { standings } = updatedByMatchday
-              standings.forEach(async (x, idx) => {
-                const man = await ManagerInfo.findOne({user: x.user})
-                if(man) {
-                  const { _id } = man
-                  const lives = await ManagerLive.findOne({manager: _id})
-                  const { livePicks } = lives
-                  const newLives = livePicks.map(live => {
-                    const {
-                      teamValue, bank, matchday, matchdayId, activeChip, matchdayPoints, picks, _id } = live
-                    return live.matchday === id ? {
-                      teamValue, bank,
-                      picks, _id,
-                      matchday, matchdayId, activeChip, matchdayPoints, matchdayRank: idx+1} : live
-                    
-                  })
-                  lives.$set('livePicks', newLives)
-                  await lives.save()
-                }
-              })
-            }
-            //update league standings
-            if(updatedLeague) {
-              const { standings } = updatedLeague
-              const newStandings = await Promise.all(standings.map(async(x, idx) => {
-                const man = await ManagerInfo.findOne({user: x.user})
-                const { matchdayPoints} = man
-                const mid = {}
-                mid[id] = matchdayPoints
-                const newMid = {...x.matchdays, ...mid}
-                const overallPoints = Object.values(newMid).reduce((a,b) => a+b,0)
-                const y = {...x, lastRank: x.currentRank,currentRank: idx+1, matchdays: newMid, overallPoints}
-                return y
-              }))
-              if(newStandings) {
-                newStandings.forEach(async x => {
-                  const man = await ManagerInfo.findOne({user: x.user})
-                  if(man) {
-                    const { overallLeagues, _id } = man
-                    const newTeamLs = overallLeagues.map(overallLeague => {
-                      return overallLeague.id === league.id && {...overallLeague, lastRank: x.lastRank, currentRank: x.currentRank}
-                    })
-                    
-                    man.$set('overallLeagues', newTeamLs)
-                    man.$set('matchdayRank', x.currenRank)
-                    await man.save()
-                  }
-                })
-                
-                updatedLeague.$set('standings', newStandings)
-                await updatedLeague.save()
+  if (matchday) {
+    async function makeCall(entrant) {
+      const response = await ManagerLive.findOne({ manager: entrant });
+      return response;
+    }
+    async function makeCalls(entrants) {
+      const promises = entrants.map(makeCall);
+      const responses = await Promise.all(promises);
+      return responses;
+    }
+    overallLeagues.forEach(async (league) => {
+      const { standings, entrants } = league;
+      const a = await makeCalls(entrants);
+      const entrantsWithNoLives = a.every((x) => x === null);
+      if (entrantsWithNoLives === true) {
+        if (standings.length > 0) {
+          const currentMd = await Matchday.findOne({ current: true });
+          const updatedLeague = await OverallLeague.findById(league.id);
+
+          const { id } = currentMd;
+          const sortParam = `standings.matchdays.${id}`;
+          const updatedByMatchday = await OverallLeague.findById(
+            league.id
+          ).sort({ sortParam: -1 });
+
+          const newStandings = await Promise.all(
+            standings.map(async (x, idx) => {
+              const man = await ManagerInfo.findOne({ user: x.user });
+              const { matchdayPoints } = man;
+              const mid = {};
+              mid[id] = matchdayPoints;
+              const newMid = { ...x.matchdays, ...mid };
+              const overallPoints = Object.values(newMid).reduce(
+                (a, b) => a + b,
+                0
+              );
+              const y = { ...x, matchdays: newMid, overallPoints };
+              return y;
+            })
+          );
+
+          const superNew = newStandings
+            .sort((a, b) => (a.overallPoints > b.overallPoints ? -1 : 1))
+            .map((x, idx) => {
+              const y = { ...x, currentRank: idx + 1 };
+              return y;
+            })
+            .sort((a, b) => (a.matchdays[id] > b.matchdays[id] ? -1 : 1))
+            .map((x, idx) => {
+              const mid = {};
+              mid[id] = idx + 1;
+              const newMid = { ...x.mdRanks, ...mid };
+              /*const lastRank = Object.keys(x.mdRanks).length <= 1 ? null : 
+              x.mdRanks[id-1]*/
+              const y = { ...x, mdRanks: newMid };
+              return y;
+            });
+
+          updatedLeague.$set("standings", superNew);
+          const newUpdated = await updatedLeague.save();
+          const { standings: nStands } = newUpdated;
+          if (newUpdated) {
+            nStands.forEach(async (x) => {
+              const man = await ManagerInfo.findOne({ user: x.user });
+              if (man) {
+                const { _id } = man;
+                const lives = await ManagerLive.findOne({ manager: _id });
+                const { livePicks } = lives;
+                const newLives = livePicks.map((live) => {
+                  const {
+                    teamValue,
+                    bank,
+                    matchday,
+                    matchdayId,
+                    activeChip,
+                    matchdayPoints,
+                    picks,
+                    _id,
+                  } = live;
+                  return live.matchday === id
+                    ? {
+                        teamValue,
+                        bank,
+                        picks,
+                        _id,
+                        matchday,
+                        matchdayId,
+                        activeChip,
+                        matchdayPoints,
+                        matchdayRank: x.mdRanks[id],
+                      }
+                    : live;
+                });
+
+                lives.$set("livePicks", newLives);
+                await lives.save();
+                const { overallLeagues } = man;
+                const newTeamLs = overallLeagues.map((overallLeague) => {
+                  return (
+                    overallLeague.id === league.id && {
+                      ...overallLeague,
+                      lastRank: x.lastRank,
+                      currentRank: x.currentRank,
+                    }
+                  );
+                });
+                console.log(overallLeagues);
+                man.$set("overallLeagues", newTeamLs);
+                man.$set("matchdayRank", x.mdRanks[id]);
+                man.$set("overallRank", x.currentRank);
+                await man.save();
               }
-            }
-           }
-        } else {
-          entrants.forEach(async entrant => {
-            const entrantHasLives = await ManagerLive.findOne({manager: entrant})
-            if(entrantHasLives) {
-              const mid = {}
-              const managerInfo = await ManagerInfo.findById(entrant)
-              const { user, firstName, lastName, teamName, overallLeagues: [ligi] } = managerInfo
-                          
-              const { lastRank, currentRank, matchdayPoints, overallPoints } = ligi
-              mid[id] = matchdayPoints
-              await OverallLeague.findByIdAndUpdate(league._id,
-                {$pull: {entrants: entrant}, 
-                $push: {
-                  standings: {user, firstName, lastName, teamName, lastRank, currentRank, overallPoints, 
-                    matchdays: mid}
-                }},{new: true})
-            }
-          })
+            });
+          }
         }
-      })
-      
-      res.status(200).json(`Tables updated`)
-    }
-})
-const updateTeamTables = asyncHandler(async (req, res) => {
-  const teamLeagues = await TeamLeague.find({})
-  const matchday = await Matchday.findOne({current: true})
-  const { id } = matchday
+      } else {
+        entrants.forEach(async (entrant) => {
+          const entrantHasLives = await ManagerLive.findOne({
+            manager: entrant,
+          });
+          if (entrantHasLives) {
+            const mid = {};
+            const managerInfo = await ManagerInfo.findById(entrant);
+            const {
+              user,
+              firstName,
+              lastName,
+              teamName,
+              overallLeagues: [ligi],
+            } = managerInfo;
 
-    if(matchday) {
-      async function makeCall (entrant) {
-        const response = await ManagerLive.findOne({manager: entrant})
-        return response
-      }
-      async function makeCalls (entrants) {
-        const promises = entrants.map(makeCall)
-        const responses = await Promise.all(promises)
-        return responses
-      }
-       teamLeagues.forEach(async league => {
-        const { standings, entrants } = league
-        const a = await makeCalls(entrants)
-        const entrantsWithNoLives = a.every(x => x === null)
-        if(entrantsWithNoLives === true) {
-          if(standings.length > 0) {
-            const updatedLeague = await TeamLeague.findById(league.id).sort({'standings.overallPoints': -1})
-            if(updatedLeague) {
-              const { standings } = updatedLeague
-              const newStandings = standings.map((x, idx) => {
-                const y = {...x, lastRank: x.currentRank, currentRank: idx+1}
-                return y
-              })
-              console.log(newStandings)
-              newStandings.forEach(async x => {
-                const man = await ManagerInfo.findOne({user: x.user})
-                if(man) {
-                  const { teamLeagues } = man
-                  const newTeamLs = teamLeagues.map(teamLeague => {
-                    return teamLeague.id === league.id && {...teamLeague, lastRank: x.lastRank, currentRank: x.currentRank}
-                  })
-                  man.$set('teamLeagues', newTeamLs)
-                  await man.save()
-                }
-              })
-              updatedLeague.$set('standings', newStandings)
-              await updatedLeague.save()
-            }
-           }
-        } else {
-          entrants.forEach(async entrant => {
-            const entrantHasLives = await ManagerLive.findOne({manager: entrant})
-            if(entrantHasLives) {
-              const mid = {}
-              const managerInfo = await ManagerInfo.findById(entrant)
-              const { user, firstName, lastName, teamName, teamLeagues: [ligi] } = managerInfo
-                          
-              const { lastRank, currentRank, matchdayPoints, overallPoints } = ligi
-              mid[id] = matchdayPoints
-              await TeamLeague.findByIdAndUpdate(league._id,
-                {$pull: {entrants: entrant}, 
+            const { lastRank, currentRank, matchdayPoints, overallPoints } =
+              ligi;
+            mid[id] = matchdayPoints;
+            await OverallLeague.findByIdAndUpdate(
+              league._id,
+              {
+                $pull: { entrants: entrant },
                 $push: {
-                  standings: {user, firstName, lastName, teamName, lastRank, currentRank, overallPoints, 
-                    matchdays: mid}
-                }},{new: true})
-                //res.status(200).json(`Tables updated`)
-            }
-          })
-        }
-      })
-      res.status(200).json(`Tables updated`)
+                  standings: {
+                    user,
+                    firstName,
+                    lastName,
+                    teamName,
+                    lastRank,
+                    currentRank,
+                    overallPoints,
+                    matchdays: mid,
+                    mdRanks: {},
+                  },
+                },
+              },
+              { new: true }
+            );
+          }
+        });
+      }
+    });
+
+    res.status(200).json(`Tables updated`);
+  }
+});
+const updateTeamTables = asyncHandler(async (req, res) => {
+  const teamLeagues = await TeamLeague.find({});
+  const matchday = await Matchday.findOne({ current: true });
+  const { id } = matchday;
+
+  if (matchday) {
+    async function makeCall(entrant) {
+      const response = await ManagerLive.findOne({ manager: entrant });
+      return response;
     }
-})
+    async function makeCalls(entrants) {
+      const promises = entrants.map(makeCall);
+      const responses = await Promise.all(promises);
+      return responses;
+    }
+    teamLeagues.forEach(async (league) => {
+      const { standings, entrants } = league;
+      const a = await makeCalls(entrants);
+      const entrantsWithNoLives = a.every((x) => x === null);
+      if (entrantsWithNoLives === true) {
+        if (standings.length > 0) {
+          const currentMd = await Matchday.findOne({ current: true });
+          const updatedLeague = await TeamLeague.findById(league.id);
+          const { id } = currentMd;
+          const newStandings = await Promise.all(
+            standings.map(async (x, idx) => {
+              const man = await ManagerInfo.findOne({ user: x.user });
+              const { matchdayPoints } = man;
+              const mid = {};
+              mid[id] = matchdayPoints;
+              const newMid = { ...x.matchdays, ...mid };
+              const overallPoints = Object.values(newMid).reduce(
+                (a, b) => a + b,
+                0
+              );
+              const y = { ...x, matchdays: newMid, overallPoints };
+              return y;
+            })
+          );
+
+          const superNew = newStandings
+            .sort((a, b) => (a.overallPoints > b.overallPoints ? -1 : 1))
+            .map((x, idx) => {
+              const y = { ...x, currentRank: idx + 1 };
+              return y;
+            })
+            .sort((a, b) => (a.matchdays[id] > b.matchdays[id] ? -1 : 1))
+            .map((x, idx) => {
+              const mid = {};
+              mid[id] = idx + 1;
+              const newMid = { ...x.mdRanks, ...mid };
+              const y = { ...x, mdRanks: newMid };
+              return y;
+            });
+
+          updatedLeague.$set("standings", superNew);
+          const newUpdated = await updatedLeague.save();
+          const { standings: nStands } = newUpdated;
+          if (newUpdated) {
+            nStands.forEach(async (x) => {
+              const man = await ManagerInfo.findOne({ user: x.user });
+              if (man) {
+                const { teamLeagues } = man;
+                const newTeamLs = teamLeagues
+                  .filter((teamLeague) => teamLeague.id === league.id)
+                  .map((teamLeague) => {
+                    return {
+                      ...teamLeague,
+                      lastRank: x.lastRank,
+                      currentRank: x.currentRank,
+                    };
+                  });
+                man.$set("teamLeagues", newTeamLs);
+                await man.save();
+              }
+            });
+          }
+        }
+      } else {
+        entrants.forEach(async (entrant) => {
+          const entrantHasLives = await ManagerLive.findOne({
+            manager: entrant,
+          });
+          if (entrantHasLives) {
+            const mid = {};
+            const managerInfo = await ManagerInfo.findById(entrant);
+            const {
+              user,
+              firstName,
+              lastName,
+              teamName,
+              teamLeagues: [ligi],
+            } = managerInfo;
+
+            const { lastRank, currentRank, matchdayPoints, overallPoints } =
+              ligi;
+            mid[id] = matchdayPoints;
+            await TeamLeague.findByIdAndUpdate(
+              league._id,
+              {
+                $pull: { entrants: entrant },
+                $push: {
+                  standings: {
+                    user,
+                    firstName,
+                    lastName,
+                    teamName,
+                    lastRank,
+                    currentRank,
+                    overallPoints,
+                    matchdays: mid,
+                  },
+                },
+              },
+              { new: true }
+            );
+            //res.status(200).json(`Tables updated`)
+          }
+        });
+      }
+    });
+    res.status(200).json(`Tables updated`);
+  }
+});
 const updatePrivateTables = asyncHandler(async (req, res) => {
-  const privateLeagues = await League.find({})
-  console.log(privateLeagues)
-})
+  const privateLeagues = await League.find({});
+  console.log(privateLeagues);
+});
 
 export {
   setLeague,
@@ -705,5 +820,5 @@ export {
   getOverallLeagues,
   updateOverallTable,
   updateTeamTables,
-  updatePrivateTables
+  updatePrivateTables,
 };

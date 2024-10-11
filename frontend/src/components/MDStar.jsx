@@ -3,19 +3,19 @@ import { useGetPlayerQuery } from "../slices/playerApiSlice";
 import { useGetPlayersQuery } from "../slices/playerApiSlice";
 
 const MDStar = (props) => {
-    const {id, _id, highestScoringEntry } = props
-    const { data: player} = useGetPlayerQuery(highestScoringEntry) 
+    const {id, _id, topPlayer } = props
+    const { data: player} = useGetPlayerQuery(topPlayer) 
     const { data: players } = useGetPlayersQuery()
     const { data: teams } = useGetQuery()
-    const appName = players?.find((play) => play._id === highestScoringEntry)?.appName;
-  const nowCost = players?.find((play) => play._id === highestScoringEntry)?.nowCost;
+    const appName = players?.find((play) => play._id === topPlayer)?.appName;
+  const nowCost = players?.find((play) => play._id === topPlayer)?.nowCost;
   const image = teams?.find((team) => team?._id === player?.playerTeam)?.code;
   const points = player?.results?.find(x => x?.matchday === _id)?.totalPoints
   const handleShow = () => {}
   return (
     <>
-    {highestScoringEntry ? 
-    <div className="button-wrapper" id={highestScoringEntry}>
+    {topPlayer ? 
+    <div className="button-wrapper" id={topPlayer}>
             <div className="next-fix">&#163;{nowCost?.toFixed(1)}M</div>
             <button className="player-btn player-in-btn" onClick={handleShow}>
               <img
