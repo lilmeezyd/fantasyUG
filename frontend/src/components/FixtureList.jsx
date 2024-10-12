@@ -55,7 +55,7 @@ const FixtureList = (props) => {
     </div>;
   }
 
-  return (
+  return ( 
     <div className="fix-body">
       <section className="btn-wrapper p-2">
         <button

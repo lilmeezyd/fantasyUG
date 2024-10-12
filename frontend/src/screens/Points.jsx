@@ -1,3 +1,4 @@
+import { useState, useMemo, useEffect } from "react";
 import LeagueDetails from "../components/LeagueDetails";
 import FixtureList from "../components/FixtureList";
 import { Link } from "react-router-dom";
@@ -8,14 +9,44 @@ import { useGetLivePicksQuery } from '../slices/livePicksApiSlice'
 import { useGetPicksQuery } from "../slices/picksSlice";
 import { useGetMatchdaysQuery } from "../slices/matchdayApiSlice";
 import ManagerLivePicks from '../components/ManagerLivePicks'
+import {
+  BsChevronLeft,
+  BsChevronRight
+} from "react-icons/bs";
 
 const Points = () => {
+  const [ pageDetails, setPageDetails ] = useState({page: null, min: null, max: null})
   const { userInfo } = useSelector((state) => state.auth)
   const { data: picks, isLoading, isSuccess } = useGetLivePicksQuery(userInfo?._id)
   const { data: managerInfo } = useGetManagerInfoQuery();
   const { data: managerPicks } = useGetPicksQuery();
   const { data: matchdays } = useGetMatchdaysQuery()
-  console.log(picks)
+  const { page, min, max } = pageDetails
+  useEffect(() => {
+    const a = []
+    const id = matchdays?.find(x => x.current === true)?.id
+      picks?.forEach(x => {
+        a.push(...x.livePicks)})
+      const minimum = Math.min(...a.map(x => x.matchday))
+      const maximum = Math.max(...a.map(x => x.matchday))
+      setPageDetails(prev => ({...prev, page: id, min: minimum, max: maximum}))
+  }, [matchdays, picks])
+  
+  const realPicks = useMemo(() => 
+    {
+      const a = []
+      picks?.forEach(x => {
+        a.push(...x.livePicks)})
+        return a.filter(x => x.matchday === +page)
+    }, [picks, page])
+    console.log(picks)
+  const onDecrement = () => {
+    setPageDetails(prev => ({...prev, page: prev.page-1}))
+  };
+
+  const onIncrement = () => {
+    setPageDetails(prev => ({...prev, page: prev.page+1}))
+  };
   if(isLoading && picks === undefined) {
     return (
     <div className="spinner">
@@ -30,11 +61,30 @@ const Points = () => {
   }
   return (
     <>
-    {picks?.length > 0 && 
-    <> 
+    {picks?.length > 0 && matchdays?.length > 0 && 
+    <>
     <div className="main">
-      {picks?.map((pick, idx) => <div key={idx+1}>
-        {pick?.livePicks?.map((lp) => <div key={lp.matchday}>
+    <section className="btn-wrapper p-2">
+        <button
+          disabled={page === min ? true : false}
+          onClick={onDecrement}
+          className={`${page === +min && "btn-hide"} btn-controls`}
+          id="prevButton"
+        >
+          <BsChevronLeft />
+        </button>
+        <button
+          disabled={page === +max ? true : false}
+          onClick={onIncrement}
+          className={`${page === +max && "btn-hide"} btn-controls`}
+          id="nextButton"
+        >
+          <BsChevronRight />
+        </button>
+      </section>
+      </div>
+    <div className="main">
+        {realPicks?.map((lp) => <div key={lp.matchday}>
           <div className="pt-matchday">
           <div>Matchday&nbsp;{lp?.matchday}</div>
           </div>
@@ -55,8 +105,6 @@ const Points = () => {
           matchdayId={lp?.matchdayId}
            isLoading={isLoading} picks={lp?.picks}/>
         </div>)}
-      </div>
-      )}
       <LeagueDetails privateLeagues={managerInfo?.privateLeagues}
         teamLeagues={managerInfo?.teamLeagues}
         overallLeagues={managerInfo?.overallLeagues}
