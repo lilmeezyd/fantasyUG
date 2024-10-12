@@ -44,7 +44,7 @@ const Points = () => {
           <div><div>Rank</div><div>{lp?.matchdayRank === null ? `-` : lp?.matchdayRank}</div></div>
           </div>
           <div className="pt-ht-av">
-          <div><div>Average</div><div> {matchdays?.find(x => x.id === lp?.matchday)?.avergeScore}</div></div>
+          <div><div>Average</div><div> {matchdays?.find(x => x.id === lp?.matchday)?.avergeScore.toFixed(0)}</div></div>
           <Link>
           <div><div>Highest</div><div> {matchdays?.find(x => x.id === lp?.matchday)?.highestScore}</div></div>
           </Link>

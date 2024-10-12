@@ -82,6 +82,7 @@ const setInitialPoints = asyncHandler(async (req, res) => {
     matchday: req.params.mid,
     fixture: req.params.id,
   });
+  const { current } = matchday
   if (!fixture) {
     res.status(400);
     throw new Error("Fixture not found");
@@ -89,6 +90,10 @@ const setInitialPoints = asyncHandler(async (req, res) => {
   if (!matchday) {
     res.status(400);
     throw new Error("Matchday not found");
+  }
+  if(!current) {
+    res.status(400);
+    throw new Error("Matchday is already finished");
   }
   if (!players) {
     res.status(400);
@@ -101,8 +106,7 @@ const setInitialPoints = asyncHandler(async (req, res) => {
     const mdPicks = mLivePicks.find(
       (x) => x.matchdayId.toString() === req.params.mid.toString()
     );
-    const { matchday, matchdayId, activeChip, matchdayRank } = mdPicks;
-    const { picks: unformattedPicks } = mdPicks;
+    const { matchday, matchdayId, activeChip, matchdayRank, picks: unformattedPicks } = mdPicks;
     const formatted = []; 
     unformattedPicks.forEach((x) => {
       const {
@@ -136,8 +140,8 @@ const setInitialPoints = asyncHandler(async (req, res) => {
           })
         : formatted.push(x);
     });
-
-    const newMdPoints = formatted.reduce((x, y) => x + y.points, 0);
+    
+    const newMdPoints = formatted.filter(x => x.multiplier > 0).reduce((x, y) => x + y.points, 0);
     const newFormatted = {
       picks: formatted,
       matchday,
@@ -146,7 +150,9 @@ const setInitialPoints = asyncHandler(async (req, res) => {
       matchdayRank,
       matchdayPoints: newMdPoints,
     };
-    const managerinfo = await ManagerInfo.findOneAndUpdate(
+    const superLives = mLivePicks.filter(x => x.matchdayId.toString() !== req.params.mid.toString())
+    superLives.push(newFormatted)
+   const managerinfo = await ManagerInfo.findOneAndUpdate(
       { _id: allLives[i].manager },
       {
         $set: {
@@ -158,8 +164,8 @@ const setInitialPoints = asyncHandler(async (req, res) => {
       { new: true }
     );
     const managerlive = await ManagerLive.findOneAndUpdate(
-      { manager: allLives[i].manager, "livePicks.matchdayId": req.params.mid },
-      { livePicks: newFormatted },
+      { manager: allLives[i].manager},
+      { livePicks: superLives },
       { new: true }
     );
 

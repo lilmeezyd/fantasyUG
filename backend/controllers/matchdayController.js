@@ -209,21 +209,17 @@ const updateMDdata = asyncHandler(async (req, res) => {
     throw new Error(`Matchday not current Matchday!`)
   }
   const allPlayers = await PlayerHistory.find({matchday: req.params.id})
-    const allLives = await ManagerLive.find({
-      "livePicks.matchdayId": req.params.id,
-    })
-      .sort({"livePicks.matchdayPoints": -1})
-      //const entriesWithScore = allLives.map(x => )
-    const livesArr = allLives.map(x => x.livePicks).flat()
+    const allLives = await ManagerLive.find()
     const entriesWithScore = allLives.map(x => {
-      const y = {}
-          y.manager = x.manager
-      const z = x.livePicks.find(q => q.matchdayId = req.params.id).matchdayPoints
-      y.matchdayPoints = z
-      return y })
+      const y = x.livePicks.find(
+        (x) => x.matchdayId.toString() === req.params.id.toString()
+      )
+      const {matchday, matchdayId, matchdayPoints, matchdayRank} = y
+      return {manager: x.manager, matchday, matchdayId, matchdayPoints, matchdayRank}
+    })
     const highestScore = Math.max(...entriesWithScore.map(x => x.matchdayPoints))
     const totalPts = entriesWithScore.map(x => x.matchdayPoints).reduce((a,b) => a+b,0)
-    const avergeScore = totalPts/allLives.length
+    const avergeScore = (+(totalPts/allLives.length).toFixed(0))
     const highestScoringEntry = entriesWithScore.find(x => x.matchdayPoints === highestScore).manager
     if(allPlayers.length > 0) {
       const highestPoints = Math.max(...allPlayers.map(x => x.totalPoints))
