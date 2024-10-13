@@ -296,22 +296,22 @@ const updateMatchdayRank = asyncHandler(async (req, res) => {});
 //@route GET api/livepicks/manager/:id
 //@access private
 const getLivePicks = asyncHandler(async (req, res) => {
-  const user = await User.findById(req.user.id);
-  const managerInfo = await ManagerInfo.findOne({user: req.user.id})
+  const user = await User.findById(req.params.id);
+  const managerInfo = await ManagerInfo.findOne({$or: [{user: req.params.id},{_id: req.params.id}]})
   const { _id } = managerInfo
-  const livePicks = await ManagerLive.find({ manager: _id });
+  const picks = await ManagerLive.find({ manager: _id });
 
-  if (!user) {
+  if (!user && !picks) {
     res.status(400);
     throw new Error("User not found");
   }
 
-  if (!livePicks) {
+  if (!picks) {
     res.status(400);
     throw new Error("Manager not found");
   }
 
-  res.status(200).json(livePicks);
+  res.status(200).json({picks, managerInfo});
 });
 
 //@desc Get specific live picks

@@ -17,29 +17,29 @@ import {
 const Points = () => {
   const [ pageDetails, setPageDetails ] = useState({page: null, min: null, max: null})
   const { userInfo } = useSelector((state) => state.auth)
-  const { data: picks, isLoading, isSuccess } = useGetLivePicksQuery(userInfo?._id)
+  const { data: picksDetails, isLoading, isSuccess } = useGetLivePicksQuery(userInfo?._id)
   const { data: managerInfo } = useGetManagerInfoQuery();
   const { data: managerPicks } = useGetPicksQuery();
   const { data: matchdays } = useGetMatchdaysQuery()
   const { page, min, max } = pageDetails
+  
   useEffect(() => {
     const a = []
     const id = matchdays?.find(x => x.current === true)?.id
-      picks?.forEach(x => {
+    picksDetails?.picks?.forEach(x => {
         a.push(...x.livePicks)})
       const minimum = Math.min(...a.map(x => x.matchday))
       const maximum = Math.max(...a.map(x => x.matchday))
       setPageDetails(prev => ({...prev, page: id, min: minimum, max: maximum}))
-  }, [matchdays, picks])
+  }, [matchdays, picksDetails])
   
   const realPicks = useMemo(() => 
     {
       const a = []
-      picks?.forEach(x => {
+      picksDetails?.picks?.forEach(x => {
         a.push(...x.livePicks)})
         return a.filter(x => x.matchday === +page)
-    }, [picks, page])
-    console.log(picks)
+    }, [picksDetails, page])
   const onDecrement = () => {
     setPageDetails(prev => ({...prev, page: prev.page-1}))
   };
@@ -47,21 +47,21 @@ const Points = () => {
   const onIncrement = () => {
     setPageDetails(prev => ({...prev, page: prev.page+1}))
   };
-  if(isLoading && picks === undefined) {
+  if(isLoading && picksDetails === undefined) {
     return (
     <div className="spinner">
       <Spinner />
     </div>
     )
   }
-  if(isSuccess && picks?.length === 0) {
+  if(isSuccess && picksDetails?.picks?.length === 0) {
     return (
     <div className='tx-center'>Live scores will appear here when matchday starts!</div>
     )
   }
   return (
     <>
-    {picks?.length > 0 && matchdays?.length > 0 && 
+    {picksDetails?.picks?.length > 0 && matchdays?.length > 0 && 
     <>
     <div className="main">
     <section className="btn-wrapper p-2">
@@ -95,7 +95,7 @@ const Points = () => {
           </div>
           <div className="pt-ht-av">
           <div><div>Average</div><div> {matchdays?.find(x => x.id === lp?.matchday)?.avergeScore.toFixed(0)}</div></div>
-          <Link>
+          <Link to={`/points/${matchdays?.find(x => x.id === lp?.matchday)?.highestScoringEntry}`}>
           <div><div>Highest</div><div> {matchdays?.find(x => x.id === lp?.matchday)?.highestScore}</div></div>
           </Link>
           </div>
@@ -105,7 +105,10 @@ const Points = () => {
           matchdayId={lp?.matchdayId}
            isLoading={isLoading} picks={lp?.picks}/>
         </div>)}
-      <LeagueDetails privateLeagues={managerInfo?.privateLeagues}
+      <LeagueDetails
+      firstName={picksDetails?.managerInfo?.firstName}
+      lastName={picksDetails?.managerInfo?.lastName}
+       privateLeagues={managerInfo?.privateLeagues}
         teamLeagues={managerInfo?.teamLeagues}
         overallLeagues={managerInfo?.overallLeagues}
         teamName={managerInfo?.teamName}

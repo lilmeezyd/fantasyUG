@@ -123,7 +123,7 @@ form.login-cs {
   padding: 0.5rem;
 }
 
-.stars-mds > div {
+.stars-mds>div {
   min-width: 100px;
   padding: 0.5rem;
 }
@@ -844,23 +844,22 @@ form.login-cs {
 }
 
 .player-name div:first-of-type {
-  /*border-radius: 0.5rem;*/
+  /*border-radius: 0.5rem;
   border-bottom-right-radius: 0;
   border-bottom-left-radius: 0;
-  color: white;
-  background: rgba(0, 0, 55, 0.9);
+  color: rgba(0, 0, 55, 0.9);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  padding: 0.1rem;
+  padding: 0.1rem;*/
 }
 
 .player-name div:last-of-type {
-  background: white;
+  /*background: white;
   border-bottom-left-radius: 0.5rem;
   border-bottom-right-radius: 0.5rem;
   padding: 0.1rem;
-  min-height: 10px;
+  min-height: 10px;*/
 }
 
 .image_pic {
@@ -980,6 +979,7 @@ form.login-cs {
 .home .team {
   text-align: right;
   padding-right: 0.5rem;
+  padding-left: 1rem;
 }
 
 .away .team {
@@ -1096,6 +1096,9 @@ form.login-cs {
 .pick-team-name {
   /*font-size: 1.5rem;*/
   font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .my-leagues {
@@ -1161,6 +1164,8 @@ form.login-cs {
   justify-content: center;
   border-bottom-left-radius: 0.5rem;
   border-bottom-right-radius: 0.5rem;
+  padding: 0.1rem;
+  background: white;
 }
 
 
@@ -1435,9 +1440,9 @@ h1.stats {
   margin: auto;
   border-radius: 0.5rem;
   background: white;
-    padding: 0.5rem;
-    overflow: auto;
-    display: grid;
+  padding: 0.5rem;
+  overflow: auto;
+  display: grid;
 }
 
 

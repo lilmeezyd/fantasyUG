@@ -42,6 +42,7 @@ import OverallLeague from "./components/OverallLeague.jsx"
 import TeamLeague from "./components/TeamLeague.jsx"
 import RequestPasswordReset from "./components/RequestPasswordReset.jsx"
 import ResetPassword from "./components/ResetPassword.jsx"
+import OtherPoints from "./screens/OtherPoints.jsx";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -73,6 +74,7 @@ const router = createBrowserRouter(
           <Route path="/transfers" element={<Transfers />} />
           <Route path="/pickteam" element={<PickTeam />} />
           <Route path="/points" element={<Points />} />
+          <Route path="/points/:id" element={<OtherPoints />} />
         </Route>
       </Route>
 

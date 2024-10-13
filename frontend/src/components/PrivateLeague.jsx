@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom"
+import { useParams, Link } from "react-router-dom"
 import { useGetLeagueQuery } from "../slices/leagueApiSlice"
 import {Spinner} from "react-bootstrap"
 import { useSelector } from "react-redux"
@@ -57,7 +57,9 @@ const PrivateLeague = () => {
       {data?.entrants?.map(entrant => 
         <div key={entrant._id}>
           <div className="standing-grid">
-          <div  className="standing-grid-name">{entrant?.teamName}</div>
+          <div  className="standing-grid-name">
+          <Link to={`/points/${entrant.user.toString()}`}>{entrant?.teamName}</Link>
+          </div>
           <div  className="standing-grid-name">
             {entrant?.firstName}&nbsp;&nbsp;{entrant?.lastName}
           </div>

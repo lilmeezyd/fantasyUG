@@ -20,13 +20,13 @@ const SquadPlayer = (props) => {
   const image = teams?.find((team) => team?._id === baller?.playerTeam)?.code
   const mdId = matchdays?.find((matchday) => matchday?.next === true)?.id;
   const mdFixs = fixtures?.find((x) => x?._id?.id === mdId)?.fixtures;
-  const opponentFix = mdFixs?.find(
-    (x) => x.teamAway === baller.playerTeam || x.teamHome === baller.playerTeam
-  );
-  const opponent =
-    baller.playerTeam === opponentFix?.teamAway
-      ? `${teams?.find((x) => x._id === opponentFix?.teamHome)?.shortName}(A)`
-      : `${teams?.find((x) => x._id === opponentFix?.teamAway)?.shortName}(H)`;
+  const opponentFixArr = mdFixs?.filter(
+    (x) => x.teamAway === baller?.playerTeam || x.teamHome === baller?.playerTeam
+  )
+  
+  const opponentArr = opponentFixArr?.map(opponent => baller?.playerTeam === opponent?.teamAway
+    ? `${teams?.find((x) => x._id === opponent?.teamHome)?.shortName}(A)`
+    : `${teams?.find((x) => x._id === opponent?.teamAway)?.shortName}(H)`)
 
   const handleClose = () => {
     setShow(false);
@@ -55,8 +55,10 @@ const SquadPlayer = (props) => {
               alt={appName}
             />
             <div className="player-name">
-              <div>{appName}</div>
-              <div>{opponent}</div>
+              <div className="data_name">{appName}</div>
+              <div style={{padding: `${opponentArr?.length === 0 && 0}`}} className="data_fixtures">
+              {opponentArr?.map((x, idx) => <div key={idx+1}>{x}</div>)}
+              </div>
             </div>
           </button>
           </div>

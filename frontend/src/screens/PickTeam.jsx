@@ -380,7 +380,10 @@ const PickTeam = () => {
         okayed={okayed}
         switcher={switcher}
          picks={picks} switchCaptain={switchCaptain} switchVice={switchVice} inform={inform} switchPlayer={switchPlayer} teamName={managerInfo?.teamName} />
-        <LeagueDetails privateLeagues={managerInfo?.privateLeagues}
+        <LeagueDetails
+        firstName={managerInfo?.firstName}
+        lastName={managerInfo?.lastName}
+         privateLeagues={managerInfo?.privateLeagues}
         teamLeagues={managerInfo?.teamLeagues}
         overallLeagues={managerInfo?.overallLeagues}
         matchdayPoints={managerInfo?.matchdayPoints}

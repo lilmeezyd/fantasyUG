@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom"
+import { useParams, Link } from "react-router-dom"
 import { useGetOverallLeagueQuery } from "../slices/leagueApiSlice"
 import {Spinner} from "react-bootstrap"
 import { useSelector } from "react-redux"
@@ -34,7 +34,8 @@ const OverallLeague = () => {
         border: `${userInfo._id === entrant.user.toString() ? '2px solid gold' : 'none'}`}} key={entrant._id} className="standing-grid-1">
             <div></div>
             <div>{entrant?.currentRank}</div>
-          <div className="standing-grid-name">{entrant?.teamName}</div>
+          <div className="standing-grid-name">
+          <Link to={`/points/${entrant.user.toString()}`}>{entrant?.teamName}</Link></div>
           <div className="standing-grid-name">
             {entrant?.firstName}&nbsp;&nbsp;{entrant?.lastName}
           </div>

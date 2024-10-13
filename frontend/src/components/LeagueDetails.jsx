@@ -4,7 +4,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { useGetTotalQuery } from "../slices/userApiSlice";
 const LeagueDetails = (props) => {
   const { privateLeagues, overallLeagues, teamLeagues, teamName, teamValue, bank,
-    overallPoints, matchdayPoints, overallRank
+    overallPoints, matchdayPoints, overallRank, firstName, lastName
    } = props;
   const { data: teams } = useGetQuery();
   const { data: totalPlayers } = useGetTotalQuery()
@@ -15,7 +15,7 @@ const LeagueDetails = (props) => {
       <div className="ranks">
         <div className="ld-1">
           <h5 style={{ fontWeight: 700 }}>
-            {userInfo?.firstName}&nbsp;{userInfo?.lastName}
+            {firstName}&nbsp;{lastName}
           </h5>
           <div>{teamName}</div>
         </div>
