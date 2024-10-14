@@ -109,8 +109,8 @@ const OtherPoints = () => {
             teamLeagues={picksDetails?.managerInfo?.teamLeagues}
             overallLeagues={picksDetails?.managerInfo?.overallLeagues}
             teamName={picksDetails?.managerInfo?.teamName}
-            teamValue={picksDetails?.managerInfo?.teamValue}
-            bank={picksDetails?.managerInfo?.bank}
+            teamValue={picksDetails?.picks[0]?.livePicks[0]?.teamValue}
+            bank={picksDetails?.picks[0]?.livePicks[0]?.bank}
             matchdayPoints={picksDetails?.managerInfo?.matchdayPoints}
             overallPoints={picksDetails?.managerInfo?.overallPoints}
             overallRank={picksDetails?.managerInfo?.overallRank}

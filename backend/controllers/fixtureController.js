@@ -229,7 +229,7 @@ const dePopulateStats = asyncHandler(async (req, res) => {
       const mdPicks = mLivePicks.find(
         (x) => x.matchdayId.toString() === req.params.mid
       );
-      const { matchday, matchdayId, activeChip, matchdayRank, matchdayPoints } =
+      const { matchday, matchdayId, activeChip, matchdayRank, teamValue, bank, matchdayPoints } =
         mdPicks;
       const { picks: unformattedPicks } = mdPicks;
       const formatted = await Promise.all(
@@ -282,6 +282,8 @@ const dePopulateStats = asyncHandler(async (req, res) => {
         matchdayId,
         activeChip,
         matchdayRank,
+        teamValue,
+        bank,
         matchdayPoints: newMdPoints,
       };
       const superLives = mLivePicks.filter(

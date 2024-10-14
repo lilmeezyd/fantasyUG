@@ -116,6 +116,8 @@ const setInitialPoints = asyncHandler(async (req, res) => {
       matchdayId,
       activeChip,
       matchdayRank,
+      teamValue,
+      bank,
       picks: unformattedPicks,
     } = mdPicks;
     const formatted = await Promise.all(
@@ -164,6 +166,8 @@ const setInitialPoints = asyncHandler(async (req, res) => {
       matchday,
       matchdayId,
       activeChip,
+      teamValue,
+      bank,
       matchdayRank,
       matchdayPoints: newMdPoints,
     };
