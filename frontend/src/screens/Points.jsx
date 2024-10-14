@@ -22,7 +22,6 @@ const Points = () => {
   const { data: managerPicks } = useGetPicksQuery();
   const { data: matchdays } = useGetMatchdaysQuery()
   const { page, min, max } = pageDetails
-  
   useEffect(() => {
     const a = []
     const id = matchdays?.find(x => x.current === true)?.id
@@ -38,6 +37,7 @@ const Points = () => {
       const a = []
       picksDetails?.picks?.forEach(x => {
         a.push(...x.livePicks)})
+        console.log(a)
         return a.filter(x => x.matchday === +page)
     }, [picksDetails, page])
   const onDecrement = () => {

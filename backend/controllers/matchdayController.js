@@ -91,13 +91,18 @@ const getMatchday = asyncHandler(async (req, res) => {
 //@role ADMIN
 const startMatchday = asyncHandler(async (req, res) => {
   const matchday = await Matchday.findById(req.params.id);
-  const { id } = matchday;
+  const { id, next: isNext } = matchday;
   const prev = id > 1 ? id - 1 : 0;
   const next = id + 1;
 
   if (!matchday) {
     res.status(400);
     throw new Error("Matchday not found");
+  }
+
+  if(!isNext) {
+    res.status(400);
+    throw new Error("Matchday not the next one");
   }
 
   //FInd user
@@ -221,6 +226,8 @@ const updateMDdata = asyncHandler(async (req, res) => {
     const totalPts = entriesWithScore.map(x => x.matchdayPoints).reduce((a,b) => a+b,0)
     const avergeScore = (+(totalPts/allLives.length).toFixed(0))
     const highestScoringEntry = entriesWithScore.find(x => x.matchdayPoints === highestScore).manager
+    console.log(highestScore)
+    console.log(allPlayers.length)
     if(allPlayers.length > 0) {
       const highestPoints = Math.max(...allPlayers.map(x => x.totalPoints))
       const topPlayer = allPlayers.find(x => x.totalPoints === highestPoints)

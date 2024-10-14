@@ -7,6 +7,7 @@ import { useGetQuery } from "../slices/teamApiSlice";
 import { useGetPositionsQuery } from "../slices/positionApiSlice";
 import { useGetMatchdaysQuery } from "../slices/matchdayApiSlice";
 import { useGetFixturesQuery } from "../slices/fixtureApiSlice";
+import { useGetHistoryQuery } from "../slices/playerApiSlice";
 import { Button, Modal, Spinner } from "react-bootstrap";
 import PlayerInfo from "./PlayerInfo";
 
@@ -16,6 +17,7 @@ const LivePlayer = (props) => {
   const { data: elementTypes } = useGetPositionsQuery();
   const { data: fixtures, isLoading } = useGetFixturesQuery();
   const { data: matchdays } = useGetMatchdaysQuery();
+  const { data: history } = useGetHistoryQuery(baller._id)
 
   const mdFixs = fixtures?.find((x) => x?._id?.id === matchday)?.fixtures;
   const appName = players?.find((player) => player._id === baller._id)?.appName;
@@ -24,14 +26,22 @@ const LivePlayer = (props) => {
   const shortName = teams?.find(
     (team) => team?._id === baller?.playerTeam
   )?.shortName;
-  const opponentFix = mdFixs?.find(
-    (x) => x.teamAway === baller.playerTeam || x.teamHome === baller.playerTeam
-  );
-  const opponent =
-    baller.playerTeam === opponentFix?.teamAway
-      ? `${teams?.find((x) => x._id === opponentFix?.teamHome)?.shortName}(A)`
-      : `${teams?.find((x) => x._id === opponentFix?.teamAway)?.shortName}(H)`;
-
+  const opponentFixArr = mdFixs?.filter(
+    (x) => x.teamAway === baller?.playerTeam || x.teamHome === baller?.playerTeam
+  )
+   /*
+  const opponentArr = opponentFixArr?.map(opponent => baller?.playerTeam === opponent?.teamAway
+    ? `${teams?.find((x) => x._id === opponent?.teamHome)?.shortName}(A)`
+    : `${teams?.find((x) => x._id === opponent?.teamAway)?.shortName}(H)`)*/
+    const opponentArr = opponentFixArr?.map(opponent => 
+      opponent?.stats?.length === 0 && baller?.playerTeam === opponent?.teamAway ? 
+      `${teams?.find((x) => x._id === opponent?.teamHome)?.shortName}(A)`: 
+      opponent?.stats?.length === 0 && baller?.playerTeam === opponent?.teamHome ? 
+      `${teams?.find((x) => x._id === opponent?.teamAway)?.shortName}(H)`: 
+      (baller?.multiplier > 1 ?
+        baller?.multiplier * history?.find(x => opponent._id === x.fixture && x.player === baller._id && x.matchday === opponent.matchday)?.totalPoints : 
+        history?.find(x => opponent._id === x.fixture && x.player === baller._id && x.matchday === opponent.matchday)?.totalPoints)
+    )
   const handleClose = () => {
     setShow(false);
   };
@@ -45,7 +55,7 @@ const LivePlayer = (props) => {
     </div>
     )
   }
-  return (
+  return ( 
     <>
       <div className="element">
         {baller._id ? (
@@ -151,7 +161,7 @@ const LivePlayer = (props) => {
               <div className="player-name">
                 <div className="data_name">{appName}</div>
                 <div style={{ fontWeight: 700 }} className="data_fixtures">
-                  {baller?.points === null ? opponent : +baller?.points}
+                  {opponentArr?.map((x, idx) => <div key={idx+1}>{x}</div>)}
                 </div>
               </div>
             </button>

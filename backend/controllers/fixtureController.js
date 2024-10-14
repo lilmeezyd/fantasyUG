@@ -181,93 +181,10 @@ const dePopulateStats = asyncHandler(async (req, res) => {
     res.status(400);
     throw new Error("No players found");
   }
-  for (let i = 0; i < allLives.length; i++) {
-    const mLive = await ManagerLive.findOne({ user: allLives[i].user });
-    const mLivePicks = mLive.livePicks;
-    const mdPicks = mLivePicks.find(
-      (x) => x.matchdayId.toString() === req.params.mid
-    );
-    const { matchday, matchdayId, activeChip, matchdayRank, matchdayPoints } =
-      mdPicks;
-    const { picks: unformattedPicks } = mdPicks;
-    const formatted = [];
-    unformattedPicks.forEach((x) => {
-      const {
-        _id,
-        playerPosition,
-        playerTeam,
-        multiplier,
-        nowCost,
-        IsCaptain,
-        IsViceCaptain,
-        slot,
-      } = x;
-      const inPlayers = players.findIndex(
-        (y) => x._id.toString() === y._id.toString()
-      );
-      inPlayers > -1
-        ? formatted.push({
-            _id,
-            playerPosition,
-            playerTeam,
-            multiplier,
-            nowCost,
-            IsCaptain,
-            IsViceCaptain,
-            slot,
-            points: null,
-          })
-        : formatted.push(x);
-    });
-
-    const newMdPoints = formatted.reduce((x, y) => x + y.points, 0);
-
-    const newFormatted = {
-      picks: formatted,
-      matchday,
-      matchdayId,
-      activeChip,
-      matchdayRank,
-      matchdayPoints: newMdPoints,
-    };
-
-    const managerlive = await ManagerLive.findOneAndUpdate(
-      { user: allLives[i].user, "livePicks.matchdayId": req.params.mid },
-      { livePicks: newFormatted },
-      { new: true }
-    );
-    const managerinfo = await ManagerInfo.findOneAndUpdate(
-      { user: allLives[i].user },
-      {
-        matchdayPoints: newMdPoints,
-        "teamLeagues.0.matchdayPoints": newMdPoints,
-        "overallLeagues.0.matchdayPoints": newMdPoints,
-      },
-      { new: true }
-    );
-
-    const { teamLeagues, overallLeagues } = managerinfo
-    const startTeamMd = await Matchday.findById(teamLeagues[0].startMatchday.toString())
-    const endTeamMd = await Matchday.findById(teamLeagues[0].endMatchday.toString())
-    const startOverallMd = await Matchday.findById(overallLeagues[0].startMatchday.toString())
-    const endOverallMd = await Matchday.findById(overallLeagues[0].endMatchday.toString())
-    const { livePicks } = managerlive
-    const overallTeamPts = livePicks.filter(x => x.matchday >= startTeamMd.id && x.matchday <= endTeamMd.id)
-    .map(x => x.matchdayPoints).reduce((x, y) => x + y, 0)
-    const overallOverallPts = livePicks.filter(x => x.matchday >= startOverallMd.id && x.matchday <= endOverallMd.id)
-    .map(x => x.matchdayPoints).reduce((x, y) => x + y, 0)
-    const overallPts = livePicks.map(x => x.matchdayPoints).reduce((a,b) => a+b, 0)
-    managerinfo.$set('overallPoints', overallPts)
-    managerinfo.$set('teamLeagues.0.overallPoints', overallTeamPts)
-    managerinfo.$set('overallLeagues.0.overallPoints', overallOverallPts)
-    await managerinfo.save()
-    
-  }
-  
   fixture.stats.length = 0;
   fixture.teamAwayScore = null;
   fixture.teamHomeScore = null;
-  await PlayerHistory.deleteMany({ fixture: req.params.id });
+  const deletedFix = await PlayerHistory.deleteMany({ fixture: req.params.id });
   affectedPlayers.forEach(async (play) => {
     const {
       player,
@@ -305,6 +222,127 @@ const dePopulateStats = asyncHandler(async (req, res) => {
       { new: true }
     );
   });
+  if (deletedFix) {
+    for (let i = 0; i < allLives.length; i++) {
+      const mLive = await ManagerLive.findOne({ manager: allLives[i].manager });
+      const mLivePicks = mLive.livePicks;
+      const mdPicks = mLivePicks.find(
+        (x) => x.matchdayId.toString() === req.params.mid
+      );
+      const { matchday, matchdayId, activeChip, matchdayRank, matchdayPoints } =
+        mdPicks;
+      const { picks: unformattedPicks } = mdPicks;
+      const formatted = await Promise.all(
+        unformattedPicks.map(async (x) => {
+          const {
+            _id,
+            playerPosition,
+            playerTeam,
+            multiplier,
+            nowCost,
+            IsCaptain,
+            IsViceCaptain,
+            slot,
+          } = x;
+          const inPlayers = players.findIndex(
+            (y) => x._id.toString() === y._id.toString()
+          );
+          const playerDatas = await PlayerHistory.find({
+            matchday: req.params.mid,
+            player: _id,
+          });
+          const playerPoints = playerDatas.reduce(
+            (a, b) => a + b.totalPoints,
+            0
+          );
+          if (inPlayers > -1) {
+            return {
+              _id,
+              playerPosition,
+              playerTeam,
+              multiplier,
+              nowCost,
+              IsCaptain,
+              IsViceCaptain,
+              slot,
+              points: IsCaptain ? playerPoints * 2 : playerPoints,
+            };
+          } else {
+            return x;
+          }
+        })
+      );
+
+      const newMdPoints = formatted
+        .filter((x) => x.multiplier > 0)
+        .reduce((x, y) => x + y.points, 0);
+      const newFormatted = {
+        picks: formatted,
+        matchday,
+        matchdayId,
+        activeChip,
+        matchdayRank,
+        matchdayPoints: newMdPoints,
+      };
+      const superLives = mLivePicks.filter(
+        (x) => x.matchdayId.toString() !== req.params.mid.toString()
+      );
+      superLives.push(newFormatted);
+      const managerinfo = await ManagerInfo.findOneAndUpdate(
+        { _id: allLives[i].manager },
+        {
+          $set: {
+            matchdayPoints: newMdPoints,
+            "teamLeagues.0.matchdayPoints": newMdPoints,
+            "overallLeagues.0.matchdayPoints": newMdPoints,
+          },
+        },
+        { new: true }
+      );
+      const managerlive = await ManagerLive.findOneAndUpdate(
+        { manager: allLives[i].manager },
+        { livePicks: superLives },
+        { new: true }
+      );
+
+      const { teamLeagues, overallLeagues } = managerinfo;
+      const startTeamMd = await Matchday.findById(
+        teamLeagues[0].startMatchday.toString()
+      );
+      const endTeamMd = await Matchday.findById(
+        teamLeagues[0].endMatchday.toString()
+      );
+      const startOverallMd = await Matchday.findById(
+        overallLeagues[0].startMatchday.toString()
+      );
+      const endOverallMd = await Matchday.findById(
+        overallLeagues[0].endMatchday.toString()
+      );
+      const { livePicks } = managerlive;
+      const endTeamMdId = endTeamMd === null ? 100 : endTeamMd.id;
+      const endOverallMdId = endOverallMd === null ? 100 : endOverallMd.id;
+      const overallTeamPts = livePicks
+        .filter(
+          (x) => x.matchday >= startTeamMd.id && x.matchday <= endTeamMdId
+        )
+        .map((x) => x.matchdayPoints)
+        .reduce((x, y) => x + y, 0);
+      const overallOverallPts = livePicks
+        .filter(
+          (x) => x.matchday >= startOverallMd.id && x.matchday <= endOverallMdId
+        )
+        .map((x) => x.matchdayPoints)
+        .reduce((x, y) => x + y, 0);
+      const overallPts = livePicks
+        .map((x) => x.matchdayPoints)
+        .reduce((a, b) => a + b, 0);
+      managerinfo.$set("overallPoints", overallPts);
+      managerinfo.$set("teamLeagues.0.overallPoints", overallTeamPts);
+      managerinfo.$set("overallLeagues.0.overallPoints", overallOverallPts);
+      await managerinfo.save();
+    }
+  }
+
   const updatedFixture = await Fixture.findByIdAndUpdate(
     req.params.id,
     fixture,
