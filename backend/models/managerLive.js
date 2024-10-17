@@ -43,7 +43,8 @@ const managerLiveSchema = mongoose.Schema({
       }
       ],
       teamValue: { type: Number},
-      bank: { type: Number}
+      bank: { type: Number},
+      automaticSubs: []
     }
   ],
 });

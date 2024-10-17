@@ -10,7 +10,7 @@ const MDStar = (props) => {
   const appName = players?.find((play) => play._id === topPlayer)?.appName;
   const nowCost = players?.find((play) => play._id === topPlayer)?.nowCost;
   const image = teams?.find((team) => team?._id === player?.playerTeam)?.code;
-  const points = player?.results?.find((x) => x?.matchday === _id)?.totalPoints;
+  const points = player?.results?.filter((x) => x?.matchday === _id)?.reduce((a,b) => a+b.totalPoints,0);
   const handleShow = () => {};
   return (
     <>

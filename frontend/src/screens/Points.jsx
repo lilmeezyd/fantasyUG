@@ -37,7 +37,6 @@ const Points = () => {
       const a = []
       picksDetails?.picks?.forEach(x => {
         a.push(...x.livePicks)})
-        console.log(a)
         return a.filter(x => x.matchday === +page)
     }, [picksDetails, page])
   const onDecrement = () => {
@@ -103,6 +102,7 @@ const Points = () => {
 
           <ManagerLivePicks matchday={lp?.matchday} 
           matchdayId={lp?.matchdayId}
+          automaticSubs={lp?.automaticSubs}
            isLoading={isLoading} picks={lp?.picks}/>
         </div>)}
       <LeagueDetails

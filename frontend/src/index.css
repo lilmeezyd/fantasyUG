@@ -1445,6 +1445,26 @@ h1.stats {
   display: grid;
 }
 
+/* Automatic subs */
+.automatic {
+  border-radius: 0.5rem;
+  background: aquamarine;
+  padding: 0.5rem;
+}
+.auto-class-header {
+  text-align: center;
+  font-weight: 700;
+}
+
+.auto-class {
+  display: flex;
+}
+
+.auto-class div {
+  flex: 1 0 0%;
+  text-align: center;
+}
+
 
 
 .footer {

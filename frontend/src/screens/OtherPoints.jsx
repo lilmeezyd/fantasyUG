@@ -19,7 +19,6 @@ const OtherPoints = () => {
 
     const { data: matchdays } = useGetMatchdaysQuery()
   const { page, min, max } = pageDetails
-  
   useEffect(() => {
     const a = []
     const id = matchdays?.find(x => x.current === true)?.id
@@ -100,6 +99,7 @@ const OtherPoints = () => {
     
               <ManagerLivePicks matchday={lp?.matchday} 
               matchdayId={lp?.matchdayId}
+              automaticSubs={lp?.automaticSubs}
                isLoading={isLoading} picks={lp?.picks}/>
             </div>)}
           <LeagueDetails 
