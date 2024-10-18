@@ -279,6 +279,7 @@ const endMatchday = asyncHandler(async (req, res) => {
         activeChip,
         matchdayRank,
         teamValue,
+        automaticSubs,
         bank,
         picks: unformattedPicks,
       } = mdPicks;
@@ -298,7 +299,7 @@ const endMatchday = asyncHandler(async (req, res) => {
       //Starting players by position
       let startingDefs = unformattedPicks.filter(x => x.multiplier > 0 && x.playerPosition.toString() === '669a4831e181cb2ed40c240f')
       let startingFwds = unformattedPicks.filter(x => x.multiplier > 0 && x.playerPosition.toString() === '669a485de181cb2ed40c2417')
-     const automaticSubs = []
+     
       if(captainMissed) {
         const vice = unformattedPicks.find(x => x.IsViceCaptain === true)
         const { _id:p_id, playerPosition:pp, playerTeam:pt, multiplier:pm, nowCost:pn,

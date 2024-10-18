@@ -746,12 +746,15 @@ form.login-cs {
   margin: 0.5rem;
   display: flex;
   justify-content: center;
-  /*gap: 1rem;*/
+  /* gap: 1rem; */
   padding: 0.5rem 0;
   border-top-left-radius: 0.5rem;
   border-top-right-radius: 0.5rem;
-  background: #f0f8ff82;
-  box-shadow: 0 0 2px 0;
+  background: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
 }
 
 .default-player .squad-player,
@@ -776,6 +779,7 @@ form.login-cs {
   padding: 0.25rem;
   text-align: center;
   font-weight: 600;
+  font-size: 10px;
 }
 
 .element {
@@ -791,16 +795,21 @@ form.login-cs {
   border-top-right-radius: 0.8rem;
   border-radius: 0.5rem;
   position: relative;
-  box-shadow: 0 0 2px 0px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
 }
 
 .player-btn {
-  background: #00000026;
-  outline: none;
-  border: 0;
+  /* background: #00000026; */
+  /* outline: none; */
+  /* border: 0; */
   width: 100%;
   position: relative;
-  box-shadow: 0 0 5px 0;
+  background: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 0.5rem;
 }
 
 .player-in-btn {
@@ -1460,9 +1469,10 @@ h1.stats {
   display: flex;
 }
 
-.auto-class div {
+.auto-class .ac {
   flex: 1 0 0%;
   text-align: center;
+  font-weight: 500;
 }
 
 

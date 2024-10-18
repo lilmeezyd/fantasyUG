@@ -145,11 +145,11 @@ const PickPlayer = (props) => {
             </div>
             <div className="player-name">
               <div className="data_name">{appName}</div>
-              <div className="data_fixtures"
+              {opponentArr?.length > 0 && <div className="data_fixtures"
               style={{padding: `${opponentArr?.length === 0 && 0}`,background: `${switcher.slot === baller.slot ? 'goldenrod' : 
                 okayed?.includes(baller.slot) ? 'silver' : '#fff'}`}}>
                   {opponentArr?.map((x, idx) => <div key={idx+1}>{x}</div>)}
-                </div>
+                </div>}
             </div>
           </button>
           </div>
