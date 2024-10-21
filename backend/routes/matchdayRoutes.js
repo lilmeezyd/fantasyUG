@@ -8,6 +8,10 @@ import {
   updateMatchday,
   deleteMatchday,
   startMatchday,
+  updateTOW,
+  getTOW,
+  getTOWs,
+  getMaxMD,
 } from "../controllers/matchdayController.js";
 import { protect, roles } from "../middleware/authMiddleware.js";
 import ROLES from "../config/permissions.js";
@@ -23,6 +27,15 @@ router
   .patch(protect, roles(ROLES.ADMIN), startMatchday)
   .patch(protect, roles(ROLES.ADMIN, ROLES.EDITOR), updateMatchday)
   .delete(protect, roles(ROLES.ADMIN), deleteMatchday);
+
+router.route("/data/max").get(getMaxMD);
+router.route("/data/tows").get(getTOWs);
+router.route("/data/tows/:id").get(getTOW);
+
+router
+  .route("/updateTOW/:id")
+  .get(getTOW)
+  .put(protect, roles(ROLES.ADMIN), updateTOW);
 
 router
   .route("/endmatchday/:id")

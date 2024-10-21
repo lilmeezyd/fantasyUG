@@ -14,7 +14,7 @@ const StarsOfWeek = () => {
   }
   return (
     <div className='p-2 my-2 stars home-section-sub'>
-      <h5>Stars of the week</h5>
+      <h6 className="home-stars">MVPs</h6>
       <div className="stars-mds">
       {matchdays?.map(matchday => 
         <div key={matchday._id}>

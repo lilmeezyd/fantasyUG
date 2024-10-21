@@ -3,7 +3,24 @@ import Matchday from "../models/matchdayModel.js";
 import ManagerLive from "../models/managerLive.js";
 import ManagerInfo from "../models/managerInfoModel.js";
 import PlayerHistory from "../models/playerHistoryModel.js"
+import TOW from "../models/teamOfTheWeekModel.js"
 import User from "../models/userModel.js";
+
+
+//@desc Get recent matchday
+//@route GET /api/matchdays/data/max/
+//@access Public
+const getMaxMD = asyncHandler(async (req, res) => {
+  const matchdays = await Matchday.find({pastDeadline: true})
+  if(matchdays.length > 0) {
+    const newMd = Math.max(...matchdays.map(x => x.id))
+    console.log(newMd)
+    res.status(200).json(newMd)
+  } else {
+    res.status(200).json(null)
+  }
+
+})
 
 //@desc Set Matchday
 //@route POST /api/matchdays
@@ -237,6 +254,128 @@ const updateMDdata = asyncHandler(async (req, res) => {
     }
 });
 
+//@desc Update Team of the week
+//@route PUT /api/matchdays/updateTOW/:id
+//@access Private
+//@role Admin, editor
+const updateTOW = asyncHandler(async (req, res) => {
+  const matchdayFound = await Matchday.findById(req.params.id);
+  const { current } = matchdayFound
+  if(!matchdayFound) {
+    res.status(404)
+    throw new Error('Matchday not found!')
+  }
+  if(!current) {
+    res.status(400)
+    throw new Error(`Matchday not current Matchday!`)
+  }
+  const { id } = matchdayFound
+  const posObj = {
+    '669a41e50f8891d8e0b4eb2a': 'GKP',
+    '669a4831e181cb2ed40c240f': 'DEF',
+    '669a4846e181cb2ed40c2413': 'MID',
+    '669a485de181cb2ed40c2417': 'FWD'
+  }
+  const codeObj = {
+    '669a41e50f8891d8e0b4eb2a': 1,
+    '669a4831e181cb2ed40c240f': 2,
+    '669a4846e181cb2ed40c2413': 3,
+    '669a485de181cb2ed40c2417': 4
+  }
+  const ads = []
+  const adPlayers = []
+  const players = await PlayerHistory.find({matchday: req.params.id}).populate('player')
+  players.forEach(playerz => {
+    const { totalPoints, player } = playerz
+    if(ads.includes(playerz.player._id.toString())) {
+      const index = adPlayers.findIndex(x => x?.player?._id.toString() === playerz.player._id.toString())
+      const newPlayer = {player: player, totalPoints: totalPoints+adPlayers[index].totalPoints}
+      adPlayers.splice(index, 1, newPlayer)
+    } else {
+      adPlayers.push({player, totalPoints})
+      ads.push(playerz.player._id.toString())
+    }
+  })
+  const sortedPlayers = adPlayers
+  .map(x => {
+    const y = {}
+    y.id = x.player._id
+    y.player = x.player.appName
+    y.position = posObj[x.player.playerPosition.toString()]
+    y.code = +codeObj[x.player.playerPosition.toString()]
+    y.positionId = x.player.playerPosition
+    y.playerTeam = x.player.playerTeam
+    y.totalPoints = x.totalPoints
+    /*y.fixture = x.fixture
+    y.opponent = x.opponent
+    x.venue = x.home === false ? 'Away': 'Home'*/
+    return y
+  })
+  .sort((a,b) => a.totalPoints > b.totalPoints ? -1 : 1)
+  const starOnes = []
+  let goal = 0, def=0, mid=0, fwd=0, total=0
+  for(let i=0; i < sortedPlayers.length; i++) {
+    if(total === 11) break;
+    if(total === 10 && goal === 0) continue;
+    if(goal !== 1 && posObj[sortedPlayers[i].positionId] === 'GKP') {
+      starOnes.push(sortedPlayers[i])
+      goal+=1
+      total+=1
+    }
+    if(posObj[sortedPlayers[i].positionId] === 'DEF') {
+      if(def === 4 && mid === 5) continue;
+      if(def < 5){
+      starOnes.push(sortedPlayers[i])
+      def+=1
+      total+=1}
+    }
+    if(posObj[sortedPlayers[i].positionId] === 'MID') {
+      if(mid === 4 && def === 2) continue;
+      if(mid < 5){
+      starOnes.push(sortedPlayers[i])
+      mid+=1
+      total+=1}
+    }
+    if(posObj[sortedPlayers[i].positionId] === 'FWD') {
+      if(fwd === 2 && mid === 5) continue;
+      if(fwd < 3){
+      starOnes.push(sortedPlayers[i])
+      fwd+=1
+      total+=1}
+    }
+  }
+
+  const realStars = await TOW.findOneAndUpdate({matchdayId: req.params.id}, 
+    {$set: {matchday: id, matchdayId: req.params.id, starOnes: starOnes}}, {new: true})
+    const sortedReals = realStars.sort((a,b) => a.code > b.code ? -1 : 1)
+    res.status(201).json(realStars)
+})
+
+//@desc Get Team of the week
+//@route GET /api/matchdays/data/tows/:id
+//@access Public
+//@role Admin, editor, Normal User
+const getTOW = asyncHandler(async (req, res) => {
+  const tow = await TOW.findOne({matchdayId: req.params.id})
+  if(!tow) {
+    res.status(404)
+    throw new Error('No team of the week found')
+  }
+  res.status(200).json(tow)
+})
+
+//@route GET /api/matchdays/data/tows/
+//@access Public
+//@role Admin, editor, Normal User
+const getTOWs = asyncHandler(async (req, res) => {
+  const tows = await TOW.find({})
+  if(!tows) {
+    res.status(404)
+    throw new Error('No team of the week found')
+  }
+  res.status(200).json(tows)
+})
+
 //@desc End Matchday
 //@route PUT /api/matchdays/endmatchday/:id
 //@access Private
@@ -251,6 +390,7 @@ const endMatchday = asyncHandler(async (req, res) => {
     res.status(400)
     throw new Error(`Matchday not current Matchday!`)
   }
+
   if (prev === 0) {
     const updated = await Matchday.findByIdAndUpdate(
       req.params.id,
@@ -536,6 +676,10 @@ const deleteMatchday = asyncHandler(async (req, res) => {
 
 export {
   updateMDdata,
+  getMaxMD,
+  updateTOW,
+  getTOW,
+  getTOWs,
   endMatchday,
   setMatchday,
   getMatchdays,

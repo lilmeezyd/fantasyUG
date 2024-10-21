@@ -415,6 +415,11 @@ form.login-cs {
 }
 
 /* Normal User Player Col */
+.player-header-1 {
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  background: aquamarine;
+}
+
 .player-header-1,
 .player-tbh {
   display: grid;
@@ -557,12 +562,12 @@ form.login-cs {
 
 
 .p-t-1 {
-  border: 1px solid;
+  /*border: 1px solid;*/
   width: 60%;
-  background: black;
+  /*background: black;
   color: aquamarine;
   border-radius: 0.5rem;
-  padding-left: 0.5rem;
+  padding-left: 0.5rem;*/
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -942,7 +947,7 @@ form.login-cs {
   cursor: pointer;
   grid-template-columns: 45% min-content 45%;
   font-size: 1rem;
-  border-bottom: 1px solid #aaa;
+  /*border-bottom: 1px solid #aaa;*/
   border-top: 1px solid #aaa;
 }
 
@@ -1473,6 +1478,11 @@ h1.stats {
   flex: 1 0 0%;
   text-align: center;
   font-weight: 500;
+}
+
+.home-stars {
+  font-weight: 700;
+  padding: 0.5rem;
 }
 
 

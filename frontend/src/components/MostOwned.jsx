@@ -25,11 +25,11 @@ if(isLoading) {
       <Spinner />
     </div>
   )
-}
+} 
   return (
     <>
     <div className="home-section-sub">
-      <h5>Most owned players</h5>
+      <h6 className="home-stars">Most owned players</h6>
     {allPlayers.map(player => 
       <div className="home-section-details" key={player._id}>
         <PlayerDetails playerId={player._id}></PlayerDetails>

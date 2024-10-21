@@ -5,6 +5,7 @@ import {
   useAddMatchdayMutation,
   useDeleteMatchdayMutation,
   useUpdateMatchdayDataMutation,
+  useUpdateMatchdayTOWMutation,
   useEndMatchdayDataMutation
 } from "../../slices/matchdayApiSlice";
 import { useSetLivePicksMutation } from "../../slices/livePicksApiSlice";
@@ -33,6 +34,7 @@ const Matchdays = () => {
   const [ setLivePicks ] = useSetLivePicksMutation()
   const [ endMatchdayData ] = useEndMatchdayDataMutation()
   const [ updateMatchdayData ] = useUpdateMatchdayDataMutation()
+  const [ updateMatchdayTOW ] = useUpdateMatchdayTOWMutation()
   const {deleted, edited, added, start } = show
   const pageSize = 5
   let totalPages = Math.ceil(matchdays?.length / pageSize);
@@ -172,6 +174,14 @@ const updateMDdata = async (id) => {
     console.log(error)
   }
 }
+const updateTOW = async (id) => {
+  try {
+    const res = await updateMatchdayTOW(id).unwrap()
+    console.log(res)
+  } catch (error) {
+    console.log(error)
+  }
+}
 const endMatchday = async (id) => {
   try {
     const res = await endMatchdayData(id).unwrap()
@@ -243,6 +253,7 @@ const memoMatchdays = useMemo(() => {
           <div><Button onClick={() => editMatchdayPop(x._id)} className="btn btn-warning">Edit</Button></div>
           <div><Button onClick={() => deleteMatchdayPop(x._id)} className="btn btn-danger">Delete</Button></div>
           <div><Button onClick={() => updateMDdata(x._id)} className="btn btn-success">Update Data</Button></div>
+          <div><Button onClick={() => updateTOW(x._id)} className="btn btn-success">Update TOW</Button></div>
           <div><Button onClick={() => endMatchday(x._id)} className="btn btn-success">End MD</Button></div>
       </div>)}
       <div>

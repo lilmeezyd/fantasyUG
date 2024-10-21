@@ -51,6 +51,31 @@ export const matchdayApiSlice = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ['Matchday']
     }),
+    updateMatchdayTOW: builder.mutation({
+      query: (id) => ({
+        url: `${MATCHDAYS_URL}/updateTOW/${id}`,
+        method: 'PUT'
+      }),
+      invalidatesTags: ['Matchday']
+    }),
+    getMaxId: builder.query({
+      query: () => ({
+        url: `${MATCHDAYS_URL}/data/max`,
+        method: 'GET'
+      }),
+    }),
+    getMatchdayTOW: builder.query({
+      query: (id) => ({
+        url: `${MATCHDAYS_URL}/data/tows/${id}`,
+        method: 'GET'
+      }),
+    }),
+    getAllTOWs: builder.query({
+      query: () => ({
+        url: `${MATCHDAYS_URL}/data/tows`,
+        method: 'GET'
+      }),
+    }),
     endMatchdayData: builder.mutation({
       query: (id) => ({
         url: `${MATCHDAYS_URL}/endmatchday/${id}`,
@@ -64,6 +89,10 @@ export const matchdayApiSlice = apiSlice.injectEndpoints({
 export const {
   useEndMatchdayDataMutation,
   useUpdateMatchdayDataMutation,
+  useUpdateMatchdayTOWMutation,
+  useGetMatchdayTOWQuery,
+  useGetAllTOWsQuery,
+  useGetMaxIdQuery,
   useGetMatchdaysQuery,
   useGetMatchdayQuery,
   useAddMatchdayMutation,
