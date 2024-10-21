@@ -264,11 +264,11 @@ const updateTOW = asyncHandler(async (req, res) => {
   if(!matchdayFound) {
     res.status(404)
     throw new Error('Matchday not found!')
-  }
+  }/*
   if(!current) {
     res.status(400)
     throw new Error(`Matchday not current Matchday!`)
-  }
+  }*/
   const { id } = matchdayFound
   const posObj = {
     '669a41e50f8891d8e0b4eb2a': 'GKP',
@@ -344,11 +344,17 @@ const updateTOW = asyncHandler(async (req, res) => {
       total+=1}
     }
   }
-
+const exists = await TOW.findOne({matchdayId: req.params.id})
+if(exists) {
   const realStars = await TOW.findOneAndUpdate({matchdayId: req.params.id}, 
-    {$set: {matchday: id, matchdayId: req.params.id, starOnes: starOnes}}, {new: true})
-    const sortedReals = realStars.sort((a,b) => a.code > b.code ? -1 : 1)
+    {$set: {matchday: id, matchdayId: req.params.id, starOnes: starOnes}}, {upsert: true})
     res.status(201).json(realStars)
+} else {
+  const newStars = await TOW.create(
+    {matchday: id, matchdayId: req.params.id, starOnes: starOnes})
+    res.status(201).json(newStars)
+}
+  
 })
 
 //@desc Get Team of the week
