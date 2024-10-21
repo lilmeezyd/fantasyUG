@@ -1164,8 +1164,8 @@ form.login-cs {
 .data_name {
   width: 100%;
   padding: 0.2rem;
-  background-color: rgba(0, 0, 55, 0.9);
-  color: white;
+  color: rgba(0, 0, 55, 0.9);
+  background-color: white;
   /*font-size: 0.825rem;*/
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1179,7 +1179,8 @@ form.login-cs {
   border-bottom-left-radius: 0.5rem;
   border-bottom-right-radius: 0.5rem;
   padding: 0.1rem;
-  background: white;
+  background: rgba(0, 0, 55, 0.9);
+  color: white;
 }
 
 
