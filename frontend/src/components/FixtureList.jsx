@@ -79,12 +79,12 @@ const FixtureList = (props) => {
         ?.filter((x) => +x?._id?.id === +page)
         ?.map((fixture) => (
           <div key={fixture?._id?._id}>
-            <div className="deadline">
-              <h5 className="pick-team-name">{fixture?._id?.name}</h5>
+            <div className="deadline"> 
+              <h5 className="pick-team-name home-stars">{fixture?._id?.name}</h5>
             </div>
-            <div>
+            <div  className="fix-item-bg">
               {fixture?.fixtures?.map((x, idx) => (
-                <div key={x._id}>
+                <div className="fix-item" key={x._id}>
                   <div className="deadline">
                     {returnDay(fixture?.fixtures, idx)}
                   </div>

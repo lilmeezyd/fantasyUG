@@ -2,6 +2,7 @@ import { useParams, Link } from "react-router-dom"
 import { useGetLeagueQuery } from "../slices/leagueApiSlice"
 import {Spinner} from "react-bootstrap"
 import { useSelector } from "react-redux"
+import { AiFillCaretRight, AiFillCaretDown, AiFillCaretUp } from "react-icons/ai";
 
 const PrivateLeague = () => {
   const { id } = useParams()
@@ -32,8 +33,12 @@ const PrivateLeague = () => {
         <div 
         style={{background: `${userInfo._id === entrant.user.toString() ? '#ffd70063' : 'white'}`, 
         border: `${userInfo._id === entrant.user.toString() ? '2px solid gold' : 'none'}`}} key={entrant._id} className="standing-grid-1">
-            <div></div>
-            <div>{idx+1}</div>
+            <div>
+            {entrant?.currentRank === entrant?.lastRank ? <AiFillCaretRight color="#aaa"/> : 
+                entrant?.currentRank > entrant?.lastRank ? <AiFillCaretUp color="green" /> : 
+                <AiFillCaretDown color="red" />}
+            </div>
+            <div>{entrant?.currentRank}</div>
           <div className="standing-grid-name">{entrant?.teamName}</div>
           <div className="standing-grid-name">
             {entrant?.firstName}&nbsp;&nbsp;{entrant?.lastName}

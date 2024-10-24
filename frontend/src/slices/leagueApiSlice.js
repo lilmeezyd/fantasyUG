@@ -147,10 +147,18 @@ export const leagueApiSlice = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ['TeamLeague']
     }),
+    setLastAndCurrentRank: builder.mutation({
+      query: () => ({
+        url: `${LEAGUES_URL}/leagues/setLastAndNow`,
+        method: "PUT"
+      }),
+      invalidatesTags: ['TeamLeague', 'OverallLeague', 'League']
+    })
   }),
 });
 
 export const {
+  useSetLastAndCurrentRankMutation,
   useUpdateOverallTableMutation,
   useUpdateTeamTablesMutation,
   useUpdatePrivateTablesMutation,

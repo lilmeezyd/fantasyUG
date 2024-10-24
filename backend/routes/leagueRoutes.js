@@ -21,10 +21,14 @@ import {
   updateOverallTable,
   updateTeamTables,
   updatePrivateTables,
+  setCurrentAndLastRanks
 } from "../controllers/leagueController.js";
 import { protect, roles } from "../middleware/authMiddleware.js";
 import ROLES from "../config/permissions.js";
 const router = express.Router();
+
+router.route("/leagues/setLastAndNow")
+.put(protect, roles(ROLES.ADMIN), setCurrentAndLastRanks)
 
 router
   .route("/overallleagues")

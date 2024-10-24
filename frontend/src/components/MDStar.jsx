@@ -27,7 +27,7 @@ const MDStar = (props) => {
               <div className="data_name">{appName}</div>
               <div style={{ fontWeight: 700 }} className="data_fixtures">
                 <div>{points}</div>
-                <div style={{borderTop: '1px solid #aaa'}}>MD&nbsp;{id}</div>
+                <div>MD&nbsp;{id}</div>
               </div>
             </div>
           </button>

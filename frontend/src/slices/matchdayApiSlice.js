@@ -76,6 +76,13 @@ export const matchdayApiSlice = apiSlice.injectEndpoints({
         method: 'GET'
       }),
     }),
+    createAutosForMd: builder.mutation({
+      query: (id) => ({
+        url: `${MATCHDAYS_URL}/createautos/${id}`,
+        method: 'PATCH'
+      }),
+      invalidatesTags: ['Matchday']
+    }),
     endMatchdayData: builder.mutation({
       query: (id) => ({
         url: `${MATCHDAYS_URL}/endmatchday/${id}`,
@@ -87,6 +94,7 @@ export const matchdayApiSlice = apiSlice.injectEndpoints({
 });
 
 export const {
+  useCreateAutosForMdMutation,
   useEndMatchdayDataMutation,
   useUpdateMatchdayDataMutation,
   useUpdateMatchdayTOWMutation,

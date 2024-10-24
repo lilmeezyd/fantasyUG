@@ -3,12 +3,14 @@ import {
   useGetMatchdaysQuery,
   useStartMatchdayMutation,
   useAddMatchdayMutation,
+  useCreateAutosForMdMutation,
   useDeleteMatchdayMutation,
   useUpdateMatchdayDataMutation,
   useUpdateMatchdayTOWMutation,
   useEndMatchdayDataMutation
 } from "../../slices/matchdayApiSlice";
 import { useSetLivePicksMutation } from "../../slices/livePicksApiSlice";
+import { useSetLastAndCurrentRankMutation } from "../../slices/leagueApiSlice";
 import { Container, Button, Spinner } from "react-bootstrap";
 import Pagination from "../Pagination"
 import AddModal from "./matchdayModals/AddModal";
@@ -35,6 +37,8 @@ const Matchdays = () => {
   const [ endMatchdayData ] = useEndMatchdayDataMutation()
   const [ updateMatchdayData ] = useUpdateMatchdayDataMutation()
   const [ updateMatchdayTOW ] = useUpdateMatchdayTOWMutation()
+  const [ createAutosForMd ] = useCreateAutosForMdMutation()
+  const [ setLastAndCurrentRank ] = useSetLastAndCurrentRankMutation()
   const {deleted, edited, added, start } = show
   const pageSize = 5
   let totalPages = Math.ceil(matchdays?.length / pageSize);
@@ -182,6 +186,22 @@ const updateTOW = async (id) => {
     console.log(error)
   }
 }
+const updateAutoSubs = async (id) => {
+  try {
+    const res = await createAutosForMd(id).unwrap()
+    console.log(res)
+  } catch (error) {
+    console.log(error)
+  }
+}
+const setPastRank = async () => {
+  try {
+    const res = await setLastAndCurrentRank().unwrap()
+    console.log(res)
+  } catch (error) {
+    console.log(error)
+  }
+}
 const endMatchday = async (id) => {
   try {
     const res = await endMatchdayData(id).unwrap()
@@ -254,11 +274,15 @@ const memoMatchdays = useMemo(() => {
           <div><Button onClick={() => deleteMatchdayPop(x._id)} className="btn btn-danger">Delete</Button></div>
           <div><Button onClick={() => updateMDdata(x._id)} className="btn btn-success">Update Data</Button></div>
           <div><Button onClick={() => updateTOW(x._id)} className="btn btn-success">Update TOW</Button></div>
+          <div><Button onClick={() => updateAutoSubs(x._id)} className="btn btn-success">Auto subs</Button></div>
           <div><Button onClick={() => endMatchday(x._id)} className="btn btn-success">End MD</Button></div>
       </div>)}
       <div>
       <div className="add-button p-2">
       <div><Button onClick={setLive}>Set Live Picks</Button></div>
+      </div>
+      <div className="add-button p-2">
+      <div><Button onClick={setPastRank}>Set Past Ranks</Button></div>
       </div>
       <div className="add-button p-2">
         <Button onClick={addMatchdayPop} className="btn btn-success">Add Matchday</Button>

@@ -5,7 +5,6 @@ import { Link } from "react-router-dom"
 const Leagues = () => {
   const { data } = useGetManagerInfoQuery()
   const { data: teams } = useGetQuery()
-  console.log(teams)
   return (
     <div className="league-bg">
       <div className="standing-wrap">

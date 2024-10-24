@@ -415,7 +415,29 @@ const endMatchday = asyncHandler(async (req, res) => {
       res.status(400);
       throw new Error(`Previous matchday isn't finished yet!`);
     }
-    const managerLives = await ManagerLive.find({})
+    const updated = await Matchday.findByIdAndUpdate(
+      req.params.id,
+      { current: false, finished: true },
+      { new: true }
+    );
+
+    res.status(200).json(updated);
+  }
+});
+
+//@desc Create autosubs
+//@route PATCH /api/matchdays/createautos/:id
+//@access Private
+//@role Admin, editor
+const createAutos = asyncHandler(async(req, res) => {
+  const matchdayFound = await Matchday.findById(req.params.id);
+  const { current } = matchdayFound
+  const { id } = matchdayFound;
+  if(!current) {
+    res.status(400)
+    throw new Error(`Matchday not current Matchday!`)
+  }
+  const managerLives = await ManagerLive.find({})
     for(let i=0; i<managerLives.length; i++) {
       const { manager, livePicks: lively } = managerLives[i]
       const mdPicks = lively.find(x => x.matchday === id)
@@ -648,15 +670,9 @@ const endMatchday = asyncHandler(async (req, res) => {
       managerinfo.$set("overallLeagues.0.overallPoints", overallOverallPts);
       await managerinfo.save();
     }
-    /*const updated = await Matchday.findByIdAndUpdate(
-      req.params.id,
-      { current: false, finished: true },
-      { new: true }
-    );
 
-    res.status(200).json(updated);*/
-  }
-});
+    res.status(201).json('Update Complete')
+})
 
 //@desc Delete Matchday
 //@route DELETE /api/matchdays/:id
@@ -681,6 +697,7 @@ const deleteMatchday = asyncHandler(async (req, res) => {
 });
 
 export {
+  createAutos,
   updateMDdata,
   getMaxMD,
   updateTOW,

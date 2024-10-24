@@ -453,7 +453,7 @@ const editStats = asyncHandler(async (req, res) => {
     penaltiesMissed: -2,
     yellowCards: -1,
     redCards: -3,
-    saves: 0,
+    saves: 0.5,
     cleansheets: code === 1 ? 4 : code === 2 ? 4 : code === 3 ? 1 : 0,
     starts: 1,
     bestPlayer: 3,

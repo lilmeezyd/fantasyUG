@@ -2,6 +2,7 @@ import { useGetQuery } from "../slices/teamApiSlice";
 import { useSelector } from "react-redux";
 import { useNavigate, Link } from "react-router-dom";
 import { useGetTotalQuery } from "../slices/userApiSlice";
+import { AiFillCaretRight, AiFillCaretDown, AiFillCaretUp } from "react-icons/ai";
 const LeagueDetails = (props) => {
   const { privateLeagues, overallLeagues, teamLeagues, teamName, teamValue, bank,
     overallPoints, matchdayPoints, overallRank, firstName, lastName
@@ -50,14 +51,22 @@ const LeagueDetails = (props) => {
           </div>
           {overallLeagues?.map((x) => (
             <div className="my-leagues" key={x._id}>
-              <div></div>
+              <div>
+                {x.currentRank === x.lastRank ? <AiFillCaretRight color="#aaa"/> : 
+                x.currentRank > x.lastRank ? <AiFillCaretUp color="green" /> : 
+                <AiFillCaretDown color="red" />}
+              </div>
               <h6>{x.currentRank === null ? '-' : x.currentRank}</h6>
               <Link to={`/userleagues/overall/${x.id}`}><h6>{x.name}</h6></Link>
             </div>
           ))}
           {teamLeagues?.map((x) => (
             <div className="my-leagues" key={x._id}>
-              <div></div>
+              <div>
+              {x.currentRank === x.lastRank ? <AiFillCaretRight color="#aaa"/> : 
+                x.currentRank > x.lastRank ? <AiFillCaretUp color="green" /> : 
+                <AiFillCaretDown color="red" />}
+              </div>
               <h6>{x.currentRank === null ? '-' : x.currentRank}</h6>
               <Link to={`/userleagues/team/${x.id}`}><h6>{teams?.find((team) => team._id === x.team)?.name}</h6></Link>
             </div>
@@ -76,7 +85,11 @@ const LeagueDetails = (props) => {
               </div>
               {privateLeagues?.map((x) => (
                 <div className="my-leagues" key={x._id}>
-                  <div></div>
+                  <div>
+                  {x.currentRank === x.lastRank ? <AiFillCaretRight color="#aaa"/> : 
+                x.currentRank > x.lastRank ? <AiFillCaretUp color="green" /> : 
+                <AiFillCaretDown color="red" />}
+                  </div>
                   <h6>{x.currentRank === null ? '-' : x.currentRank}</h6>
                   <Link to={`/userleagues/private/${x.id}`}><h6>{x.name}</h6></Link>
                 </div>

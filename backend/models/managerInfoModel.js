@@ -15,6 +15,7 @@ const managerInfoSchema = mongoose.Schema(
       type: String,
       required: true,
     },
+    overallRanks: {},
     teamLeagues: [],
     overallLeagues: [],
     privateLeagues: [],
