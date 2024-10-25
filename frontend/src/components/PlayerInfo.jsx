@@ -23,9 +23,13 @@ const PlayerInfo = (props) => {
   const playerTeam = teams?.find(
     (team) => team?._id === player?.playerTeam
   )?.name;
+  const shortTeamName = teams?.find(
+    (team) => team?._id === player?.playerTeam
+  )?.shortName;
   const playerPosition = elementTypes?.find(
     (x) => x?._id === player?.playerPosition
   )?.singularName;
+  console.log(player)
 
   useEffect(() => {
     const copyFix = player?.fixtures?.length > 0 ? [...player?.fixtures] : [];
@@ -60,11 +64,30 @@ const PlayerInfo = (props) => {
                 {player?.firstName}&nbsp;{player?.secondName}
               </span>
               <span>{playerPosition}</span>
-              <span>{playerTeam}</span>
+              <div className="player-info-img">
+              <div className="ticker-image">
+        <img src={`../${shortTeamName}.png`} alt="logo" />
+        </div>
+        <span>{playerTeam}</span>
+              </div>
             </div>
           </Modal.Title>
         </Modal.Header>
         <Modal.Body className="p-3">
+          <div className="player-info-data">
+            <div className="player-info-data-t">
+              <div className="player-info-data-h">Selected %</div>
+              <div>{player?.ownership}</div>
+            </div>
+            <div className="player-info-data-t">
+              <div className="player-info-data-h">Total</div>
+              <div>{player?.totalPoints}pts</div>
+            </div>
+            <div className="player-info-data-t">
+              <div className="player-info-data-h">Price</div>
+              <div>{player?.nowCost?.toFixed(1)}</div>
+            </div>
+          </div>
           <div className="player-info-wrapper">
           {
             (player?.results?.length > 0 ? (

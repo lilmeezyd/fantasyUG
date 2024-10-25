@@ -78,11 +78,41 @@ const setPlayer = asyncHandler(async (req, res) => {
 const getPlayers = asyncHandler(async (req, res) => {
   const players = await Player.find({});
   const numberOfManagers =  await getAllManagers()
-  const updatedPlayers =  Array.from(players).map(x => {
+  /*const updatedPlayers =  Array.from(players).map(x => {
     const b = numberOfManagers === 0 ? 0 : x.playerCount/numberOfManagers*100 
     return {...x._doc, ownership: `${b.toFixed(1)}`}
-  })
-  res.status(200).json(updatedPlayers);
+  })*/
+  if(players && numberOfManagers) {
+   const updatedPlayers =  players.map(player => {
+      const {_id,
+        firstName,
+        secondName,
+        appName,
+        playerPosition,
+        playerTeam,
+        startCost,
+        nowCost,
+        totalPoints,
+        goalsScored,
+        assists,
+        ownGoals,
+        penaltiesSaved,
+        penaltiesMissed,
+        yellowCards,
+        redCards,
+        saves,
+        cleansheets,
+        starts,
+        playerCount} = player
+        const b = numberOfManagers === 0 ? 0 : playerCount/numberOfManagers*100 
+        return {_id,firstName,secondName,appName,
+          playerPosition,playerTeam,startCost,nowCost,totalPoints,goalsScored,
+          assists, ownGoals, penaltiesSaved,penaltiesMissed,yellowCards,redCards,saves,
+          cleansheets,starts,ownership: `${b.toFixed(1)}`}
+    })
+    console.log(updatedPlayers)
+    res.status(200).json(updatedPlayers)
+  }
 });
 
 //@desc Get Players
@@ -100,8 +130,16 @@ const getPlayer = asyncHandler(async (req, res) => {
   const team = player?.playerTeam
   const pFixtures = await Fixture.find({$or: [{ teamHome: team }, { teamAway: team }]})
   const pResults = await PlayerHistory.find({player: req.params.id})
-  const { _doc } = player
-  const newPlayer = {..._doc, fixtures: pFixtures, results: pResults} 
+  const numberOfManagers =  await getAllManagers()
+  const { _id,firstName,secondName,appName,
+    playerPosition,playerTeam,startCost,nowCost,totalPoints,goalsScored,
+    assists, ownGoals, penaltiesSaved,penaltiesMissed,yellowCards,redCards,saves,
+    cleansheets,starts, playerCount } = player
+  const b = numberOfManagers === 0 ? 0 : playerCount/numberOfManagers*100 
+  const newPlayer = {_id,firstName,secondName,appName,
+    playerPosition,playerTeam,startCost,nowCost,totalPoints,goalsScored,
+    assists, ownGoals, penaltiesSaved,penaltiesMissed,yellowCards,redCards,saves,
+    cleansheets,starts,ownership: `${b.toFixed(1)}%`, fixtures: pFixtures, results: pResults} 
   res.status(200).json(newPlayer);
 });
 

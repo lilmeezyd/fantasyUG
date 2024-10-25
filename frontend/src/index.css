@@ -1404,6 +1404,34 @@ h1.stats {
 
 .playerInfoFix img {
   width: 30px;
+  height: 30px;
+}
+
+.player-info-img img {
+  width: 30px;
+  height: 30px;
+}
+
+.player-info-img {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 0;
+  gap: 0.5rem;
+}
+
+.player-info-data {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.player-info-data-t {
+  padding: 0 0.5rem;
+  text-align: center;
+}
+
+.player-info-data-h {
+  font-weight: 700;
 }
 
 /* Manager Standings */
