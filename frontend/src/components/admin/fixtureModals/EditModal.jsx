@@ -6,17 +6,13 @@ import {
   useGetFixtureQuery,
   useEditFixtureMutation,
 } from "../../../slices/fixtureApiSlice";
-
+ 
 const EditModal = (props) => {
   const { show, closeEdit, resetEdit, fixtureId } = props;
   const { data: fixture } = useGetFixtureQuery(fixtureId);
-  const [data, setData] = useState({
-    teamHome: "",
-    teamAway: "",
-    matchday: "",
-    kickOffTime: "",
-  });
-  const { teamHome, teamAway, matchday, kickOffTime } = data;
+  const [ data, setData ] = useState({teamHome: '', teamAway: '',
+    matchday: '', kickOff: '', time: ''})
+  const { teamHome, teamAway,matchday, kickOff, time } = data;
   const { data: teams } = useGetQuery();
   const { data: matchdays } = useGetMatchdaysQuery();
   const [editFixture] = useEditFixtureMutation();
@@ -24,9 +20,10 @@ const EditModal = (props) => {
   useEffect(() => {
     setData({
       teamHome: fixture?.teamHome,
-      kickOffTime: fixture?.kickOffTime,
       teamAway: fixture?.teamAway,
       matchday: fixture?.matchday,
+      deadline: new Date(fixture?.kickOffTime).toLocaleDateString(),
+      time: new Date(fixture?.kickOffTime).toTimeString()
     });
   }, [
     fixture?.teamHome,
@@ -38,9 +35,15 @@ const EditModal = (props) => {
     e.preventDefault();
     const { elements } = e.currentTarget;
     const teamHome = elements.hteam.value;
-    const kickOffTime = elements.kickoff.value;
+    const date = elements.kickoff.value
+    const time = elements.time.value
+    const kickOffTime = new Date(date+'/'+time);
     const teamAway = elements.ateam.value;
     const matchday = elements.matchday.value;
+    console.log(date)
+    console.log(time)
+    console.log(kickOffTime)
+
 
     if (teamAway && teamHome && kickOffTime && matchday) {
       await editFixture({
@@ -94,23 +97,28 @@ const EditModal = (props) => {
               </select>
             </div>
             <div className="form-group my-2">
-              <label className="py-2" htmlFor="hteam">
-                Kickoff time
-              </label>
-              <input
-                name="kickoff"
-                id="kickoff"
-                type="date"
-                value={kickOffTime}
+                <label className="py-2" htmlFor="kickoff">Date</label>
+                <input name="kickoff" id="kickoff" type="date"
+                value={kickOff}
                 className="form-control"
                 onChange={(e) => {
-                  setData((prev) => ({
-                    ...prev,
-                    kickOffTime: e.target.value,
-                  }));
+                  setData(prev => ({
+                    ...prev, kickOff: e.target.value
+                  }))
                 }}
-              />
-            </div>
+                />
+                  
+              </div>
+              <div className="form-group my-2">
+              <label className="py-2" htmlFor="time">Time</label>
+              <input
+              value={time}
+              onChange={(e) => {
+                setData((prev) => ({
+                  ...prev, time: e.target.value
+                }))
+              }} name="time" id="time" className="form-control" type="time" />
+              </div>
             <div className="form-group my-2">
               <label className="py-2" htmlFor="hteam">
                 Home Team

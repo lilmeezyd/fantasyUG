@@ -192,7 +192,7 @@ const resetEdit = async () => {
           <div>
           {getTime1(fixture?._id?.deadlineTime)},&nbsp;
           {getPmString(
-                          new Date(getTime(fixture?._id?.deadlineTime)).toLocaleTimeString()
+                          fixture?._id?.deadlineTime
                         )}&nbsp;
                         {getPm(fixture?._id?.kickOffTime)}
           </div>

@@ -4,11 +4,12 @@ const getPm = (time) => {
 }
 
 const getPmString = (time) => {
-
-    let newTime = (time.slice(time.length-2) === 'AM' || time.slice(time.length-2) === 'PM') ?
-    time.slice(0, time.length-3) : time
-    newTime = newTime.slice(0, newTime.length-3)
+    let hrs = new Date(time).getHours()
+    let minutes = new Date(time).getMinutes() < 10 ? `0${new Date(time).getMinutes()}` : new Date(time).getMinutes()
+    let newHrs = +hrs > 11 ? hrs-12 : hrs
+    let newTime = `${newHrs}:${minutes}`
     return newTime
+
 }
 
 export { getPm, getPmString}

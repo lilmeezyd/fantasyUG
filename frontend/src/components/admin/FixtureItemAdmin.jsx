@@ -9,7 +9,7 @@ import { useGetPlayersQuery } from "../../slices/playerApiSlice";
 import EditStatsModal from "./fixtureModals/EditStatsModal";
 
 const FixtureItemAdmin = (props) => {
-  const { x, editFixturePop, deleteFixturePop } = props;
+  const { x, editFixturePop, deleteFixturePop } = props; 
 
   const [stats, displayStats] = useState(false);
   const [show, setShow] = useState(false)
@@ -87,8 +87,7 @@ const statExists = (field) => {
                 ?.filter((x) => x.identifier === "ownGoals")[0]
                 .away.map((x) => x.value)
                 .reduce((a, b) => a + b, 0)
-            : getPmString(
-                new Date(getTime(x?.kickOffTime)).toLocaleTimeString()
+            : getPmString(x?.kickOffTime
               )}
         </div>
         <div className={`${x?.stats?.length > 0 ? "score" : "time-2"}`}>

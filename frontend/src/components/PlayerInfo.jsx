@@ -29,7 +29,6 @@ const PlayerInfo = (props) => {
   const playerPosition = elementTypes?.find(
     (x) => x?._id === player?.playerPosition
   )?.singularName;
-  console.log(player)
 
   useEffect(() => {
     const copyFix = player?.fixtures?.length > 0 ? [...player?.fixtures] : [];
@@ -89,11 +88,11 @@ const PlayerInfo = (props) => {
             </div>
           </div>
           <div className="player-info-wrapper">
-          {
-            (player?.results?.length > 0 ? (
-              <div className="games-info-fixtures">
-                <div className="playerInfoFix">
-                  {copyRes?.sort((x, y) => (x?.kickOffTime > y?.kickOffTime ? 1 : -1))?.map((x, idx) => {
+          <div className="games-info-fixtures">
+          <div className="playerInfoFix">
+            {player?.results?.length > 0 ? (
+              <>
+              {copyRes?.sort((x, y) => (x?.kickOffTime > y?.kickOffTime ? 1 : -1))?.map((x, idx) => {
                     let teamImg = player?.playerTeam === x.teamAway
                     ? teams?.find((tname) => tname._id === x.teamHome)?.shortName
                     : teams?.find((tname) => tname._id === x.teamAway)
@@ -104,12 +103,11 @@ const PlayerInfo = (props) => {
         <img src={`../${teamImg}.png`} alt="logo" />
         </div></div>)
                   })}
-
-{
-            (copyFix?.length > 0 ? (
-                <div>
-                  <div className="playerInfoFix">
-                  {copyFix?.sort((x, y) => (x?.kickOffTime > y?.kickOffTime ? 1 : -1))?.map((x, idx) => {
+              </>
+            ) : ''}
+            {copyFix?.length > 0 ? (
+              <>
+              {copyFix?.sort((x, y) => (x?.kickOffTime > y?.kickOffTime ? 1 : -1))?.map((x, idx) => {
                     let teamImg = player?.playerTeam === x.teamAway
                     ? teams?.find((tname) => tname._id === x.teamHome)?.shortName
                     : teams?.find((tname) => tname._id === x.teamAway)
@@ -121,19 +119,10 @@ const PlayerInfo = (props) => {
           <img src={`../${teamImg}.png`} alt="logo" />
         </div>
                     </div>)
-                  })}
-                  </div>
-                </div>
-                
-            ) : (
-              ''
-            ))}
-
-                </div>
-              </div>
-            ) : (
-              ''
-            ))}
+                  })}</>
+            ): ''}
+            </div>
+            </div>
           
             {id &&<div className="player-info-3">
                   <> 
@@ -159,7 +148,7 @@ const PlayerInfo = (props) => {
                             : <div>{new Date(showPlayerHistory?.kickOffTime).toDateString()}</div>}
                             {showPlayerHistory?.kickOffTime === "" ? "" : 
                             <div>
-                            {getPmString(new Date(getTime(showPlayerHistory?.kickOffTime)).toLocaleTimeString())}
+                            {getPmString(showPlayerHistory?.kickOffTime)}
                             {getPm(showPlayerHistory?.kickOffTime)}
                             </div>
                             }
@@ -193,7 +182,7 @@ const PlayerInfo = (props) => {
                             : <div>{new Date(showPlayerHistory?.kickOffTime).toDateString()}</div>}
                             {showPlayerHistory?.kickOffTime === "" ? "" : 
                             <div>
-                            {getPmString(new Date(getTime(showPlayerHistory?.kickOffTime)).toLocaleTimeString())}
+                            {getPmString(showPlayerHistory?.kickOffTime)}
                             {getPm(showPlayerHistory?.kickOffTime)}
                             </div>
                             }

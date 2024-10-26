@@ -6,13 +6,15 @@ const AddModal = (props) => {
     const {show, closeAdd, submit} = props
     //const [ teams, setTeams ] = useState([])
     const [ data, setData ] = useState({teamHome: '', teamAway: '',
-      matchday: '', kickOffTime: ''})
+      matchday: '', kickOff: '', time: ''})
+      const { teamHome, teamAway,matchday, kickOff, time } = data
       const { data: teams} = useGetQuery()
       const { data:matchdays } = useGetMatchdaysQuery()
-
+ 
     const onSubmit = (e) => {
       e.preventDefault()
-      submit(data)
+      const kickOffTime = kickOff+'/'+time
+      submit({teamHome, teamAway,matchday, kickOffTime}) 
 
     }
   return (
@@ -41,16 +43,25 @@ const AddModal = (props) => {
                 </select>
               </div>
               <div className="form-group my-2">
-                <label className="py-2" htmlFor="hteam">Kickoff time</label>
+                <label className="py-2" htmlFor="hteam">Date</label>
                 <input name="kickoff" id="kickoff" type="date"
                 className="form-control"
                 onChange={(e) => {
                   setData(prev => ({
-                    ...prev, kickOffTime: e.target.value
+                    ...prev, kickOff: e.target.value
                   }))
                 }}
                 />
                   
+              </div>
+              <div className="form-group my-2">
+              <label className="py-2" htmlFor="time">Time</label>
+              <input
+              onChange={(e) => {
+                setData((prev) => ({
+                  ...prev, time: e.target.value
+                }))
+              }} name="time" id="time" className="form-control" type="time" />
               </div>
               <div className="form-group my-2">
                 <label className="py-2" htmlFor="hteam">Home Team</label>

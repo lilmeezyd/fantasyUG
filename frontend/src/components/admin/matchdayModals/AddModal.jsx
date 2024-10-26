@@ -7,7 +7,7 @@ const AddModal = (props) => {
     const onSubmit = (e) => {
       e.preventDefault() 
      const deadlineTime = deadline+'/'+time
-      submit({name, deadlineTime})
+      submit({name, deadlineTime}) 
 
     }
   return (
@@ -29,7 +29,7 @@ const AddModal = (props) => {
                  name="tname" id="tname" className="form-control" type="text" />
               </div>
               <div className="form-group my-2">
-              <label className="py-2" htmlFor="sname">Deadline</label>
+              <label className="py-2" htmlFor="sname">Date</label>
               <input
               onChange={(e) => {
                 setData((prev) => ({
@@ -38,7 +38,7 @@ const AddModal = (props) => {
               }} name="sname" id="sname" className="form-control" type="date" />
               </div>
               <div className="form-group my-2">
-              <label className="py-2" htmlFor="time">Deadline</label>
+              <label className="py-2" htmlFor="time">Time</label>
               <input
               onChange={(e) => {
                 setData((prev) => ({

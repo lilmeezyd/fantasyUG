@@ -48,9 +48,8 @@ const FixtureItem = (props) => {
               x?.stats
                 ?.filter((x) => x.identifier === "ownGoals")[0]
                 .away.map((x) => x.value)
-                .reduce((a, b) => a + b, 0)
-            : getPmString(
-                new Date(getTime(x?.kickOffTime)).toLocaleTimeString()
+                .reduce((a, b) => a + b, 0) 
+            : getPmString((x?.kickOffTime)
               )}
         </div>
         <div className={`${x?.stats?.length > 0 ? "score" : "time-2"}`}>
