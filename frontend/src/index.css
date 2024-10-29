@@ -943,11 +943,6 @@ form.login-cs {
 }
 
 .fix-item {
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(5px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 0.5rem;
   margin: 0.5rem;
 }
 
@@ -960,6 +955,11 @@ form.login-cs {
   cursor: pointer;
   grid-template-columns: 45% min-content 45%;
   font-size: 1rem;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 0.5rem;
 }
 
 
@@ -980,15 +980,24 @@ form.login-cs {
   padding-bottom: 0.5rem;
 }
 
-.home div,
-.away div {
+.home .team, .away .team {
   flex: 1 0 0%;
   align-self: center;
+}
+
+.home .ticker-image, .away .ticker-image {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 0.5rem;
 }
 
 .home img,
 .away img {
   width: 25px;
+  height: 25px;
 }
 
 .ticker-image {
@@ -1010,6 +1019,7 @@ form.login-cs {
 .away .team {
   text-align: left;
   padding-left: 0.5rem;
+  padding-right: 1rem;
 }
 
 .date {
@@ -1061,7 +1071,7 @@ form.login-cs {
 
 .time-1 {
   text-align: right;
-  padding: 0.5rem;
+  padding: 0.5rem 0 0.5rem 0.5rem;
   background: #fff;
   border-right: none;
   border-radius: 0.5rem;
@@ -1070,7 +1080,7 @@ form.login-cs {
 }
 
 .time-2 {
-  padding: 0.5rem;
+  padding: 0.5rem 0.5rem 0.5rem 0;
   text-align: left;
   background: #fff;
   border-left: none;
@@ -1100,6 +1110,7 @@ form.login-cs {
 
 .fix-body {
   padding: 1rem 0;
+  overflow-x: auto;
 }
 
 .fix-admin-buttons {

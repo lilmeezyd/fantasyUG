@@ -73,9 +73,9 @@ const ManagerPicks = (props) => {
           <div className="pick-team-name">
           {getTime1(md?.deadlineTime)},&nbsp;
           {getPmString(
-                          new Date(getTime(md?.deadlineTime)).toLocaleTimeString()
+                          md?.deadlineTime
                         )}&nbsp;
-                        {getPm(md?.kickOffTime)}
+                        {getPm(md?.deadlineTime)}
           </div>
         </div>
       </div>}

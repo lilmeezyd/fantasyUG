@@ -189,12 +189,12 @@ const resetEdit = async () => {
         <div className="deadline">
           <div>{fixture?._id?.name}</div>
           <div>Deadline:</div>
-          <div>
+          <div> 
           {getTime1(fixture?._id?.deadlineTime)},&nbsp;
           {getPmString(
                           fixture?._id?.deadlineTime
                         )}&nbsp;
-                        {getPm(fixture?._id?.kickOffTime)}
+                        {getPm(fixture?._id?.deadlineTime)}
           </div>
         </div>
         <div>
