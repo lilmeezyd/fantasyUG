@@ -55,7 +55,7 @@ const setTeams = asyncHandler(async (req, res) => {
 //@role Admin, editor, normal_user
 const getTeams = asyncHandler(async (req, res) => {
   const teams = await Team.find({});
-  res.status(200).json(teams);
+  res.status(200).json(teams.sort((a,b) => a.name > b.name ? 1 : -1));
 });
 
 //@desc Get Team

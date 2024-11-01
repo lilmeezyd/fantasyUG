@@ -229,13 +229,51 @@ form.login-cs {
 /* Dashboard */
 .teams {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  place-items: center;
+  /*grid-template-columns: repeat(4, 1fr);
+  place-items: center;*/
   font-weight: 700;
+  padding: 0.25rem 0;
+  width: fit-content;
+    grid-template-columns: 120px 50px 50px 50px 50px 50px 50px 100px 50px 50px 50px 50px;
 }
 
+.admin-teams {
+  border: 1px solid;
+  border-radius: 0.5rem;
+  overflow: auto;
+  margin: auto;
+}
 
-.teams:nth-of-type(odd) {
+.admin-vs {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  align-items: center;
+}
+
+.admin-vs div {
+  flex: 1 0 0%;
+}
+
+.admin-vs-select {
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+}
+
+.teams div {
+  text-align: center;
+  margin-top: auto;
+  margin-bottom: auto;
+}
+
+.btn-click {
+  cursor: pointer;
+}
+
+.teams-head {
+  background: #0c123d;
+  color: white;
+}
+.teams:nth-of-type(even) {
   background: aquamarine;
 }
 
@@ -245,6 +283,7 @@ form.login-cs {
   overflow: hidden;
   width: 120px;
   text-overflow: ellipsis;
+  padding: 0 0.25rem;
 }
 
 .add-button {

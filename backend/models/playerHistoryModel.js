@@ -69,6 +69,10 @@ const playerHistorySchema = mongoose.Schema({
         type: Number,
         default: 0
     },
+    bench: {
+        type: Number,
+        default: 0
+    },
     bestPlayer: {
         type: Number,
         default: 0

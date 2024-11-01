@@ -32,7 +32,7 @@ const Pagination = (props) => {
         <Form.Group className="my-2 current" controlId="curPage">
           <Form.Control
             type="number"
-            value={page}
+            value={curPage}
             onChange={changePage}
             min="1"
             max={totalPages}

@@ -452,17 +452,17 @@ const createAutos = asyncHandler(async(req, res) => {
         picks: unformattedPicks,
       } = mdPicks;
       //Captain missed
-      const captainMissed = unformattedPicks.find(x => x.multiplier > 1 && +x.points === 0)
+      const captainMissed = unformattedPicks.find(x => x.multiplier > 1 && +x.starts === 0 && +x.bench === 0)
       //Available players
-      let available = unformattedPicks.filter(x => x.multiplier === 0 && x.slot > 12 && +x.points > 0)
-      let availableGoalie = unformattedPicks.filter(x => +x.points > 0 && x.slot === 12)
+      let available = unformattedPicks.filter(x => x.multiplier === 0 && x.slot > 12 && (+x.starts > 0 || +x.bench > 0))
+      let availableGoalie = unformattedPicks.filter(x => (+x.starts > 0 || +x.bench > 0) && x.slot === 12)
       //Available by position
       let availableDefs = available.filter(x => x.playerPosition.toString() === '669a4831e181cb2ed40c240f')
       let availableFwds = available.filter(x => x.playerPosition.toString() === '669a485de181cb2ed40c2417')
-      const gWhoMissed = unformattedPicks.filter(x => x.multiplier > 0 && x.playerPosition.toString() === '669a41e50f8891d8e0b4eb2a' && +x.points === 0)
-      const dWhoMissed = unformattedPicks.filter(x => x.multiplier > 0 && x.playerPosition.toString() === '669a4831e181cb2ed40c240f' && +x.points === 0)
-      const mWhoMissed = unformattedPicks.filter(x => x.multiplier > 0 && x.playerPosition.toString() === '669a4846e181cb2ed40c2413' && +x.points === 0)
-      const fWhoMissed = unformattedPicks.filter(x => x.multiplier > 0 && x.playerPosition.toString() === '669a485de181cb2ed40c2417' && +x.points === 0)
+      const gWhoMissed = unformattedPicks.filter(x => x.multiplier > 0 && x.playerPosition.toString() === '669a41e50f8891d8e0b4eb2a' && +x.starts === 0 && +x.bench === 0)
+      const dWhoMissed = unformattedPicks.filter(x => x.multiplier > 0 && x.playerPosition.toString() === '669a4831e181cb2ed40c240f' && +x.starts === 0 && +x.bench === 0)
+      const mWhoMissed = unformattedPicks.filter(x => x.multiplier > 0 && x.playerPosition.toString() === '669a4846e181cb2ed40c2413' && +x.starts === 0 && +x.bench === 0)
+      const fWhoMissed = unformattedPicks.filter(x => x.multiplier > 0 && x.playerPosition.toString() === '669a485de181cb2ed40c2417' && +x.starts === 0 && +x.bench === 0)
       
       //Starting players by position
       let startingDefs = unformattedPicks.filter(x => x.multiplier > 0 && x.playerPosition.toString() === '669a4831e181cb2ed40c240f')
@@ -484,7 +484,7 @@ const createAutos = asyncHandler(async(req, res) => {
           unformattedPicks.splice(pIndex,1,newVice)
       }
       if(gWhoMissed.length > 0) {
-        const potential = availableGoalie.find(x => +x.points > 0)
+        const potential = availableGoalie.find(x => +x.starts > 0 || +x.bench > 0)
         const { _id:p_id, playerPosition:pp, playerTeam:pt, multiplier:pm, nowCost:pn,
           IsCaptain:pc, IsViceCaptain:pvc, slot:ps, points:ppts } = potential
           const { _id:m_id, playerPosition:mp, playerTeam:mt, multiplier:mm, nowCost:mn,
@@ -505,7 +505,7 @@ const createAutos = asyncHandler(async(req, res) => {
           available.sort((a,b) => a.slot > b.slot ? 1 : -1)
           if(available.length === 0) break;
           if(startingDefs.length === 3 && availableDefs.length === 0) break;
-          const potential = available.find(x => +x.points > 0)
+          const potential = available.find(x => +x.starts > 0 || +x.bench > 0)
           const { _id:p_id, playerPosition:pp, playerTeam:pt, multiplier:pm, nowCost:pn,
              IsCaptain:pc, IsViceCaptain:pvc, slot:ps, points:ppts } = potential
              const { _id:m_id, playerPosition:mp, playerTeam:mt, multiplier:mm, nowCost:mn,
@@ -540,7 +540,7 @@ const createAutos = asyncHandler(async(req, res) => {
         for(let i=0; i < mWhoMissed.length; i++) {
           available.sort((a,b) => a.slot > b.slot ? 1 : -1)
           if(available.length === 0) break;
-          const potential = available.find(x => +x.points > 0)
+          const potential = available.find(x => +x.starts > 0 || +x.bench > 0)
           const { _id:p_id, playerPosition:pp, playerTeam:pt, multiplier:pm, nowCost:pn,
              IsCaptain:pc, IsViceCaptain:pvc, slot:ps, points:ppts } = potential
              const { _id:m_id, playerPosition:mp, playerTeam:mt, multiplier:mm, nowCost:mn,
@@ -570,7 +570,7 @@ const createAutos = asyncHandler(async(req, res) => {
         for(let i=0; i < fWhoMissed.length; i++) {
           if(available.length === 0) break;
           if(startingFwds.length === 1 && availableFwds.length === 0) break;
-          const potential = available.find(x => +x.points > 0)
+          const potential = available.find(x => +x.starts > 0 || +x.bench > 0)
           const { _id:p_id, playerPosition:pp, playerTeam:pt, multiplier:pm, nowCost:pn,
              IsCaptain:pc, IsViceCaptain:pvc, slot:ps, points:ppts } = potential
              const { _id:m_id, playerPosition:mp, playerTeam:mt, multiplier:mm, nowCost:mn,

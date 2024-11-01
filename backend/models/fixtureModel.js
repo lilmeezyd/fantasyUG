@@ -28,6 +28,14 @@ const fixtureSchema = mongoose.Schema({
     teamHomeScore: {
         type: Number,
         default: null
+    },
+    live: {
+        type: Boolean,
+        default: false
+    },
+    finished: {
+        type: Boolean,
+        default: false
     }
 })
 

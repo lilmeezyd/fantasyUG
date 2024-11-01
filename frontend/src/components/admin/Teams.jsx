@@ -3,6 +3,8 @@ import {  useGetQuery,
   useAddMutation,
   useDeletMutation } from "../../slices/teamApiSlice"
 import { Button, Container, Spinner } from "react-bootstrap"
+import { BsPencilFill } from "react-icons/bs";
+import { AiFillDelete } from "react-icons/ai";
 import Pagination from "../Pagination"
 import AddModal from "./teamModals/AddModal"
 import DeleteModal from "./teamModals/DeleteModal"
@@ -18,7 +20,7 @@ const Teams = () => {
   const [delet] = useDeletMutation()
 
   const { deleted, edited, added } = show
-  const pageSize = 5
+  const pageSize = 8
   let totalPages = Math.ceil(data?.length / pageSize);
 
   const closeAdd = () => {
@@ -153,12 +155,40 @@ const Teams = () => {
   
   return (
     <Container>
-      {memoTeams?.map(x => <div className="teams p-2" key={x._id}>
+      <div className="admin-teams">
+      <div className="teams teams-head">
+          <div className="team-name">Team</div>
+          <div>Code</div>
+          <div>Pld</div>
+          <div>W</div>
+          <div>D</div>
+          <div>L</div>
+          <div>GF</div>
+          <div>GA</div>
+          <div>GD</div>
+          <div>Pts</div>
+          <div></div>
+          <div></div>
+        </div>
+      {memoTeams?.map(x => <div className="teams" key={x._id}>
           <div className="team-name">{x.name}</div>
           <div>{x.shortName}</div>
-          <div><Button onClick={() =>editTeam(x._id)} className="btn btn-warning">Edit</Button></div>
-          <div><Button onClick={() => deleteTeam(x._id)} className="btn btn-danger">Delete</Button></div>
+          <div>{x.played}</div>
+          <div>{x.win}</div>
+          <div>{x.draw}</div>
+          <div>{x.loss}</div>
+          <div>{x.goalsScored}</div>
+          <div>{x.goalsConceded}</div>
+          <div>{x.goalsScored-x.goalsConceded}</div>
+          <div>{x.points}</div>
+          <div className="btn-click" onClick={() => editTeam(x._id)}>
+              <BsPencilFill color="black" />
+            </div>
+            <div className="btn-click" onClick={() => deleteTeam(x._id)}>
+              <AiFillDelete color="black" />
+            </div>
       </div>)}
+      </div>
       <div className="add-button p-2">
         <Button onClick={addTeam} className="btn btn-success">Add Team</Button>
       </div>

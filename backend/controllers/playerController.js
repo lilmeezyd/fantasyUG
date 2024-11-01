@@ -110,7 +110,6 @@ const getPlayers = asyncHandler(async (req, res) => {
           assists, ownGoals, penaltiesSaved,penaltiesMissed,yellowCards,redCards,saves,
           cleansheets,starts,ownership: `${b.toFixed(1)}`}
     })
-    console.log(updatedPlayers)
     res.status(200).json(updatedPlayers)
   }
 });
@@ -414,8 +413,6 @@ const playerIncrement = asyncHandler(async (playerId, increment,  req, res) => {
 //@access private
 //@role ADMIN
 const deletePlayer = asyncHandler(async (req, res) => {
-  console.log(req.params)
-  console.log(req.body)
   const player = await Player.findById(req.params.id);
 
   if (!player) {
