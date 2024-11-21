@@ -1,4 +1,6 @@
 import express, { urlencoded } from 'express'
+import path from 'path'
+import { fileURLToPath } from 'url';
 import dotenv from 'dotenv'
 import userRoutes from './routes/userRoutes.js'
 import teamRoutes from './routes/teamRoutes.js'
@@ -15,6 +17,7 @@ import { notFound, errorHandler } from './middleware/errorMiddleware.js'
 import connectDB from './config/db.js'
 dotenv.config()
 
+
 connectDB()
 const app = express()
 const port = process.env.PORT|| 5000
@@ -23,6 +26,11 @@ app.use(urlencoded({extended: true}))
 app.use(cookieParser())
 
 app.get('/', (req, res) => res.send('server ready'))
+const __filename = fileURLToPath(import.meta.url); // get the resolved path to the file
+const __dirname = path.dirname(__filename); // get the name of the directory
+// Serve the static files from the React app
+app.use(express.static(path.join(__dirname, '../frontend/dist')));
+
 app.use('/api/users', userRoutes)
 app.use('/api/teams', teamRoutes)
 app.use('/api/players', playerRoutes)
@@ -36,6 +44,7 @@ app.use('/api/livepicks/manager', liveRoutes)
 app.use(notFound)
 app.use(errorHandler)
 app.listen(port, () => console.log(`Server running on port ${port}`))
+export default app
 
 /*
  POST /api/users = Register a user
