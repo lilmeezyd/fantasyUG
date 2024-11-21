@@ -25,7 +25,7 @@ app.use(express.json())
 app.use(urlencoded({extended: true}))
 app.use(cookieParser())
 
-//app.get('/', (req, res) => res.send('server ready'))
+app.get('/', (req, res) => res.send('server ready'))
 const __filename = fileURLToPath(import.meta.url); // get the resolved path to the file
 const __dirname = path.dirname(__filename); // get the name of the directory
 // Serve the static files from the React app
