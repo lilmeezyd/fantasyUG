@@ -36,6 +36,14 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/dist', 'main.jsx'));
 });
 
+app.get('/login', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/dist', '/screens/LoginScreen.jsx'));
+});
+
+app.get('/admin/dashboard', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/dist', '/screens/DashboardScreen.jsx'));
+});
+
 app.use('/api/users', userRoutes)
 app.use('/api/teams', teamRoutes)
 app.use('/api/players', playerRoutes)
