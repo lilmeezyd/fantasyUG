@@ -37,11 +37,11 @@ app.get('/', (req, res) => {
 });
 
 app.get('/login', (req, res) => {
-    res.sendFile(path.join(__dirname, '../frontend/dist', '/screens/LoginScreen.jsx'));
+    res.sendFile(path.join(__dirname, '../frontend/dist', 'screens/LoginScreen.jsx'));
 });
 
 app.get('/admin/dashboard', (req, res) => {
-    res.sendFile(path.join(__dirname, '../frontend/dist', '/screens/DashboardScreen.jsx'));
+    res.sendFile(path.join(__dirname, '../frontend/dist', 'DashboardScreen.jsx'));
 });
 
 app.use('/api/users', userRoutes)
