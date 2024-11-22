@@ -6,12 +6,6 @@
         "use": "@vercel/node"
       }
     ],
-    "redirects": [
-        {
-            "source": "/(.*)",
-            "destination": "/frontend/dist"
-        }
-    ],
     "routes": [
       {
         "src": "/(.*)",
