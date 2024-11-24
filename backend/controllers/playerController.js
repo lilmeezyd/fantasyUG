@@ -82,7 +82,7 @@ const getPlayers = asyncHandler(async (req, res) => {
     const b = numberOfManagers === 0 ? 0 : x.playerCount/numberOfManagers*100 
     return {...x._doc, ownership: `${b.toFixed(1)}`}
   })*/
-  if(players && numberOfManagers) {
+  if(players) {
    const updatedPlayers =  players.map(player => {
       const {_id,
         firstName,
