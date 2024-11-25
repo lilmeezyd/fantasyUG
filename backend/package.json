@@ -5,11 +5,8 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "postinstall": "cd ./frontend && npm install && npm run build",
-    "start": "node backend/server.js",
-    "server": "node --watch backend/server.js",
-    "client": "npm run dev --prefix frontend",
-    "dev": "concurrently \"npm run server\" \"npm run client\""
+    "start": "node server.js",
+    "server": "node --watch server.js"
   },
   "author": "Denis Moini",
   "license": "MIT",
