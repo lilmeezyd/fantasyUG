@@ -1,5 +1,6 @@
 import express, { urlencoded } from 'express'
 import path from 'path'
+import cors from 'cors'
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv'
 import userRoutes from './routes/userRoutes.js'
@@ -24,6 +25,13 @@ const port = process.env.PORT|| 5000
 app.use(express.json())
 app.use(urlencoded({extended: true}))
 app.use(cookieParser())
+const corsConfig = {
+    origin: '*',
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE']
+  }
+  app.use(cors(corsConfig))
+  app.options("", cors(corsConfig))
 
 app.get('/', (req, res) => res.send('server ready'))
 const __filename = fileURLToPath(import.meta.url); // get the resolved path to the file
