@@ -1,1 +1,1 @@
-{ "routes": [{ "source": "/(.*).html", "destination": "/index.html" }] }
+{ "rewrites": [{ "source": "/(.*).html", "destination": "/index.html" }] }
