@@ -1,5 +1,5 @@
 import { apiSlice } from "./apiSlice";
-const PLAYERS_URL = "/api/players";
+const PLAYERS_URL = "https://fantasy-ug-api.vercel.app/api/players";
 
 export const playerApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
