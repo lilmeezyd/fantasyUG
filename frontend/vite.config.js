@@ -8,8 +8,8 @@ export default defineConfig({
     port: 3000,
     proxy: {
       '/api': {
-        target: 'https://fantasy-ug-api.vercel.app',
-        //target: 'http://localhost:5000',
+        //target: 'https://fantasy-ug-api.vercel.app',
+        target: 'http://localhost:5000',
         changeOrigin: true
       },
     },

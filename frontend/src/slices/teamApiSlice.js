@@ -1,5 +1,5 @@
 import { apiSlice } from "./apiSlice";
-const TEAMS_URL = "https://fantasy-ug-api.vercel.app/api/teams";
+const TEAMS_URL = "/api/teams";
 export const teamApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     get: builder.query({
