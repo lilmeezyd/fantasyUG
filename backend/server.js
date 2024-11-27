@@ -33,7 +33,7 @@ app.use(cookieParser())
 app.use(cors(corsConfig))
 app.options("", cors(corsConfig))*/
 
-app.get('/', (req, res) => res.send('server ready'))
+//app.get('/', (req, res) => res.send('server ready'))
 const __filename = fileURLToPath(import.meta.url); // get the resolved path to the file
 const __dirname = path.dirname(__filename); // get the name of the directory
 // Serve the static files from the React app
