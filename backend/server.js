@@ -6,7 +6,7 @@ import dotenv from 'dotenv'
 import userRoutes from './routes/userRoutes.js'
 import teamRoutes from './routes/teamRoutes.js'
 import playerRoutes from './routes/playerRoutes.js'
-import positionRoutes from  './routes/positionRoutes.js'
+import positionRoutes from './routes/positionRoutes.js'
 import fixtureRoutes from './routes/fixtureRoutes.js'
 import matchdayRoutes from './routes/matchdayRoutes.js'
 import pickRoutes from './routes/pickRoutes.js'
@@ -21,17 +21,17 @@ dotenv.config()
 
 connectDB()
 const app = express()
-const port = process.env.PORT|| 5000
+const port = process.env.PORT || 5000
 app.use(express.json())
-app.use(urlencoded({extended: true}))
+app.use(urlencoded({ extended: true }))
 app.use(cookieParser())
 const corsConfig = {
-    origin: '*',
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE']
-  }
-  app.use(cors(corsConfig))
-  app.options("", cors(corsConfig))
+  origin: '*',
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE']
+}
+app.use(cors(corsConfig))
+app.options("", cors(corsConfig))
 
 app.get('/', (req, res) => res.send('server ready'))
 const __filename = fileURLToPath(import.meta.url); // get the resolved path to the file

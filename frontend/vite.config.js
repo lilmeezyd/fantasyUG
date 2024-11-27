@@ -9,6 +9,7 @@ export default defineConfig({
     proxy: {
       '/api': {
         target: 'https://fantasy-ug-api.vercel.app',
+        //target: 'http://localhost:5000',
         changeOrigin: true
       },
     },

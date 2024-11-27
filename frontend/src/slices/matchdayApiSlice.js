@@ -1,5 +1,5 @@
 import { apiSlice } from "./apiSlice";
-const MATCHDAYS_URL = "https://fantasy-ug-api.vercel.app/api/matchdays";
+const MATCHDAYS_URL = "/api/matchdays";
 
 export const matchdayApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({

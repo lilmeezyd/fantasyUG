@@ -14,6 +14,7 @@ const AddModal = (props) => {
 
     const onSubmit = (e) => {
       e.preventDefault()
+      console.log(data)
       submit(data) 
 
     }

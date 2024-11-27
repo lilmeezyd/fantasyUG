@@ -414,7 +414,8 @@ const playerIncrement = asyncHandler(async (playerId, increment,  req, res) => {
 //@role ADMIN
 const deletePlayer = asyncHandler(async (req, res) => {
   const player = await Player.findById(req.params.id);
-
+console.log(player)
+console.log(req.user)
   if (!player) {
     res.status(404);
     throw new Error("Player not found");
