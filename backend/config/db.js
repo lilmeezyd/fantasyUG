@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
 
 const clientOptions = { serverApi: { version: '1', strict: true, deprecationErrors: true } };
-console.log(process.env)
 const connectDB = async () => {
     const uri = `mongodb+srv://denismoini09:${process.env.PASSWORD}@fantasyug.zvubwkt.mongodb.net/ugandanDiba?retryWrites=true&w=majority&appName=fantasyUG`
     try {
