@@ -23,7 +23,7 @@ connectDB()
 const app = express()
 const port = process.env.PORT || 5000
 app.use(express.json())
-app.use(urlencoded({ extended: true })) 
+app.use(urlencoded({ extended: true }))
 app.use(cookieParser())
 /*const corsConfig = {
   origin: '*',
@@ -42,26 +42,25 @@ app.use('/api/picks', pickRoutes)
 app.use('/api/leagues', leagueRoutes)
 app.use('/api/managerinfo', managerInfoRoutes)
 app.use('/api/livepicks/manager', liveRoutes)
-if(process.env.NODE_ENV === 'production') {
-  const __dirname = path.resolve();
+if (process.env.NODE_ENV === 'production') {
+  /*const __dirname = path.resolve();
   app.use(express.static(path.join(__dirname, '/frontend/dist')));
   app.get('*', (req, res) => {
     res.sendFile(path.resolve(__dirname, 'frontend', 'dist', 'index.html'));
-}) 
+}) */
+
+  const __filename = fileURLToPath(import.meta.url); // get the resolved path to the file
+  const __dirname = path.dirname(__filename); // get the name of the directory
+  // Serve the static files from the React app
+  app.use(express.static(path.join(__dirname, '../frontend/dist')));
+
+  // Handle requests by serving index.html for all routes
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/dist', 'index.html'));
+  });
 } else {
   app.get('/', (req, res) => res.send('server ready'))
 }
-
-
-const __filename = fileURLToPath(import.meta.url); // get the resolved path to the file
-const __dirname = path.dirname(__filename); // get the name of the directory
-// Serve the static files from the React app
-//app.use(express.static(path.join(__dirname, '../frontend/dist')));
-
-// Handle requests by serving index.html for all routes
-/*app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../frontend/dist', '/index.html'));
-});*/
 
 
 app.use(notFound)
