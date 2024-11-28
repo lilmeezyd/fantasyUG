@@ -42,7 +42,8 @@ app.use('/api/picks', pickRoutes)
 app.use('/api/leagues', leagueRoutes)
 app.use('/api/managerinfo', managerInfoRoutes)
 app.use('/api/livepicks/manager', liveRoutes)
-if (process.env.NODE_ENV === 'production') {
+
+if (process.env.NODE_ENV === 'Production') {
   /*const __dirname = path.resolve();
   app.use(express.static(path.join(__dirname, '/frontend/dist')));
   app.get('*', (req, res) => {
