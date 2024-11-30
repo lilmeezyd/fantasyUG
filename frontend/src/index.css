@@ -804,6 +804,21 @@ form.login-cs {
 .default-player .squad-player,
 .default-bench .squad-player {
   width: 20%;
+  /*width: 120px;*/
+}
+
+@media(max-width: 768px) {
+  .default-player .squad-player,
+.default-bench .squad-player {
+  /*width: 100px;*/
+}
+}
+
+@media(max-width: 540px) {
+  .default-player .squad-player,
+.default-bench .squad-player {
+  /*width: 70px;*/
+}
 }
 
 .default-bench .squad-player {
@@ -879,9 +894,9 @@ form.login-cs {
 }
 
 .player-name {
-  width: 100%;
   border-radius: 0.5rem;
   font-weight: 600;
+  width: inherit;
 }
 
 @media(max-width: 760px) {
