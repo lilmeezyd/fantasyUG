@@ -1248,7 +1248,7 @@ form.login-cs {
 }
 
 .data_name {
-  width: 100%;
+  width: -webkit-fill-available;
   padding: 0.2rem;
   color: rgba(0, 0, 55, 0.9);
   background-color: white;
