@@ -896,7 +896,7 @@ form.login-cs {
 .player-name {
   border-radius: 0.5rem;
   font-weight: 600;
-  width: inherit;
+  width: -webkit-fill-available;
 }
 
 @media(max-width: 760px) {
