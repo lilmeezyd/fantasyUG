@@ -61,7 +61,7 @@ const PickTeam = () => {
         if(state.FWD === 1) {
           const okayS = state.picks.filter(x => x.playerPosition !== "669a41e50f8891d8e0b4eb2a" && x.playerPosition !== "669a485de181cb2ed40c2417").map(x => x.slot)
           const okayed = [...okayB, ...okayS]
-          const blocked = Array.from(new Set(ids)?.difference(new Set(okayed)))
+          const blocked = ids.filter(x => !okayed.includes(x))
           return {
             ...state,
             switcher: data,
@@ -71,7 +71,7 @@ const PickTeam = () => {
         }
         const okayS = state.picks.filter(x => x.playerPosition !== "669a41e50f8891d8e0b4eb2a").map(x => x.slot)
         const okayed = [...okayB, ...okayS]
-        const blocked = Array.from(new Set(ids)?.difference(new Set(okayed)))
+        const blocked = ids.filter(x => !okayed.includes(x))
         return {
           ...state,
           switcher: data,
@@ -82,7 +82,7 @@ const PickTeam = () => {
         if(state.DEF === 3) {
           const okayS = state.picks.filter(x => x.slot > 12 && x.playerPosition === "669a4831e181cb2ed40c240f").map(x => x.slot)
           const okayed = [...okayS]
-          const blocked = Array.from(new Set(ids)?.difference(new Set(okayed)))
+          const blocked = ids.filter(x => !okayed.includes(x))
           return {
             ...state,
             switcher: data,
@@ -92,7 +92,7 @@ const PickTeam = () => {
         }
         const okayS = state.picks.filter(x => x.slot > 12).map(x => x.slot)
         const okayed = [...okayS]
-        const blocked = Array.from(new Set(ids)?.difference(new Set(okayed)))
+        const blocked = ids.filter(x => !okayed.includes(x))
         return {
           ...state,
           switcher: data,
@@ -110,7 +110,7 @@ const PickTeam = () => {
           if(state.FWD === 1) {
             const okayS = state.picks.filter(x => x.playerPosition !== "669a41e50f8891d8e0b4eb2a" && x.playerPosition !== "669a485de181cb2ed40c2417").map(x => x.slot)
             const okayed = [...okayB, ...okayS]
-            const blocked = Array.from(new Set(ids)?.difference(new Set(okayed)))
+            const blocked = ids.filter(x => !okayed.includes(x))
             return {
               ...state,
               switcher: data,
@@ -122,7 +122,7 @@ const PickTeam = () => {
           if(state.DEF === 3) {
             const okayS = state.picks.filter(x => x.playerPosition !== "669a41e50f8891d8e0b4eb2a" && x.playerPosition !== "669a4831e181cb2ed40c240f").map(x => x.slot)
             const okayed = [...okayS, ...okayB]
-            const blocked = Array.from(new Set(ids)?.difference(new Set(okayed)))
+            const blocked = ids.filter(x => !okayed.includes(x))
             return {
               ...state,
               switcher: data,
@@ -132,7 +132,7 @@ const PickTeam = () => {
           }
           const okayS = state.picks.filter(x => x.playerPosition !== "669a41e50f8891d8e0b4eb2a").map(x => x.slot)
           const okayed = [...okayB, ...okayS]
-          const blocked = Array.from(new Set(ids)?.difference(new Set(okayed)))
+          const blocked = ids.filter(x => !okayed.includes(x))
           return {
             ...state,
             switcher: data,
@@ -142,7 +142,7 @@ const PickTeam = () => {
          } else {
           const okayS = state.picks.filter(x => x.slot > 12).map(x => x.slot)
           const okayed = [...okayS]
-          const blocked = Array.from(new Set(ids)?.difference(new Set(okayed)))
+          const blocked = ids.filter(x => !okayed.includes(x))
           return {
             ...state,
             switcher: data,
@@ -160,7 +160,7 @@ const PickTeam = () => {
           if(state.DEF === 3) {
             const okayS = state.picks.filter(x => x.playerPosition !== "669a41e50f8891d8e0b4eb2a" && x.playerPosition !== "669a4831e181cb2ed40c240f").map(x => x.slot)
             const okayed = [...okayS, ...okayB]
-            const blocked = Array.from(new Set(ids)?.difference(new Set(okayed)))
+            const blocked = ids.filter(x => !okayed.includes(x))
             return {
               ...state,
               switcher: data,
@@ -170,7 +170,7 @@ const PickTeam = () => {
           }
           const okayS = state.picks.filter(x => x.playerPosition !== "669a41e50f8891d8e0b4eb2a").map(x => x.slot)
           const okayed = [...okayB, ...okayS]
-          const blocked = Array.from(new Set(ids)?.difference(new Set(okayed)))
+          const blocked = ids.filter(x => !okayed.includes(x))
           return {
             ...state,
             switcher: data,
@@ -183,7 +183,7 @@ const PickTeam = () => {
           if(state.FWD === 1) {
             const okayS = state.picks.filter(x => x.slot > 12 && x.playerPosition === "669a485de181cb2ed40c2417").map(x => x.slot)
             const okayed = [...okayS]
-            const blocked = Array.from(new Set(ids)?.difference(new Set(okayed)))
+            const blocked = ids.filter(x => !okayed.includes(x))
             return {
               ...state,
               switcher: data,
@@ -193,7 +193,7 @@ const PickTeam = () => {
           }
           
           const okayed = [...okayS]
-          const blocked = Array.from(new Set(ids)?.difference(new Set(okayed)))
+          const blocked = ids.filter(x => !okayed.includes(x))
           return {
             ...state,
             switcher: data,
