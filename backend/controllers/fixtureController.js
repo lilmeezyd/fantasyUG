@@ -135,7 +135,6 @@ const populateStats = asyncHandler(async (req, res) => {
   });
   fixture.teamAwayScore = 0;
   fixture.teamHomeScore = 0;
-
   const updatedFixture = await Fixture.findByIdAndUpdate(
     req.params.id,
     fixture,
