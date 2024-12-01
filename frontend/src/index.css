@@ -897,6 +897,7 @@ form.login-cs {
   border-radius: 0.5rem;
   font-weight: 600;
   width: -webkit-fill-available;
+  width: 100%;
 }
 
 @media(max-width: 760px) {
@@ -1249,6 +1250,7 @@ form.login-cs {
 
 .data_name {
   width: -webkit-fill-available;
+  width: 100%;
   padding: 0.2rem;
   color: rgba(0, 0, 55, 0.9);
   background-color: white;
