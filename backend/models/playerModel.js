@@ -75,6 +75,10 @@ const playerSchema = mongoose.Schema({
         type: Number,
         default: 0
     },
+    bench: {
+        type: Number,
+        default: 0
+    },
     playerCount: {
         type: Number,
         default: 0

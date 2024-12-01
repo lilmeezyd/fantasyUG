@@ -11,7 +11,7 @@ import ManagerLive from "../models/managerLive.js";
 import ManagerInfo from "../models/managerInfoModel.js";
 
 //@desc Set Fixture
-//@route POST /api/fixtures
+//@route POST /api/fixtures 
 //@access Private
 //@role Admin
 const setFixture = asyncHandler(async (req, res) => {
@@ -102,6 +102,7 @@ const populateStats = asyncHandler(async (req, res) => {
     identifier9: "cleansheets",
     identifier10: "starts",
     identifier11: "bestPlayer",
+    identifier12: "bench"
   };
   if (!fixture) {
     res.status(400);
@@ -199,6 +200,7 @@ const dePopulateStats = asyncHandler(async (req, res) => {
       saves,
       cleansheets,
       starts,
+      bench,
       bestPlayer,
     } = play;
     await Player.findByIdAndUpdate(
@@ -216,6 +218,7 @@ const dePopulateStats = asyncHandler(async (req, res) => {
           saves: -saves,
           cleansheets: -cleansheets,
           starts: -starts,
+          bench: -bench,
           bestPlayer: -bestPlayer,
         },
       },
@@ -455,7 +458,8 @@ const editStats = asyncHandler(async (req, res) => {
     redCards: -3,
     saves: 0.5,
     cleansheets: code === 1 ? 4 : code === 2 ? 4 : code === 3 ? 1 : 0,
-    starts: 1,
+    starts: 2,
+    bench: 1,
     bestPlayer: 3,
   };
   let playerIn = fixture.stats
