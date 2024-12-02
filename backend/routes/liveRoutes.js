@@ -11,7 +11,7 @@ import { protect, roles } from "../middleware/authMiddleware.js";
 import ROLES from "../config/permissions.js";
 const router = express.Router();
 
-router.route("/").put(setLivePicks);
+router.route("/").put(protect, roles(ROLES.ADMIN), setLivePicks);
 router
   .route("/matchday/:mid/fixtures/:id")
   .put(protect, roles(ROLES.ADMIN), deletePoints);

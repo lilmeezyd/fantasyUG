@@ -135,7 +135,7 @@ form.login-cs {
 
 .home-section {
   display: flex;
-  gap: 1rem;
+  gap: 15px;
 }
 
 .home-name {
@@ -896,8 +896,9 @@ form.login-cs {
 .player-name {
   border-radius: 0.5rem;
   font-weight: 600;
-  width: -webkit-fill-available;
- /* width: 100%;*/
+  width: calc(100%);
+  /*width: -webkit-fill-available;
+  width: 100%;*/
 }
 
 @media(max-width: 760px) {
@@ -1249,8 +1250,9 @@ form.login-cs {
 }
 
 .data_name {
-  width: -webkit-fill-available;
-  /*width: 100%;*/
+  /*width: -webkit-fill-available;
+  width: 100%;*/
+  width: calc(100%);
   padding: 0.2rem;
   color: rgba(0, 0, 55, 0.9);
   background-color: white;
@@ -1269,6 +1271,7 @@ form.login-cs {
   padding: 0.1rem;
   background: rgba(0, 0, 55, 0.9);
   color: white;
+  width: calc(100%);
 }
 
 
