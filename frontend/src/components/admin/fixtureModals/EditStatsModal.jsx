@@ -7,12 +7,12 @@ import { useEditStatsMutation } from "../../../slices/fixtureApiSlice";
 const EditStatsModal = (props) => {
   const { show, handleClose, fixture } = props;
   const [data, setData ] = useState({
-    identifier: '', homeAway: '', player: '', value: ''
+    identifier: '', homeAway: '', player: [], value: ''
 })
 
 const { identifier, homeAway, player, value } = data
   const { data: players } = useGetPlayersQuery()
-  const [ editStats ] = useEditStatsMutation()
+  const [ editStats, isLoading ] = useEditStatsMutation()
 
   const onSubmit = async (e) => {
     e.preventDefault()
@@ -20,6 +20,9 @@ const { identifier, homeAway, player, value } = data
     const stats = {
       identifier, homeAway, player, value: newValue
   }
+  console.log(stats)
+  setData({identifier: '', homeAway: '', player: [], value: ''})
+  
   try {
     await editStats({id: fixture._id, ...stats}).unwrap()
   } catch (error) {
@@ -30,11 +33,29 @@ const { identifier, homeAway, player, value } = data
   }
 
   const onChange = async (e) => {
-    setData((prevState) => ({
-      ...prevState,
-      [e.target.name]: e.target.value
-    }))
+    if(e.target.name === 'player') {
+      const exists = player.includes(e.target.value)
+      if(exists === true) {
+        setData((prevState) => ({
+          ...prevState,
+          player: player.filter(x => x !== e.target.value) 
+        }))
+      } else {
+        const newplayers = [...player, e.target.value]
+        setData((prevState) => ({
+          ...prevState,
+          player: newplayers
+        }))
+      }
+    } else {
+      setData((prevState) => ({
+        ...prevState,
+        [e.target.name]: e.target.value
+      }))
+    }
+    
   }
+  
   return (
     <Modal show={show} onHide={handleClose}>
       <Modal.Header style={{ background: "aquamarine" }} closeButton>
@@ -65,31 +86,29 @@ const { identifier, homeAway, player, value } = data
               </select>
             </div>
             <div className="form-group pb-2">
-              <select className="form-control" name="player" id="player" onChange={onChange}>
-                <option value="">Select Player</option>
+              <div className="form-control">
+                <div>Select Players</div>
 
                 {homeAway === "home" &&
-                  players
-                    .filter(
+                  players?.filter(
                       (x) => x.playerTeam.toString() === fixture?.teamHome?.toString()
-                    )
-                    .map((player) => (
-                      <option key={player._id} value={player._id}>
-                        {player.appName}
-                      </option>
+                    )?.map((player) => (
+                      <div key={player._id}>
+                        <input onChange={onChange} type="checkbox" value={player._id} name='player' id={player.appName} />
+                        <label htmlFor={player.appName}>{player.appName}</label>
+                      </div>
                     ))}
 
                 {homeAway === "away" &&
-                  players
-                    .filter(
+                  players?.filter(
                       (x) => x.playerTeam.toString() === fixture?.teamAway?.toString()
-                    )
-                    .map((player) => (
-                      <option key={player._id} value={player._id}>
-                        {player.appName}
-                      </option>
+                    )?.map((player) => (
+                      <div key={player._id}>
+                        <input onChange={onChange} type="checkbox" value={player._id} name='player' id={player.appName} />
+                        <label htmlFor={player.appName}>{player.appName}</label>
+                      </div>
                     ))}
-              </select>
+              </div>
             </div>
             <div className="form-group pb-2">
               <select className="form-control" name="value" id="value" onChange={onChange}>

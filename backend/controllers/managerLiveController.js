@@ -13,7 +13,7 @@ import League from "../models/leagueModel.js";
 
 //@desc set live picks
 //@route PUT api/livepicks/manager/
-//@access
+//@access  
 const setLivePicks = asyncHandler(async (req, res) => {
   const allPicks = await Picks.find({});
   const matchday = await Matchday.findOne({ current: true });

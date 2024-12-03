@@ -9,24 +9,24 @@ export const livePicksApiSlice = apiSlice.injectEndpoints({
             }),
             providesTags: ['Live']
         },
-    ),
-    setLivePicks: builder.mutation({
-        query: () => ({
-            url: `${LIVE_PICKS_URL}`,
-            method: 'PUT'
+        ),
+        setLivePicks: builder.mutation({
+            query: () => ({
+                url: `${LIVE_PICKS_URL}`,
+                method: 'PUT'
+            }),
+            invalidatesTags: ['Live']
         }),
-        invalidatesTags: ['Live']
-    }), 
-    setInitialPoints: builder.mutation({
-        query: (data) => {
-            const {y, x} = data
-            return {
-            url: `${LIVE_PICKS_URL}/matchday/${y}/start/fixtures/${x}`,
-            method: 'PUT'
-            }
-        },
-        invalidatesTags: ['Live']
-    })
+        setInitialPoints: builder.mutation({
+            query: (data) => {
+                const { y, x } = data
+                return {
+                    url: `${LIVE_PICKS_URL}/matchday/${y}/start/fixtures/${x}`,
+                    method: 'PUT'
+                }
+            },
+            invalidatesTags: ['Live']
+        })
     })
 })
 
