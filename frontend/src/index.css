@@ -234,7 +234,7 @@ form.login-cs {
   font-weight: 700;
   padding: 0.25rem 0;
   width: fit-content;
-    grid-template-columns: 120px 50px 50px 50px 50px 50px 50px 100px 50px 50px 50px 50px;
+    grid-template-columns: 120px 50px 50px 50px 50px 50px 50px 100px 50px 50px 50px 50px 50px;
 }
 
 .admin-teams {

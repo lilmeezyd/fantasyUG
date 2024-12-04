@@ -301,6 +301,7 @@ const Players = () => {
             <option value="assists">Assists</option>
             <option value="yellowCards">Yellow cards</option>
             <option value="redCards">Red cards</option>
+            <option value="cleansheets">Clean sheets</option>
             {/*<option value="penaltiesSaved">Penalties Saved</option>
                     <option value="penaltiesMissed">Penalties Missed</option>
                     <option value="cleansheets">Clean sheets</option>
@@ -328,6 +329,7 @@ const Players = () => {
           <div>Team</div>
           <div>Pos</div>
           <div>Ownership</div>
+          <div>CS</div>
           <div>YC</div>
           <div>RC</div>
           <div></div>
@@ -351,6 +353,7 @@ const Players = () => {
               }
             </div>
             <div>{x.ownership}%</div>
+            <div>{x.cleansheets}</div>
             <div>{x.yellowCards}</div>
             <div>{x.redCards}</div>
             <div className="btn-click" onClick={() => editPlayerPop(x._id)}>
