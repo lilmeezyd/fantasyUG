@@ -16,7 +16,7 @@ const FixtureItem = (props) => {
   const createStats = (field, ground) => {
     return x?.stats?.length > 0 && x?.stats?.filter(x => x.identifier === field)[0][ground].map((x) => (
         <p key={x.player} className="player">
-            <span className="stats">{players.find(player => player._id === x.player).appName}</span>
+            <span className="stats">{players?.find(player => player._id === x.player)?.appName}</span>
             <span>({x.value})</span></p>
     ))
   }
@@ -171,6 +171,54 @@ const FixtureItem = (props) => {
                                 <div className="vertical-line"></div>
                                 <div>
                                     {createStats('saves', 'away')}
+                                </div>
+                            </div></>}
+
+                            {statExists('bestPlayer') === -1 &&
+                        <><h1 className="stats">Man of the match</h1>
+                            <div className="info-container">
+                                <div>
+                                    {createStats('bestPlayer', 'home')}
+                                </div>
+                                <div className="vertical-line"></div>
+                                <div>
+                                    {createStats('bestPlayer', 'away')}
+                                </div>
+                            </div></>}
+
+                            {statExists('cleansheets') === -1 &&
+                        <><h1 className="stats">Clean Sheets</h1>
+                            <div className="info-container">
+                                <div>
+                                    {createStats('cleansheets', 'home')}
+                                </div>
+                                <div className="vertical-line"></div>
+                                <div>
+                                    {createStats('cleansheets', 'away')}
+                                </div>
+                            </div></>}
+
+                            {statExists('starts') === -1 &&
+                        <><h1 className="stats">Started</h1>
+                            <div className="info-container">
+                                <div>
+                                    {createStats('starts', 'home')}
+                                </div>
+                                <div className="vertical-line"></div>
+                                <div>
+                                    {createStats('starts', 'away')}
+                                </div>
+                            </div></>}
+
+                            {statExists('bench') === -1 &&
+                        <><h1 className="stats">Sub appearance</h1>
+                            <div className="info-container">
+                                <div>
+                                    {createStats('bench', 'home')}
+                                </div>
+                                <div className="vertical-line"></div>
+                                <div>
+                                    {createStats('bench', 'away')}
                                 </div>
                             </div></>}
                 </div>}
