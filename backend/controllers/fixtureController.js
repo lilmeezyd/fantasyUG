@@ -475,7 +475,6 @@ const editStats = asyncHandler(async (req, res) => {
       [homeAway].some((x) => x.player.toString() === retrievedPlayer.toString());
       let newValue = +value;
       let totalPoints;
-
       if (playerIn) {
         let playerIndex = fixture.stats
           .filter((x) => x.identifier === identifier)[0]
@@ -500,7 +499,7 @@ const editStats = asyncHandler(async (req, res) => {
             { new: true }
           );
           await Player.findByIdAndUpdate(
-            player,
+            retrievedPlayer,
             { $inc: { totalPoints, [identifier]: newValue } },
             { new: true }
           );
@@ -512,13 +511,13 @@ const editStats = asyncHandler(async (req, res) => {
             player: retrievedPlayer,
             value: newValue + a,
           });
-          await PlayerHistory.findOneAndUpdate(
+         await PlayerHistory.findOneAndUpdate(
             { player: retrievedPlayer, fixture: req.params.id },
             { $inc: { [identifier]: newValue, totalPoints } },
             { new: true }
           );
           await Player.findByIdAndUpdate(
-            player,
+            retrievedPlayer,
             { $inc: { totalPoints, [identifier]: newValue } },
             { new: true }
           );
@@ -539,7 +538,7 @@ const editStats = asyncHandler(async (req, res) => {
         );
 
         await Player.findByIdAndUpdate(
-          player,
+          retrievedPlayer,
           { $inc: { totalPoints, [identifier]: +value } },
           { new: true }
         );
