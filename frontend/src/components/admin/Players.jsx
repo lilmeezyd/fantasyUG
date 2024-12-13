@@ -25,11 +25,12 @@ const Players = () => {
   const [curPage, setCurPage] = useState(1);
   const [page, setPage] = useState(1);
   const [word, setWord] = useState("");
-  const { data: players, isLoading } = useGetPlayersQuery();
+  const { data: players, isLoading, isError } = useGetPlayersQuery();
   const { data: teams } = useGetQuery();
   const { data: positions } = useGetPositionsQuery();
   const [addPlayer] = useAddPlayerMutation();
   const [deletePlayer] = useDeletePlayerMutation();
+  console.log(useGetPlayersQuery())
 
   const { deleted, edited, added } = show;
   const pageSize = 10;
@@ -257,9 +258,14 @@ const Players = () => {
       </div>
     );
   }
+
+  if(isError) {
+    /*return <div className="spinner">Something went wrong</div>*/
+  }
+
   return (
     <Container>
-      <div className="admin-vs">
+      {!memoPlayers?.length ? <div className="spinner">No Players Found!</div> : <><div className="admin-vs">
         <div className="view">
           <label htmlFor="view_by">View</label>
           <select onChange={onView} className="custom-select admin-vs-select" id="view_by">
@@ -365,9 +371,20 @@ const Players = () => {
           </div>
         ))}
       </div>
+      <Pagination
+        curPage={curPage}
+        viewFirstPage={viewFirstPage}
+        viewPreviousPage={viewPreviousPage}
+        viewNextPage={viewNextPage}
+        viewLastPage={viewLastPage}
+        totalPages={totalPages}
+        onSubmit={onSubmit}
+        page={page}
+        changePage={changePage}
+      /></>}
       <div className="add-button p-2">
         <Button onClick={addPlayerPop} className="btn btn-success">
-          Add Player
+          Add Player 
         </Button>
       </div>
       <AddModal submit={submit} show={added} closeAdd={closeAdd}></AddModal>
@@ -383,18 +400,6 @@ const Players = () => {
         show={deleted}
         closeDelete={closeDelete}
       ></DeleteModal>
-
-      <Pagination
-        curPage={curPage}
-        viewFirstPage={viewFirstPage}
-        viewPreviousPage={viewPreviousPage}
-        viewNextPage={viewNextPage}
-        viewLastPage={viewLastPage}
-        totalPages={totalPages}
-        onSubmit={onSubmit}
-        page={page}
-        changePage={changePage}
-      />
     </Container>
   );
 };

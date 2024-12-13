@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react"
 import { Container, Spinner, Button } from "react-bootstrap"
 import Pagination from "../Pagination"
-import { useGetLeaguesQuery, useDeleteLeagueMutation } from "../../slices/leagueApiSlice"
+import { useUpdatePrivateTablesMutation, useGetLeaguesQuery, useDeleteLeagueMutation } from "../../slices/leagueApiSlice"
 import EditModal from "./privateLeagueModals/EditModal"
 import DeleteModal from "./privateLeagueModals/DeleteModal"
 const PrivateLeagues = () => {
@@ -12,7 +12,8 @@ const PrivateLeagues = () => {
   const [privateLeagueId, setPrivateLeagueId] = useState("");
   const [curPage, setCurPage] = useState(1);
   const [page, setPage] = useState(1);
-  const { data: privateLeagues, isLoading} = useGetLeaguesQuery()
+  const { data: privateLeagues, isLoading, isError} = useGetLeaguesQuery()
+  const [ updatePrivateTables, {isLoading: a} ] = useUpdatePrivateTablesMutation()
   const [ deleteLeague ] = useDeleteLeagueMutation() 
 
   const { deleted, edited } = show
@@ -69,6 +70,11 @@ const PrivateLeagues = () => {
     }))
     setPrivateLeagueId('')
   }
+
+  const updatePrivateLeagues = async () => {
+    const res = await updatePrivateTables().unwrap()
+    console.log(res)
+  }
   
   {/* Button Controls */}
   const onSubmit = (e) => {
@@ -122,21 +128,16 @@ const PrivateLeagues = () => {
   }, [privateLeagues, pageSize, curPage])
 
     if(isLoading) {
-        console.log('Loading')
         return <div className="spinner"><Spinner /></div>
+    } 
+    if(isError) {
+      return <div className="spinner">Something went wrong</div>
     }
 
-    if(memoPrivateLeagues.length === 0) {
-        return (
-          <Container>
-            <div className="spinner">No Private Leagues Found!</div>
-          </Container>
-        );
-    }
   return (
-    <Container>
-      {memoPrivateLeagues?.length === 0 ? <div className="spinner">No Private Leagues Found!</div> : 
-      memoPrivateLeagues?.map(x => <div className="teams p-2" key={x._id}>
+    <Container className="p-2">
+      {!memoPrivateLeagues?.length ? <div className="spinner">No Private Leagues Found!</div> : 
+      <>{memoPrivateLeagues?.map(x => <div className="teams p-2" key={x._id}>
         <div className="team-name">{x?.team?.name}</div>
         <div>
             <Button
@@ -154,16 +155,22 @@ const PrivateLeagues = () => {
               Delete
             </Button>
           </div>
-      </div>)
+      </div>)}
+      <Pagination curPage={curPage} viewFirstPage={viewFirstPage}
+         viewPreviousPage={viewPreviousPage}
+        viewNextPage={viewNextPage} viewLastPage={viewLastPage}
+         totalPages={totalPages} onSubmit={onSubmit} page={page} changePage={changePage} /></>
       }
+      <div className="add-button p-2">
+        {!!memoPrivateLeagues?.length && <Button
+              onClick={updatePrivateLeagues}
+            >{a === true ? <Spinner /> : `Update Tables`}
+            </Button>}
+      </div>
      <EditModal privateLeagueId={privateLeagueId} resetEdit={resetEdit} show={edited} closeEdit={closeEdit} ></EditModal>
       <DeleteModal
       deleteLeagueNow={deleteLeagueNow}
        cancelDelete={cancelDelete} show={deleted} closeDelete={closeDelete} ></DeleteModal>
-       <Pagination curPage={curPage} viewFirstPage={viewFirstPage}
-         viewPreviousPage={viewPreviousPage}
-        viewNextPage={viewNextPage} viewLastPage={viewLastPage}
-         totalPages={totalPages} onSubmit={onSubmit} page={page} changePage={changePage} />
     </Container>
   )
 }

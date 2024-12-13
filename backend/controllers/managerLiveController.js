@@ -230,6 +230,7 @@ const setInitialPoints = asyncHandler(async (req, res) => {
     managerinfo.$set("overallLeagues.0.overallPoints", overallOverallPts);
     await managerinfo.save();
   }
+  res.json('Points added to manager picks')
 });
 
 //@desc update player scores in picks

@@ -15,7 +15,7 @@ const Teams = () => {
   const [ teamId, setTeamId] = useState('')
   const [ curPage, setCurPage ] = useState(1)
   const [page, setPage] = useState(1);
-  const { data,  isLoading } = useGetQuery()
+  const { data,  isLoading, isError } = useGetQuery()
   const [ add ] = useAddMutation()
   const [delet] = useDeletMutation()
 
@@ -152,10 +152,14 @@ const Teams = () => {
   if(isLoading) {
     return <div className="spinner"><Spinner /></div>
   }
+
+  if(isError) {
+    return <div className="spinner">Something went wrong</div>
+  }
   
   return (
     <Container>
-      <div className="admin-teams">
+      {!memoTeams?.length ? <div className="spinner">No Teams Found!</div> : <><div className="admin-teams">
       <div className="teams teams-head">
           <div className="team-name">Team</div>
           <div>Code</div>
@@ -170,6 +174,7 @@ const Teams = () => {
           <div></div>
           <div></div>
         </div>
+      
       {memoTeams?.map(x => <div className="teams" key={x._id}>
           <div className="team-name">{x.name}</div>
           <div>{x.shortName}</div>
@@ -189,6 +194,12 @@ const Teams = () => {
             </div>
       </div>)}
       </div>
+      <Pagination curPage={curPage} viewFirstPage={viewFirstPage}
+         viewPreviousPage={viewPreviousPage}
+        viewNextPage={viewNextPage} viewLastPage={viewLastPage}
+         totalPages={totalPages} onSubmit={onSubmit} page={page} changePage={changePage} />
+         </>
+      }
       <div className="add-button p-2">
         <Button onClick={addTeam} className="btn btn-success">Add Team</Button>
       </div>
@@ -199,13 +210,8 @@ const Teams = () => {
       <DeleteModal
       deleteTeamNow={deleteTeamNow}
        cancelDelete={cancelDelete} show={deleted} closeDelete={closeDelete} ></DeleteModal>
-
-        <Pagination curPage={curPage} viewFirstPage={viewFirstPage}
-         viewPreviousPage={viewPreviousPage}
-        viewNextPage={viewNextPage} viewLastPage={viewLastPage}
-         totalPages={totalPages} onSubmit={onSubmit} page={page} changePage={changePage} />
        
-    </Container>
+    </Container> 
   )
 }
 

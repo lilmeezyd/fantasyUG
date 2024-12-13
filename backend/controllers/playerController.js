@@ -111,7 +111,7 @@ const getPlayers = asyncHandler(async (req, res) => {
         assists, ownGoals, penaltiesSaved, penaltiesMissed, yellowCards, redCards, saves,
         cleansheets, starts, ownership: `${b.toFixed(1)}`
       }
-    })
+    }).sort((a,b) => a.appName-b.appName ? 1:-1)
     res.status(200).json(updatedPlayers)
   }
 });

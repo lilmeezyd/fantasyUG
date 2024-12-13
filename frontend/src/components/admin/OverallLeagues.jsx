@@ -17,11 +17,11 @@ const OverallLeagues = () => {
   const [overallLeagueId, setOverallLeagueId] = useState("");
   const [curPage, setCurPage] = useState(1);
   const [page, setPage] = useState(1);
-  const { data: overallLeagues, isLoading} = useGetOverallLeaguesQuery()
+  const { data: overallLeagues, isLoading, isFetching, isError} = useGetOverallLeaguesQuery()
   const [addOverallLeague ] = useAddOverallLeagueMutation()
   const [ deleteOverallLeague ] = useDeleteOverallLeagueMutation() 
   const [ updateOverallTable, {isLoading: a} ] = useUpdateOverallTableMutation()
-  console.log(a)
+  console.log(useGetOverallLeaguesQuery())
 
   const { deleted, edited, added } = show
   const pageSize = 5
@@ -51,7 +51,7 @@ const OverallLeagues = () => {
     setOverallLeagueId(id)
   }
 
-  const updateOverallLeaguePop = async (id) => {
+  const updateOverallLeague = async (id) => {
     const res = await updateOverallTable().unwrap()
     console.log(res)
   }
@@ -158,7 +158,11 @@ const OverallLeagues = () => {
   }, [overallLeagues, pageSize, curPage])
 
     if(isLoading) {
-        return <div className="spinner"><Spinner /></div>
+        return (<div className="spinner"><Spinner /></div>)
+    }
+
+    if(isError) {
+      return (<div className="spinner">Something went wrong</div>)
     }
 /*
     if(memoOverallLeagues.length === 0) {
@@ -174,9 +178,9 @@ const OverallLeagues = () => {
       );
     }*/
   return (
-    <Container>
-      {memoOverallLeagues?.length === 0 ? <div className="spinner">No Team Leagues Found!</div> : 
-      memoOverallLeagues?.map(x => <div className="teams p-2" key={x._id}>
+    <Container className="p-2">
+      {!memoOverallLeagues?.length ? <div className="spinner">No overall Leagues Found!</div> : 
+      <>{memoOverallLeagues?.map(x => <div className="teams p-2" key={x._id}>
         <div className="team-name">{x?.name}</div>
         <div>
             <Button
@@ -195,18 +199,23 @@ const OverallLeagues = () => {
             </Button>
           </div>
           <div>
-            <Button
-              onClick={() => updateOverallLeaguePop(x._id)}
-            >
-              {a === true ? <Spinner /> : `Update Table`}
-            </Button>
           </div>
-      </div>)
+      </div>)}
+      <Pagination curPage={curPage} viewFirstPage={viewFirstPage}
+         viewPreviousPage={viewPreviousPage}
+        viewNextPage={viewNextPage} viewLastPage={viewLastPage}
+         totalPages={totalPages} onSubmit={onSubmit} page={page} changePage={changePage} />
+      </>
       }
       <div className="add-button p-2">
         <Button onClick={addOverallLeaguePop} className="btn btn-success">
           Add Overall League
         </Button>
+        {!!memoOverallLeagues?.length && <Button
+              onClick={() => updateOverallLeague(x._id)}
+            >
+              {a === true ? <Spinner /> : `Update Table`}
+            </Button>}
       </div>
       <AddModal
       submit={submit}
@@ -216,10 +225,6 @@ const OverallLeagues = () => {
       deleteOverallLeagueNow={deleteOverallLeagueNow}
        cancelDelete={cancelDelete} show={deleted} closeDelete={closeDelete} ></DeleteModal>
 
-<Pagination curPage={curPage} viewFirstPage={viewFirstPage}
-         viewPreviousPage={viewPreviousPage}
-        viewNextPage={viewNextPage} viewLastPage={viewLastPage}
-         totalPages={totalPages} onSubmit={onSubmit} page={page} changePage={changePage} />
     </Container>
   )
 }
