@@ -726,6 +726,7 @@ form.login-cs {
   display: flex;
   background: white;
   gap: 1rem;
+  border: 1px solid #aaa;
 }
 
 .transfer-item {
@@ -735,9 +736,6 @@ form.login-cs {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  border-radius: 0.8rem;
-  border: 1px solid rgba(59, 147, 118, 0.315);
-  background: aquamarine;
 }
 
 .trans-reset {
@@ -1351,6 +1349,12 @@ h1.stats {
   padding: 0.2rem 0;
   margin-top: 0.3rem;
   font-size: 11px;
+}
+
+@media(max-width: 480px) {
+  .info-container {
+    font-size: 9px;
+  }
 }
 
 .vertical-line {
