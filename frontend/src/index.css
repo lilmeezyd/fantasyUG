@@ -234,7 +234,7 @@ form.login-cs {
   font-weight: 700;
   padding: 0.25rem 0;
   width: fit-content;
-    grid-template-columns: 120px 50px 50px 50px 50px 50px 50px 100px 50px 50px 50px 50px 50px;
+  grid-template-columns: 120px 50px 50px 50px 50px 50px 50px 100px 50px 50px 50px 50px 50px;
 }
 
 .admin-teams {
@@ -273,6 +273,7 @@ form.login-cs {
   background: #0c123d;
   color: white;
 }
+
 .teams:nth-of-type(even) {
   background: aquamarine;
 }
@@ -288,7 +289,7 @@ form.login-cs {
 
 .add-button {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-evenly;
 }
 
 .info-details {
@@ -363,6 +364,18 @@ form.login-cs {
 .leagues {
   display: flex;
   justify-content: space-between;
+}
+
+.league-baby {
+  display: block;
+  flex: 1 0 0%;
+  text-align: center;
+  padding: 0.5rem;
+  margin: 0 2px;
+}
+
+.league-active {
+  border-bottom: 5px solid #aaa;
 }
 
 /* Normal User Players*/
@@ -808,17 +821,19 @@ form.login-cs {
 }
 
 @media(max-width: 768px) {
+
   .default-player .squad-player,
-.default-bench .squad-player {
-  /*width: 100px;*/
-}
+  .default-bench .squad-player {
+    /*width: 100px;*/
+  }
 }
 
 @media(max-width: 540px) {
+
   .default-player .squad-player,
-.default-bench .squad-player {
-  /*width: 70px;*/
-}
+  .default-bench .squad-player {
+    /*width: 70px;*/
+  }
 }
 
 .default-bench .squad-player {
@@ -1036,12 +1051,14 @@ form.login-cs {
   padding-bottom: 0.5rem;
 }
 
-.home .team, .away .team {
+.home .team,
+.away .team {
   flex: 1 0 0%;
   align-self: center;
 }
 
-.home .ticker-image, .away .ticker-image {
+.home .ticker-image,
+.away .ticker-image {
   width: 30px;
   height: 30px;
   display: flex;
@@ -1080,12 +1097,12 @@ form.login-cs {
 
 .date {
   width: 80%;
-    background: #0c123d;
-    padding: 0.2rem 0;
-    color: #fff;
-    text-align: center;
-    border-bottom-left-radius: 0.5rem;
-    border-bottom-right-radius: 0.5rem;
+  background: #0c123d;
+  padding: 0.2rem 0;
+  color: #fff;
+  text-align: center;
+  border-bottom-left-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
 }
 
 .score {

@@ -17,7 +17,7 @@ const MDStar = (props) => {
       {topPlayer ? (
         <div className="button-wrapper" id={topPlayer}>
           <div className="next-fix">&#163;{nowCost?.toFixed(1)}M</div>
-          <button className="player-btn player-in-btn" onClick={handleShow}>
+          <button className="player-btn" onClick={handleShow}>
             <img
               src={`../shirt_${image}-66.svg`}
               className="image_pic"

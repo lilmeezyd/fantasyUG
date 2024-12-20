@@ -46,7 +46,7 @@ const PickPlayer = (props) => {
           <button 
           style={{borderRadius: '0.5rem', border: `${switcher.slot === baller.slot ? '2px solid goldenrod' : ''}`,
           opacity: `${blocked?.includes(baller.slot) ? '0.6' : '1'}`}}
-          className={`${okayed?.includes(baller.slot) ? 'h-light' : ''} player-btn player-in-btn`} onClick={handleShow}>
+          className={`${okayed?.includes(baller.slot) ? 'h-light' : ''} player-btn`} onClick={handleShow}>
             <img
               src={`../shirt_${image}-66.svg`}
               className="image_pic"

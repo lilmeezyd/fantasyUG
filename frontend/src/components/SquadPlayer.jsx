@@ -48,7 +48,7 @@ const SquadPlayer = (props) => {
         {baller._id ? (
           <div className="button-wrapper" id={baller._id}>
             <div className="next-fix">&#163;{nowCost?.toFixed(1)}M</div>
-          <button onClick={handleShow} className="player-btn player-in-btn">
+          <button onClick={handleShow} className="player-btn">
           <img
               src={`../shirt_${image}-66.svg`}
               className="image_pic"
