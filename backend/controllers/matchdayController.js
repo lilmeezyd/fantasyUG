@@ -227,23 +227,36 @@ const updateMatchday = asyncHandler(async (req, res) => {
 const updateMDdata = asyncHandler(async (req, res) => {
   const matchdayFound = await Matchday.findById(req.params.id);
   const { current } = matchdayFound
-  if (!current) {
+  if (!matchdayFound) {
+    res.status(404)
+    throw new Error('Matchday not found!')
+  }
+  /*if (!current) {
     res.status(400)
     throw new Error(`Matchday not current Matchday!`)
-  }
+  }*/
   const allPlayers = await PlayerHistory.find({ matchday: req.params.id })
+  if(allPlayers.length === 0) {
+    res.status(400)
+    throw new Error('No Players in this matchday yet!')
+  }
   const allLives = await ManagerLive.find()
   const entriesWithScore = allLives.map(x => {
     const y = x.livePicks.find(
       (x) => x.matchdayId.toString() === req.params.id.toString()
     )
-    const { matchday, matchdayId, matchdayPoints, matchdayRank } = y
-    return { manager: x.manager, matchday, matchdayId, matchdayPoints, matchdayRank }
+    if(y === undefined) {
+      return {manager: null, 
+        matchday: matchdayFound.id,
+        matchdayId:req.params.id.toString(), matchdayPoints: null, matchdayRank:null}
+    }
+    return { manager: x.manager, matchday:y.matchday,
+       matchdayId:y.matchdayId, matchdayPoints:y.matchdayPoints, matchdayRank:y.matchdayRank }
   })
   const highestScore = Math.max(...entriesWithScore.map(x => x.matchdayPoints))
   const totalPts = entriesWithScore.map(x => x.matchdayPoints).reduce((a, b) => a + b, 0)
   const avergeScore = (+(totalPts / allLives.length).toFixed(0))
-  const highestScoringEntry = entriesWithScore.find(x => x.matchdayPoints === highestScore).manager
+  const highestScoringEntry = entriesWithScore.find(x => +x.matchdayPoints === highestScore).manager
   if (allPlayers.length > 0) {
     const highestPoints = Math.max(...allPlayers.map(x => x.totalPoints))
     const topPlayer = allPlayers.find(x => x.totalPoints === highestPoints)
@@ -272,7 +285,8 @@ const updateTOW = asyncHandler(async (req, res) => {
     res.status(400)
     throw new Error(`Matchday not current Matchday!`)
   }*/
-  const { id } = matchdayFound
+ 
+ const { id } = matchdayFound
   const posObj = {
     '669a41e50f8891d8e0b4eb2a': 'GKP',
     '669a4831e181cb2ed40c240f': 'DEF',
@@ -317,33 +331,37 @@ const updateTOW = asyncHandler(async (req, res) => {
       return y
     })
     .sort((a, b) => a.totalPoints > b.totalPoints ? -1 : 1)
-  const starOnes = []
+    //console.log(sortedPlayers.filter(x => x.position === 'GKP'))
+ const starOnes = []
   let goal = 0, def = 0, mid = 0, fwd = 0, total = 0
   for (let i = 0; i < sortedPlayers.length; i++) {
     if (total === 11) break;
-    if (total === 10 && goal === 0) continue;
-    if (goal !== 1 && posObj[sortedPlayers[i].positionId] === 'GKP') {
+   // if (total === 10 && goal === 0) continue;
+    if (sortedPlayers[i].position === 'GKP') {
+      if(goal === 1) continue;
+      if(goal<1) {
       starOnes.push(sortedPlayers[i])
       goal += 1
       total += 1
+      }
     }
-    if (posObj[sortedPlayers[i].positionId] === 'DEF') {
-      if (def === 4 && mid === 5) continue;
+    if (sortedPlayers[i].position === 'DEF') {
+      if ((def === 4 && mid === 5) || (def === 3 && mid === 4 && fwd === 3)) continue;
       if (def < 5) {
         starOnes.push(sortedPlayers[i])
         def += 1
         total += 1
       }
     }
-    if (posObj[sortedPlayers[i].positionId] === 'MID') {
-      if (mid === 4 && def === 2) continue;
+    if (sortedPlayers[i].position === 'MID') {
+      if ((mid === 4 && def === 2) || (mid === 4 && fwd === 3) || (mid === 4 && def === 5)) continue;
       if (mid < 5) {
         starOnes.push(sortedPlayers[i])
         mid += 1
         total += 1
       }
     }
-    if (posObj[sortedPlayers[i].positionId] === 'FWD') {
+    if (sortedPlayers[i].position === 'FWD') {
       if (fwd === 2 && mid === 5) continue;
       if (fwd < 3) {
         starOnes.push(sortedPlayers[i])
@@ -351,6 +369,11 @@ const updateTOW = asyncHandler(async (req, res) => {
         total += 1
       }
     }
+    /*console.log(`goal: ${goal}`)
+    console.log(`def: ${def}`)
+    console.log(`mid: ${mid}`)
+    console.log(`fwd: ${fwd}`)
+    console.log(starOnes.length)*/
   }
   const exists = await TOW.findOne({ matchdayId: req.params.id })
   if (exists) {
@@ -400,6 +423,7 @@ const endMatchday = asyncHandler(async (req, res) => {
   const { id } = matchdayFound;
   const prev = id > 1 ? id - 1 : 0;
   const next = id + 1;
+  console.log(matchdayFound)
   if (!current) {
     res.status(400)
     throw new Error(`Matchday not current Matchday!`)
