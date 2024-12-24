@@ -3,7 +3,7 @@ import { useGetQuery } from "../../slices/teamApiSlice";
 import { usePopulateFixtureMutation, useDepopulateFixtureMutation } from "../../slices/fixtureApiSlice";
 import getTime from "../../utils/getTime";
 import { getPm, getPmString } from "../../utils/getPm";
-import { Button } from "react-bootstrap";
+import { Button, Spinner } from "react-bootstrap";
 import { useSetInitialPointsMutation } from "../../slices/livePicksApiSlice";
 import { useGetPlayersQuery } from "../../slices/playerApiSlice";
 import EditStatsModal from "./fixtureModals/EditStatsModal";
@@ -12,6 +12,7 @@ const FixtureItemAdmin = (props) => {
   const { x, editFixturePop, deleteFixturePop } = props; 
 
   const [stats, displayStats] = useState(false);
+  const [initialLoad, setInitialLoad ] = useState(false)
   const [show, setShow] = useState(false)
   const { data: teams } = useGetQuery();
   const { data: players } = useGetPlayersQuery()
@@ -46,7 +47,9 @@ const dePopulate = async (x,y) => {
 
 const setInitial= async (x, y) => {
   try {
-    await setInitialPoints({y:y, x:x}).unwrap()
+    const initialPts = await setInitialPoints({y:y, x:x}).unwrap()
+    const { isLoading } = initialPts
+    setInitialLoad(isLoading)
   } catch (error) {
     console.log(error)
   }
@@ -125,7 +128,7 @@ const statExists = (field) => {
                 </div>
                 {x?.stats?.length > 0 &&<div>
                     <Button onClick={() => setInitial(x._id, x.matchday)}>
-                        Set Initial Points
+                         {initialLoad === true ? <Spinner/> : 'Set Initial Points'}
                     </Button>
                 </div>}
               </div>

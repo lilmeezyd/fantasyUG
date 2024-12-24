@@ -51,7 +51,7 @@ const OverallLeagues = () => {
     setOverallLeagueId(id)
   }
 
-  const updateOverallLeague = async (id) => {
+  const updateOverallLeague = async () => {
     const res = await updateOverallTable().unwrap()
     console.log(res)
   }
@@ -212,7 +212,7 @@ const OverallLeagues = () => {
           Add Overall League
         </Button>
         {!!memoOverallLeagues?.length && <Button
-              onClick={() => updateOverallLeague(x._id)}
+              onClick={() => updateOverallLeague()}
             >
               {a === true ? <Spinner /> : `Update Table`}
             </Button>}

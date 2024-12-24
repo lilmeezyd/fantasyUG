@@ -95,11 +95,11 @@ const setInitialPoints = asyncHandler(async (req, res) => {
   if (!matchday) {
     res.status(400);
     throw new Error("Matchday not found");
-  }
+  }/*
   if (!current) {
     res.status(400);
     throw new Error("Matchday is already finished or yet to start");
-  }
+  }*/
   if (!players) {
     res.status(400);
     throw new Error("No players found");
