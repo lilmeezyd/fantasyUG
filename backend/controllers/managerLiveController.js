@@ -13,7 +13,7 @@ import League from "../models/leagueModel.js";
 
 //@desc set live picks
 //@route PUT api/livepicks/manager/
-//@access  
+//@access   
 const setLivePicks = asyncHandler(async (req, res) => {
   const allPicks = await Picks.find({});
   const matchday = await Matchday.findOne({ current: true });
@@ -143,6 +143,8 @@ const setInitialPoints = asyncHandler(async (req, res) => {
           matchday: req.params.mid,
           player: _id,
         });
+        const pBench =  playerDatas.reduce((a, b) => a + b.bench, 0);
+        const pStart =  playerDatas.reduce((a, b) => a + b.starts, 0);
         const playerPoints = playerDatas.reduce((a, b) => a + b.totalPoints, 0);
         if (inPlayers > -1) {
           return {
@@ -154,6 +156,8 @@ const setInitialPoints = asyncHandler(async (req, res) => {
             IsCaptain,
             IsViceCaptain,
             slot,
+            starts: pStart,
+            bench: pBench,
             points: IsCaptain ? playerPoints * 2 : playerPoints,
           };
         } else {

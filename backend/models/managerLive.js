@@ -39,7 +39,9 @@ const managerLiveSchema = mongoose.Schema({
          IsCaptain: { type: Boolean, required: true},
          IsViceCaptain: { type: Boolean, required: true},
          slot: { type: Number, required: true},
-         points: { type: Number, default: null}
+         points: { type: Number, default: null},
+         starts: { type: Number, default: null},
+         bench: { type: Number, default: null}
       }
       ],
       teamValue: { type: Number},

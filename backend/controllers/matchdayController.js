@@ -465,10 +465,10 @@ const createAutos = asyncHandler(async (req, res) => {
   const matchdayFound = await Matchday.findById(req.params.id);
   const { current } = matchdayFound
   const { id } = matchdayFound;
-  if (!current) {
+ /* if (!current) {
     res.status(400)
     throw new Error(`Matchday not current Matchday!`)
-  }
+  }*/
   const managerLives = await ManagerLive.find({})
   for (let i = 0; i < managerLives.length; i++) {
     const { manager, livePicks: lively } = managerLives[i]
@@ -519,7 +519,7 @@ const createAutos = asyncHandler(async (req, res) => {
       const pIndex = unformattedPicks.findIndex(x => x.IsViceCaptain === vice.IsViceCaptain)
       unformattedPicks.splice(pIndex, 1, newVice)
     }
-    if (gWhoMissed.length > 0) {
+    if (gWhoMissed.length > 0 && availableGoalie.length > 0) {
       const potential = availableGoalie.find(x => +x.starts > 0 || +x.bench > 0)
       const { _id: p_id, playerPosition: pp, playerTeam: pt, multiplier: pm, nowCost: pn,
         IsCaptain: pc, IsViceCaptain: pvc, slot: ps, points: ppts } = potential
