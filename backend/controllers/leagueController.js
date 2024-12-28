@@ -560,7 +560,11 @@ const updateOverallTable = asyncHandler(async (req, res) => {
           const superNew = newStandings
             .sort((a, b) => (a.overallPoints > b.overallPoints ? -1 : 1))
             .map((x, idx) => {
-              const y = { ...x, currentRank: idx + 1 };
+              const mid = {};
+              mid[id] = idx + 1;
+              const newOverallRanks = {...mid, ...x.managerRanks}
+              const lastRank = x.managerRanks === undefined ? null : x.managerRanks[id-1]
+              const y = { ...x, currentRank: idx + 1, lastRank,  managerRanks:newOverallRanks};
               return y;
             })
             .sort((a, b) => (a.matchdays[id] > b.matchdays[id] ? -1 : 1))
@@ -722,8 +726,13 @@ const updateTeamTables = asyncHandler(async (req, res) => {
           const superNew = newStandings
             .sort((a, b) => (a.overallPoints > b.overallPoints ? -1 : 1))
             .map((x, idx) => {
-              const y = { ...x, currentRank: idx + 1 };
-              return y;
+              const mid = {};
+              mid[id] = idx + 1;
+              const newOverallRanks = {...mid, ...x.managerRanks}
+              const lastRank = x.managerRanks === undefined ? null : x.managerRanks[id-1]
+              const y = { ...x, currentRank: idx + 1, lastRank,  managerRanks:newOverallRanks};
+              console.log(y)
+              return y
             })
             .sort((a, b) => (a.matchdays[id] > b.matchdays[id] ? -1 : 1))
             .map((x, idx) => {

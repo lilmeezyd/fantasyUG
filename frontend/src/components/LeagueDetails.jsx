@@ -7,11 +7,12 @@ const LeagueDetails = (props) => {
   const { privateLeagues, overallLeagues, teamLeagues, teamName, teamValue, bank,
     overallPoints, matchdayPoints, overallRank, firstName, lastName
    } = props;
+   console.log(overallLeagues)
   const { data: teams } = useGetQuery();
   const { data: totalPlayers } = useGetTotalQuery()
   const { userInfo } = useSelector((state) => state.auth);
   const navigate = useNavigate();
-  return (
+  return ( 
     <div className="league-details"> 
       <div className="ranks">
         <div className="ld-1">
@@ -52,9 +53,9 @@ const LeagueDetails = (props) => {
           {overallLeagues?.map((x) => (
             <div className="my-leagues" key={x._id}>
               <div>
-                {x.currentRank === x.lastRank ? <AiFillCaretRight color="#aaa"/> : 
-                x.currentRank > x.lastRank ? <AiFillCaretUp color="green" /> : 
-                <AiFillCaretDown color="red" />}
+                {x.currentRank === x.lastRank || x.lastRank === null && <AiFillCaretRight color="#aaa"/> }
+                {x.currentRank < x.lastRank && x.lastRank !== null && <AiFillCaretUp color="green" />} 
+                {x.currentRank > x.lastRank && x.lastRank !== null  && <AiFillCaretDown color="red" />}
               </div>
               <h6>{x.currentRank === null ? '-' : x.currentRank}</h6>
               <Link to={`/userleagues/overall/${x.id}`}><h6>{x.name}</h6></Link>
@@ -63,9 +64,9 @@ const LeagueDetails = (props) => {
           {teamLeagues?.map((x) => (
             <div className="my-leagues" key={x._id}>
               <div>
-              {x.currentRank === x.lastRank ? <AiFillCaretRight color="#aaa"/> : 
-                x.currentRank > x.lastRank ? <AiFillCaretUp color="green" /> : 
-                <AiFillCaretDown color="red" />}
+              {x.currentRank === x.lastRank || x.lastRank === null && <AiFillCaretRight color="#aaa"/> }
+                {x.currentRank < x.lastRank && x.lastRank !== null && <AiFillCaretUp color="green" />} 
+                {x.currentRank > x.lastRank && x.lastRank !== null  && <AiFillCaretDown color="red" />}
               </div>
               <h6>{x.currentRank === null ? '-' : x.currentRank}</h6>
               <Link to={`/userleagues/team/${x.id}`}><h6>{teams?.find((team) => team._id === x.team)?.name}</h6></Link>

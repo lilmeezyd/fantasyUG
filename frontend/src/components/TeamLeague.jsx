@@ -33,9 +33,9 @@ const TeamLeague = () => {
         style={{background: `${userInfo._id === entrant.user.toString() ? '#ffd70063' : 'white'}`, 
         border: `${userInfo._id === entrant.user.toString() ? '2px solid gold' : 'none'}`}} key={entrant._id} className="standing-grid-1">
             <div>
-            {entrant?.currentRank === entrant?.lastRank ? <AiFillCaretRight color="#aaa"/> : 
-                entrant?.currentRank > entrant?.lastRank ? <AiFillCaretUp color="green" /> : 
-                <AiFillCaretDown color="red" />}
+            {entrant?.currentRank === entrant?.lastRank || entrant?.lastRank === null && <AiFillCaretRight color="#aaa"/> }
+                {entrant?.currentRank < entrant?.lastRank && entrant?.lastRank !== null && <AiFillCaretUp color="green" />} 
+                {entrant?.currentRank > entrant?.lastRank && entrant?.lastRank !== null  && <AiFillCaretDown color="red" />}
             </div>
             <div>{entrant?.currentRank}</div>
           <div className="standing-grid-name">

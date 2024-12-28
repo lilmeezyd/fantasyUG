@@ -10,6 +10,7 @@ import { useGetPicksQuery } from "../slices/picksSlice";
 const PickTeam = () => {
   const { data: managerInfo } = useGetManagerInfoQuery();
   const { data: managerPicks, isLoading } = useGetPicksQuery();
+  console.log(managerInfo)
   /*console.log(isLoading)
   console.log(managerPicks)
   console.log(useGetPicksQuery())*/
