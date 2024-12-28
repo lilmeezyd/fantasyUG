@@ -1,11 +1,13 @@
 import { useParams, Link } from "react-router-dom"
 import { useGetOverallLeagueQuery } from "../slices/leagueApiSlice"
+import { useGetMaxIdQuery } from "../slices/matchdayApiSlice"
 import {Spinner} from "react-bootstrap"
 import { useSelector } from "react-redux"
 import { AiFillCaretRight, AiFillCaretDown, AiFillCaretUp } from "react-icons/ai";
 const OverallLeague = () => {
   const { id } = useParams()
   const { data, isLoading } = useGetOverallLeagueQuery(id)
+  const { data: maxId } = useGetMaxIdQuery()
   const { userInfo } = useSelector(state => state.auth)
   if(isLoading) {
     return (
@@ -23,8 +25,8 @@ const OverallLeague = () => {
       <div className="standing-grid-1 standing-grid-header">
         <div></div>
         <div>Rank</div>
-          <div className="standing-grid-name">Team Name</div>
-            <div className="standing-grid-name">Manager</div>
+        <div className="standing-grid-name">Team Name</div>
+        <div>MD Points</div>
             <div>Points</div>
           </div>
       {data?.standings?.map((entrant, idx) => 
@@ -33,17 +35,22 @@ const OverallLeague = () => {
         style={{background: `${userInfo._id === entrant.user.toString() ? '#ffd70063' : 'white'}`, 
         border: `${userInfo._id === entrant.user.toString() ? '2px solid gold' : 'none'}`}} key={entrant._id} className="standing-grid-1">
             <div>
-            {entrant?.currentRank === entrant?.lastRank || entrant?.lastRank === null && <AiFillCaretRight color="#aaa"/> }
+            {(entrant?.currentRank === entrant?.lastRank || entrant?.lastRank === null) && <AiFillCaretRight color="#aaa"/> }
                 {entrant?.currentRank < entrant?.lastRank && entrant?.lastRank !== null && <AiFillCaretUp color="green" />} 
                 {entrant?.currentRank > entrant?.lastRank && entrant?.lastRank !== null  && <AiFillCaretDown color="red" />}
             
             </div>
             <div>{entrant?.currentRank}</div>
-          <div className="standing-grid-name">
-          <Link to={`/points/${entrant.user.toString()}`}>{entrant?.teamName}</Link></div>
-          <div className="standing-grid-name">
-            {entrant?.firstName}&nbsp;&nbsp;{entrant?.lastName}
-          </div>
+            <div className="standing-grid-name">
+                  <Link to={`/points/${entrant.user.toString()}`}>
+                    <div>
+                      <div>{entrant?.teamName}</div>
+                      <div>
+                        {entrant?.firstName}&nbsp;&nbsp;{entrant?.lastName}
+                      </div>
+                    </div></Link></div>
+
+                <div>{entrant?.matchdays[maxId]}</div>
           <div>{entrant?.overallPoints}</div>
           </div>
       )}

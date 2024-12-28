@@ -575,6 +575,7 @@ const updateOverallTable = asyncHandler(async (req, res) => {
               const y = { ...x, mdRanks: newMid };
               return y;
             });
+            console.log(superNew)
 
           updatedLeague.$set("standings", superNew);
           const newUpdated = await updatedLeague.save();

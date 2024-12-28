@@ -53,7 +53,7 @@ const LeagueDetails = (props) => {
           {overallLeagues?.map((x) => (
             <div className="my-leagues" key={x._id}>
               <div>
-                {x.currentRank === x.lastRank || x.lastRank === null && <AiFillCaretRight color="#aaa"/> }
+                {(x.currentRank === x.lastRank || x.lastRank === null) && <AiFillCaretRight color="#aaa"/> }
                 {x.currentRank < x.lastRank && x.lastRank !== null && <AiFillCaretUp color="green" />} 
                 {x.currentRank > x.lastRank && x.lastRank !== null  && <AiFillCaretDown color="red" />}
               </div>
@@ -64,7 +64,7 @@ const LeagueDetails = (props) => {
           {teamLeagues?.map((x) => (
             <div className="my-leagues" key={x._id}>
               <div>
-              {x.currentRank === x.lastRank || x.lastRank === null && <AiFillCaretRight color="#aaa"/> }
+              {(x.currentRank === x.lastRank || x.lastRank === null) && <AiFillCaretRight color="#aaa"/> }
                 {x.currentRank < x.lastRank && x.lastRank !== null && <AiFillCaretUp color="green" />} 
                 {x.currentRank > x.lastRank && x.lastRank !== null  && <AiFillCaretDown color="red" />}
               </div>

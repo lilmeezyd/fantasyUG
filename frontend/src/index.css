@@ -895,7 +895,7 @@ form.login-cs {
 .next-fix {
   padding: 0.1rem;
   border-radius: 0.5rem;
-  font-weight: 600;
+  font-weight: 800;
   border-top: 0;
   width: min-content;
   border-bottom: 0;
@@ -908,7 +908,7 @@ form.login-cs {
 
 .player-name {
   border-radius: 0.5rem;
-  font-weight: 600;
+  font-weight: 800;
   width: calc(100%);
   /*width: -webkit-fill-available;
   width: 100%;*/
@@ -1545,6 +1545,8 @@ h1.stats {
 
 .standing-grid-header {
   font-weight: 700;
+  background: aquamarine;
+  border: 1px solid transparent;
 }
 
 .standing-grid-manager {
@@ -1560,6 +1562,7 @@ h1.stats {
   max-width: 900px;
   margin: auto;
   padding: 0.25rem;
+  font-weight: 700;
 }
 
 .standing-grid-2 {
