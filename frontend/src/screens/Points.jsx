@@ -24,12 +24,11 @@ const Points = () => {
   const { page, min, max } = pageDetails
   useEffect(() => {
     const a = []
-    const id = matchdays?.find(x => x.next === true)?.id-1
     picksDetails?.picks?.forEach(x => {
         a.push(...x.livePicks)})
       const minimum = Math.min(...a.map(x => x.matchday))
       const maximum = Math.max(...a.map(x => x.matchday))
-      setPageDetails(prev => ({...prev, page: id, min: minimum, max: maximum}))
+      setPageDetails(prev => ({...prev, page: maximum, min: minimum, max: maximum}))
   }, [matchdays, picksDetails])
   
   const realPicks = useMemo(() => 
