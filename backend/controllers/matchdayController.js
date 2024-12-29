@@ -473,6 +473,8 @@ const createAutos = asyncHandler(async (req, res) => {
   for (let i = 0; i < managerLives.length; i++) {
     const { manager, livePicks: lively } = managerLives[i]
     const mdPicks = lively.find(x => x.matchday === id)
+    const manInfo = await ManagerInfo.findById(manager)
+    console.log(manInfo.teamName)
     const {
       matchday,
       matchdayId,
@@ -491,6 +493,7 @@ const createAutos = asyncHandler(async (req, res) => {
     //Available by position
     let availableDefs = available.filter(x => x.playerPosition.toString() === '669a4831e181cb2ed40c240f')
     let availableFwds = available.filter(x => x.playerPosition.toString() === '669a485de181cb2ed40c2417')
+    let availableMids = available.filter(x => x.playerPosition.toString() === '669a4846e181cb2ed40c2413')
     const gWhoMissed = unformattedPicks.filter(x => x.multiplier > 0 && x.playerPosition.toString() === '669a41e50f8891d8e0b4eb2a' && +x.starts === 0 && +x.bench === 0)
     const dWhoMissed = unformattedPicks.filter(x => x.multiplier > 0 && x.playerPosition.toString() === '669a4831e181cb2ed40c240f' && +x.starts === 0 && +x.bench === 0)
     const mWhoMissed = unformattedPicks.filter(x => x.multiplier > 0 && x.playerPosition.toString() === '669a4846e181cb2ed40c2413' && +x.starts === 0 && +x.bench === 0)
@@ -499,7 +502,9 @@ const createAutos = asyncHandler(async (req, res) => {
     //Starting players by position
     let startingDefs = unformattedPicks.filter(x => x.multiplier > 0 && x.playerPosition.toString() === '669a4831e181cb2ed40c240f')
     let startingFwds = unformattedPicks.filter(x => x.multiplier > 0 && x.playerPosition.toString() === '669a485de181cb2ed40c2417')
+    let startingMids = unformattedPicks.filter(x => x.multiplier > 0 && x.playerPosition.toString() === '669a4846e181cb2ed40c2413')
 
+    //console.log(available.length)
     if (captainMissed) {
       const vice = unformattedPicks.find(x => x.IsViceCaptain === true)
       const { _id: p_id, playerPosition: pp, playerTeam: pt, multiplier: pm, nowCost: pn,
@@ -563,16 +568,32 @@ const createAutos = asyncHandler(async (req, res) => {
         unformattedPicks.splice(mMissedIndex, 1, newPotential)
         const pIndex = unformattedPicks.findIndex(x => x.slot === ps)
         unformattedPicks.splice(pIndex, 1, oldMid)
+        //Defenders
         if (pp.toString() === '669a4831e181cb2ed40c240f') {
-          availableDefs -= 1
-          startingDefs += 1
+          /*availableDefs -= 1
+          startingDefs += 1*/
+          const availDefIndex = availableDefs.findIndex(x => x._id === potential._id)
+          availableDefs.splice(availDefIndex, 1)
+          const starDefIndex = startingDefs.findIndex(x => x._id === dWhoMissed[i]._id)
+          startingDefs.splice(starDefIndex, 1, newPotential)
         }
-        if (pp.toString() === '669a485de181cb2ed40c2417') {
-          availableFwds -= 1
-          startingFwds += 1
+        //Forwards
+        if (pp.toString() === '669a485de181cb2ed40c2417' && startingDefs.length > 3) {
+          /*availableFwds -= 1
+          startingFwds += 1*/
+          const availFwdIndex = availableFwds.findIndex(x => x._id === potential._id)
+          availableFwds.splice(availFwdIndex, 1)
+          const starDefIndex = startingDefs.findIndex(x => x._id === dWhoMissed[i]._id)
+          startingDefs.splice(starDefIndex,1)
+          startingFwds.push(newPotential)
         }
-        if (pp.toString() !== '669a4831e181cb2ed40c240f' && mp.toString() === '669a4831e181cb2ed40c240f') {
-          startingDefs -= 1
+        //Midfielders
+        if(pp.toString() === '669a4846e181cb2ed40c2413' && startingDefs.length > 3) {
+          const availMidIndex = availableMids.findIndex(x => x._id === potential._id)
+          availableMids.splice(availMidIndex, 1)
+          const starDefIndex = startingDefs.findIndex(x => x._id === dWhoMissed[i]._id)
+          startingDefs.splice(starDefIndex, 1)
+          startingMids.push(newPotential)
         }
         const availableIndex = available.findIndex(x => x._id === potential._id)
         automaticSubs.push({ in: { _id: p_id, playerPosition: pp, playerTeam: pt }, out: { _id: m_id, playerPosition: mp, playerTeam: mt } })
@@ -601,13 +622,28 @@ const createAutos = asyncHandler(async (req, res) => {
         unformattedPicks.splice(mMissedIndex, 1, newPotential)
         const pIndex = unformattedPicks.findIndex(x => x.slot === ps)
         unformattedPicks.splice(pIndex, 1, oldMid)
+        //Defenders
         if (pp.toString() === '669a4831e181cb2ed40c240f') {
-          availableDefs -= 1
-          startingDefs += 1
+          const availDefIndex = availableDefs.findIndex(x => x._id === potential._id)
+          availableDefs.splice(availDefIndex, 1)
+          const starMidIndex = startingMids.findIndex(x => x._id === mWhoMissed[i]._id)
+          startingMids.splice(starMidIndex, 1)
+          startingDefs.push(newPotential)
         }
+        //Forwards
         if (pp.toString() === '669a485de181cb2ed40c2417') {
-          availableFwds -= 1
-          startingFwds += 1
+          const availFwdIndex = availableFwds.findIndex(x => x._id === potential._id)
+          availableFwds.splice(availFwdIndex, 1)
+          const starMidIndex = startingMids.findIndex(x => x._id === mWhoMissed[i]._id)
+          startingMids.splice(starMidIndex, 1)
+          startingFwds.push(newPotential)
+        }
+        //Midfielders
+        if(pp.toString() === '669a4846e181cb2ed40c2413') {
+          const availMidIndex = availableMids.findIndex(x => x._id === potential._id)
+          availableMids.splice(availMidIndex, 1)
+          const starMidIndex = startingMids.findIndex(x => x._id === mWhoMissed[i]._id)
+          startingMids.splice(starMidIndex, 1, newPotential)
         }
         const availableIndex = available.findIndex(x => x._id === potential._id)
         automaticSubs.push({ in: { _id: p_id, playerPosition: pp, playerTeam: pt }, out: { _id: m_id, playerPosition: mp, playerTeam: mt } })
@@ -635,16 +671,28 @@ const createAutos = asyncHandler(async (req, res) => {
         unformattedPicks.splice(mMissedIndex, 1, newPotential)
         const pIndex = unformattedPicks.findIndex(x => x.slot === ps)
         unformattedPicks.splice(pIndex, 1, oldMid)
-        if (pp.toString() === '669a4831e181cb2ed40c240f') {
-          availableDefs -= 1
-          startingDefs += 1
+        //Defenders
+        if (pp.toString() === '669a4831e181cb2ed40c240f' && startingFwds.length > 1) {
+          const availDefIndex = availableDefs.findIndex(x => x._id === potential._id)
+          availableDefs.splice(availDefIndex, 1)
+          const starFwdIndex = startingFwds.findIndex(x => x._id === fWhoMissed[i]._id)
+          startingFwds.splice(starFwdIndex,1)
+          startingFwds.push(newPotential)
+          
         }
         if (pp.toString() === '669a485de181cb2ed40c2417') {
-          availableFwds -= 1
-          startingFwds += 1
+          const availFwdIndex = availableFwds.findIndex(x => x._id === potential._id)
+          availableFwds.splice(availFwdIndex, 1)
+          const starFwdIndex = startingFwds.findIndex(x => x._id === fWhoMissed[i]._id)
+          startingFwds.splice(starFwdIndex, 1, newPotential)
         }
-        if (pp.toString() !== '669a485de181cb2ed40c2417' && mp.toString() === '669a485de181cb2ed40c2417') {
-          startingFwds -= 1
+        //midfielders
+        if(pp.toString() === '669a4846e181cb2ed40c2413' && startingFwds.length > 1) {
+          const availMidIndex = availableMids.findIndex(x => x._id === potential._id)
+          availableMids.splice(availMidIndex, 1)
+          const starFwdIndex = startingFwds.findIndex(x => x._id === fWhoMissed[i]._id)
+          startingFwds.splice(starFwdIndex, 1)
+          startingFwds.push(newPotential)
         }
         const availableIndex = available.findIndex(x => x._id === potential._id)
         automaticSubs.push({ in: { _id: p_id, playerPosition: pp, playerTeam: pt }, out: { _id: m_id, playerPosition: mp, playerTeam: mt } })
@@ -652,6 +700,8 @@ const createAutos = asyncHandler(async (req, res) => {
       }
 
     }
+    //console.log(automaticSubs)
+    
     const newMdPoints = unformattedPicks
       .filter((x) => x.multiplier > 0)
       .reduce((x, y) => x + y.points, 0);

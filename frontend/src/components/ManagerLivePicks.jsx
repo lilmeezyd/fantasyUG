@@ -157,6 +157,7 @@ const ManagerPicks = (props) => {
       {automaticSubs?.length > 0 && (
         <div className="automatic">
           <div  className="auto-class-header">Automatic Subs</div>
+          <div className="auto-class-wrapper">
           <div className="auto-class">
             <div className="ac">IN</div>
             <div className="ac">OUT</div>
@@ -167,6 +168,7 @@ const ManagerPicks = (props) => {
               <div className="ac">{players?.find((y) => y?._id === x?.out?._id)?.appName}</div>
             </div>
           ))}
+          </div>
         </div>
       )}
     </div>

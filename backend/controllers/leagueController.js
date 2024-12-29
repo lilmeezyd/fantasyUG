@@ -575,7 +575,8 @@ const updateOverallTable = asyncHandler(async (req, res) => {
               const y = { ...x, mdRanks: newMid };
               return y;
             });
-            console.log(superNew)
+
+            console.log(newStandings)
 
           updatedLeague.$set("standings", superNew);
           const newUpdated = await updatedLeague.save();
@@ -591,6 +592,7 @@ const updateOverallTable = asyncHandler(async (req, res) => {
                   const {
                     teamValue,
                     bank,
+                    automaticSubs,
                     matchday,
                     matchdayId,
                     activeChip,
@@ -601,6 +603,7 @@ const updateOverallTable = asyncHandler(async (req, res) => {
                   return live.matchday === id
                     ? {
                         teamValue,
+                        automaticSubs,
                         bank,
                         picks,
                         _id,

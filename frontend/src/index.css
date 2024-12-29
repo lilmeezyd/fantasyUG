@@ -1605,15 +1605,26 @@ h1.stats {
 }
 
 /* Automatic subs */
+.auto-class-wrapper {
+  background: white;
+  border: 1px solid #aaa;
+  border-radius: 0.5rem;
+  font-weight: 700;
+}
 .automatic {
   border-radius: 0.5rem;
   background: aquamarine;
   padding: 0.5rem;
+  border: 1px solid #aaa;
 }
 
 .auto-class-header {
   text-align: center;
   font-weight: 700;
+  border: 1px solid #aaa;
+  margin-bottom: 0.5rem;
+  background: white;
+  border-radius: 0.5rem;
 }
 
 .auto-class {
@@ -1623,7 +1634,7 @@ h1.stats {
 .auto-class .ac {
   flex: 1 0 0%;
   text-align: center;
-  font-weight: 500;
+  /*font-weight: 500;*/
 }
 
 .home-stars {
