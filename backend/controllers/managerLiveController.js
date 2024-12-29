@@ -32,6 +32,7 @@ const setLivePicks = asyncHandler(async (req, res) => {
     const { matchdayJoined } = mInfo;
     if (mLive === null) {
       if (matchdayJoined <= id) {
+        await ManagerInfo.findOneAndUpdate({ _id: allPicks[i].manager }, {matchdayPoints: 0})
         await ManagerLive.create({
           manager: allPicks[i].manager,
           livePicks: [
@@ -63,6 +64,7 @@ const setLivePicks = asyncHandler(async (req, res) => {
         teamValue: allPicks[i].teamValue,
         bank: allPicks[i].bank,
       };
+      await ManagerInfo.findOneAndUpdate({ _id: allPicks[i].manager }, {matchdayPoints: 0})
       await ManagerLive.findOneAndUpdate(
         { manager: allPicks[i].manager },
         { $push: { livePicks: newLivePicks } },

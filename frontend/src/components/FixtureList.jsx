@@ -7,7 +7,7 @@ import {
 } from "react-icons/bs";
 import FixtureItem from "./FixtureItem";
 const FixtureList = (props) => {
-  const { mdParam } = props
+  const { mdParam, mdParam1 } = props
   const [page, setPage] = useState(1);
   const [copy, setCopy] = useState([]); 
   const { data: fixtures, isLoading } = useGetFixturesQuery();
@@ -15,9 +15,14 @@ const FixtureList = (props) => {
   useEffect(() => {
     const copyFix = fixtures?.length > 0 ? [...fixtures] : [];
     copyFix?.sort((x, y) => (x?.kickOffTime > y?.kickOffTime ? 1 : -1));
+    mdParam === 'current' ? 
+    setPage(+copyFix?.find(x => x?._id?.[mdParam1] === true)?._id?.id-1) :
     setPage(copyFix?.find(x => x?._id?.[mdParam] === true)?._id?.id)
     setCopy(fixtures);
-  }, [fixtures, mdParam]);
+  }, [fixtures, mdParam, mdParam1]);
+  console.log(mdParam)
+  console.log(copy)
+  console.log(page)
 
   const onDecrement = () => {
     setPage((prevState) => prevState - 1);

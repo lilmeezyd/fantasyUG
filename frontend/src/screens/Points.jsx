@@ -24,7 +24,7 @@ const Points = () => {
   const { page, min, max } = pageDetails
   useEffect(() => {
     const a = []
-    const id = matchdays?.find(x => x.current === true)?.id
+    const id = matchdays?.find(x => x.next === true)?.id-1
     picksDetails?.picks?.forEach(x => {
         a.push(...x.livePicks)})
       const minimum = Math.min(...a.map(x => x.matchday))
@@ -120,7 +120,7 @@ const Points = () => {
          />
       </div>
       <Container className="main">
-        <FixtureList mdParam={'current'} />
+        <FixtureList mdParam={'next'} mdParam1={'next'} />
       </Container>
       </>}
       </>
