@@ -396,7 +396,7 @@ const PickTeam = () => {
          /> 
       </div>
       <Container className="main">
-        <FixtureList mdParam={'next'} mdParam1={'next'} />
+        <FixtureList mdParam={'next'} />
       </Container>
     </>
   );

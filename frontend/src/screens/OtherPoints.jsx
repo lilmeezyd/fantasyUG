@@ -116,7 +116,7 @@ const OtherPoints = () => {
              />
           </div>
           <Container className="main">
-            <FixtureList mdParam={'current'} mdParam1={'next'} />
+            <FixtureList mdParam={page} />
           </Container>
           </>}
           </>
