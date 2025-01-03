@@ -13,7 +13,7 @@ export const livePicksApiSlice = apiSlice.injectEndpoints({
         setLivePicks: builder.mutation({
             query: () => ({
                 url: `${LIVE_PICKS_URL}`,
-                method: 'PATCH'
+                method: 'PUT'
             }),
             invalidatesTags: ['Live']
         }),
@@ -22,7 +22,7 @@ export const livePicksApiSlice = apiSlice.injectEndpoints({
                 const { y, x } = data
                 return {
                     url: `${LIVE_PICKS_URL}/matchday/${y}/start/fixtures/${x}`,
-                    method: 'PATCH'
+                    method: 'PUT'
                 }
             },
             invalidatesTags: ['Live']
