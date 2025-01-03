@@ -12,7 +12,7 @@ import TeamLeague from "../models/teamLeagueModel.js";
 import League from "../models/leagueModel.js";
 
 //@desc set live picks
-//@route PUT api/livepicks/manager/
+//@route PATCH api/livepicks/manager/
 //@access   
 const setLivePicks = asyncHandler(async (req, res) => {
   const allPicks = await Picks.find({});
@@ -77,7 +77,7 @@ const setLivePicks = asyncHandler(async (req, res) => {
 });
 
 //@desc set initial points
-//@route PUT api/livepicks/manager/matchday/:mid/start/fixtures/:id
+//@route PATCH api/livepicks/manager/matchday/:mid/start/fixtures/:id
 //@access ADMIN
 const setInitialPoints = asyncHandler(async (req, res) => {
   const allLives = await ManagerLive.find({});
