@@ -4,7 +4,7 @@ import {
   getRound,
   setLivePicks,
   setInitialPoints,
-  addPointsToPicks, 
+  addPointsToPicks,
   deletePoints,
 } from "../controllers/managerLiveController.js";
 import { protect, roles } from "../middleware/authMiddleware.js";
