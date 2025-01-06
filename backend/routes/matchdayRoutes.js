@@ -36,7 +36,7 @@ router.route("/data/tows/:id").get(getTOW);
 router
   .route("/updateTOW/:id")
   .get(getTOW)
-  .put(protect, roles(ROLES.ADMIN), updateTOW);
+  .patch(protect, roles(ROLES.ADMIN), updateTOW);
 router.route("/createautos/:id").patch(protect, roles(ROLES.ADMIN), createAutos)
 router
   .route("/endmatchday/:id")
