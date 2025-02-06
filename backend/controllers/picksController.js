@@ -113,11 +113,13 @@ const setPicks = asyncHandler(async (req, res) => {
 });
 
 //@desc Get picks
-//@route GET /api/picks
+//@route GET /api/picks/:id
 //@access Private
 const getPicks = asyncHandler(async (req, res) => {
-  const user = await User.findById(req.user.id)
-  const userManager = await ManagerInfo.findOne({user: req.user.id});
+  const user = await User.findById(req.params.id);
+  const userManager = await ManagerInfo.findOne({
+    $or: [{ user: req.params.id }, { _id: req.params.id }],
+  });
 
   if (!user) {
     res.status(400);

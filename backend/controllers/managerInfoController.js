@@ -3,11 +3,13 @@ import ManagerInfo from "../models/managerInfoModel.js";
 import User from "../models/userModel.js";
 
 //@desc Get manager info
-//@route GET /api/managerinfo/
+//@route GET /api/managerinfo/:id
 //@access Private
 const getManagerInfo = asyncHandler(async (req, res) => {
-  const user = await User.findById(req.user.id);
-  const managerInfo = await ManagerInfo.findOne({ user: req.user.id });
+  const user = await User.findById(req.params.id);
+  const managerInfo = await ManagerInfo.findOne({
+    $or: [{ user: req.params.id }, { _id: req.params.id }],
+  });
   if (!user) {
     res.status(400);
     throw new Error("User not found");
@@ -15,4 +17,4 @@ const getManagerInfo = asyncHandler(async (req, res) => {
   res.status(200).json(managerInfo);
 });
 
-export { getManagerInfo };
+export { getManagerInfo }; 

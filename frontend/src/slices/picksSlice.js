@@ -3,7 +3,7 @@ const PICKS_URL = "/api/picks";
 
 export const picksApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    setPicks: builder.mutation({
+    setPicks: builder.mutation({ 
       query: (data) => ({
         url: `${PICKS_URL}`,
         method: "POST",
@@ -12,8 +12,8 @@ export const picksApiSlice = apiSlice.injectEndpoints({
       invalidatesTags: ["Pick"],
     }),
     getPicks: builder.query({
-      query: () => ({
-        url: `${PICKS_URL}`,
+      query: (id) => ({
+        url: `${PICKS_URL}/${id}`,
         method: "GET",
       }),
       providesTags: ["Pick"],

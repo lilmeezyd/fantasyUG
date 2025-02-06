@@ -3,10 +3,12 @@ import PicksPlatform from "../components/PicksPlatform";
 import Players from "../components/Players";
 import { useGetPicksQuery } from "../slices/picksSlice";
 import { Spinner } from "react-bootstrap";
+import { useSelector } from 'react-redux'
 import FixtureList from "../components/FixtureList";
 
 const Transfers = () => {
-  const { data, isLoading } = useGetPicksQuery();
+  const { userInfo } = useSelector((state) => state.auth)
+  const { data, isLoading } = useGetPicksQuery(userInfo?._id);
   const reducer = (state, action) => {
     const ids = state.originalPicks?.map(x => x._id)
     if (action.type === "INITIAL_PICKS") {

@@ -18,8 +18,8 @@ const Points = () => {
   const [ pageDetails, setPageDetails ] = useState({page: null, min: null, max: null})
   const { userInfo } = useSelector((state) => state.auth)
   const { data: picksDetails, isLoading, isSuccess } = useGetLivePicksQuery(userInfo?._id)
-  const { data: managerInfo } = useGetManagerInfoQuery();
-  const { data: managerPicks } = useGetPicksQuery();
+  const { data: managerInfo } = useGetManagerInfoQuery(userInfo?._id);
+  const { data: managerPicks } = useGetPicksQuery(userInfo?._id);
   const { data: matchdays } = useGetMatchdaysQuery()
   const { page, min, max } = pageDetails
   useEffect(() => {

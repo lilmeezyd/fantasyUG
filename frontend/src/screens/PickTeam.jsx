@@ -4,12 +4,14 @@ import LeagueDetails from "../components/LeagueDetails";
 import ManagerPicks from "../components/ManagerPicks";
 import FixtureList from "../components/FixtureList";
 import { Container } from "react-bootstrap";
+import { useSelector } from 'react-redux'
 import { useGetManagerInfoQuery } from "../slices/managerInfoApiSlice";
 import { useGetPicksQuery } from "../slices/picksSlice";
  
-const PickTeam = () => {
-  const { data: managerInfo } = useGetManagerInfoQuery();
-  const { data: managerPicks, isLoading } = useGetPicksQuery();
+const PickTeam = () => { 
+  const { userInfo } = useSelector((state) => state.auth)
+  const { data: managerInfo } = useGetManagerInfoQuery(userInfo?._id);
+  const { data: managerPicks, isLoading } = useGetPicksQuery(userInfo?._id);
   console.log(managerInfo)
   /*console.log(isLoading)
   console.log(managerPicks)

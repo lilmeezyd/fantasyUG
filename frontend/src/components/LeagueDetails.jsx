@@ -7,7 +7,6 @@ const LeagueDetails = (props) => {
   const { privateLeagues, overallLeagues, teamLeagues, teamName, teamValue, bank,
     overallPoints, matchdayPoints, overallRank, firstName, lastName
    } = props;
-   console.log(overallLeagues)
   const { data: teams } = useGetQuery();
   const { data: totalPlayers } = useGetTotalQuery()
   const { userInfo } = useSelector((state) => state.auth);
