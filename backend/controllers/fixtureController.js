@@ -121,8 +121,9 @@ const populateStats = asyncHandler(async (req, res) => {
     throw new Error("No players found");
   }
 
-  players.forEach(async (player) => {
-    await PlayerHistory.create({
+
+  const playersHis = await Promise.all(players.map(async (player) => {
+    return await PlayerHistory.create({
       matchday: fixture.matchday,
       player: player._id,
       fixture: fixture._id,
@@ -132,7 +133,8 @@ const populateStats = asyncHandler(async (req, res) => {
           : fixture.teamAway,
       home: fixture.teamHome === player.playerTeam ? true : false,
     });
-  });
+  }))
+
   fixture.teamAwayScore = 0;
   fixture.teamHomeScore = 0;
   const updatedFixture = await Fixture.findByIdAndUpdate(
@@ -140,7 +142,7 @@ const populateStats = asyncHandler(async (req, res) => {
     fixture,
     { new: true }
   );
-  res.status(200).json(updatedFixture);
+  res.status(200).json({updatedFixture, playersHis});
 });
 
 //@desc remove stats for a specific fixture
@@ -185,7 +187,7 @@ const dePopulateStats = asyncHandler(async (req, res) => {
   fixture.teamAwayScore = null;
   fixture.teamHomeScore = null;
   const deletedFix = await PlayerHistory.deleteMany({ fixture: req.params.id });
-  affectedPlayers.forEach(async (play) => {
+  const updatedPlayers = await Promise.all(affectedPlayers.map(async (play) => {
     const {
       player,
       totalPoints,
@@ -202,7 +204,7 @@ const dePopulateStats = asyncHandler(async (req, res) => {
       bench,
       bestPlayer,
     } = play;
-    await Player.findByIdAndUpdate(
+    return await Player.findByIdAndUpdate(
       { _id: player },
       {
         $inc: {
@@ -223,8 +225,9 @@ const dePopulateStats = asyncHandler(async (req, res) => {
       },
       { new: true }
     );
-  });
-  if (deletedFix) {
+  }));
+  const picksExist = allLives.map(x => x.livePicks).flat().filter(a => a.matchdayId.toString() === req.params.mid)
+  if (deletedFix && picksExist.length > 0) {
     for (let i = 0; i < allLives.length; i++) {
       const mLive = await ManagerLive.findOne({ manager: allLives[i].manager });
       const mLivePicks = mLive.livePicks;
@@ -352,7 +355,7 @@ const dePopulateStats = asyncHandler(async (req, res) => {
     fixture,
     { new: true }
   );
-  res.status(200).json(updatedFixture);
+  res.status(200).json({updatedFixture, updatedPlayers, deletedFix});
 });
 
 //@desc Edit a specific fixture
