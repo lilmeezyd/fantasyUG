@@ -43,14 +43,14 @@ app.use('/api/leagues', leagueRoutes)
 app.use('/api/managerinfo', managerInfoRoutes)
 app.use('/api/livepicks/manager', liveRoutes)
 const __filename = fileURLToPath(import.meta.url); // get the resolved path to the file
-  const __dirname = path.dirname(__filename); // get the name of the directory
+  //const __dirname = path.dirname(__filename); // get the name of the directory
   // Serve the static files from the React app
-  app.use(express.static(path.join(__dirname, '../frontend/dist')));
+  //app.use(express.static(path.join(__dirname, '../frontend/dist')));
 
   // Handle requests by serving index.html for all routes
-  app.get('*', (req, res) => {
+  /*app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/dist', 'index.html'));
-  });
+  });*/
 
 if (process.env.NODE_ENV === 'Production') {
   /*const __dirname = path.resolve();

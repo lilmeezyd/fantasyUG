@@ -9,6 +9,7 @@ import Matchday from "../models/matchdayModel.js";
 import Team from "../models/teamModel.js";
 import ManagerLive from "../models/managerLive.js";
 import ManagerInfo from "../models/managerInfoModel.js";
+import { rollbackFixtureStats } from "../services/rollbackFixtureStats.js";
 
 //@desc Set Fixture
 //@route POST /api/fixtures 
@@ -122,18 +123,25 @@ const populateStats = asyncHandler(async (req, res) => {
   }
 
 
-  const playersHis = await Promise.all(players.map(async (player) => {
-    return await PlayerHistory.create({
-      matchday: fixture.matchday,
-      player: player._id,
-      fixture: fixture._id,
-      opponent:
-        fixture.teamAway === player.playerTeam
-          ? fixture.teamHome
-          : fixture.teamAway,
-      home: fixture.teamHome === player.playerTeam ? true : false,
-    });
-  }))
+  const results = await Promise.allSettled(
+    players.map((player) => {
+      const isHomeTeam = fixture.teamHome === player.playerTeam;
+      const opponent = isHomeTeam ? fixture.teamAway : fixture.teamHome;
+
+      return PlayerHistory.create({
+        matchday: fixture.matchday,
+        player: player._id,
+        fixture: fixture._id,
+        opponent,
+        home: isHomeTeam,
+      });
+    })
+  );
+
+  // Separate successes and failures
+  const successes = results.filter(r => r.status === 'fulfilled').map(r => r.value);
+  const errors = results.filter(r => r.status === 'rejected').map(r => r.reason);
+
 
   fixture.teamAwayScore = 0;
   fixture.teamHomeScore = 0;
@@ -142,7 +150,7 @@ const populateStats = asyncHandler(async (req, res) => {
     fixture,
     { new: true }
   );
-  res.status(200).json({updatedFixture, playersHis});
+  res.status(200).json({ updatedFixture, successes, errors });
 });
 
 //@desc remove stats for a specific fixture
@@ -186,176 +194,14 @@ const dePopulateStats = asyncHandler(async (req, res) => {
   fixture.stats.length = 0;
   fixture.teamAwayScore = null;
   fixture.teamHomeScore = null;
-  const deletedFix = await PlayerHistory.deleteMany({ fixture: req.params.id });
-  const updatedPlayers = await Promise.all(affectedPlayers.map(async (play) => {
-    const {
-      player,
-      totalPoints,
-      goalsScored,
-      assists,
-      ownGoals,
-      penaltiesSaved,
-      penaltiesMissed,
-      yellowCards,
-      redCards,
-      saves,
-      cleansheets,
-      starts,
-      bench,
-      bestPlayer,
-    } = play;
-    return await Player.findByIdAndUpdate(
-      { _id: player },
-      {
-        $inc: {
-          totalPoints: -totalPoints,
-          goalsScored: -goalsScored,
-          assists: -assists,
-          ownGoals: -ownGoals,
-          penaltiesSaved: -penaltiesSaved,
-          penaltiesMissed: -penaltiesMissed,
-          yellowCards: -yellowCards,
-          redCards: -redCards,
-          saves: -saves,
-          cleansheets: -cleansheets,
-          starts: -starts,
-          bench: -bench,
-          bestPlayer: -bestPlayer,
-        },
-      },
-      { new: true }
-    );
-  }));
-  const picksExist = allLives.map(x => x.livePicks).flat().filter(a => a.matchdayId.toString() === req.params.mid)
-  if (deletedFix && picksExist.length > 0) {
-    for (let i = 0; i < allLives.length; i++) {
-      const mLive = await ManagerLive.findOne({ manager: allLives[i].manager });
-      const mLivePicks = mLive.livePicks;
-      const mdPicks = mLivePicks.find(
-        (x) => x.matchdayId.toString() === req.params.mid
-      );
-      const { matchday, matchdayId, activeChip, matchdayRank, teamValue, bank, matchdayPoints } =
-        mdPicks;
-      const { picks: unformattedPicks } = mdPicks;
-      const formatted = await Promise.all(
-        unformattedPicks.map(async (x) => {
-          const {
-            _id,
-            playerPosition,
-            playerTeam,
-            multiplier,
-            nowCost,
-            IsCaptain,
-            IsViceCaptain,
-            slot,
-          } = x;
-          const inPlayers = players.findIndex(
-            (y) => x._id.toString() === y._id.toString()
-          );
-          const playerDatas = await PlayerHistory.find({
-            matchday: req.params.mid,
-            player: _id,
-          });
-          const playerPoints = playerDatas.reduce(
-            (a, b) => a + b.totalPoints,
-            0
-          );
-          if (inPlayers > -1) {
-            return {
-              _id,
-              playerPosition,
-              playerTeam,
-              multiplier,
-              nowCost,
-              IsCaptain,
-              IsViceCaptain,
-              slot,
-              points: IsCaptain ? playerPoints * 2 : playerPoints,
-            };
-          } else {
-            return x;
-          }
-        })
-      );
-
-      const newMdPoints = formatted
-        .filter((x) => x.multiplier > 0)
-        .reduce((x, y) => x + y.points, 0);
-      const newFormatted = {
-        picks: formatted,
-        matchday,
-        matchdayId,
-        activeChip,
-        matchdayRank,
-        teamValue,
-        bank,
-        matchdayPoints: newMdPoints,
-      };
-      const superLives = mLivePicks.filter(
-        (x) => x.matchdayId.toString() !== req.params.mid.toString()
-      );
-      superLives.push(newFormatted);
-      const managerinfo = await ManagerInfo.findOneAndUpdate(
-        { _id: allLives[i].manager },
-        {
-          $set: {
-            matchdayPoints: newMdPoints,
-            "teamLeagues.0.matchdayPoints": newMdPoints,
-            "overallLeagues.0.matchdayPoints": newMdPoints,
-          },
-        },
-        { new: true }
-      );
-      const managerlive = await ManagerLive.findOneAndUpdate(
-        { manager: allLives[i].manager },
-        { livePicks: superLives },
-        { new: true }
-      );
-
-      const { teamLeagues, overallLeagues } = managerinfo;
-      const startTeamMd = await Matchday.findById(
-        teamLeagues[0].startMatchday.toString()
-      );
-      const endTeamMd = await Matchday.findById(
-        teamLeagues[0].endMatchday.toString()
-      );
-      const startOverallMd = await Matchday.findById(
-        overallLeagues[0].startMatchday.toString()
-      );
-      const endOverallMd = await Matchday.findById(
-        overallLeagues[0].endMatchday.toString()
-      );
-      const { livePicks } = managerlive;
-      const endTeamMdId = endTeamMd === null ? 100 : endTeamMd.id;
-      const endOverallMdId = endOverallMd === null ? 100 : endOverallMd.id;
-      const overallTeamPts = livePicks
-        .filter(
-          (x) => x.matchday >= startTeamMd.id && x.matchday <= endTeamMdId
-        )
-        .map((x) => x.matchdayPoints)
-        .reduce((x, y) => x + y, 0);
-      const overallOverallPts = livePicks
-        .filter(
-          (x) => x.matchday >= startOverallMd.id && x.matchday <= endOverallMdId
-        )
-        .map((x) => x.matchdayPoints)
-        .reduce((x, y) => x + y, 0);
-      const overallPts = livePicks
-        .map((x) => x.matchdayPoints)
-        .reduce((a, b) => a + b, 0);
-      managerinfo.$set("overallPoints", overallPts);
-      managerinfo.$set("teamLeagues.0.overallPoints", overallTeamPts);
-      managerinfo.$set("overallLeagues.0.overallPoints", overallOverallPts);
-      await managerinfo.save();
-    }
-  }
+  rollbackFixtureStats(req.params.id, req.params.mid, affectedPlayers, allLives)
 
   const updatedFixture = await Fixture.findByIdAndUpdate(
     req.params.id,
     fixture,
     { new: true }
   );
-  res.status(200).json({updatedFixture, updatedPlayers, deletedFix});
+  res.status(200).json(updatedFixture);
 });
 
 //@desc Edit a specific fixture
@@ -406,6 +252,7 @@ const editFixture = asyncHandler(async (req, res) => {
 //@access private
 //@role ADMIN, EDITOR
 const editStats = asyncHandler(async (req, res) => {
+
   const fixture = await Fixture.findById(req.params.id);
   let { teamHomeScore, teamAwayScore } = fixture;
   const { identifier, homeAway, player, value } = req.body;
@@ -514,7 +361,7 @@ const editStats = asyncHandler(async (req, res) => {
             player: retrievedPlayer,
             value: newValue + a,
           });
-         await PlayerHistory.findOneAndUpdate(
+          await PlayerHistory.findOneAndUpdate(
             { player: retrievedPlayer, fixture: req.params.id },
             { $inc: { [identifier]: newValue, totalPoints } },
             { new: true }

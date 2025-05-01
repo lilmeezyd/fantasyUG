@@ -82,6 +82,7 @@ const getPlayers = asyncHandler(async (req, res) => {
     const b = numberOfManagers === 0 ? 0 : x.playerCount/numberOfManagers*100 
     return {...x._doc, ownership: `${b.toFixed(1)}`}
   })*/
+    
   if (players) {
     const updatedPlayers = players.map(player => {
       const { _id,
@@ -109,7 +110,7 @@ const getPlayers = asyncHandler(async (req, res) => {
         _id, firstName, secondName, appName,
         playerPosition, playerTeam, startCost, nowCost, totalPoints, goalsScored,
         assists, ownGoals, penaltiesSaved, penaltiesMissed, yellowCards, redCards, saves,
-        cleansheets, starts, ownership: `${b.toFixed(1)}`
+        cleansheets, starts, ownership: `${b?.toFixed(1)}`
       }
     }).sort((a,b) => a.appName-b.appName ? 1:-1)
     res.status(200).json(updatedPlayers)
@@ -162,7 +163,6 @@ const getPlayerHistory = asyncHandler(async (req, res) => {
 const updatePlayer = asyncHandler(async (req, res) => {
   const player = await Player.findById(req.params.id);
   const position = await Position.findById(player.playerPosition);
-  console.log(player)
 
   // Find user
   const user = await User.findById(req.user.id).select("-password");
@@ -216,7 +216,6 @@ const updatePlayer = asyncHandler(async (req, res) => {
       req.body,
       { new: true }
     );
-    console.log(updatedPlayer)
     res.status(200).json(updatedPlayer);
   }
   /*
