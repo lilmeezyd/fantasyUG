@@ -78,7 +78,7 @@ const setTeamLeague = asyncHandler(async (req, res) => {
 //@route PATCH /api/leagues/overallleagues/:id/join
 //@access Private
 const joinOverallLeague = asyncHandler(
-  async (userObj, manager, overallLeague, req, res) => {
+  async (userObj, manager, overallLeague, session, req, res) => {
     const managerInfo = await ManagerInfo.findById(manager);
     const oldLeagues = managerInfo ? managerInfo.overallLeagues : [];
     const oldLeaguesIds = oldLeagues.map((x) => x.id);
@@ -120,7 +120,7 @@ const joinOverallLeague = asyncHandler(
     const updatedManagerInfo = await ManagerInfo.findByIdAndUpdate(
       manager,
       { $push: { overallLeagues: newLeague } },
-      { new: true }
+      { new: true },
     );
 
     if (updatedManagerInfo) {
