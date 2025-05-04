@@ -10,9 +10,11 @@ import { Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import PickPlayer from "./PickPlayer";
 import {Spinner} from "react-bootstrap";
+import { toast } from 'react-toastify';
 
 const ManagerPicks = (props) => {
   const { teamName, switchPlayer,switchCaptain,
+    save, setSaveToFalse,
   switchVice, inform, picks, blocked, okayed, switcher, id, isLoading } = props;
   const { data: teams } = useGetQuery();
   const { data: players } = useGetPlayersQuery();
@@ -22,7 +24,6 @@ const ManagerPicks = (props) => {
   const { data: matchdays, isLoading: isMatchday } = useGetMatchdaysQuery()
   const navigate = useNavigate();
   const md = matchdays?.find(matchday => matchday?.next === true)
-  console.log(picks)
 
   const goalkeepers = picks?.filter(
     (pick) =>
@@ -50,7 +51,9 @@ const ManagerPicks = (props) => {
 
   const onSave = async (e) => {
     e.preventDefault()
-    await updatePicks({id: id?._id, picks, teamValue, bank: itb}).unwrap()
+    setSaveToFalse()
+    const message = await updatePicks({id: id?._id, picks, teamValue, bank: itb}).unwrap() 
+    toast.success(message?.msg)
     navigate('/pickteam')
   }
   if(isLoading) {
@@ -150,6 +153,7 @@ const ManagerPicks = (props) => {
         <div className="form-group py-3">
             <Button
               type="submit"
+              disabled={ !save }
               className="btn-success form-control"
             >
               Save

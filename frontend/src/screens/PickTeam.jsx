@@ -12,10 +12,6 @@ const PickTeam = () => {
   const { userInfo } = useSelector((state) => state.auth)
   const { data: managerInfo } = useGetManagerInfoQuery(userInfo?._id);
   const { data: managerPicks, isLoading } = useGetPicksQuery(userInfo?._id);
-  console.log(managerInfo)
-  /*console.log(isLoading)
-  console.log(managerPicks)
-  console.log(useGetPicksQuery())*/
 
   const reducer = (state, action) => {
     const ids = state?.picks?.map(x => x.slot)
@@ -291,6 +287,7 @@ const PickTeam = () => {
         }
       return {
         ...state,
+        save: true,
         switcher: {},
           okayed: [],
           blocked: [],
@@ -309,10 +306,16 @@ const PickTeam = () => {
         blocked: []
       }
     }
+
+    if(action.type === 'BACK_TO_FALSE') {
+      return {
+        ...state, save: false
+      }
+    }
   }
 
-  const [ state, dispatch ] = useReducer(reducer, { GKP:0, DEF: 0, MID: 0, FWD: 0, picks: [], switcher: {}, blocked: [], okayed: []})
-  const {picks, switcher, blocked, okayed} = state
+  const [ state, dispatch ] = useReducer(reducer, { save: false, GKP:0, DEF: 0, MID: 0, FWD: 0, picks: [], switcher: {}, blocked: [], okayed: []})
+  const {picks, switcher, blocked, okayed, save} = state
 
   useEffect(() => {
     const goalkeepers = managerPicks?.picks?.filter(
@@ -345,7 +348,7 @@ const PickTeam = () => {
         FWD: forwards
       }
     })
-  },[managerPicks])
+  },[managerPicks]) 
 
   const switchPlayer = (data) => {
     const { shortPos, ...rest} = data
@@ -365,6 +368,10 @@ const PickTeam = () => {
   const switchVice = (data) => {
     dispatch({type: `SWITCH_VICE`, data})
   }
+
+  const setSaveToFalse = () => {
+    dispatch({type: `BACK_TO_FALSE`})
+  }
   const inform = (data) => {
     console.log('view info')
   }
@@ -382,6 +389,8 @@ const PickTeam = () => {
         blocked={blocked}
         okayed={okayed}
         switcher={switcher}
+        save={save}
+        setSaveToFalse={setSaveToFalse}
          picks={picks} switchCaptain={switchCaptain} switchVice={switchVice} inform={inform} switchPlayer={switchPlayer} teamName={managerInfo?.teamName} />
         <LeagueDetails
         firstName={managerInfo?.firstName}

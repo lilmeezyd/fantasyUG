@@ -78,10 +78,6 @@ const setPlayer = asyncHandler(async (req, res) => {
 const getPlayers = asyncHandler(async (req, res) => {
   const players = await Player.find({});
   const numberOfManagers = await getAllManagers()
-  /*const updatedPlayers =  Array.from(players).map(x => {
-    const b = numberOfManagers === 0 ? 0 : x.playerCount/numberOfManagers*100 
-    return {...x._doc, ownership: `${b.toFixed(1)}`}
-  })*/
     
   if (players) {
     const updatedPlayers = players.map(player => {
@@ -407,8 +403,8 @@ const updatePlayer = asyncHandler(async (req, res) => {
 });
 
 //Increment Player number
-const playerIncrement = asyncHandler(async (playerId, increment, req, res) => {
-  await Player.findByIdAndUpdate(playerId, { $inc: { playerCount: increment } })
+const playerIncrement = asyncHandler(async (playerId, increment, session, req, res) => {
+  await Player.findByIdAndUpdate(playerId, { $inc: { playerCount: increment } }, { session })
 })
 
 //@desc delete player

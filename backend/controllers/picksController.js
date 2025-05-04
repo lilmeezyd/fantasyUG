@@ -89,7 +89,7 @@ const setPicks = asyncHandler(async (req, res) => {
   const requiredLeague = await OverallLeague.findById(overallLeague);
   const requiredTeamLeague = await TeamLeague.findById(playerLeague);
   const { creator: oCreator, name, id: oId, startMatchday: oSM, endMatchday: oEM } = requiredLeague;
-  const { creator: tCreator, team: tTeam, id: tId, startMatchday: tSM, endMatchday: tEM } = requiredTeamLeague;
+  const { creator: tCreator, team, id: tId, startMatchday: tSM, endMatchday: tEM } = requiredTeamLeague;
 
   const newOverallLeague = {
     creator: oCreator,
@@ -104,7 +104,7 @@ const setPicks = asyncHandler(async (req, res) => {
   };
   const newTeamLeague = {
     creator: tCreator,
-    team: tTeam,
+    team,
     id: tId,
     startMatchday: tSM,
     endMatchday: tEM,
@@ -294,23 +294,31 @@ const updatePicks = asyncHandler(async (req, res) => {
     res.status(400);
     throw new Error("Not enough funds");
   }
+  const session = await mongoose.startSession()
+  session.startTransaction()
 
-
-  const updatedPicks = await Picks.findByIdAndUpdate(req.params.id, req.body, {
-    new: true,
-  });
-
-  if (updatedPicks && transfersOut && transfersIn) {
-    const inIds = transfersIn.map(x => x._id)
-    const outIds = transfersOut.map(x => x._id)
-    inIds.forEach(async (pick) => {
-      playerIncrement(pick, 1)
-    })
-    outIds.forEach(async (pick) => {
-      playerIncrement(pick, -1)
-    })
+  try {
+    const updatedPicks = await Picks.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+    }, {session});
+    if(transfersIn && transfersOut) {
+      if(!updatedPicks) throw new Error('Updating Picks failed');
+      const inIds = transfersIn.map(x => x._id);
+      const outIds = transfersOut.map(x => x._id);
+      await Promise.all(inIds.map(id => playerIncrement(id, 1, session)))
+      await Promise.all(outIds.map(id => playerIncrement(id, -1, session)))
+    }
+    await session.commitTransaction();
+    session.endSession();
+    res.status(200).json({msg: 'Changes saved'})
+    
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    console.error(error)
+    res.status(500).json({ error: 'Something went wrong', details: err.message });
   }
-  res.status(200).json(updatedPicks);
+
 });
 
 export { setPicks, getPicks, getMatchdayPicks, updatePicks, previousPicks };

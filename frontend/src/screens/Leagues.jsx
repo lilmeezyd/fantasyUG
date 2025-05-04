@@ -1,10 +1,14 @@
 import { useGetManagerInfoQuery } from "../slices/managerInfoApiSlice"
 import { useGetQuery } from "../slices/teamApiSlice"
 import { Link } from "react-router-dom"
+import { useSelector } from "react-redux"
 
 const Leagues = () => {
-  const { data } = useGetManagerInfoQuery()
+  const { userInfo } = useSelector((state) => state.auth)
+  const { data } = useGetManagerInfoQuery(userInfo?._id)
   const { data: teams } = useGetQuery()
+  console.log(data)
+  console.log(teams)
   return (
     <div className="league-bg">
       <div className="standing-wrap">

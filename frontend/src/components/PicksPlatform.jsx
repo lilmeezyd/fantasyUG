@@ -17,6 +17,7 @@ import SquadPlayer from "./SquadPlayer";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { setCredentials } from "../slices/authSlice";
+import { toast } from "react-toastify";
 const PicksPlatform = (props) => {
   const { isLoading, picks, removePlayer, totalPlayers, itb, reset, teamValue, id, transfersIn, transfersOut } = props;
   const [teamName, setTeamName] = useState("");
@@ -50,32 +51,34 @@ const PicksPlatform = (props) => {
 
   const onSave = async (e) => {
     e.preventDefault()
-    const res = await updatePicks({id: id?._id, picks, teamValue, bank: itb, transfersIn, transfersOut}).unwrap()
+    const message = await updatePicks({ id: id?._id, picks, teamValue, bank: itb, transfersIn, transfersOut }).unwrap()
+    toast.success(message?.msg)
     navigate('/pickteam')
   }
   const onSubmit = async (e) => {
     e.preventDefault();
-    if(goalkeepers.length === 2 && defenders.length === 5 && midfielders.length === 5 && forwards.length === 3) {
+    if (goalkeepers.length === 2 && defenders.length === 5 && midfielders.length === 5 && forwards.length === 3) {
       console.log('team is full')
     }
 
     try {
       const res = await setPicks({
-        picks, teamName, bank: itb, teamValue, playerLeague, 
-        overallLeague: "66c13c3d1f44b30a427fb02f"}).unwrap()
-        dispatch(setCredentials({ ...res.hasPicks }))
-        navigate("/pickteam")
+        picks, teamName, bank: itb, teamValue, playerLeague,
+        overallLeague: "66c13c3d1f44b30a427fb02f"
+      }).unwrap()
+      dispatch(setCredentials({ ...res.hasPicks }))
+      navigate("/pickteam")
     } catch (error) {
       console.log(error)
     }
-    
+
   };
   const selectLeague = (e) => {
     setPlayerLeague(e.target.value);
   };
   const onChange = (e) => {
     setTeamName(e.target.value);
-  }; 
+  };
 
   if (isLoading) {
     return (
@@ -83,10 +86,10 @@ const PicksPlatform = (props) => {
         <Spinner> /</Spinner>
       </div>
     );
-  } 
+  }
 
   return (
-    <div> 
+    <div>
       <div className="transfer-data p-2">
         <div className="transfer-item p-2">
           <div>Selected</div>
@@ -118,13 +121,13 @@ const PicksPlatform = (props) => {
         </Button>
       </div>
       <div className="no-picks-team">
-        <div className="default-player"> 
+        <div className="default-player">
           {goalkeepers?.map((x) => (
             <div key={x.slot} className="squad-player">
               <SquadPlayer
                 removePlayer={removePlayer}
                 baller={x}
-                posName={"GKP"}  
+                posName={"GKP"}
               ></SquadPlayer>
             </div>
           ))}
@@ -225,20 +228,20 @@ const PicksPlatform = (props) => {
       </section>}
 
       {userInfo?.hasPicks &&
-      <section className="form">
-        <form onSubmit={onSave}>
-        <div className="form-group py-3">
-            <Button
-              type="submit"
-              disabled={
-                itb < 0 ||
-                totalPlayers < 15 || transfersIn?.length === 0 ||transfersOut?.length === 0
-              }
-              className="btn-success form-control"
-            >
-              Save
-            </Button>
-          </div>
+        <section className="form">
+          <form onSubmit={onSave}>
+            <div className="form-group py-3">
+              <Button
+                type="submit"
+                disabled={
+                  itb < 0 ||
+                  totalPlayers < 15 || transfersIn?.length === 0 || transfersOut?.length === 0
+                }
+                className="btn-success form-control"
+              >
+                Save
+              </Button>
+            </div>
           </form></section>}
     </div>
   );

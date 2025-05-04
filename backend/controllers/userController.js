@@ -140,8 +140,8 @@ const getAllManagers = asyncHandler(async (req, res) => {
   return managerLength
 })
 
-const updateHasPicks = asyncHandler(async (userId, req, res) => {
-  const user = await User.findByIdAndUpdate(userId, {hasPicks: true}, {new: true}).select('-password')
+const updateHasPicks = asyncHandler(async (userId, session, req, res) => {
+  const user = await User.findByIdAndUpdate(userId, {hasPicks: true}, {new: true}, {session}).select('-password')
   return user
 })
 

@@ -9,7 +9,6 @@ const OverallLeague = () => {
   const { data, isLoading } = useGetOverallLeagueQuery(id)
   const { data: maxId } = useGetMaxIdQuery()
   const { userInfo } = useSelector(state => state.auth)
-  console.log(data)
   if(isLoading) {
     return (
       <div className="spinner">

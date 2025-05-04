@@ -10,6 +10,7 @@ const getManagerInfo = asyncHandler(async (req, res) => {
   const managerInfo = await ManagerInfo.findOne({
     $or: [{ user: req.params.id }, { _id: req.params.id }],
   });
+  console.log(managerInfo)
   if (!user) {
     res.status(400);
     throw new Error("User not found");
