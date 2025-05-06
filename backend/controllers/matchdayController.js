@@ -3,8 +3,10 @@ import Matchday from "../models/matchdayModel.js";
 import ManagerLive from "../models/managerLive.js";
 import ManagerInfo from "../models/managerInfoModel.js";
 import PlayerHistory from "../models/playerHistoryModel.js"
+import Position from "../models/positionModel.js";
 import TOW from "../models/teamOfTheWeekModel.js"
 import User from "../models/userModel.js";
+import mongoose from "mongoose";
 
 
 //@desc Get recent matchday
@@ -109,69 +111,82 @@ const getMatchday = asyncHandler(async (req, res) => {
 //@role ADMIN
 const startMatchday = asyncHandler(async (req, res) => {
   const matchday = await Matchday.findById(req.params.id);
-  const { id, next: isNext } = matchday;
-  const prev = id > 1 ? id - 1 : 0;
-  const next = id + 1;
-
   if (!matchday) {
     res.status(400);
     throw new Error("Matchday not found");
   }
 
+  const { id, next: isNext } = matchday;
+  const prev = id > 1 ? id - 1 : 0;
+  const next = id + 1;
+
   if (!isNext) {
     res.status(400);
-    throw new Error("Matchday not the next one");
+    throw new Error("Matchday is not the next one");
   }
 
-  //FInd user
   if (!req.user) {
     res.status(400);
     throw new Error("User not found");
   }
 
-  if (prev === 0) {
-    const updated = await Matchday.findByIdAndUpdate(
-      req.params.id,
-      { next: false, current: true, pastDeadline: true },
-      { new: true }
-    );
+  const session = await mongoose.startSession();
+  session.startTransaction();
 
-    await Matchday.findOneAndUpdate(
-      { id: next },
-      { next: true },
-      { new: true }
-    );
+  try {
+    let updatedMatchday, nextMatchdayDoc;
 
-    res.status(200).json(updated);
-  } else {
-    const prevMatchday = await Matchday.findOne({ id: prev });
-    const nextMatchday = await Matchday.findOne({ id: next });
-    const { finished, pastDeadline } = prevMatchday;
-    let nextMatch;
-
-    if (finished === false || pastDeadline === false) {
-      res.status(400);
-      throw new Error(`Previous matchday isn't finished yet!`);
-    }
-    const updated = await Matchday.findByIdAndUpdate(
-      req.params.id,
-      { next: false, current: true, pastDeadline: true },
-      { new: true }
-    );
-
-    if (nextMatchday) {
-      nextMatch = nextMatchday?._id;
-
-      await Matchday.findByIdAndUpdate(
-        nextMatch,
-        { next: true },
-        { new: true }
+    if (prev === 0) {
+      // First matchday case
+      updatedMatchday = await Matchday.findByIdAndUpdate(
+        req.params.id,
+        { next: false, current: true, pastDeadline: true },
+        { new: true, session }
       );
+
+      nextMatchdayDoc = await Matchday.findOneAndUpdate(
+        { id: next },
+        { next: true },
+        { new: true, session }
+      );
+    } else {
+      const prevMatchday = await Matchday.findOne({ id: prev }).session(session);
+      const nextMatchday = await Matchday.findOne({ id: next }).session(session);
+
+      if (!prevMatchday.finished || !prevMatchday.pastDeadline) {
+        throw new Error(`Previous matchday isn't finished yet!`);
+      }
+
+      updatedMatchday = await Matchday.findByIdAndUpdate(
+        req.params.id,
+        { next: false, current: true, pastDeadline: true },
+        { new: true, session }
+      );
+
+      if (nextMatchday) {
+        nextMatchdayDoc = await Matchday.findByIdAndUpdate(
+          nextMatchday._id,
+          { next: true },
+          { new: true, session }
+        );
+      }
     }
 
-    res.status(200).json(updated);
+    await session.commitTransaction();
+    session.endSession();
+
+    res.status(200).json({
+      currentMatchday: updatedMatchday,
+      nextMatchday: nextMatchdayDoc || null,
+    });
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    console.error("Transaction failed:", error);
+    res.status(500).json({ error: error.message });
   }
 });
+
 
 //@desc Update Matchday
 //@route PUT /api/matchdays/:id
@@ -225,50 +240,82 @@ const updateMatchday = asyncHandler(async (req, res) => {
 //@access Private
 //@role Admin, editor
 const updateMDdata = asyncHandler(async (req, res) => {
-  const matchdayFound = await Matchday.findById(req.params.id);
-  const { current } = matchdayFound
-  if (!matchdayFound) {
-    res.status(404)
-    throw new Error('Matchday not found!')
-  }
-  /*if (!current) {
-    res.status(400)
-    throw new Error(`Matchday not current Matchday!`)
-  }*/
-  const allPlayers = await PlayerHistory.find({ matchday: req.params.id })
-  if(allPlayers.length === 0) {
-    res.status(400)
-    throw new Error('No Players in this matchday yet!')
-  }
-  const allLives = await ManagerLive.find()
-  const entriesWithScore = allLives.map(x => {
-    const y = x.livePicks.find(
-      (x) => x.matchdayId.toString() === req.params.id.toString()
-    )
-    if(y === undefined) {
-      return {manager: null, 
-        matchday: matchdayFound.id,
-        matchdayId:req.params.id.toString(), matchdayPoints: null, matchdayRank:null}
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    const matchdayFound = await Matchday.findById(req.params.id).session(session);
+    if (!matchdayFound) {
+      throw new Error('Matchday not found!');
     }
-    return { manager: x.manager, matchday:y.matchday,
-       matchdayId:y.matchdayId, matchdayPoints:y.matchdayPoints, matchdayRank:y.matchdayRank }
-  })
-  const highestScore = Math.max(...entriesWithScore.map(x => x.matchdayPoints))
-  const totalPts = entriesWithScore.map(x => x.matchdayPoints).reduce((a, b) => a + b, 0)
-  const avergeScore = (+(totalPts / allLives.length).toFixed(0))
-  const highestScoringEntry = entriesWithScore.find(x => +x.matchdayPoints === highestScore).manager
-  if (allPlayers.length > 0) {
-    const highestPoints = Math.max(...allPlayers.map(x => x.totalPoints))
-    const topPlayer = allPlayers.find(x => x.totalPoints === highestPoints)
-    const { player } = topPlayer
-    const updatedMatchday = await Matchday.findByIdAndUpdate(req.params.id, {
-      $set: {
-        highestScoringEntry, topPlayer: player, avergeScore, highestScore
+
+    // Uncomment to restrict update to current matchday
+    // if (!matchdayFound.current) {
+    //   throw new Error('Matchday is not the current one!');
+    // }
+
+    const allPlayers = await PlayerHistory.find({ matchday: req.params.id }).session(session);
+    if (allPlayers.length === 0) {
+      throw new Error('No players in this matchday yet!');
+    }
+
+    const allLives = await ManagerLive.find().session(session);
+
+    const entriesWithScore = allLives.map((x) => {
+      const pick = x.livePicks.find(
+        (p) => p.matchdayId.toString() === req.params.id.toString()
+      );
+
+      if (!pick) {
+        return {
+          manager: null,
+          matchday: matchdayFound.id,
+          matchdayId: req.params.id,
+          matchdayPoints: null,
+          matchdayRank: null,
+        };
       }
-    })
-    res.status(201).json(updatedMatchday)
+
+      return {
+        manager: x.manager,
+        matchday: pick.matchday,
+        matchdayId: pick.matchdayId,
+        matchdayPoints: pick.matchdayPoints ?? 0,
+        matchdayRank: pick.matchdayRank ?? null,
+      };
+    });
+
+    const validScores = entriesWithScore.filter((x) => typeof (x.matchdayPoints) === 'number') ?? [];
+    const highestScore = Math.max(...validScores.map((x) => x.matchdayPoints)) ?? 0;
+    const totalPoints = validScores.reduce((sum, x) => sum + x.matchdayPoints, 0) ?? 0;
+    const averageScore = Math.round(totalPoints / allLives.length) ?? 0;
+    const highestScoringEntry = validScores.find((x) => x.matchdayPoints === highestScore)?.manager || null;
+
+    const highestPlayerPoints = Math.max(...allPlayers.map((p) => p.totalPoints)) ?? 0;
+    const topPlayer = allPlayers.find((p) => p.totalPoints === highestPlayerPoints)?.player || null;
+
+    const updatedMatchday = await Matchday.findByIdAndUpdate(
+      req.params.id,
+      {
+        highestScoringEntry,
+        topPlayer,
+        avergeScore: averageScore,
+        highestScore,
+      },
+      { new: true, session }
+    );
+
+    await session.commitTransaction();
+    session.endSession();
+
+    res.status(200).json(updatedMatchday);
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    res.status(500).json({ message: error.message || 'Something went wrong' });
   }
 });
+
 
 //@desc Update Team of the week
 //@route PUT /api/matchdays/updateTOW/:id
@@ -276,117 +323,177 @@ const updateMDdata = asyncHandler(async (req, res) => {
 //@role Admin, editor
 const updateTOW = asyncHandler(async (req, res) => {
   const matchdayFound = await Matchday.findById(req.params.id);
-  const { current } = matchdayFound
   if (!matchdayFound) {
-    res.status(404)
-    throw new Error('Matchday not found!')
-  }/*
-  if(!current) {
-    res.status(400)
-    throw new Error(`Matchday not current Matchday!`)
-  }*/
- 
- const { id } = matchdayFound
-  const posObj = {
-    '669a41e50f8891d8e0b4eb2a': 'GKP',
-    '669a4831e181cb2ed40c240f': 'DEF',
-    '669a4846e181cb2ed40c2413': 'MID',
-    '669a485de181cb2ed40c2417': 'FWD'
-  }
-  const codeObj = {
-    '669a41e50f8891d8e0b4eb2a': 1,
-    '669a4831e181cb2ed40c240f': 2,
-    '669a4846e181cb2ed40c2413': 3,
-    '669a485de181cb2ed40c2417': 4
-  }
-  const ads = []
-  const adPlayers = []
-  const players = await PlayerHistory.find({ matchday: req.params.id }).populate('player')
-  players.forEach(playerz => {
-    const { totalPoints, player } = playerz
-    if (player !== null) {
-      if (ads.includes(playerz.player._id.toString())) {
-        const index = adPlayers.findIndex(x => x?.player?._id.toString() === playerz.player._id.toString())
-        const newPlayer = { player: player, totalPoints: totalPoints + adPlayers[index].totalPoints }
-        adPlayers.splice(index, 1, newPlayer)
-      } else {
-        adPlayers.push({ player, totalPoints })
-        ads.push(playerz.player._id.toString())
-      }
-    }
-  })
-  const sortedPlayers = adPlayers
-    .map(x => {
-      const y = {}
-      y.id = x.player._id
-      y.player = x.player.appName
-      y.position = posObj[x.player.playerPosition.toString()]
-      y.code = +codeObj[x.player.playerPosition.toString()]
-      y.positionId = x.player.playerPosition
-      y.playerTeam = x.player.playerTeam
-      y.totalPoints = x.totalPoints
-      /*y.fixture = x.fixture
-      y.opponent = x.opponent
-      x.venue = x.home === false ? 'Away': 'Home'*/
-      return y
-    })
-    .sort((a, b) => a.totalPoints > b.totalPoints ? -1 : 1)
-    //console.log(sortedPlayers.filter(x => x.position === 'GKP'))
- const starOnes = []
-  let goal = 0, def = 0, mid = 0, fwd = 0, total = 0
-  for (let i = 0; i < sortedPlayers.length; i++) {
-    if (total === 11) break;
-   // if (total === 10 && goal === 0) continue;
-    if (sortedPlayers[i].position === 'GKP') {
-      if(goal === 1) continue;
-      if(goal<1) {
-      starOnes.push(sortedPlayers[i])
-      goal += 1
-      total += 1
-      }
-    }
-    if (sortedPlayers[i].position === 'DEF') {
-      if ((def === 4 && mid === 5) || (def === 3 && mid === 4 && fwd === 3)) continue;
-      if (def < 5) {
-        starOnes.push(sortedPlayers[i])
-        def += 1
-        total += 1
-      }
-    }
-    if (sortedPlayers[i].position === 'MID') {
-      if ((mid === 4 && def === 2) || (mid === 4 && fwd === 3) || (mid === 4 && def === 5)) continue;
-      if (mid < 5) {
-        starOnes.push(sortedPlayers[i])
-        mid += 1
-        total += 1
-      }
-    }
-    if (sortedPlayers[i].position === 'FWD') {
-      if (fwd === 2 && mid === 5) continue;
-      if (fwd < 3) {
-        starOnes.push(sortedPlayers[i])
-        fwd += 1
-        total += 1
-      }
-    }
-    /*console.log(`goal: ${goal}`)
-    console.log(`def: ${def}`)
-    console.log(`mid: ${mid}`)
-    console.log(`fwd: ${fwd}`)
-    console.log(starOnes.length)*/
-  }
-  const exists = await TOW.findOne({ matchdayId: req.params.id })
-  if (exists) {
-    const realStars = await TOW.findOneAndUpdate({ matchdayId: req.params.id },
-      { $set: { matchday: id, matchdayId: req.params.id, starOnes: starOnes } }, { upsert: true })
-    res.status(201).json(realStars)
-  } else {
-    const newStars = await TOW.create(
-      { matchday: id, matchdayId: req.params.id, starOnes: starOnes })
-    res.status(201).json(newStars)
+    res.status(404);
+    throw new Error('Matchday not found!');
   }
 
-})
+  const { id } = matchdayFound;
+
+  // Dynamically load position mappings
+  const positions = await Position.find();
+  const posObj = {}, codeObj = {};
+  positions.forEach(pos => {
+    posObj[pos._id.toString()] = pos.shortName;
+    codeObj[pos._id.toString()] = pos.code;
+  });
+
+  const playerHistories = await PlayerHistory.find({ matchday: req.params.id }).populate('player');
+  const playerMap = playerHistories.reduce((acc, curr) => {
+    const player = curr.player;
+    if (!player) return acc;
+
+    const id = player._id.toString();
+    if (!acc[id]) {
+      acc[id] = { player, totalPoints: 0 };
+    }
+    acc[id].totalPoints += curr.totalPoints;
+    return acc;
+  }, {});
+  
+  const adPlayers = Object.values(playerMap);
+
+ const sortedPlayers = adPlayers
+    .map(x => {
+      const { _id, appName, playerPosition, playerTeam } = x.player;
+      return {
+        id: _id,
+        player: appName,
+        position: posObj[playerPosition.toString()],
+        code: +codeObj[playerPosition.toString()],
+        positionId: playerPosition,
+        playerTeam,
+        totalPoints: x.totalPoints,
+      };
+    })
+    .sort((a, b) => b.totalPoints - a.totalPoints);
+
+    // Group players by position
+  const grouped = { GKP: [], DEF: [], MID: [], FWD: [] };
+  for (const p of sortedPlayers) {
+    grouped[p.position]?.push(p);
+  }
+  for (const pos in grouped) {
+    grouped[pos].sort((a, b) => b.totalPoints - a.totalPoints);
+  }
+
+  // Valid formations
+  const formations = [
+    { GKP: 1, DEF: 4, MID: 4, FWD: 2 },
+    { GKP: 1, DEF: 4, MID: 3, FWD: 3 },
+    { GKP: 1, DEF: 5, MID: 3, FWD: 2 },
+    { GKP: 1, DEF: 5, MID: 2, FWD: 3 },
+    { GKP: 1, DEF: 3, MID: 5, FWD: 2 },
+    { GKP: 1, DEF: 3, MID: 4, FWD: 3 },
+    { GKP: 1, DEF: 5, MID: 4, FWD: 1 },
+    { GKP: 1, DEF: 4, MID: 5, FWD: 1 }
+  ];
+
+  let bestTeam = null, bestScore = -1, bestFormation = null;
+
+  for (const formation of formations) {
+    let team = [];
+    let valid = true;
+    let total = 0;
+
+    for (const pos of ['GKP', 'DEF', 'MID', 'FWD']) {
+      const needed = formation[pos] || 0;
+      if (grouped[pos].length < needed) {
+        valid = false;
+        break;
+      }
+      const selected = grouped[pos].slice(0, needed);
+      team.push(...selected);
+      total += selected.reduce((sum, p) => sum + p.totalPoints, 0);
+    }
+
+    if (valid && team.length === 11 && total > bestScore) {
+      bestScore = total;
+      bestTeam = team;
+      bestFormation = formation;
+    }
+  }
+
+  if (!bestTeam) {
+    res.status(400);
+    throw new Error("Not enough data to form a valid Team of the Week.");
+  }
+
+  const existing = await TOW.findOne({ matchdayId: req.params.id });
+
+  if (existing) {
+    const updated = await TOW.findOneAndUpdate(
+      { matchdayId: req.params.id },
+      {
+        $set: {
+          matchday: id,
+          matchdayId: req.params.id,
+          starOnes: bestTeam
+        }
+      },
+      { new: true }
+    );
+    res.status(200).json(updated);
+  } else {
+    const created = await TOW.create({
+      matchday: id,
+      matchdayId: req.params.id,
+      starOnes: bestTeam
+    });
+    res.status(201).json(created);
+  }
+
+  // Build Team of the Week
+  /*const starOnes = [];
+  let goal = 0, def = 0, mid = 0, fwd = 0, total = 0;
+
+  
+  for (const p of sortedPlayers) {
+    if (total === 11) break;
+
+    switch (p.position) {
+      case 'GKP':
+        if (goal < 1) {
+          starOnes.push(p); goal++; total++;
+        }
+        break;
+      case 'DEF':
+        if ((def === 4 && mid === 5) || (def === 3 && mid === 4 && fwd === 3)) break;
+        if (def < 5) {
+          starOnes.push(p); def++; total++;
+        }
+        break;
+      case 'MID':
+        if ((mid === 4 && def === 2) || (mid === 4 && fwd === 3) || (mid === 4 && def === 5)) break;
+        if (mid < 5) {
+          starOnes.push(p); mid++; total++;
+        }
+        break;
+      case 'FWD':
+        if (fwd === 2 && mid === 5) break;
+        if (fwd < 3) {
+          starOnes.push(p); fwd++; total++;
+        }
+        break;
+    }
+  }
+
+  // Upsert TOW document
+  const update = {
+    matchday: id,
+    matchdayId: req.params.id,
+    starOnes
+  };
+
+  const realStars = await TOW.findOneAndUpdate(
+    { matchdayId: req.params.id },
+    { $set: update },
+    { upsert: true, new: true }
+  );
+
+  res.status(201).json(realStars);*/
+});
+
 
 //@desc Get Team of the week
 //@route GET /api/matchdays/data/tows/:id
@@ -465,10 +572,10 @@ const createAutos = asyncHandler(async (req, res) => {
   const matchdayFound = await Matchday.findById(req.params.id);
   const { current } = matchdayFound
   const { id } = matchdayFound;
- /* if (!current) {
-    res.status(400)
-    throw new Error(`Matchday not current Matchday!`)
-  }*/
+  /* if (!current) {
+     res.status(400)
+     throw new Error(`Matchday not current Matchday!`)
+   }*/
   const managerLives = await ManagerLive.find({})
   for (let i = 0; i < managerLives.length; i++) {
     const { manager, livePicks: lively } = managerLives[i]
@@ -584,11 +691,11 @@ const createAutos = asyncHandler(async (req, res) => {
           const availFwdIndex = availableFwds.findIndex(x => x._id === potential._id)
           availableFwds.splice(availFwdIndex, 1)
           const starDefIndex = startingDefs.findIndex(x => x._id === dWhoMissed[i]._id)
-          startingDefs.splice(starDefIndex,1)
+          startingDefs.splice(starDefIndex, 1)
           startingFwds.push(newPotential)
         }
         //Midfielders
-        if(pp.toString() === '669a4846e181cb2ed40c2413' && startingDefs.length > 3) {
+        if (pp.toString() === '669a4846e181cb2ed40c2413' && startingDefs.length > 3) {
           const availMidIndex = availableMids.findIndex(x => x._id === potential._id)
           availableMids.splice(availMidIndex, 1)
           const starDefIndex = startingDefs.findIndex(x => x._id === dWhoMissed[i]._id)
@@ -639,7 +746,7 @@ const createAutos = asyncHandler(async (req, res) => {
           startingFwds.push(newPotential)
         }
         //Midfielders
-        if(pp.toString() === '669a4846e181cb2ed40c2413') {
+        if (pp.toString() === '669a4846e181cb2ed40c2413') {
           const availMidIndex = availableMids.findIndex(x => x._id === potential._id)
           availableMids.splice(availMidIndex, 1)
           const starMidIndex = startingMids.findIndex(x => x._id === mWhoMissed[i]._id)
@@ -676,9 +783,9 @@ const createAutos = asyncHandler(async (req, res) => {
           const availDefIndex = availableDefs.findIndex(x => x._id === potential._id)
           availableDefs.splice(availDefIndex, 1)
           const starFwdIndex = startingFwds.findIndex(x => x._id === fWhoMissed[i]._id)
-          startingFwds.splice(starFwdIndex,1)
+          startingFwds.splice(starFwdIndex, 1)
           startingFwds.push(newPotential)
-          
+
         }
         if (pp.toString() === '669a485de181cb2ed40c2417') {
           const availFwdIndex = availableFwds.findIndex(x => x._id === potential._id)
@@ -687,7 +794,7 @@ const createAutos = asyncHandler(async (req, res) => {
           startingFwds.splice(starFwdIndex, 1, newPotential)
         }
         //midfielders
-        if(pp.toString() === '669a4846e181cb2ed40c2413' && startingFwds.length > 1) {
+        if (pp.toString() === '669a4846e181cb2ed40c2413' && startingFwds.length > 1) {
           const availMidIndex = availableMids.findIndex(x => x._id === potential._id)
           availableMids.splice(availMidIndex, 1)
           const starFwdIndex = startingFwds.findIndex(x => x._id === fWhoMissed[i]._id)
@@ -701,7 +808,7 @@ const createAutos = asyncHandler(async (req, res) => {
 
     }
     //console.log(automaticSubs)
-    
+
     const newMdPoints = unformattedPicks
       .filter((x) => x.multiplier > 0)
       .reduce((x, y) => x + y.points, 0);
