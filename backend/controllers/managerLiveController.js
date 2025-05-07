@@ -10,6 +10,7 @@ import PlayerHistory from "../models/playerHistoryModel.js";
 import OverallLeague from "../models/overallLeagueModel.js";
 import TeamLeague from "../models/teamLeagueModel.js";
 import League from "../models/leagueModel.js";
+import mongoose from "mongoose";
 
 //@desc set live picks
 //@route PATCH api/livepicks/manager/
@@ -17,64 +18,93 @@ import League from "../models/leagueModel.js";
 const setLivePicks = asyncHandler(async (req, res) => {
   const allPicks = await Picks.find({});
   const matchday = await Matchday.findOne({ current: true });
-  
 
   if (!matchday) {
     res.status(404);
-    throw new Error(`No matchday found!`);
+    throw new Error("No matchday found!");
   }
-  const id = matchday.id;
-  const mid = matchday._id;
 
-  for (let i = 0; i < allPicks.length; i++) {
-    const mLive = await ManagerLive.findOne({ manager: allPicks[i].manager });
-    const mInfo = await ManagerInfo.findOne({ _id: allPicks[i].manager });
-    const { matchdayJoined } = mInfo;
-    if (mLive === null) {
-      if (matchdayJoined <= id) {
-        await ManagerInfo.findOneAndUpdate({ _id: allPicks[i].manager }, {matchdayPoints: 0})
-        await ManagerLive.create({
-          manager: allPicks[i].manager,
-          livePicks: [
-            {
-              matchday: id,
-              matchdayId: mid,
-              activeChip: null,
-              picks: allPicks[i].picks,
-              teamValue: allPicks[i].teamValue,
-              bank: allPicks[i].bank,
-            },
-          ],
-        });
+  const matchdayNumber = matchday.id;
+  const matchdayId = matchday._id;
+
+  const createdManagers = [];
+  const skippedManagers = [];
+
+  for (const pick of allPicks) {
+    const { manager, picks, teamValue, bank } = pick;
+
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    try {
+      const [mLive, mInfo] = await Promise.all([
+        ManagerLive.findOne({ manager }).session(session),
+        ManagerInfo.findById(manager).session(session),
+      ]);
+
+      // Skip if manager does not exist or joined after this matchday
+      if (!mInfo || mInfo.matchdayJoined > matchdayNumber) {
+        skippedManagers.push(manager);
+        await session.abortTransaction();
+        session.endSession();
+        continue;
       }
-    } else {
-      let idIndex = mLive.livePicks.findIndex((x) => x.matchday === id);
-      let midIndex = mLive.livePicks.findIndex(
-        (X) => X.matchdayId.toString() === mid.toString()
-      );
-      if (idIndex > -1 || midIndex > -1) {
-        res.status(400);
-        throw new Error("Matchday scores already exist");
-      }
-      const newLivePicks = {
-        matchday: id,
-        matchdayId: mid,
+
+      const newLivePick = {
+        matchday: matchdayNumber,
+        matchdayId,
         activeChip: null,
-        picks: allPicks[i].picks,
-        teamValue: allPicks[i].teamValue,
-        bank: allPicks[i].bank,
+        picks,
+        teamValue,
+        bank,
       };
-      await ManagerInfo.findOneAndUpdate({ _id: allPicks[i].manager }, {matchdayPoints: 0})
-      await ManagerLive.findOneAndUpdate(
-        { manager: allPicks[i].manager },
-        { $push: { livePicks: newLivePicks } },
-        { new: true }
+
+      await ManagerInfo.findByIdAndUpdate(
+        manager,
+        { matchdayPoints: 0 },
+        { session }
       );
+
+      if (!mLive) {
+        await ManagerLive.create([{ manager, livePicks: [newLivePick] }], { session });
+        createdManagers.push(manager);
+      } else {
+        const alreadyExists = mLive.livePicks.some(
+          (x) =>
+            x.matchday === matchdayNumber ||
+            x.matchdayId.toString() === matchdayId.toString()
+        );
+
+        if (alreadyExists) {
+          skippedManagers.push(manager);
+        } else {
+          await ManagerLive.updateOne(
+            { manager },
+            { $push: { livePicks: newLivePick } },
+            { session }
+          );
+          createdManagers.push(manager);
+        }
+      }
+
+      await session.commitTransaction();
+      session.endSession();
+    } catch (err) {
+      await session.abortTransaction();
+      session.endSession();
+      console.error(`Transaction failed for manager ${manager}:`, err);
+      skippedManagers.push(manager);
     }
   }
 
-  res.status(200).json(allPicks);
+  res.status(200).json({
+    message: "Live picks processed successfully",
+    createdManagers,
+    skippedManagers,
+  });
 });
+
+
 
 //@desc set initial points
 //@route PATCH api/livepicks/manager/matchday/:mid/start/fixtures/:id
@@ -145,8 +175,8 @@ const setInitialPoints = asyncHandler(async (req, res) => {
           matchday: req.params.mid,
           player: _id,
         });
-        const pBench =  playerDatas.reduce((a, b) => a + b.bench, 0);
-        const pStart =  playerDatas.reduce((a, b) => a + b.starts, 0);
+        const pBench = playerDatas.reduce((a, b) => a + b.bench, 0);
+        const pStart = playerDatas.reduce((a, b) => a + b.starts, 0);
         const playerPoints = playerDatas.reduce((a, b) => a + b.totalPoints, 0);
         if (inPlayers > -1) {
           return {
@@ -335,12 +365,12 @@ const deletePoints = asyncHandler(async (req, res) => {
 //@desc update player scores in picks
 //@route PUT api/livepicks/manager/matchday/:mid/matchdayscore
 //@access ADMIN
-const updateMatchdayScore = asyncHandler(async (req, res) => {});
+const updateMatchdayScore = asyncHandler(async (req, res) => { });
 
 //@desc update player scores in picks
 //@route PUT api/livepicks/manager/matchday/:mid/matchdayrank
 //@access ADMIN
-const updateMatchdayRank = asyncHandler(async (req, res) => {});
+const updateMatchdayRank = asyncHandler(async (req, res) => { });
 
 //@desc Get live picks
 //@route GET api/livepicks/manager/:id
