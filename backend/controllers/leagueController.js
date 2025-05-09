@@ -109,7 +109,7 @@ const joinOverallLeague = asyncHandler(
       {
         new: true,
       }
-    , {session});
+      , { session });
 
   }
 );
@@ -159,7 +159,7 @@ const joinTeamLeague = asyncHandler(
       {
         new: true,
       }
-    , {session});
+      , { session });
   }
 );
 
@@ -522,395 +522,388 @@ const deleteOverallLeague = asyncHandler(async (req, res) => {
 });
 
 const updateOverallTable = asyncHandler(async (req, res) => {
-  const overallLeagues = await OverallLeague.find({});
-  const matchday = await Matchday.findOne({ current: true });
-  const { id } = matchday;
+  const matchday = await Matchday.findOne({ current: true }).lean();
+  if (!matchday) {
+    return res.status(404).json({ message: "No current matchday found." });
+  }
 
-  if (matchday) {
-    async function makeCall(entrant) {
-      const response = await ManagerLive.findOne({ manager: entrant });
-      return response;
+  const matchdayNumber = matchday.id;
+  const overallLeagues = await OverallLeague.find({}).lean();
+
+  for (const league of overallLeagues) {
+    const entrantIds = league.entrants || [];
+    const oldUserIds = league.standings.map(s => s.user);
+    const allUserIds = [...new Set([...entrantIds, ...oldUserIds])];
+
+    // Pull all related manager info at once
+    const managerInfos = await ManagerInfo.find({ user: { $in: allUserIds } }).lean();
+    const infoMap = Object.fromEntries(managerInfos.map(m => [m.user, m]));
+
+    // Build all updated standings
+    const newStandings = [...league.standings]; // start with existing
+    for (const entrantId of entrantIds) {
+      const info = managerInfos.find(m => m._id.toString() === entrantId.toString());
+      if (!info) continue;
+      const ligi = info.overallLeagues?.[0] || {};
+      newStandings.push({
+        user: info.user,
+        firstName: info.firstName,
+        lastName: info.lastName,
+        teamName: info.teamName,
+        lastRank: ligi.lastRank || null,
+        currentRank: ligi.currentRank || null,
+        overallPoints: ligi.overallPoints || 0,
+        matchdays: { [matchdayNumber]: ligi.matchdayPoints || 0 },
+        mdRanks: {},
+      });
     }
-    async function makeCalls(entrants) {
-      const promises = entrants.map(makeCall);
-      const responses = await Promise.all(promises);
-      return responses;
-    }
-    overallLeagues.forEach(async (league) => {
-      const { standings, entrants } = league;
-      const a = await makeCalls(entrants);
-      const entrantsWithNoLives = a.every((x) => x === null);
-      if (entrantsWithNoLives === true) {
-        if (standings.length > 0) {
-          const currentMd = await Matchday.findOne({ current: true });
-          const updatedLeague = await OverallLeague.findById(league.id);
 
-          const { id } = currentMd;
-
-          const newStandings = await Promise.all(
-            standings.map(async (x, idx) => {
-              const man = await ManagerInfo.findOne({ user: x.user });
-              const { matchdayPoints } = man;
-              const mid = {};
-              mid[id] = matchdayPoints;
-              const newMid = { ...x.matchdays, ...mid };
-              const overallPoints = Object.values(newMid).reduce(
-                (a, b) => a + b,
-                0
-              );
-              const y = { ...x, matchdays: newMid, overallPoints };
-              return y;
-            })
-          );
-
-          const superNew = newStandings
-            .sort((a, b) => (a.overallPoints > b.overallPoints ? -1 : 1))
-            .map((x, idx) => {
-              const mid = {};
-              mid[id] = idx + 1;
-              const newOverallRanks = { ...mid, ...x.managerRanks }
-              const lastRank = x.managerRanks === undefined ? null : x.managerRanks[id - 1]
-              const y = { ...x, currentRank: idx + 1, lastRank, managerRanks: newOverallRanks };
-              return y;
-            })
-            .sort((a, b) => (a.matchdays[id] > b.matchdays[id] ? -1 : 1))
-            .map((x, idx) => {
-              const mid = {};
-              mid[id] = idx + 1;
-              const newMid = { ...x.mdRanks, ...mid };
-              const y = { ...x, mdRanks: newMid };
-              return y;
-            });
-
-          console.log(newStandings)
-
-          updatedLeague.$set("standings", superNew);
-          const newUpdated = await updatedLeague.save();
-          const { standings: nStands } = newUpdated;
-          if (newUpdated) {
-            nStands.forEach(async (x) => {
-              const man = await ManagerInfo.findOne({ user: x.user });
-              if (man) {
-                const { _id } = man;
-                const lives = await ManagerLive.findOne({ manager: _id });
-                const { livePicks } = lives;
-                const newLives = livePicks.map((live) => {
-                  const {
-                    teamValue,
-                    bank,
-                    automaticSubs,
-                    matchday,
-                    matchdayId,
-                    activeChip,
-                    matchdayPoints,
-                    picks,
-                    _id,
-                  } = live;
-                  return live.matchday === id
-                    ? {
-                      teamValue,
-                      automaticSubs,
-                      bank,
-                      picks,
-                      _id,
-                      matchday,
-                      matchdayId,
-                      activeChip,
-                      matchdayPoints,
-                      matchdayRank: x.mdRanks[id],
-                    }
-                    : live;
-                });
-
-                lives.$set("livePicks", newLives);
-                await lives.save();
-                const { overallLeagues, currentRanks } = man;
-                const pcRanks = {}
-                pcRanks[id] = x.currentRank
-                const newPcRanks = { ...currentRanks, ...pcRanks }
-                const newTeamLs = overallLeagues.map((overallLeague) => {
-                  return (
-                    overallLeague.id === league.id && {
-                      ...overallLeague,
-                      lastRank: x.lastRank,
-                      currentRank: x.currentRank,
-                    }
-                  );
-                });
-                man.$set("overallRanks", newPcRanks)
-                man.$set("overallLeagues", newTeamLs);
-                man.$set("matchdayRank", x.mdRanks[id]);
-                man.$set("overallRank", x.currentRank);
-                await man.save();
-              }
-            });
-          }
-        }
-      } else {
-        entrants.forEach(async (entrant) => {
-          const entrantHasLives = await ManagerLive.findOne({
-            manager: entrant,
-          });
-          if (entrantHasLives) {
-            const mid = {};
-            const managerInfo = await ManagerInfo.findById(entrant);
-            const {
-              user,
-              firstName,
-              lastName,
-              teamName,
-              overallLeagues: [ligi],
-            } = managerInfo;
-
-            const { lastRank, currentRank, matchdayPoints, overallPoints } =
-              ligi;
-            mid[id] = matchdayPoints;
-            await OverallLeague.findByIdAndUpdate(
-              league._id,
-              {
-                $pull: { entrants: entrant },
-                $push: {
-                  standings: {
-                    user,
-                    firstName,
-                    lastName,
-                    teamName,
-                    lastRank,
-                    currentRank,
-                    overallPoints,
-                    matchdays: mid,
-                    mdRanks: {},
-                  },
-                },
-              },
-              { new: true }
-            );
-          }
-        });
-      }
+    // Update matchday points for all standings
+    const finalStandings = newStandings.map(s => {
+      const info = infoMap[s.user];
+      const mdPoints = info?.matchdayPoints || 0;
+      const updatedMd = { ...s.matchdays, [matchdayNumber]: mdPoints };
+      const totalPoints = Object.values(updatedMd).reduce((a, b) => a + b, 0);
+      return { ...s, matchdays: updatedMd, overallPoints: totalPoints };
     });
 
-    res.status(200).json(`Tables updated`);
+    // Sort and assign overall ranks
+    finalStandings.sort((a, b) => b.overallPoints - a.overallPoints);
+    finalStandings.forEach((s, i) => {
+      s.currentRank = i + 1;
+    });
+
+    // Sort and assign matchday ranks
+    const sortedMd = [...finalStandings].sort((a, b) =>
+      (b.matchdays[matchdayNumber] || 0) - (a.matchdays[matchdayNumber] || 0)
+    );
+    sortedMd.forEach((s, i) => {
+      s.mdRanks = { ...s.mdRanks, [matchdayNumber]: i + 1 };
+    });
+
+    // Save updated league
+    await OverallLeague.findByIdAndUpdate(league._id, {
+      $set: { standings: sortedMd, entrants: [] },
+    });
+
+    // Bulk update manager ranks
+    const bulkOps = [];
+    for (const s of finalStandings) {
+      const manager = infoMap[s.user];
+      if (!manager) continue;
+      const [ligi] = manager.overallLeagues || [{}];
+      const updatedLigi = {
+        ...ligi,
+        lastRank: s.lastRank,
+        currentRank: s.currentRank,
+      };
+      bulkOps.push({
+        updateOne: {
+          filter: { _id: manager._id },
+          update: { $set: { "overallLeagues.0": updatedLigi } },
+        },
+      });
+    }
+    if (bulkOps.length > 0) await ManagerInfo.bulkWrite(bulkOps);
   }
+
+  res.status(200).json({ message: "Overall tables updated successfully." });
 });
+
+
+
 const updateTeamTables = asyncHandler(async (req, res) => {
-  const teamLeagues = await TeamLeague.find({});
-  const matchday = await Matchday.findOne({ current: true });
-  const { id } = matchday;
-
-  if (matchday) {
-    async function makeCall(entrant) {
-      const response = await ManagerLive.findOne({ manager: entrant });
-      return response;
-    }
-    async function makeCalls(entrants) {
-      const promises = entrants.map(makeCall);
-      const responses = await Promise.all(promises);
-      return responses;
-    }
-    teamLeagues.forEach(async (league) => {
-      const { standings, entrants } = league;
-      const a = await makeCalls(entrants);
-      const entrantsWithNoLives = a.every((x) => x === null);
-      if (entrantsWithNoLives === true) {
-        if (standings.length > 0) {
-          const currentMd = await Matchday.findOne({ current: true });
-          const updatedLeague = await TeamLeague.findById(league.id);
-          const { id } = currentMd;
-          const newStandings = await Promise.all(
-            standings.map(async (x, idx) => {
-              const man = await ManagerInfo.findOne({ user: x.user });
-              const { matchdayPoints } = man;
-              const mid = {};
-              mid[id] = matchdayPoints;
-              const newMid = { ...x.matchdays, ...mid };
-              const overallPoints = Object.values(newMid).reduce(
-                (a, b) => a + b,
-                0
-              );
-              const y = { ...x, matchdays: newMid, overallPoints };
-              return y;
-            })
-          );
-
-          const superNew = newStandings
-            .sort((a, b) => (a.overallPoints > b.overallPoints ? -1 : 1))
-            .map((x, idx) => {
-              const mid = {};
-              mid[id] = idx + 1;
-              const newOverallRanks = { ...mid, ...x.managerRanks }
-              const lastRank = x.managerRanks === undefined ? null : x.managerRanks[id - 1]
-              const y = { ...x, currentRank: idx + 1, lastRank, managerRanks: newOverallRanks };
-              console.log(y)
-              return y
-            })
-            .sort((a, b) => (a.matchdays[id] > b.matchdays[id] ? -1 : 1))
-            .map((x, idx) => {
-              const mid = {};
-              mid[id] = idx + 1;
-              const newMid = { ...x.mdRanks, ...mid };
-              const y = { ...x, mdRanks: newMid };
-              return y;
-            });
-
-          updatedLeague.$set("standings", superNew);
-          const newUpdated = await updatedLeague.save();
-          const { standings: nStands } = newUpdated;
-          if (newUpdated) {
-            nStands.forEach(async (x) => {
-              const man = await ManagerInfo.findOne({ user: x.user });
-              if (man) {
-                const { teamLeagues } = man;
-                const newTeamLs = teamLeagues
-                  .filter((teamLeague) => teamLeague.id === league.id)
-                  .map((teamLeague) => {
-                    return {
-                      ...teamLeague,
-                      lastRank: x.lastRank,
-                      currentRank: x.currentRank,
-                    };
-                  });
-                man.$set("teamLeagues", newTeamLs);
-                await man.save();
-              }
-            });
-          }
-        }
-      } else {
-        entrants.forEach(async (entrant) => {
-          const entrantHasLives = await ManagerLive.findOne({
-            manager: entrant,
-          });
-          if (entrantHasLives) {
-            const mid = {};
-            const managerInfo = await ManagerInfo.findById(entrant);
-            const {
-              user,
-              firstName,
-              lastName,
-              teamName,
-              teamLeagues: [ligi],
-            } = managerInfo;
-
-            const { lastRank, currentRank, matchdayPoints, overallPoints } =
-              ligi;
-            mid[id] = matchdayPoints;
-            await TeamLeague.findByIdAndUpdate(
-              league._id,
-              {
-                $pull: { entrants: entrant },
-                $push: {
-                  standings: {
-                    user,
-                    firstName,
-                    lastName,
-                    teamName,
-                    lastRank,
-                    currentRank,
-                    overallPoints,
-                    matchdays: mid,
-                  },
-                },
-              },
-              { new: true }
-            );
-            //res.status(200).json(`Tables updated`)
-          }
-        });
-      }
-    });
-    res.status(200).json(`Tables updated`);
+  const matchday = await Matchday.findOne({ current: true }).lean();
+  if (!matchday) {
+    return res.status(404).json({ message: "No current matchday found." });
   }
+
+  const matchdayNumber = matchday.id;
+  const teamLeagues = await TeamLeague.find({}).lean();
+
+  for (const league of teamLeagues) {
+    const entrantIds = league.entrants || [];
+    const oldUserIds = league.standings.map(s => s.user);
+    const allUserIds = [...new Set([...entrantIds, ...oldUserIds])];
+
+    // Pull all related manager info at once
+    const managerInfos = await ManagerInfo.find({ user: { $in: allUserIds } }).lean();
+    const infoMap = Object.fromEntries(managerInfos.map(m => [m.user, m]));
+
+    // Build all updated standings
+    const newStandings = [...league.standings]; // start with existing
+    for (const entrantId of entrantIds) {
+      const info = managerInfos.find(m => m._id.toString() === entrantId.toString());
+      if (!info) continue;
+      const ligi = info.teamLeagues?.[0] || {};
+      newStandings.push({
+        user: info.user,
+        firstName: info.firstName,
+        lastName: info.lastName,
+        teamName: info.teamName,
+        lastRank: ligi.lastRank || null,
+        currentRank: ligi.currentRank || null,
+        overallPoints: ligi.overallPoints || 0,
+        matchdays: { [matchdayNumber]: ligi.matchdayPoints || 0 },
+        mdRanks: {},
+      });
+    }
+
+    // Update matchday points for all standings
+    const finalStandings = newStandings.map(s => {
+      const info = infoMap[s.user];
+      const mdPoints = info?.matchdayPoints || 0;
+      const updatedMd = { ...s.matchdays, [matchdayNumber]: mdPoints };
+      const totalPoints = Object.values(updatedMd).reduce((a, b) => a + b, 0);
+      return { ...s, matchdays: updatedMd, overallPoints: totalPoints };
+    });
+
+    // Sort and assign overall ranks
+    finalStandings.sort((a, b) => b.overallPoints - a.overallPoints);
+    finalStandings.forEach((s, i) => {
+      s.currentRank = i + 1;
+    });
+
+    // Sort and assign matchday ranks
+    const sortedMd = [...finalStandings].sort((a, b) =>
+      (b.matchdays[matchdayNumber] || 0) - (a.matchdays[matchdayNumber] || 0)
+    );
+    sortedMd.forEach((s, i) => {
+      s.mdRanks = { ...s.mdRanks, [matchdayNumber]: i + 1 };
+    });
+
+    // Save updated league
+    await TeamLeague.findByIdAndUpdate(league._id, {
+      $set: { standings: sortedMd, entrants: [] },
+    });
+
+    // Bulk update manager ranks
+    const bulkOps = [];
+    for (const s of finalStandings) {
+      const manager = infoMap[s.user];
+      if (!manager) continue;
+      const [ligi] = manager.teamLeagues || [{}];
+      const updatedLigi = {
+        ...ligi,
+        lastRank: s.lastRank,
+        currentRank: s.currentRank,
+      };
+      bulkOps.push({
+        updateOne: {
+          filter: { _id: manager._id },
+          update: { $set: { "teamLeagues.0": updatedLigi } },
+        },
+      });
+    }
+    if (bulkOps.length > 0) await ManagerInfo.bulkWrite(bulkOps);
+  }
+
+  res.status(200).json({ message: "Team tables updated successfully." });
 });
 const updatePrivateTables = asyncHandler(async (req, res) => {
-  const privateLeagues = await League.find({});
-  console.log(privateLeagues);
+  const matchday = await Matchday.findOne({ current: true }).lean();
+  if (!matchday) {
+    return res.status(404).json({ message: "No current matchday found." });
+  }
+
+  const matchdayNumber = matchday.id;
+  const privateLeagues = await PrivateLeague.find({}).lean();
+  const BATCH_SIZE = 1000;
+
+  for (const league of privateLeagues) {
+    const standingsMap = new Map(); // key = user, value = standing object
+
+    // Load existing standings into map
+    for (const s of league.standings) {
+      standingsMap.set(s.user.toString(), s);
+    }
+
+    // Chunk entrants to avoid large queries
+    const entrants = league.entrants;
+    for (let i = 0; i < entrants.length; i += BATCH_SIZE) {
+      const chunk = entrants.slice(i, i + BATCH_SIZE);
+      const managerInfos = await ManagerInfo.find({ _id: { $in: chunk } }).lean();
+
+      for (const info of managerInfos) {
+        const { user, firstName, lastName, teamName, privateLeagues: [ligi] } = info;
+        const matchdayPoints = ligi?.matchdayPoints ?? 0;
+        const overallPoints = ligi?.overallPoints ?? 0;
+        const lastRank = ligi?.lastRank ?? null;
+        const currentRank = ligi?.currentRank ?? null;
+
+        const standing = {
+          user,
+          firstName,
+          lastName,
+          teamName,
+          lastRank,
+          currentRank,
+          overallPoints,
+          matchdays: { [matchdayNumber]: matchdayPoints },
+          mdRanks: {},
+        };
+        standingsMap.set(user.toString(), standing);
+      }
+    }
+
+    // Refresh standings from map
+    const mergedStandings = Array.from(standingsMap.values());
+
+    // Recalculate matchday totals and overallPoints
+    for (const standing of mergedStandings) {
+      const updatedMatchdays = {
+        ...standing.matchdays,
+        [matchdayNumber]: standing.matchdays[matchdayNumber] ?? 0,
+      };
+      standing.matchdays = updatedMatchdays;
+      standing.overallPoints = Object.values(updatedMatchdays).reduce((a, b) => a + b, 0);
+    }
+
+    // Sort and assign ranks
+    mergedStandings.sort((a, b) => b.overallPoints - a.overallPoints);
+    mergedStandings.forEach((standing, index) => {
+      standing.lastRank = standing.currentRank ?? null;
+      standing.currentRank = index + 1;
+    });
+
+    // Assign matchday ranks
+    const sortedByMdPoints = [...mergedStandings].sort(
+      (a, b) => (b.matchdays[matchdayNumber] ?? 0) - (a.matchdays[matchdayNumber] ?? 0)
+    );
+    sortedByMdPoints.forEach((standing, index) => {
+      standing.mdRanks = {
+        ...standing.mdRanks,
+        [matchdayNumber]: index + 1,
+      };
+    });
+
+    // Save final standings and clear entrants
+    await PrivateLeague.findByIdAndUpdate(league._id, {
+      $set: {
+        standings: sortedByMdPoints,
+        entrants: [],
+      },
+    });
+  }
+
+  res.status(200).json({ message: "Private tables updated successfully." });
 });
 
+
 const setCurrentAndLastRanks = asyncHandler(async (req, res) => {
-  const overallLeagues = await OverallLeague.find({})
-  const teamLeagues = await TeamLeague.find({})
-  const privateLeagues = await League.find({})
+  const overallLeagues = await OverallLeague.find({}).lean()
+  const teamLeagues = await TeamLeague.find({}).lean()
+  const privateLeagues = await League.find({}).lean()
 
   //Setting current and last ranks for overall leagues
   if (overallLeagues) {
-    for (let i = 0; i < overallLeagues.length; i++) {
-      const { standings, _id } = overallLeagues[i]
-      const newStand = standings.map(x => {
-        return { ...x, lastRank: x.currentRank }
-      })
-      const updatedOverall = await OverallLeague.findByIdAndUpdate(_id, { $set: { standings: newStand } }, { new: true })
-      if (updatedOverall) {
-        const { standings: newStandz } = updatedOverall
-        newStandz.forEach(async stand => {
-          const { user, lastRank, currentRank } = stand
-          const managerExists = await ManagerInfo.findOne({ user: user })
-          if (managerExists) {
-            const { overallLeagues } = managerExists
-            const requiredLeague = overallLeagues.find(league => league.id.toString() === _id.toString())
-            const indexOfLeague = overallLeagues.findIndex(league => league.id.toString() === _id.toString())
-            const newRequired = { ...requiredLeague, lastRank, currentRank }
-            overallLeagues.splice(indexOfLeague, 1, newRequired)
-            await ManagerInfo.findOneAndUpdate({ user: user },
-              { $set: { overallLeagues: overallLeagues } },
-              { new: true })
-          }
-        })
+    // Using a for...of loop to ensure proper async handling
+    for (let league of overallLeagues) {
+      const { standings, _id: leagueId } = league;
+
+      if (standings.length === 0) continue;
+
+      // Update league standings with new lastRank
+      const newStandings = standings.map(entry => ({
+        ...entry,
+        lastRank: entry.currentRank
+      }));
+
+      await OverallLeague.findByIdAndUpdate(leagueId, {
+        $set: { standings: newStandings }
+      });
+
+      // Prepare bulkWrite updates for ManagerInfo
+      const bulkOps = newStandings.map(({ user, currentRank, lastRank }) => ({
+        updateOne: {
+          filter: { user },
+          update: {
+            $set: {
+              "overallLeagues.$[el].currentRank": currentRank,
+              "overallLeagues.$[el].lastRank": lastRank
+            }
+          },
+          arrayFilters: [{ "el.id": leagueId }]
+        }
+      }));
+      // Perform all updates in one DB operation
+      if (bulkOps.length > 0) {
+        await ManagerInfo.bulkWrite(bulkOps, { ordered: false });
       }
     }
   }
   //Setting current and last ranks for team leagues
   if (teamLeagues) {
-    for (let i = 0; i < teamLeagues.length; i++) {
-      const { standings, _id } = teamLeagues[i]
-      const newStand = standings.map(x => {
-        return { ...x, lastRank: x.currentRank }
-      })
-      const updatedTeam = await TeamLeague.findByIdAndUpdate(_id, { $set: { standings: newStand } }, { new: true })
-      if (updatedTeam) {
-        const { standings: newStandz } = updatedTeam
-        newStandz.forEach(async stand => {
-          const { user, lastRank, currentRank } = stand
-          const managerExists = await ManagerInfo.findOne({ user: user })
-          if (managerExists) {
-            const { teamLeagues } = managerExists
-            const requiredLeague = teamLeagues.find(league => league.id.toString() === _id.toString())
-            const indexOfLeague = teamLeagues.findIndex(league => league.id.toString() === _id.toString())
-            const newRequired = { ...requiredLeague, lastRank, currentRank }
-            teamLeagues.splice(indexOfLeague, 1, newRequired)
-            await ManagerInfo.findOneAndUpdate({ user: user },
-              { $set: { teamLeagues: teamLeagues } },
-              { new: true })
-          }
-        })
+    // Using a for...of loop to ensure proper async handling
+    for (let league of teamLeagues) {
+      const { standings, _id: leagueId } = league;
+
+      if (standings.length === 0) continue;
+
+      // Update league standings with new lastRank
+      const newStandings = standings.map(entry => ({
+        ...entry,
+        lastRank: entry.currentRank
+      }));
+
+      await TeamLeague.findByIdAndUpdate(leagueId, {
+        $set: { standings: newStandings }
+      });
+
+      // Prepare bulkWrite updates for ManagerInfo
+      const bulkOps = newStandings.map(({ user, currentRank, lastRank }) => ({
+        updateOne: {
+          filter: { user },
+          update: {
+            $set: {
+              "teamLeagues.$[el].currentRank": currentRank,
+              "teamLeagues.$[el].lastRank": lastRank
+            }
+          },
+          arrayFilters: [{ "el.id": leagueId }]
+        }
+      }));
+      // Perform all updates in one DB operation
+      if (bulkOps.length > 0) {
+        await ManagerInfo.bulkWrite(bulkOps, { ordered: false });
       }
     }
   }
 
   ////Setting current and last ranks for private leagues
   if (privateLeagues) {
-    for (let i = 0; i < privateLeagues.length; i++) {
-      const { standings, _id } = privateLeagues[i]
-      const newStand = standings.map(x => {
-        return { ...x, lastRank: x.currentRank }
-      })
-      const updatedPrivate = await League.findByIdAndUpdate(_id, { $set: { standings: newStand } }, { new: true })
-      if (updatedOverall) {
-        const { standings: newStandz } = updatedPrivate
-        newStandz.forEach(async stand => {
-          const { user, lastRank, currentRank } = stand
-          const managerExists = await ManagerInfo.findOne({ user: user })
-          if (managerExists) {
-            const { privateLeagues } = managerExists
-            const requiredLeague = privateLeagues.find(league => league.id.toString() === _id.toString())
-            const indexOfLeague = privateLeagues.findIndex(league => league.id.toString() === _id.toString())
-            const newRequired = { ...requiredLeague, lastRank, currentRank }
-            privateLeagues.splice(indexOfLeague, 1, newRequired)
-            await ManagerInfo.findOneAndUpdate({ user: user },
-              { $set: { privateLeagues: privateLeagues } },
-              { new: true })
-          }
-        })
+    // Using a for...of loop to ensure proper async handling
+    for (let league of privateLeagues) {
+      const { standings, _id: leagueId } = league;
+
+      if (standings.length === 0) continue;
+
+      // Update league standings with new lastRank
+      const newStandings = standings.map(entry => ({
+        ...entry,
+        lastRank: entry.currentRank
+      }));
+
+      await PrivateLeague.findByIdAndUpdate(leagueId, {
+        $set: { standings: newStandings }
+      });
+
+      // Prepare bulkWrite updates for ManagerInfo
+      const bulkOps = newStandings.map(({ user, currentRank, lastRank }) => ({
+        updateOne: {
+          filter: { user },
+          update: {
+            $set: {
+              "privateLeagues.$[el].currentRank": currentRank,
+              "privateLeagues.$[el].lastRank": lastRank
+            }
+          },
+          arrayFilters: [{ "el.id": leagueId }]
+        }
+      }));
+      // Perform all updates in one DB operation
+      if (bulkOps.length > 0) {
+        await ManagerInfo.bulkWrite(bulkOps, { ordered: false });
       }
     }
   }
