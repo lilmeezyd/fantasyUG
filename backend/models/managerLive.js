@@ -51,5 +51,9 @@ const managerLiveSchema = mongoose.Schema({
   ],
 });
 
+managerLiveSchema.index({ manager: 1 });
+managerLiveSchema.index({ "livePicks.matchdayId": 1 });
+
+
 const ManagerLive = mongoose.model("ManagerLive", managerLiveSchema);
 export default ManagerLive

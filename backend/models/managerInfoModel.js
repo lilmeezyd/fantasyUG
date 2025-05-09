@@ -41,5 +41,10 @@ const managerInfoSchema = mongoose.Schema(
   }
 );
 
+managerInfoSchema.index({ user: 1})
+managerInfoSchema.index({ "teamLeagues.startMatchday": 1 });
+managerInfoSchema.index({ "overallLeagues.startMatchday": 1 });
+
+
 const ManagerInfo = mongoose.model("ManagerInfo", managerInfoSchema);
 export default ManagerInfo

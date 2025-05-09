@@ -79,5 +79,9 @@ const playerHistorySchema = mongoose.Schema({
     },
 }, {strict: false})
 
+playerHistorySchema.index({ matchday: 1, fixture: 1 });
+playerHistorySchema.index({ player: 1, matchday: 1 });
+
+
 const PlayerHistory = mongoose.model('PlayerHistory', playerHistorySchema)
 export default PlayerHistory
