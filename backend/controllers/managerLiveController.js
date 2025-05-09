@@ -142,15 +142,19 @@ const setInitialPoints = asyncHandler(async (req, res) => {
 
     const formatted = mdPicks.picks.map(pick => {
       const stats = playerMap[pick._id] || [];
-      const starts = stats.reduce((a, b) => a + b.starts, 0);
-      const bench = stats.reduce((a, b) => a + b.bench, 0);
-      const totalPoints = stats.reduce((a, b) => a + b.totalPoints, 0);
-      return {
-        ...pick,
-        starts,
-        bench,
-        points: pick.IsCaptain ? totalPoints * 2 : totalPoints,
-      };
+      if (stats.length > 0) {
+        const starts = stats.reduce((a, b) => a + b.starts, 0);
+        const bench = stats.reduce((a, b) => a + b.bench, 0);
+        const totalPoints = stats.reduce((a, b) => a + b.totalPoints, 0);
+        return {
+          ...pick,
+          starts,
+          bench,
+          points: pick.IsCaptain ? totalPoints * 2 : totalPoints,
+        };
+      } else {
+        return pick;
+      }
     });
     const newMdPoints = formatted.filter(p => p.multiplier > 0).reduce((a, b) => a + b.points, 0);
     const updatedLivePicks = mLive.livePicks.map(p =>
