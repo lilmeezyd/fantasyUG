@@ -250,9 +250,9 @@ const updateMDdata = asyncHandler(async (req, res) => {
     }
 
     // Uncomment to restrict update to current matchday
-    // if (!matchdayFound.current) {
-    //   throw new Error('Matchday is not the current one!');
-    // }
+     if (!matchdayFound.current) {
+       throw new Error('Matchday is not the current one!');
+     }
 
     const allPlayers = await PlayerHistory.find({ matchday: req.params.id }).session(session);
     if (allPlayers.length === 0) {

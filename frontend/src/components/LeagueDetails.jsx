@@ -28,7 +28,7 @@ const LeagueDetails = (props) => {
           </div>
           <div className="my-ranking">
             <div>Overall rank</div>
-            <div>{overallRank === null ? '-' : overallRank}</div>
+            <div>{overallLeagues[0]?.currentRank === null ? '-' : overallLeagues[0]?.currentRank}</div>
           </div>
           <div className="my-ranking">
             <div>Total players</div>
@@ -72,7 +72,7 @@ const LeagueDetails = (props) => {
             </div>
           ))}
         </div>
-        <div>
+        {/*<div>
           <h5 className="ld-2">Private Leagues</h5>
           {privateLeagues?.length === 0 ? (
             <div className="ld-1">Create or join a private league</div>
@@ -96,7 +96,7 @@ const LeagueDetails = (props) => {
               ))}
             </>
           )}
-        </div>
+        </div>*/}
       </div>
 
       <div className="ld">
