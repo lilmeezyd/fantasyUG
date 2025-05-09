@@ -586,6 +586,24 @@ const updateOverallTable = asyncHandler(async (req, res) => {
       $set: { standings: sortedMd, entrants: [] },
     });
 
+    // Bulk update manager matchday ranks
+    const bulkOps_md = [];
+    for (const s of sortedMd) {
+      const manager = infoMap[s.user];
+      const managerLivePicks = await ManagerLive.findOne({ manager: manager?._id }).lean();
+      const currentLivePicks = managerLivePicks?.livePicks?.find(x => +x.matchday === +matchdayNumber)
+      const newCurrentLives = { ...currentLivePicks, matchdayRank: s.mdRanks[matchdayNumber] }
+      const updatedManagerLivePicks = [newCurrentLives, ...managerLivePicks?.livePicks?.filter(x => +x.matchday !== +matchdayNumber)]
+      bulkOps_md.push({
+        updateOne: {
+          filter: { manager: manager?._id },
+          update: { $set: { livePicks: updatedManagerLivePicks } }
+        }
+      })
+    }
+
+    if (bulkOps_md.length > 0) await ManagerLive.bulkWrite(bulkOps_md);
+
     // Bulk update manager ranks
     const bulkOps = [];
     for (const s of finalStandings) {
