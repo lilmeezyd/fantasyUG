@@ -26,7 +26,7 @@ const LeagueDetails = (props) => {
             <div>Total points</div>
             <div>{overallPoints}</div>
           </div>
-          {overallLeagues.length > 0 && <div className="my-ranking">
+          {overallLeagues?.length > 0 && <div className="my-ranking">
             <div>Overall rank</div>
             <div>{overallLeagues[0]?.currentRank === null ? '-' : overallLeagues[0]?.currentRank}</div>
           </div>}

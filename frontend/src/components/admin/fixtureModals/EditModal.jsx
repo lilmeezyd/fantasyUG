@@ -6,24 +6,31 @@ import {
   useGetFixtureQuery,
   useEditFixtureMutation,
 } from "../../../slices/fixtureApiSlice";
- 
+
 const EditModal = (props) => {
   const { show, closeEdit, resetEdit, fixtureId } = props;
   const { data: fixture } = useGetFixtureQuery(fixtureId);
-  const [ data, setData ] = useState({teamHome: '', teamAway: '',
-    matchday: '', kickOff: '', time: ''})
-  const { teamHome, teamAway,matchday, kickOff, time } = data;
   const { data: teams } = useGetQuery();
   const { data: matchdays } = useGetMatchdaysQuery();
   const [editFixture] = useEditFixtureMutation();
+  const [data, setData] = useState({
+    teamHome: '', teamAway: '',
+    matchday: '', kickOff: '', time: ''
+  })
+  const { teamHome, teamAway, matchday, kickOff, time } = data;
+  console.log(fixture)
 
   useEffect(() => {
+    /*const dt = new Date(fixture?.kickOffTime)
+    console.log(fixture)
+    console.log(fixture?.kickOffTime)
+    console.log(dt)*/
     setData({
       teamHome: fixture?.teamHome,
       teamAway: fixture?.teamAway,
       matchday: fixture?.matchday,
-      deadline: new Date(fixture?.kickOffTime).toLocaleDateString(),
-      time: new Date(fixture?.kickOffTime).toTimeString()
+      kickOff: new Date(fixture?.kickOffTime),
+      time: new Date(fixture?.kickOffTime).toTimeString().split(":").slice(0, 2).join(":")
     });
   }, [
     fixture?.teamHome,
@@ -37,12 +44,14 @@ const EditModal = (props) => {
     const teamHome = elements.hteam.value;
     const date = elements.kickoff.value
     const time = elements.time.value
-    const kickOffTime = new Date(date+'/'+time);
+    const kickOffTime = new Date(date + '/' + time);
     const teamAway = elements.ateam.value;
     const matchday = elements.matchday.value;
-    console.log(date)
-    console.log(time)
-    console.log(kickOffTime)
+
+    if (teamHome === teamAway) {
+      alert("Home and Away teams must be different.");
+      return;
+    }
 
 
     if (teamAway && teamHome && kickOffTime && matchday) {
@@ -82,6 +91,7 @@ const EditModal = (props) => {
                 name="matchday"
                 id="matchday"
                 className="form-control"
+                value={matchday}
                 onChange={(e) => {
                   setData((prev) => ({
                     ...prev,
@@ -89,16 +99,16 @@ const EditModal = (props) => {
                   }));
                 }}
               >
-                {matchdays?.map((matchday) => (
-                  <option key={matchday?._id} value={matchday?._id}>
-                    {matchday?.name}
+                {matchdays?.map((md) => (
+                  <option key={md?._id} value={md?._id}>
+                    {md?.name}
                   </option>
                 ))}
               </select>
             </div>
             <div className="form-group my-2">
-                <label className="py-2" htmlFor="kickoff">Date</label>
-                <input name="kickoff" id="kickoff" type="date"
+              <label className="py-2" htmlFor="kickoff">Date</label>
+              <input name="kickoff" id="kickoff" type="date"
                 value={kickOff}
                 className="form-control"
                 onChange={(e) => {
@@ -106,19 +116,19 @@ const EditModal = (props) => {
                     ...prev, kickOff: e.target.value
                   }))
                 }}
-                />
-                  
-              </div>
-              <div className="form-group my-2">
+              />
+
+            </div>
+            <div className="form-group my-2">
               <label className="py-2" htmlFor="time">Time</label>
               <input
-              value={time}
-              onChange={(e) => {
-                setData((prev) => ({
-                  ...prev, time: e.target.value
-                }))
-              }} name="time" id="time" className="form-control" type="time" />
-              </div>
+                value={time}
+                onChange={(e) => {
+                  setData((prev) => ({
+                    ...prev, time: e.target.value
+                  }))
+                }} name="time" id="time" className="form-control" type="time" />
+            </div>
             <div className="form-group my-2">
               <label className="py-2" htmlFor="hteam">
                 Home Team
@@ -127,6 +137,7 @@ const EditModal = (props) => {
                 name="hteam"
                 id="hteam"
                 className="form-control"
+                value={teamHome}
                 onChange={(e) => {
                   setData((prev) => ({
                     ...prev,
@@ -135,7 +146,7 @@ const EditModal = (props) => {
                 }}
               >
                 {teams?.map((team) => (
-                  <option key={team._id} value={teamHome}>
+                  <option key={team._id} value={team._id}>
                     {team?.name}
                   </option>
                 ))}
@@ -149,6 +160,7 @@ const EditModal = (props) => {
                 name="ateam"
                 id="ateam"
                 className="form-control"
+                value={teamAway}
                 onChange={(e) => {
                   setData((prev) => ({
                     ...prev,
@@ -157,7 +169,7 @@ const EditModal = (props) => {
                 }}
               >
                 {teams?.map((team) => (
-                  <option key={team._id} value={teamAway}>
+                  <option key={team._id} value={team._id}>
                     {team?.name}
                   </option>
                 ))}

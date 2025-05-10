@@ -322,22 +322,22 @@ const PickTeam = () => {
       (pick) =>
         pick?.playerPosition === "669a41e50f8891d8e0b4eb2a" &&
         pick?.multiplier > 0
-    ).length;
+    )?.length;
     const defenders = managerPicks?.picks?.filter(
       (pick) =>
         pick?.playerPosition === "669a4831e181cb2ed40c240f" &&
         pick?.multiplier > 0
-    ).length;
+    )?.length;
     const midfielders = managerPicks?.picks?.filter(
       (pick) =>
         pick?.playerPosition === "669a4846e181cb2ed40c2413" &&
         pick?.multiplier > 0
-    ).length;
+    )?.length;
     const forwards = managerPicks?.picks?.filter(
       (pick) =>
         pick?.playerPosition === "669a485de181cb2ed40c2417" &&
         pick?.multiplier > 0
-    ).length; 
+    )?.length; 
     dispatch({type: 'INITIAL_PICKS', 
       payload: {
         ...state,
@@ -352,13 +352,13 @@ const PickTeam = () => {
 
   const switchPlayer = (data) => {
     const { shortPos, ...rest} = data
-    if(Object.keys(switcher).length === 0) {
+    if(Object.keys(switcher)?.length === 0) {
       dispatch({type: `${shortPos}_SET_SWITCH`, data})
     }
     if(data._id === switcher._id) {
       dispatch({type: `CANCEL`})
     }
-    if(Object.keys(switcher).length > 0 && (data._id !== switcher._id)) {
+    if(Object.keys(switcher)?.length > 0 && (data._id !== switcher._id)) {
       dispatch({type: `SWAP_PLAYER`, data})
     }
   }
