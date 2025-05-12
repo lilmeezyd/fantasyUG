@@ -9,7 +9,7 @@ const EditModal = (props) => {
     startMatchday: "",
     endMatchday: "",
   })
-
+ 
   const { name, startMatchday, endMatchday } = data
   
   const { data: overallLeague } = useGetOverallLeagueQuery(overallLeagueId)

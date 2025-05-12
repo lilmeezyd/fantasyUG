@@ -12,7 +12,7 @@ const EditModal = (props) => {
   useEffect(() => {
     setData({name:position?.singularName, shortName: position?.shortName, code: position?.code})
   }, [position?.singularName, position?.shortName, position?.code])
-
+ 
   const onSubmit = async (e) => {
     e.preventDefault()
     const {elements}  = e.currentTarget

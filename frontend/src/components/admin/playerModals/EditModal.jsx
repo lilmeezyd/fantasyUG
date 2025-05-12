@@ -11,7 +11,7 @@ const EditModal = (props) => {
     playerPosition: '', playerTeam: '', startCost: ''
   })
   const { firstName, secondName, appName, playerPosition, playerTeam, startCost} = data
-
+ 
   const { data: teams} = useGetQuery()
   const { data: positions } = useGetPositionsQuery()
   const [ editPlayer ] = useEditPlayerMutation()

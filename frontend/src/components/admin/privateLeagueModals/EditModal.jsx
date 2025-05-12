@@ -11,7 +11,7 @@ const EditModal = (props) => {
   
   const { data: privateLeague } = useGetLeagueQuery(privateLeagueId)
   const [ editTeamLeague ] = useEditLeagueMutation()
-
+ 
   useEffect(() => {
     setData({name:privateLeague?.name})
   }, [privateLeague?.name])

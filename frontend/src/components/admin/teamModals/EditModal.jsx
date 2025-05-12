@@ -9,7 +9,7 @@ const EditModal = (props) => {
      code: ''}) 
   const { name, shortName, code} = data1
   const [ edit ] = useEditMutation()
-
+ 
   useEffect(() => {
     setData1({name:team?.name, shortName: team?.shortName, code: team?.code})
   }, [team?.name, team?.shortName, team?.code])
