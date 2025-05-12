@@ -18,20 +18,17 @@ const EditModal = (props) => {
     matchday: '', kickOff: '', time: ''
   })
   const { teamHome, teamAway, matchday, kickOff, time } = data;
-  console.log(fixture)
 
   useEffect(() => {
-    /*const dt = new Date(fixture?.kickOffTime)
-    console.log(fixture)
-    console.log(fixture?.kickOffTime)
-    console.log(dt)*/
+    if (fixtureId) {
     setData({
       teamHome: fixture?.teamHome,
       teamAway: fixture?.teamAway,
       matchday: fixture?.matchday,
-      kickOff: new Date(fixture?.kickOffTime),
+      kickOff: new Date(fixture?.kickOffTime).toISOString().split("T")[0],
       time: new Date(fixture?.kickOffTime).toTimeString().split(":").slice(0, 2).join(":")
     });
+  }
   }, [
     fixture?.teamHome,
     fixture?.teamAway,
