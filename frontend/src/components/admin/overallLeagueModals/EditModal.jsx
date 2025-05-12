@@ -72,6 +72,7 @@ return (
                 Start Matchday
               </label>
               <select
+              value={startMatchday}
                 onChange={(e) => {
                   setData((prev) => ({
                     ...prev,
@@ -94,6 +95,7 @@ return (
                 End matchday
               </label>
               <select
+              value={endMatchday}
                 onChange={(e) => {
                   setData((prev) => ({
                     ...prev,

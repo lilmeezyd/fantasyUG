@@ -39,7 +39,7 @@ return (
   <Modal show={show} onHide={closeEdit}>
       <Modal.Header style={{ background: "aquamarine" }} closeButton>
           <Modal.Title>
-            <div className="info-details">Edit Team League</div></Modal.Title>
+            <div className="info-details">Edit Private League</div></Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <div>

@@ -288,7 +288,7 @@ const getTeamLeague = asyncHandler(async (req, res) => {
 
   const {
     _id,
-    name,
+    team,
     startMatchday,
     endMatchday,
     creator,
@@ -304,7 +304,7 @@ const getTeamLeague = asyncHandler(async (req, res) => {
 
   const newLeague = {
     _id,
-    name,
+    team,
     startMatchday,
     endMatchday,
     creator,

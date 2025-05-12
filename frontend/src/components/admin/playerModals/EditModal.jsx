@@ -89,8 +89,7 @@ return (
               </div>
               <div className="form-group my-2">
               <label className="py-2" htmlFor="team">Team</label>
-                <select onChange={(e) => {
-                      console.log(e.target.value)
+                <select value={playerTeam} onChange={(e) => {
                       setData((prev) => ({
                         ...prev, playerTeam: e.target.value
                       }))
@@ -106,6 +105,7 @@ return (
               <div className="form-group my-2">
               <label className="py-2" htmlFor="position">Position</label>
                 <select
+                value={playerPosition}
                 onChange={(e) => {
                   setData((prev) => ({
                     ...prev, playerPosition: e.target.value

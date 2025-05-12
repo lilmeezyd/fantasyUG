@@ -1,23 +1,25 @@
 import { Modal, Button } from "react-bootstrap"
 import { useState, useEffect } from "react"
-import { useGetTeamLeagueQuery, useEditTeamLeagueMutation } from "../../../slices/leagueApiSlice" 
+import { useGetTeamLeagueQuery, useEditTeamLeagueMutation } from "../../../slices/leagueApiSlice"
 import { useGetMatchdaysQuery } from "../../../slices/matchdayApiSlice"
 import { useGetQuery } from "../../../slices/teamApiSlice"
 const EditModal = (props) => {
-  const {show, closeEdit, resetEdit, teamLeagueId} = props
+  const { show, closeEdit, resetEdit, teamLeagueId } = props
   const [data, setData] = useState({
     team: "",
     startMatchday: "",
     endMatchday: "",
   })
-   
+
   const { data: teamLeague } = useGetTeamLeagueQuery(teamLeagueId)
   const { data: matchdays } = useGetMatchdaysQuery()
   const { data: teams } = useGetQuery()
-  const [ editTeamLeague ] = useEditTeamLeagueMutation()
+  const [editTeamLeague] = useEditTeamLeagueMutation()
+  const { team, startMatchday, endMatchday } = data
+ 
 
   useEffect(() => {
-    setData({team:teamLeague?.team, startMatchday: teamLeague?.startMatchday, code: teamLeague?.endMatchday})
+    setData({ team: teamLeague?.team, startMatchday: teamLeague?.startMatchday, endMatchday: teamLeague?.endMatchday })
   }, [teamLeague?.team, teamLeague?.startMatchday, teamLeague?.endMatchday])
   const onSubmit = async (e) => {
     e.preventDefault()
@@ -26,26 +28,26 @@ const EditModal = (props) => {
     const startMatchday = elements.start.value
     const endMatchday = elements.end.value
 
-    if(team && startMatchday && endMatchday) {
-      await editTeamLeague({id: teamLeague?._id, team, startMatchday, endMatchday})
+    if (team && startMatchday && endMatchday) {
+      await editTeamLeague({ id: teamLeague?._id, team, startMatchday, endMatchday })
       closeEdit()
       resetEdit()
     }
 
-    if(!teamLeague) {
+    if (!teamLeague) {
       return (
         <section>
           <h4>Team League not found!</h4>
         </section>
       )
     }
-    
+
   }
-return (
-  <Modal show={show} onHide={closeEdit}>
+  return (
+    <Modal show={show} onHide={closeEdit}>
       <Modal.Header style={{ background: "aquamarine" }} closeButton>
-          <Modal.Title>
-            <div className="info-details">Edit Team League</div></Modal.Title>
+        <Modal.Title>
+          <div className="info-details">Edit Team League</div></Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <div>
@@ -55,6 +57,7 @@ return (
                 League
               </label>
               <select
+                value={team}
                 onChange={(e) => {
                   setData((prev) => ({
                     ...prev,
@@ -77,6 +80,7 @@ return (
                 Start Matchday
               </label>
               <select
+                value={startMatchday}
                 onChange={(e) => {
                   setData((prev) => ({
                     ...prev,
@@ -99,6 +103,7 @@ return (
                 End matchday
               </label>
               <select
+                value={endMatchday}
                 onChange={(e) => {
                   setData((prev) => ({
                     ...prev,
@@ -124,8 +129,8 @@ return (
           </form>
         </div>
       </Modal.Body>
-  </Modal>
-)
+    </Modal>
+  )
 }
 
 export default EditModal
