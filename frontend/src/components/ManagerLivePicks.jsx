@@ -49,6 +49,7 @@ const ManagerPicks = (props) => {
   const bench = picks
     ?.filter((pick) => pick.multiplier === 0)
     ?.sort((a, b) => (a.slot > b.slot ? 1 : -1));
+
   const teamValue = picks?.reduce((x, y) => x + +y.nowCost, 0);
   const itb = 100 - teamValue;
 

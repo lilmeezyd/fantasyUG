@@ -250,9 +250,9 @@ const updateMDdata = asyncHandler(async (req, res) => {
     }
 
     // Uncomment to restrict update to current matchday
-     if (!matchdayFound.current) {
-       throw new Error('Matchday is not the current one!');
-     }
+    if (!matchdayFound.current) {
+      throw new Error('Matchday is not the current one!');
+    }
 
     const allPlayers = await PlayerHistory.find({ matchday: req.params.id }).session(session);
     if (allPlayers.length === 0) {
@@ -350,10 +350,10 @@ const updateTOW = asyncHandler(async (req, res) => {
     acc[id].totalPoints += curr.totalPoints;
     return acc;
   }, {});
-  
+
   const adPlayers = Object.values(playerMap);
 
- const sortedPlayers = adPlayers
+  const sortedPlayers = adPlayers
     .map(x => {
       const { _id, appName, playerPosition, playerTeam } = x.player;
       return {
@@ -368,7 +368,7 @@ const updateTOW = asyncHandler(async (req, res) => {
     })
     .sort((a, b) => b.totalPoints - a.totalPoints);
 
-    // Group players by position
+  // Group players by position
   const grouped = { GKP: [], DEF: [], MID: [], FWD: [] };
   for (const p of sortedPlayers) {
     grouped[p.position]?.push(p);
@@ -443,55 +443,6 @@ const updateTOW = asyncHandler(async (req, res) => {
     res.status(201).json(created);
   }
 
-  // Build Team of the Week
-  /*const starOnes = [];
-  let goal = 0, def = 0, mid = 0, fwd = 0, total = 0;
-
-  
-  for (const p of sortedPlayers) {
-    if (total === 11) break;
-
-    switch (p.position) {
-      case 'GKP':
-        if (goal < 1) {
-          starOnes.push(p); goal++; total++;
-        }
-        break;
-      case 'DEF':
-        if ((def === 4 && mid === 5) || (def === 3 && mid === 4 && fwd === 3)) break;
-        if (def < 5) {
-          starOnes.push(p); def++; total++;
-        }
-        break;
-      case 'MID':
-        if ((mid === 4 && def === 2) || (mid === 4 && fwd === 3) || (mid === 4 && def === 5)) break;
-        if (mid < 5) {
-          starOnes.push(p); mid++; total++;
-        }
-        break;
-      case 'FWD':
-        if (fwd === 2 && mid === 5) break;
-        if (fwd < 3) {
-          starOnes.push(p); fwd++; total++;
-        }
-        break;
-    }
-  }
-
-  // Upsert TOW document
-  const update = {
-    matchday: id,
-    matchdayId: req.params.id,
-    starOnes
-  };
-
-  const realStars = await TOW.findOneAndUpdate(
-    { matchdayId: req.params.id },
-    { $set: update },
-    { upsert: true, new: true }
-  );
-
-  res.status(201).json(realStars);*/
 });
 
 
@@ -576,311 +527,110 @@ const createAutos = asyncHandler(async (req, res) => {
      res.status(400)
      throw new Error(`Matchday not current Matchday!`)
    }*/
-  const managerLives = await ManagerLive.find({})
-  for (let i = 0; i < managerLives.length; i++) {
-    const { manager, livePicks: lively } = managerLives[i]
-    const mdPicks = lively.find(x => x.matchday === id)
-    const manInfo = await ManagerInfo.findById(manager)
-    console.log(manInfo.teamName)
-    const {
-      matchday,
-      matchdayId,
-      activeChip,
-      matchdayRank,
-      teamValue,
-      automaticSubs,
-      bank,
-      picks: unformattedPicks,
-    } = mdPicks;
-    //Captain missed
-    const captainMissed = unformattedPicks.find(x => x.multiplier > 1 && +x.starts === 0 && +x.bench === 0)
-    //Available players
-    let available = unformattedPicks.filter(x => x.multiplier === 0 && x.slot > 12 && (+x.starts > 0 || +x.bench > 0))
-    let availableGoalie = unformattedPicks.filter(x => (+x.starts > 0 || +x.bench > 0) && x.slot === 12)
-    //Available by position
-    let availableDefs = available.filter(x => x.playerPosition.toString() === '669a4831e181cb2ed40c240f')
-    let availableFwds = available.filter(x => x.playerPosition.toString() === '669a485de181cb2ed40c2417')
-    let availableMids = available.filter(x => x.playerPosition.toString() === '669a4846e181cb2ed40c2413')
-    const gWhoMissed = unformattedPicks.filter(x => x.multiplier > 0 && x.playerPosition.toString() === '669a41e50f8891d8e0b4eb2a' && +x.starts === 0 && +x.bench === 0)
-    const dWhoMissed = unformattedPicks.filter(x => x.multiplier > 0 && x.playerPosition.toString() === '669a4831e181cb2ed40c240f' && +x.starts === 0 && +x.bench === 0)
-    const mWhoMissed = unformattedPicks.filter(x => x.multiplier > 0 && x.playerPosition.toString() === '669a4846e181cb2ed40c2413' && +x.starts === 0 && +x.bench === 0)
-    const fWhoMissed = unformattedPicks.filter(x => x.multiplier > 0 && x.playerPosition.toString() === '669a485de181cb2ed40c2417' && +x.starts === 0 && +x.bench === 0)
+  const managerLives = await ManagerLive.find({}).lean()
+  const VALID_FORMATIONS = [
+    { GKP: 1, DEF: 4, MID: 4, FWD: 2 },
+    { GKP: 1, DEF: 4, MID: 3, FWD: 3 },
+    { GKP: 1, DEF: 5, MID: 3, FWD: 2 },
+    { GKP: 1, DEF: 5, MID: 2, FWD: 3 },
+    { GKP: 1, DEF: 3, MID: 5, FWD: 2 },
+    { GKP: 1, DEF: 3, MID: 4, FWD: 3 },
+    { GKP: 1, DEF: 5, MID: 4, FWD: 1 },
+    { GKP: 1, DEF: 4, MID: 5, FWD: 1 }
+  ];
+  const POSITIONS = {
+    '669a41e50f8891d8e0b4eb2a': 'GKP',
+    '669a4831e181cb2ed40c240f': 'DEF',
+    '669a4846e181cb2ed40c2413': 'MID',
+    '669a485de181cb2ed40c2417': 'FWD'
+  };
 
-    //Starting players by position
-    let startingDefs = unformattedPicks.filter(x => x.multiplier > 0 && x.playerPosition.toString() === '669a4831e181cb2ed40c240f')
-    let startingFwds = unformattedPicks.filter(x => x.multiplier > 0 && x.playerPosition.toString() === '669a485de181cb2ed40c2417')
-    let startingMids = unformattedPicks.filter(x => x.multiplier > 0 && x.playerPosition.toString() === '669a4846e181cb2ed40c2413')
-
-    //console.log(available.length)
-    if (captainMissed) {
-      const vice = unformattedPicks.find(x => x.IsViceCaptain === true)
-      const { _id: p_id, playerPosition: pp, playerTeam: pt, multiplier: pm, nowCost: pn,
-        IsCaptain: pc, IsViceCaptain: pvc, slot: ps, points: ppts } = captainMissed
-      const { _id: m_id, playerPosition: mp, playerTeam: mt, multiplier: mm, nowCost: mn,
-        IsCaptain: mc, IsViceCaptain: mvc, slot: ms, points: mpts } = vice
-      const cMissedIndex = unformattedPicks.findIndex(x => x.IsCaptain === captainMissed.IsCaptain)
-      const newCaptain = {
-        _id: p_id, playerPosition: pp, playerTeam: pt, multiplier: 1, nowCost: pn,
-        IsCaptain: pc, IsViceCaptain: pvc, slot: ps, points: ppts
-      }
-      const newVice = {
-        _id: m_id, playerPosition: mp, playerTeam: mt, multiplier: pm, nowCost: mn,
-        IsCaptain: mc, IsViceCaptain: mvc, slot: ms, points: mpts * pm
-      }
-      unformattedPicks.splice(cMissedIndex, 1, newCaptain)
-      const pIndex = unformattedPicks.findIndex(x => x.IsViceCaptain === vice.IsViceCaptain)
-      unformattedPicks.splice(pIndex, 1, newVice)
+  // Helpers
+  const isValidFormation = ({ GKP, DEF, MID, FWD }) => {
+    return VALID_FORMATIONS.some(f =>
+      f.GKP === GKP && f.DEF === DEF && f.MID === MID && f.FWD === FWD
+    );
+  };
+  const getFormation = picks => {
+    const formation = { GKP: 0, DEF: 0, MID: 0, FWD: 0 };
+    for (const pick of picks) {
+      formation[POSITIONS[pick.playerPosition]]++;
     }
-    if (gWhoMissed.length > 0 && availableGoalie.length > 0) {
-      const potential = availableGoalie.find(x => +x.starts > 0 || +x.bench > 0)
-      const { _id: p_id, playerPosition: pp, playerTeam: pt, multiplier: pm, nowCost: pn,
-        IsCaptain: pc, IsViceCaptain: pvc, slot: ps, points: ppts } = potential
-      const { _id: m_id, playerPosition: mp, playerTeam: mt, multiplier: mm, nowCost: mn,
-        IsCaptain: mc, IsViceCaptain: mvc, slot: ms, points: mpts } = gWhoMissed[0]
-      const mMissedIndex = unformattedPicks.findIndex(x => x.slot === gWhoMissed[0].slot)
-      const newPotential = {
-        _id: p_id, playerPosition: pp, playerTeam: pt, multiplier: 1, nowCost: pn,
-        IsCaptain: pc, IsViceCaptain: pvc, slot: ms, points: ppts
-      }
-      const oldMid = {
-        _id: m_id, playerPosition: mp, playerTeam: mt, multiplier: pm, nowCost: mn,
-        IsCaptain: mc, IsViceCaptain: mvc, slot: ps, points: mpts
-      }
-      unformattedPicks.splice(mMissedIndex, 1, oldMid)
-      const pIndex = unformattedPicks.findIndex(x => x.slot === potential.slot)
-      unformattedPicks.splice(pIndex, 1, newPotential)
-      automaticSubs.push({ in: { _id: p_id, playerPosition: pp, playerTeam: pt }, out: { _id: m_id, playerPosition: mp, playerTeam: mt } })
-
+    return formation;
+  };
+  const clonePicks = picks => picks.map(p => ({ ...p }));
+  const applyAutoSubs = (picks) => {
+    const updatedPicks = clonePicks(picks);
+    const usedPlayerIds = new Set();
+    const automaticSubs = []
+    const starters = updatedPicks.filter(p => p.multiplier > 0);
+    const bench = updatedPicks
+      .filter(p => p.multiplier === 0)
+      .sort((a, b) => a.slot - b.slot);
+    for (const pick of starters) {
+      usedPlayerIds.add(pick._id);
     }
-    if (dWhoMissed.length > 0) {
-      for (let i = 0; i < dWhoMissed.length; i++) {
-        available.sort((a, b) => a.slot > b.slot ? 1 : -1)
-        if (available.length === 0) break;
-        if (startingDefs.length === 3 && availableDefs.length === 0) break;
-        const potential = available.find(x => +x.starts > 0 || +x.bench > 0)
-        const { _id: p_id, playerPosition: pp, playerTeam: pt, multiplier: pm, nowCost: pn,
-          IsCaptain: pc, IsViceCaptain: pvc, slot: ps, points: ppts } = potential
-        const { _id: m_id, playerPosition: mp, playerTeam: mt, multiplier: mm, nowCost: mn,
-          IsCaptain: mc, IsViceCaptain: mvc, slot: ms, points: mpts } = dWhoMissed[i]
-
-        const mMissedIndex = unformattedPicks.findIndex(x => x.slot === ms)
-        const newPotential = {
-          _id: p_id, playerPosition: pp, playerTeam: pt, multiplier: 1, nowCost: pn,
-          IsCaptain: pc, IsViceCaptain: pvc, slot: ms, points: ppts
+    for (const starter of starters) {
+      if (+starter.starts === 0 && +starter.bench === 0) {
+        for (const sub of bench) {
+          if ((+sub.starts === 1 || +sub.bench === 1) &&
+            !usedPlayerIds.has(sub._id)
+          ) {
+            // Temporarily apply sub and check formation
+            const simulated = starters.map(p =>
+              p._id === starter._id ? { ...sub, multiplier: 1 } : p
+            );
+            const formation = getFormation(simulated);
+            if (isValidFormation(formation)) {
+              let newStarterSlot = sub.slot;
+              let newSubSlot = starter.slot;
+              // Apply sub
+              sub.multiplier = 1;
+              starter.multiplier = 0;
+              starter.slot = newStarterSlot;
+              sub.slot = starter.slot;
+              usedPlayerIds.add(sub._id);
+              automaticSubs.push({in: { _id: sub._id, playerPosition: sub.playerPosition, playerTeam: sub.playerTeam},
+                 out: {_id: starter._id, playerPosition: starter.playerPosition, playerTeam: starter.playerTeam}})
+              break;
+            }
+          }
         }
-        const oldMid = {
-          _id: m_id, playerPosition: mp, playerTeam: mt, multiplier: pm, nowCost: mn,
-          IsCaptain: mc, IsViceCaptain: mvc, slot: ps, points: mpts
-        }
-        unformattedPicks.splice(mMissedIndex, 1, newPotential)
-        const pIndex = unformattedPicks.findIndex(x => x.slot === ps)
-        unformattedPicks.splice(pIndex, 1, oldMid)
-        //Defenders
-        if (pp.toString() === '669a4831e181cb2ed40c240f') {
-          /*availableDefs -= 1
-          startingDefs += 1*/
-          const availDefIndex = availableDefs.findIndex(x => x._id === potential._id)
-          availableDefs.splice(availDefIndex, 1)
-          const starDefIndex = startingDefs.findIndex(x => x._id === dWhoMissed[i]._id)
-          startingDefs.splice(starDefIndex, 1, newPotential)
-        }
-        //Forwards
-        if (pp.toString() === '669a485de181cb2ed40c2417' && startingDefs.length > 3) {
-          /*availableFwds -= 1
-          startingFwds += 1*/
-          const availFwdIndex = availableFwds.findIndex(x => x._id === potential._id)
-          availableFwds.splice(availFwdIndex, 1)
-          const starDefIndex = startingDefs.findIndex(x => x._id === dWhoMissed[i]._id)
-          startingDefs.splice(starDefIndex, 1)
-          startingFwds.push(newPotential)
-        }
-        //Midfielders
-        if (pp.toString() === '669a4846e181cb2ed40c2413' && startingDefs.length > 3) {
-          const availMidIndex = availableMids.findIndex(x => x._id === potential._id)
-          availableMids.splice(availMidIndex, 1)
-          const starDefIndex = startingDefs.findIndex(x => x._id === dWhoMissed[i]._id)
-          startingDefs.splice(starDefIndex, 1)
-          startingMids.push(newPotential)
-        }
-        const availableIndex = available.findIndex(x => x._id === potential._id)
-        automaticSubs.push({ in: { _id: p_id, playerPosition: pp, playerTeam: pt }, out: { _id: m_id, playerPosition: mp, playerTeam: mt } })
-        available.splice(availableIndex, 1)
-      }
-
-    }
-    if (mWhoMissed.length > 0) {
-      for (let i = 0; i < mWhoMissed.length; i++) {
-        available.sort((a, b) => a.slot > b.slot ? 1 : -1)
-        if (available.length === 0) break;
-        const potential = available.find(x => +x.starts > 0 || +x.bench > 0)
-        const { _id: p_id, playerPosition: pp, playerTeam: pt, multiplier: pm, nowCost: pn,
-          IsCaptain: pc, IsViceCaptain: pvc, slot: ps, points: ppts } = potential
-        const { _id: m_id, playerPosition: mp, playerTeam: mt, multiplier: mm, nowCost: mn,
-          IsCaptain: mc, IsViceCaptain: mvc, slot: ms, points: mpts } = mWhoMissed[i]
-        const mMissedIndex = unformattedPicks.findIndex(x => x.slot === ms)
-        const newPotential = {
-          _id: p_id, playerPosition: pp, playerTeam: pt, multiplier: 1, nowCost: pn,
-          IsCaptain: pc, IsViceCaptain: pvc, slot: ms, points: ppts
-        }
-        const oldMid = {
-          _id: m_id, playerPosition: mp, playerTeam: mt, multiplier: pm, nowCost: mn,
-          IsCaptain: mc, IsViceCaptain: mvc, slot: ps, points: mpts
-        }
-        unformattedPicks.splice(mMissedIndex, 1, newPotential)
-        const pIndex = unformattedPicks.findIndex(x => x.slot === ps)
-        unformattedPicks.splice(pIndex, 1, oldMid)
-        //Defenders
-        if (pp.toString() === '669a4831e181cb2ed40c240f') {
-          const availDefIndex = availableDefs.findIndex(x => x._id === potential._id)
-          availableDefs.splice(availDefIndex, 1)
-          const starMidIndex = startingMids.findIndex(x => x._id === mWhoMissed[i]._id)
-          startingMids.splice(starMidIndex, 1)
-          startingDefs.push(newPotential)
-        }
-        //Forwards
-        if (pp.toString() === '669a485de181cb2ed40c2417') {
-          const availFwdIndex = availableFwds.findIndex(x => x._id === potential._id)
-          availableFwds.splice(availFwdIndex, 1)
-          const starMidIndex = startingMids.findIndex(x => x._id === mWhoMissed[i]._id)
-          startingMids.splice(starMidIndex, 1)
-          startingFwds.push(newPotential)
-        }
-        //Midfielders
-        if (pp.toString() === '669a4846e181cb2ed40c2413') {
-          const availMidIndex = availableMids.findIndex(x => x._id === potential._id)
-          availableMids.splice(availMidIndex, 1)
-          const starMidIndex = startingMids.findIndex(x => x._id === mWhoMissed[i]._id)
-          startingMids.splice(starMidIndex, 1, newPotential)
-        }
-        const availableIndex = available.findIndex(x => x._id === potential._id)
-        automaticSubs.push({ in: { _id: p_id, playerPosition: pp, playerTeam: pt }, out: { _id: m_id, playerPosition: mp, playerTeam: mt } })
-        available.splice(availableIndex, 1)
       }
     }
-    if (fWhoMissed.length > 0) {
-      for (let i = 0; i < fWhoMissed.length; i++) {
-        if (available.length === 0) break;
-        if (startingFwds.length === 1 && availableFwds.length === 0) break;
-        const potential = available.find(x => +x.starts > 0 || +x.bench > 0)
-        const { _id: p_id, playerPosition: pp, playerTeam: pt, multiplier: pm, nowCost: pn,
-          IsCaptain: pc, IsViceCaptain: pvc, slot: ps, points: ppts } = potential
-        const { _id: m_id, playerPosition: mp, playerTeam: mt, multiplier: mm, nowCost: mn,
-          IsCaptain: mc, IsViceCaptain: mvc, slot: ms, points: mpts } = fWhoMissed[i]
-        const mMissedIndex = unformattedPicks.findIndex(x => x.slot === ms)
-        const newPotential = {
-          _id: p_id, playerPosition: pp, playerTeam: pt, multiplier: 1, nowCost: pn,
-          IsCaptain: pc, IsViceCaptain: pvc, slot: ms, points: ppts
-        }
-        const oldMid = {
-          _id: m_id, playerPosition: mp, playerTeam: mt, multiplier: pm, nowCost: mn,
-          IsCaptain: mc, IsViceCaptain: mvc, slot: ps, points: mpts
-        }
-        unformattedPicks.splice(mMissedIndex, 1, newPotential)
-        const pIndex = unformattedPicks.findIndex(x => x.slot === ps)
-        unformattedPicks.splice(pIndex, 1, oldMid)
-        //Defenders
-        if (pp.toString() === '669a4831e181cb2ed40c240f' && startingFwds.length > 1) {
-          const availDefIndex = availableDefs.findIndex(x => x._id === potential._id)
-          availableDefs.splice(availDefIndex, 1)
-          const starFwdIndex = startingFwds.findIndex(x => x._id === fWhoMissed[i]._id)
-          startingFwds.splice(starFwdIndex, 1)
-          startingFwds.push(newPotential)
-
-        }
-        if (pp.toString() === '669a485de181cb2ed40c2417') {
-          const availFwdIndex = availableFwds.findIndex(x => x._id === potential._id)
-          availableFwds.splice(availFwdIndex, 1)
-          const starFwdIndex = startingFwds.findIndex(x => x._id === fWhoMissed[i]._id)
-          startingFwds.splice(starFwdIndex, 1, newPotential)
-        }
-        //midfielders
-        if (pp.toString() === '669a4846e181cb2ed40c2413' && startingFwds.length > 1) {
-          const availMidIndex = availableMids.findIndex(x => x._id === potential._id)
-          availableMids.splice(availMidIndex, 1)
-          const starFwdIndex = startingFwds.findIndex(x => x._id === fWhoMissed[i]._id)
-          startingFwds.splice(starFwdIndex, 1)
-          startingFwds.push(newPotential)
-        }
-        const availableIndex = available.findIndex(x => x._id === potential._id)
-        automaticSubs.push({ in: { _id: p_id, playerPosition: pp, playerTeam: pt }, out: { _id: m_id, playerPosition: mp, playerTeam: mt } })
-        available.splice(availableIndex, 1)
-      }
-
-    }
-    //console.log(automaticSubs)
-
-    const newMdPoints = unformattedPicks
-      .filter((x) => x.multiplier > 0)
-      .reduce((x, y) => x + y.points, 0);
-    const newFormatted = {
-      picks: unformattedPicks,
-      matchday,
-      matchdayId,
-      activeChip,
-      teamValue,
-      bank,
-      matchdayRank,
-      automaticSubs,
-      matchdayPoints: newMdPoints,
-    };
-
-    const superLives = lively.filter(
-      (x) => x.matchdayId.toString() !== req.params.id.toString()
-    );
-    superLives.push(newFormatted);
-    const managerinfo = await ManagerInfo.findOneAndUpdate(
-      { _id: manager },
-      {
-        $set: {
-          matchdayPoints: newMdPoints,
-          "teamLeagues.0.matchdayPoints": newMdPoints,
-          "overallLeagues.0.matchdayPoints": newMdPoints,
-        },
-      },
-      { new: true }
-    );
-    const managerlive = await ManagerLive.findOneAndUpdate(
-      { manager: manager },
-      { livePicks: superLives },
-      { new: true }
-    );
-
-    const { teamLeagues, overallLeagues } = managerinfo;
-    const startTeamMd = await Matchday.findById(
-      teamLeagues[0].startMatchday.toString()
-    );
-    const endTeamMd = await Matchday.findById(
-      teamLeagues[0].endMatchday.toString()
-    );
-    const startOverallMd = await Matchday.findById(
-      overallLeagues[0].startMatchday.toString()
-    );
-    const endOverallMd = await Matchday.findById(
-      overallLeagues[0].endMatchday.toString()
-    );
-    const { livePicks } = managerlive;
-    const endTeamMdId = endTeamMd === null ? 100 : endTeamMd.id;
-    const endOverallMdId = endOverallMd === null ? 100 : endOverallMd.id;
-    const overallTeamPts = livePicks
-      .filter((x) => x.matchday >= startTeamMd.id && x.matchday <= endTeamMdId)
-      .map((x) => x.matchdayPoints)
-      .reduce((x, y) => x + y, 0);
-    const overallOverallPts = livePicks
-      .filter(
-        (x) => x.matchday >= startOverallMd.id && x.matchday <= endOverallMdId
-      )
-      .map((x) => x.matchdayPoints)
-      .reduce((x, y) => x + y, 0);
-    const overallPts = livePicks
-      .map((x) => x.matchdayPoints)
-      .reduce((a, b) => a + b, 0);
-    managerinfo.$set("overallPoints", overallPts);
-    managerinfo.$set("teamLeagues.0.overallPoints", overallTeamPts);
-    managerinfo.$set("overallLeagues.0.overallPoints", overallOverallPts);
-    await managerinfo.save();
+    return {newPicks: [...starters, ...bench], automaticSubs};
   }
-
-  res.status(201).json('Update Complete')
+  const applyCaptainFallback = (picks) => {
+    const captainMissed = picks.find(x => x.multiplier > 1 && +x.starts === 0 && +x.bench === 0)
+    const vice = picks.find(x => x.IsViceCaptain === true && (+x.starts === 1 || +x.bench === 1))
+    if (captainMissed && vice) {
+      return picks
+        .map(pick => pick.multiplier > 1 ? { ...pick, multiplier: 1 } :
+          pick.IsViceCaptain === true ? { ...pick, multiplier: captainMissed.multiplier } : pick)
+    }
+    return picks
+  }
+  const createSubs = (picks) => {
+    let captainFallback = applyCaptainFallback(picks)
+    let finalPicks = applyAutoSubs(captainFallback)
+    return finalPicks;
+  }
+  const bulkOps = managerLives.map(lives => {
+    const { _id, livePicks } = lives
+    const mdPicks = livePicks.find(x => x.matchday === id) ?? []
+    const {  picks } = mdPicks;
+    const newPicksAndSubs = createSubs(picks)
+    const { automaticSubs, newPicks } = newPicksAndSubs
+    const newMdPicks = livePicks.map(x => x.matchday === id ? {...x, automaticSubs, picks: newPicks.sort((a, b) => a.slot - b.slot)} : x)
+    return {
+      updateOne: {
+        filter: {_id: _id},
+        update: {$set: {livePicks: newMdPicks}}
+      }
+    }
+  })
+  await ManagerLive.bulkWrite(bulkOps)
+  res.json(managerLives)
 })
 
 //@desc Delete Matchday

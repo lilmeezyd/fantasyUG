@@ -319,7 +319,30 @@ const getLivePicks = asyncHandler(async (req, res) => {
     $or: [{ user: req.params.id }, { _id: req.params.id }],
   });
   const { _id } = managerInfo;
-  const picks = await ManagerLive.find({ manager: _id });
+  //const picks = await ManagerLive.find({ manager: _id })
+  const picks = await ManagerLive.aggregate([
+    { $match: { manager: _id } },
+    { $unwind: "$livePicks" },
+    { $sort: { "livePicks.matchday": 1, "livePicks.slot": 1 } },
+    {
+      $group: {
+        _id: "$_id",
+        manager: { $first: "$manager" },
+        livePicks: { $push: "$livePicks" },
+      },
+    },
+    { $project: { _id: 1, manager: 1, livePicks: 1 } }
+  ]);
+
+  // Post-process to sort livePicks.picks by slot
+  const sortedPicks = picks.map((doc) => {
+    doc.livePicks.forEach((lp) => {
+      if (Array.isArray(lp.picks)) {
+        lp.picks.sort((a, b) => a.slot - b.slot);
+      }
+    });
+    return doc;
+  });
 
   if (!user && !picks) {
     res.status(400);
@@ -331,7 +354,7 @@ const getLivePicks = asyncHandler(async (req, res) => {
     throw new Error("Manager not found");
   }
 
-  res.status(200).json({ picks, managerInfo });
+  res.status(200).json({ picks: sortedPicks, managerInfo });
 });
 
 //@desc Get specific live picks
