@@ -25,23 +25,47 @@ const TeamOfWeek = () => {
   const allArrays = useMemo(() => {
     const newOnes = []
     const all = data?.filter(x => +x.matchday === +matchdayId)
-    if(all !== undefined && all.length > 0) {
+    if (all !== undefined && all.length > 0) {
       newOnes.push(...all[0].starOnes)
     }
-    return newOnes.sort((a,b) => a.code > b.code ? 1 : -1)
+    return newOnes.sort((a, b) => a.code > b.code ? 1 : -1)
   }, [matchdayId, data])
-    
-  
+  console.log(allArrays)
+  const goalkeepers = allArrays?.filter(
+    (pick) =>
+      pick?.positionId
+      === "669a41e50f8891d8e0b4eb2a"
+  );
+  const defenders = allArrays
+    ?.filter(
+      (pick) =>
+        pick?.positionId
+        === "669a4831e181cb2ed40c240f"
+    );
+  const midfielders = allArrays
+    ?.filter(
+      (pick) =>
+        pick?.positionId
+        === "669a4846e181cb2ed40c2413"
+    );
+  const forwards = allArrays
+    ?.filter(
+      (pick) =>
+        pick?.positionId
+        === "669a485de181cb2ed40c2417"
+    );
+
+
   const onDecrement = () => {
-    setMatchdayId(matchdayId-1)
+    setMatchdayId(matchdayId - 1)
   };
 
   const onIncrement = () => {
-    setMatchdayId(matchdayId+1)
+    setMatchdayId(matchdayId + 1)
   };
-  
 
-  if(isLoading || getAllLoading || !data?.length) {
+
+  if (isLoading || getAllLoading || !data?.length) {
     return (
       <div className="spinner">
         <Spinner />
@@ -49,45 +73,77 @@ const TeamOfWeek = () => {
     )
   }
 
-  if(data?.length === 0) {
+  if (data?.length === 0) {
     return (
       <div className="spinner">
         No stars of the matchday yet
       </div>
     )
   }
-  
+
   return (
     <>
-    <div className="home-section-sub">
-    <section className="btn-wrapper p-2">
-        <button
-          disabled={matchdayId === minId ? true : false}
-          onClick={onDecrement}
-          className={`${matchdayId === +minId && "btn-hide"} btn-controls`}
-          id="prevButton"
-        >
-          <BsChevronLeft />
-        </button>
-        <button
-          disabled={matchdayId === +maxId ? true : false}
-          onClick={onIncrement}
-          className={`${matchdayId === +maxId && "btn-hide"} btn-controls`}
-          id="nextButton"
-        >
-          <BsChevronRight />
-        </button>
-      </section>
-    <h6 className="home-stars">Stars of Matchday {allArray[0]?.matchday}</h6>
-      {allArrays?.map(player => 
-      <>
-      <div className="home-section-details" key={player.id}>
-        <PlayerDetails playerId={player.id}></PlayerDetails>
-        <div>{player.totalPoints}</div>
+      <div className="home-section-sub">
+        <section className="btn-wrapper p-2">
+          <button
+            disabled={matchdayId === minId ? true : false}
+            onClick={onDecrement}
+            className={`${matchdayId === +minId && "btn-hide"} btn-controls`}
+            id="prevButton"
+          >
+            <BsChevronLeft />
+          </button>
+          <button
+            disabled={matchdayId === +maxId ? true : false}
+            onClick={onIncrement}
+            className={`${matchdayId === +maxId && "btn-hide"} btn-controls`}
+            id="nextButton"
+          >
+            <BsChevronRight />
+          </button>
+        </section>
+        <h6 className="home-stars">Stars of Matchday {allArray[0]?.matchday}</h6>
+        <div className="default-player">
+          {goalkeepers?.map((x) => (
+            <div key={x.id} className="squad-player">
+              <PlayerDetails
+                playerId={x.id}
+                totalPoints={x.totalPoints}
+              />
+            </div>
+          ))}
+        </div>
+        <div className="default-player">
+          {defenders?.map((x) => (
+            <div key={x.id} className="squad-player">
+              <PlayerDetails
+                playerId={x.id}
+                totalPoints={x.totalPoints}
+              />
+            </div>
+          ))}
+        </div>
+        <div className="default-player">
+          {midfielders?.map((x) => (
+            <div key={x.id} className="squad-player">
+              <PlayerDetails
+                playerId={x.id}
+                totalPoints={x.totalPoints}
+              />
+            </div>
+          ))}
+        </div>
+        <div className="default-player">
+          {forwards?.map((x) => (
+            <div key={x.id} className="squad-player">
+              <PlayerDetails
+                playerId={x.id}
+                totalPoints={x.totalPoints}
+              />
+            </div>
+          ))}
+        </div>
       </div>
-      </>
-    )}
-    </div>
     </>
   )
 }

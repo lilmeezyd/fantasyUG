@@ -1,6 +1,6 @@
 import { useGetPlayersQuery } from "../slices/playerApiSlice"
 import { Spinner } from "react-bootstrap"
-import PlayerDetails from "./PlayerDetails"
+import MostOwnedDetails from "./MostOwnedDetails"
 import { 
   getPlayers
 } from "../helpers/playersHelper";
@@ -32,7 +32,7 @@ if(isLoading) {
       <h6 className="home-stars">Most owned players</h6>
     {allPlayers.map(player => 
       <div className="home-section-details" key={player._id}>
-        <PlayerDetails playerId={player._id}></PlayerDetails>
+        <MostOwnedDetails playerId={player._id}></MostOwnedDetails>
         <div>{player.ownership}%</div>
       </div>
     )}

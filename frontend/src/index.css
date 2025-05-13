@@ -139,6 +139,23 @@ form.login-cs {
 }
 
 .home-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 0 0.2rem;
+  font-weight: 700;
+  background: white;
+}
+
+.home-points {
+  font-weight: 500;
+  background: #0c123d;
+  color: white;
+  border-bottom-left-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
+}
+
+.most-owned {
   cursor: pointer;
 }
 
@@ -153,7 +170,8 @@ form.login-cs {
   text-align: center;
   padding: 1rem 0;
   border: 1px solid #aaa;
-  background: linear-gradient(45deg, aquamarine, #0000ff57);
+  /*background: linear-gradient(45deg, aquamarine, #0000ff57);*/
+  background: linear-gradient(#7ecf8f, #3e944a);
   border-radius: 0.5rem;
   font-weight: 700;
 }
@@ -179,7 +197,8 @@ form.login-cs {
 }
 
 .stars {
-  background: linear-gradient(45deg, aquamarine, #0000ff57);
+  /*background: linear-gradient(45deg, aquamarine, #0000ff57);*/
+  background: linear-gradient(#7ecf8f, #3e944a);
   border-radius: 0.5rem;
   border: 1px solid #aaa;
   font-weight: 700;
@@ -724,9 +743,11 @@ form.login-cs {
 /* Transfers */
 .transfer-data {
   display: flex;
-  background: white;
-  gap: 1rem;
-  border: 1px solid #aaa;
+  justify-content: center;
+  gap: 2rem;
+  margin: 0.5rem 0;
+  font-size: 1.5rem;
+  flex-wrap: wrap;
 }
 
 .transfer-item {
@@ -740,11 +761,22 @@ form.login-cs {
 
 .trans-reset {
   display: flex;
-  gap: 1.2rem;
+  justify-content: space-evenly;
+  margin-top: 0.5rem;
 }
 
 .trans-reset button {
-  flex: 1 0 0;
+  width: 100px;
+  font-weight: 700;
+  padding: 0.5rem;
+}
+
+.primary {
+  background-color: #1f8f6b;
+  color: white;
+  width: 100px;
+  font-weight: 700;
+  padding: 0.5rem;
 }
 
 .no-picks-team {
@@ -761,7 +793,7 @@ form.login-cs {
 .no-picks-team {
   display: flex;
   flex-direction: column;
-  background: #008000a3;
+  background: linear-gradient(#7ecf8f, #3e944a);
   box-shadow: 0 0 2px;
   border-radius: 0.5rem;
   padding: 0.5rem 0;
@@ -1611,6 +1643,7 @@ h1.stats {
   border-radius: 0.5rem;
   font-weight: 700;
 }
+
 .automatic {
   border-radius: 0.5rem;
   background: aquamarine;

@@ -91,30 +91,30 @@ const PicksPlatform = (props) => {
   return (
     <div>
       <div className="transfer-data p-2">
-        <div className="transfer-item p-2">
-          <div>Selected</div>
-          <div>{totalPlayers}/15</div>
+        <div className="p-2">
+          <strong>Selected:</strong>&nbsp;&nbsp;
+          {totalPlayers}/15
         </div>
-        <div className="transfer-item p-2">
-          <div>ITB</div>
-          <div>{itb.toFixed(1)}</div>
+        <div className="p-2">
+          <strong>ITB:</strong>&nbsp;&nbsp;
+          {itb.toFixed(1)}
         </div>
-        <div className="transfer-item p-2">
-          <div>TC</div>
-          <div>0</div>
+        {/*<div className="p-2">
+          <strong>TC:</strong>
+          0
         </div>
-        <div className="transfer-item p-2">
-          <div>FTS</div>
-          <div>Unlimited</div>
-        </div>
+        <div className="p-2">
+          <strong>FTS:</strong>
+          Unlimited
+        </div>*/}
       </div>
       <div className="trans-reset p-2">
-        <Button style={{ color: "aquamarine" }} className="btn-dark">
+        <Button  className="primary">
           Auto Pick
         </Button>
         <Button
           onClick={reset}
-          style={{ color: "aquamarine" }}
+          style={{ color: "white" }}
           className="btn-dark"
         >
           Reset
@@ -219,7 +219,7 @@ const PicksPlatform = (props) => {
                 teamName.length > 20 ||
                 playerLeague === ""
               }
-              className="btn-success form-control"
+              className="primary"
             >
               Save
             </Button>
