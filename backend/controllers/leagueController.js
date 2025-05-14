@@ -841,7 +841,7 @@ const setCurrentAndLastRanks = asyncHandler(async (req, res) => {
               "overallLeagues.$[el].lastRank": lastRank
             }
           },
-          arrayFilters: [{ "el.id": leagueId }]
+          arrayFilters: [{ "el.id": leagueId.toString() }]
         }
       }));
       // Perform all updates in one DB operation
@@ -878,7 +878,7 @@ const setCurrentAndLastRanks = asyncHandler(async (req, res) => {
               "teamLeagues.$[el].lastRank": lastRank
             }
           },
-          arrayFilters: [{ "el.id": leagueId }]
+          arrayFilters: [{ "el.id": leagueId.toString() }]
         }
       }));
       // Perform all updates in one DB operation
