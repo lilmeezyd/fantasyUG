@@ -16,8 +16,10 @@ import mongoose from "mongoose";
 //@route PATCH api/livepicks/manager/
 //@access   
 const setLivePicks = asyncHandler(async (req, res) => {
-  const allPicks = await Picks.find({});
-  const matchday = await Matchday.findOne({ current: true });
+  const [allPicks, matchday] = await Promise.all([
+    Picks.find({}),
+    Matchday.findOne({ current: true }),
+  ]);
 
   if (!matchday) {
     res.status(404);
@@ -27,74 +29,85 @@ const setLivePicks = asyncHandler(async (req, res) => {
   const matchdayNumber = matchday.id;
   const matchdayId = matchday._id;
 
+  const managerIds = allPicks.map((p) => p.manager.toString());
+  const [managerInfos, managerLives] = await Promise.all([
+    ManagerInfo.find({ _id: { $in: managerIds } }),
+    ManagerLive.find({ manager: { $in: managerIds } }),
+  ]);
+
+  const infoMap = new Map(managerInfos.map((m) => [m._id.toString(), m]));
+  const liveMap = new Map(managerLives.map((m) => [m.manager.toString(), m]));
+
   const createdManagers = [];
   const skippedManagers = [];
 
+  const liveUpdates = [];
+  const infoUpdates = [];
+
   for (const pick of allPicks) {
     const { manager, picks, teamValue, bank } = pick;
+    const managerId = manager.toString();
+    const mInfo = infoMap.get(managerId);
+    const mLive = liveMap.get(managerId);
 
-    const session = await mongoose.startSession();
-    session.startTransaction();
+    if (!mInfo || mInfo.matchdayJoined > matchdayNumber) {
+      skippedManagers.push(managerId);
+      continue;
+    }
 
-    try {
-      const [mLive, mInfo] = await Promise.all([
-        ManagerLive.findOne({ manager }).session(session),
-        ManagerInfo.findById(manager).session(session),
-      ]);
+    const newLivePick = {
+      matchday: matchdayNumber,
+      matchdayId,
+      activeChip: null,
+      picks,
+      teamValue,
+      bank,
+    };
 
-      // Skip if manager does not exist or joined after this matchday
-      if (!mInfo || mInfo.matchdayJoined > matchdayNumber) {
-        skippedManagers.push(manager);
-        await session.abortTransaction();
-        session.endSession();
-        continue;
-      }
+    infoUpdates.push({
+      updateOne: {
+        filter: { _id: manager },
+        update: { $set: { matchdayPoints: 0 } },
+      },
+    });
 
-      const newLivePick = {
-        matchday: matchdayNumber,
-        matchdayId,
-        activeChip: null,
-        picks,
-        teamValue,
-        bank,
-      };
-
-      await ManagerInfo.findByIdAndUpdate(
-        manager,
-        { matchdayPoints: 0 },
-        { session }
+    if (!mLive) {
+      liveUpdates.push({
+        insertOne: {
+          document: {
+            manager,
+            livePicks: [newLivePick],
+          },
+        },
+      });
+      createdManagers.push(managerId);
+    } else {
+      const alreadyExists = mLive.livePicks.some(
+        (x) =>
+          x.matchday === matchdayNumber ||
+          x.matchdayId.toString() === matchdayId.toString()
       );
 
-      if (!mLive) {
-        await ManagerLive.create([{ manager, livePicks: [newLivePick] }], { session });
-        createdManagers.push(manager);
+      if (alreadyExists) {
+        skippedManagers.push(managerId);
       } else {
-        const alreadyExists = mLive.livePicks.some(
-          (x) =>
-            x.matchday === matchdayNumber ||
-            x.matchdayId.toString() === matchdayId.toString()
-        );
-
-        if (alreadyExists) {
-          skippedManagers.push(manager);
-        } else {
-          await ManagerLive.updateOne(
-            { manager },
-            { $push: { livePicks: newLivePick } },
-            { session }
-          );
-          createdManagers.push(manager);
-        }
+        liveUpdates.push({
+          updateOne: {
+            filter: { manager },
+            update: { $push: { livePicks: newLivePick } },
+          },
+        });
+        createdManagers.push(managerId);
       }
-
-      await session.commitTransaction();
-      session.endSession();
-    } catch (err) {
-      await session.abortTransaction();
-      session.endSession();
-      console.error(`Transaction failed for manager ${manager}:`, err);
-      skippedManagers.push(manager);
     }
+  }
+
+  if (liveUpdates.length > 0) {
+    await ManagerLive.bulkWrite(liveUpdates, { ordered: false });
+  }
+
+  if (infoUpdates.length > 0) {
+    await ManagerInfo.bulkWrite(infoUpdates, { ordered: false });
   }
 
   res.status(200).json({
@@ -103,6 +116,7 @@ const setLivePicks = asyncHandler(async (req, res) => {
     skippedManagers,
   });
 });
+
 
 
 

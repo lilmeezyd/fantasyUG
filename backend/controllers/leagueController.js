@@ -811,7 +811,7 @@ const updatePrivateTables = asyncHandler(async (req, res) => {
 const setCurrentAndLastRanks = asyncHandler(async (req, res) => {
   const overallLeagues = await OverallLeague.find({}).lean()
   const teamLeagues = await TeamLeague.find({}).lean()
-  const privateLeagues = await League.find({}).lean()
+  //const privateLeagues = await League.find({}).lean()
 
   //Setting current and last ranks for overall leagues
   if (overallLeagues) {
@@ -889,45 +889,11 @@ const setCurrentAndLastRanks = asyncHandler(async (req, res) => {
   }
 
   ////Setting current and last ranks for private leagues
-  if (privateLeagues) {
-    // Using a for...of loop to ensure proper async handling
-    for (let league of privateLeagues) {
-      const { standings, _id: leagueId } = league;
-
-      if (standings.length === 0) continue;
-
-      // Update league standings with new lastRank
-      const newStandings = standings.map(entry => ({
-        ...entry,
-        lastRank: entry.currentRank
-      }));
-
-      await PrivateLeague.findByIdAndUpdate(leagueId, {
-        $set: { standings: newStandings }
-      });
-
-      // Prepare bulkWrite updates for ManagerInfo
-      const bulkOps = newStandings.map(({ user, currentRank, lastRank }) => ({
-        updateOne: {
-          filter: { user },
-          update: {
-            $set: {
-              "privateLeagues.$[el].currentRank": currentRank,
-              "privateLeagues.$[el].lastRank": lastRank
-            }
-          },
-          arrayFilters: [{ "el.id": leagueId }]
-        }
-      }));
-      // Perform all updates in one DB operation
-      if (bulkOps.length > 0) {
-        await ManagerInfo.bulkWrite(bulkOps, { ordered: false });
-      }
-    }
-  }
+  
 
   res.status(201).json('All Tables updated')
 })
+
 
 export {
   setLeague,

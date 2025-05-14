@@ -771,13 +771,18 @@ form.login-cs {
   padding: 0.5rem;
 }
 
+.save-picks {
+  text-align: center;
+}
+
 .primary {
   background-color: #1f8f6b;
   color: white;
-  width: 100px;
+  width: 150px;
   font-weight: 700;
   padding: 0.5rem;
 }
+
 
 .no-picks-team {
   /*border: 1px solid #aaa;

@@ -40,7 +40,7 @@ const LivePlayer = (props) => {
       `${teams?.find((x) => x._id === opponent?.teamAway)?.shortName}(H)`: 
       (baller?.multiplier > 1 ?
         baller?.multiplier * history?.find(x => opponent._id === x.fixture && x.player === baller._id && x.matchday === opponent.matchday)?.totalPoints : 
-        history?.find(x => opponent._id === x.fixture && x.player === baller._id && x.matchday === opponent.matchday)?.totalPoints)
+        history?.find(x => opponent?._id === x.fixture && x.player === baller?._id && x.matchday === opponent.matchday)?.totalPoints)
     )
   const handleClose = () => {
     setShow(false);

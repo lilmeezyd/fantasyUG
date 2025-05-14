@@ -150,11 +150,11 @@ const ManagerPicks = (props) => {
       </div>
       <section className="form">
         <form onSubmit={onSave}>
-        <div className="form-group py-3">
+        <div className="save-picks form-group py-3">
             <Button
               type="submit"
               disabled={ !save }
-              className="btn-success form-control"
+              className="primary btn btn-success"
             >
               Save
             </Button>

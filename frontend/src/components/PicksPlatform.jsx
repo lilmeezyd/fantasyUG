@@ -109,9 +109,9 @@ const PicksPlatform = (props) => {
         </div>*/}
       </div>
       <div className="trans-reset p-2">
-        <Button  className="primary">
+        {/*<Button  className="primary">
           Auto Pick
-        </Button>
+        </Button>*/}
         <Button
           onClick={reset}
           style={{ color: "white" }}
@@ -209,8 +209,8 @@ const PicksPlatform = (props) => {
             </div>
             <div className="name-warning py-1">*Select favorite team</div>
           </div>
-          <div className="form-group py-3">
-            <Button
+          <div className="save-picks form-group py-3">
+            <button
               type="submit"
               disabled={
                 itb < 0 ||
@@ -219,10 +219,10 @@ const PicksPlatform = (props) => {
                 teamName.length > 20 ||
                 playerLeague === ""
               }
-              className="primary"
+              className="primary btn btn-success"
             >
               Save
-            </Button>
+            </button>
           </div>
         </form>
       </section>}
@@ -230,17 +230,17 @@ const PicksPlatform = (props) => {
       {userInfo?.hasPicks &&
         <section className="form">
           <form onSubmit={onSave}>
-            <div className="form-group py-3">
-              <Button
+            <div className="save-picks form-group py-3">
+              <button
                 type="submit"
                 disabled={
                   itb < 0 ||
                   totalPlayers < 15 || transfersIn?.length === 0 || transfersOut?.length === 0
                 }
-                className="btn-success form-control"
+                className="primary btn btn-success"
               >
                 Save
-              </Button>
+              </button>
             </div>
           </form></section>}
     </div>

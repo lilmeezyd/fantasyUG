@@ -477,43 +477,53 @@ const getTOWs = asyncHandler(async (req, res) => {
 //@role Admin, editor
 const endMatchday = asyncHandler(async (req, res) => {
   const matchdayFound = await Matchday.findById(req.params.id);
-  const { current } = matchdayFound
+
+  if (!matchdayFound) {
+    res.status(404);
+    throw new Error("Matchday not found");
+  }
+
+  if (!matchdayFound.current) {
+    res.status(400);
+    throw new Error("Matchday is not the current one!");
+  }
+
   const { id } = matchdayFound;
-  const prev = id > 1 ? id - 1 : 0;
-  const next = id + 1;
-  console.log(matchdayFound)
-  if (!current) {
-    res.status(400)
-    throw new Error(`Matchday not current Matchday!`)
-  }
+  const prevId = id > 1 ? id - 1 : null;
 
-  if (prev === 0) {
+  if (prevId === null) {
+    // First matchday - no previous to validate
     const updated = await Matchday.findByIdAndUpdate(
       req.params.id,
       { current: false, finished: true },
       { new: true }
     );
-
-    res.status(200).json(updated);
-  } else {
-    const prevMatchday = await Matchday.findOne({ id: prev });
-    const nextMatchday = await Matchday.findOne({ id: next });
-    const { finished, pastDeadline } = prevMatchday;
-    let nextMatch;
-
-    if (finished === false || pastDeadline === false) {
-      res.status(400);
-      throw new Error(`Previous matchday isn't finished yet!`);
-    }
-    const updated = await Matchday.findByIdAndUpdate(
-      req.params.id,
-      { current: false, finished: true },
-      { new: true }
-    );
-
-    res.status(200).json(updated);
+    return res.status(200).json(updated);
   }
+
+  // Validate previous matchday is finished
+  const prevMatchday = await Matchday.findOne({ id: prevId });
+
+  if (!prevMatchday) {
+    res.status(400);
+    throw new Error("Previous matchday not found");
+  }
+
+  if (!prevMatchday.finished || !prevMatchday.pastDeadline) {
+    res.status(400);
+    throw new Error("Previous matchday is not finished or past deadline");
+  }
+
+  // Final update
+  const updated = await Matchday.findByIdAndUpdate(
+    req.params.id,
+    { current: false, finished: true },
+    { new: true }
+  );
+
+  res.status(200).json(updated);
 });
+
 
 //@desc Create autosubs
 //@route PATCH /api/matchdays/createautos/:id
