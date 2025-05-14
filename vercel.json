@@ -1,17 +1,30 @@
-{
+  {
     "version": 2,
     "builds": [
       {
         "src": "backend/server.js",
         "use": "@vercel/node"
+      },
+      {
+        "src": "frontend/dist/**",
+        "use": "@vercel/static"
       }
     ],
     "routes": [
       {
+        "src": "/api/(.*)",
+        "dest": "backend/server.js"
+      },
+      {
+        "src": "/(.*\\.js|.*\\.css|.*\\.png|.*\\.svg|.*\\.ico)",
+        "dest": "frontend/dist/$1"
+      },
+      {
         "src": "/(.*)",
-        "dest": "backend/server.js",
-        "methods": ["GET", "POST", "PATCH", "DELETE", "OPTIONS"]
+        "dest": "frontend/dist/index.html"
       }
     ],
-    "buildCommand": "npm install && npm install --prefix frontend && npm run build --prefix frontend"
+    "buildCommand": "npm install && npm install --prefix frontend && npm run build --prefix frontend",
+    "outputDirectory": "frontend/dist"
   }
+  
