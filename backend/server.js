@@ -52,7 +52,7 @@ const __filename = fileURLToPath(import.meta.url); // get the resolved path to t
     res.sendFile(path.join(__dirname, '../frontend/dist', 'index.html'));
   });*/
 
-if (process.env.NODE_ENV === 'Production') {
+if (process.env.NODE_ENV === 'Production' || process.env.NODE_ENV === 'production') {
   /*const __dirname = path.resolve();
   app.use(express.static(path.join(__dirname, '/frontend/dist')));
   app.get('*', (req, res) => {
