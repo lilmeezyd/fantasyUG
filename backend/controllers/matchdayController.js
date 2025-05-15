@@ -568,46 +568,70 @@ const createAutos = asyncHandler(async (req, res) => {
   const applyAutoSubs = (picks) => {
     const updatedPicks = clonePicks(picks);
     const usedPlayerIds = new Set();
-    const automaticSubs = []
+    const automaticSubs = [];
+  
     const starters = updatedPicks.filter(p => p.multiplier > 0);
     const bench = updatedPicks
       .filter(p => p.multiplier === 0)
       .sort((a, b) => a.slot - b.slot);
+  
     for (const pick of starters) {
-      usedPlayerIds.add(pick._id);
+      usedPlayerIds.add(pick._id.toString());
     }
+  
     for (const starter of starters) {
       if (+starter.starts === 0 && +starter.bench === 0) {
         for (const sub of bench) {
           if ((+sub.starts === 1 || +sub.bench === 1) &&
-            !usedPlayerIds.has(sub._id)
+            !usedPlayerIds.has(sub._id.toString())
           ) {
-            // Temporarily apply sub and check formation
+            const starterPos = POSITIONS[starter.playerPosition];
+            const subPos = POSITIONS[sub.playerPosition];
+  
+            // Only allow GKP-for-GKP, others can freely sub
+            if (starterPos === 'GKP' && subPos !== 'GKP') continue;
+            if (starterPos !== 'GKP' && subPos === 'GKP') continue;
+  
+            // Try simulated substitution
             const simulated = starters.map(p =>
               p._id === starter._id ? { ...sub, multiplier: 1 } : p
             );
+  
             const formation = getFormation(simulated);
             if (isValidFormation(formation)) {
-              let newStarterSlot = sub.slot;
-              let newSubSlot = starter.slot;
-              // Apply sub
+              // Apply substitution
               sub.multiplier = 1;
               starter.multiplier = 0;
-              starter.slot = newStarterSlot;
+  
+              // Swap slots
+              const subSlot = sub.slot;
               sub.slot = starter.slot;
-              usedPlayerIds.add(sub._id);
+              starter.slot = subSlot;
+  
+              usedPlayerIds.add(sub._id.toString());
+  
               automaticSubs.push({
-                in: { _id: sub._id, playerPosition: sub.playerPosition, playerTeam: sub.playerTeam },
-                out: { _id: starter._id, playerPosition: starter.playerPosition, playerTeam: starter.playerTeam }
-              })
+                in: {
+                  _id: sub._id,
+                  playerPosition: sub.playerPosition,
+                  playerTeam: sub.playerTeam
+                },
+                out: {
+                  _id: starter._id,
+                  playerPosition: starter.playerPosition,
+                  playerTeam: starter.playerTeam
+                }
+              });
               break;
             }
           }
         }
       }
     }
+  
     return { newPicks: [...starters, ...bench], automaticSubs };
-  }
+  };
+  
   const applyCaptainFallback = (picks) => {
     const captainMissed = picks.find(x => x.IsCaptain === true && +x.starts === 0 && +x.bench === 0)
     const vice = picks.find(x => x.IsViceCaptain === true && (+x.starts === 1 || +x.bench === 1))
