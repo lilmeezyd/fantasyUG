@@ -164,7 +164,7 @@ const setInitialPoints = asyncHandler(async (req, res) => {
           ...pick,
           starts,
           bench,
-          points: pick.IsCaptain ? totalPoints * 2 : totalPoints,
+          points: pick.multiplier === 2 ? totalPoints * 2 : totalPoints,
         };
       } else {
         return pick;

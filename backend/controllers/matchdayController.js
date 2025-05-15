@@ -272,7 +272,6 @@ const updateMDdata = asyncHandler(async (req, res) => {
           matchday: matchdayFound.id,
           matchdayId: req.params.id,
           matchdayPoints: null,
-          matchdayRank: null,
         };
       }
 
@@ -281,19 +280,16 @@ const updateMDdata = asyncHandler(async (req, res) => {
         matchday: pick.matchday,
         matchdayId: pick.matchdayId,
         matchdayPoints: pick.matchdayPoints ?? 0,
-        matchdayRank: pick.matchdayRank ?? null,
       };
     });
 
     const validScores = entriesWithScore.filter((x) => typeof (x.matchdayPoints) === 'number') ?? [];
-    const highestScore = Math.max(...validScores.map((x) => x.matchdayPoints)) ?? 0;
-    const totalPoints = validScores.reduce((sum, x) => sum + x.matchdayPoints, 0) ?? 0;
+    const highestScore = validScores.length ? Math.max(...validScores.map(x => x.matchdayPoints)) : 0;
+    const totalPoints = validScores.reduce((sum, x) => sum + x.matchdayPoints, 0);
     const averageScore = Math.round(totalPoints / allLives.length) ?? 0;
-    const highestScoringEntry = validScores.find((x) => x.matchdayPoints === highestScore)?.manager || null;
-
-    const highestPlayerPoints = Math.max(...allPlayers.map((p) => p.totalPoints)) ?? 0;
-    const topPlayer = allPlayers.find((p) => p.totalPoints === highestPlayerPoints)?.player || null;
-
+    const highestScoringEntry = validScores.length ? validScores.find(x => x.matchdayPoints === highestScore)?.manager : null;
+    const highestPlayerPoints = allPlayers.length  ? Math.max(...allPlayers.map((p) => p.totalPoints))  : 0;
+    const topPlayer = allPlayers.length ? allPlayers.find(p => p.totalPoints === highestPlayerPoints)?.player : null;
     const updatedMatchday = await Matchday.findByIdAndUpdate(
       req.params.id,
       {
@@ -533,10 +529,10 @@ const createAutos = asyncHandler(async (req, res) => {
   const matchdayFound = await Matchday.findById(req.params.id);
   const { current } = matchdayFound
   const { id } = matchdayFound;
-  /* if (!current) {
+   if (!current) {
      res.status(400)
      throw new Error(`Matchday not current Matchday!`)
-   }*/
+   }
   const managerLives = await ManagerLive.find({}).lean()
   const VALID_FORMATIONS = [
     { GKP: 1, DEF: 4, MID: 4, FWD: 2 },
@@ -600,23 +596,25 @@ const createAutos = asyncHandler(async (req, res) => {
               starter.slot = newStarterSlot;
               sub.slot = starter.slot;
               usedPlayerIds.add(sub._id);
-              automaticSubs.push({in: { _id: sub._id, playerPosition: sub.playerPosition, playerTeam: sub.playerTeam},
-                 out: {_id: starter._id, playerPosition: starter.playerPosition, playerTeam: starter.playerTeam}})
+              automaticSubs.push({
+                in: { _id: sub._id, playerPosition: sub.playerPosition, playerTeam: sub.playerTeam },
+                out: { _id: starter._id, playerPosition: starter.playerPosition, playerTeam: starter.playerTeam }
+              })
               break;
             }
           }
         }
       }
     }
-    return {newPicks: [...starters, ...bench], automaticSubs};
+    return { newPicks: [...starters, ...bench], automaticSubs };
   }
   const applyCaptainFallback = (picks) => {
-    const captainMissed = picks.find(x => x.multiplier > 1 && +x.starts === 0 && +x.bench === 0)
+    const captainMissed = picks.find(x => x.IsCaptain === true && +x.starts === 0 && +x.bench === 0)
     const vice = picks.find(x => x.IsViceCaptain === true && (+x.starts === 1 || +x.bench === 1))
     if (captainMissed && vice) {
       return picks
-        .map(pick => pick.multiplier > 1 ? { ...pick, multiplier: 1 } :
-          pick.IsViceCaptain === true ? { ...pick, multiplier: captainMissed.multiplier } : pick)
+        .map(pick => pick.IsCaptain === true ? { ...pick, multiplier: pick.multiplier === 0 ? 0 : 1 } :
+          pick.IsViceCaptain === true ? { ...pick, multiplier: 2, points: pick.points } : pick)
     }
     return picks
   }
@@ -628,14 +626,15 @@ const createAutos = asyncHandler(async (req, res) => {
   const bulkOps = managerLives.map(lives => {
     const { _id, livePicks } = lives
     const mdPicks = livePicks.find(x => x.matchday === id) ?? []
-    const {  picks } = mdPicks;
+    const { picks, automaticSubs: oldSubs } = mdPicks;
     const newPicksAndSubs = createSubs(picks)
-    const { automaticSubs, newPicks } = newPicksAndSubs
-    const newMdPicks = livePicks.map(x => x.matchday === id ? {...x, automaticSubs, picks: newPicks.sort((a, b) => a.slot - b.slot)} : x)
+    const { automaticSubs: newSubs, newPicks } = newPicksAndSubs
+    const newMdPicks = livePicks.map(x => x.matchday === id ? { ...x, 
+      automaticSubs: [...oldSubs, ...newSubs ], picks: newPicks.sort((a, b) => a.slot - b.slot) } : x)
     return {
       updateOne: {
-        filter: {_id: _id},
-        update: {$set: {livePicks: newMdPicks}}
+        filter: { _id: _id },
+        update: { $set: { livePicks: newMdPicks } }
       }
     }
   })
