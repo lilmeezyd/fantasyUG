@@ -61,7 +61,7 @@ const LivePlayer = (props) => {
       <div className="element">
         {baller._id ? (
           <div className="button-wrapper" id={baller._id}>
-            <div className="next-fix">&#163;{nowCost?.toFixed(1)}M</div>
+            {/*<div className="next-fix">&#163;{nowCost?.toFixed(1)}M</div>*/}
             <button className="player-btn" onClick={handleShow}>
               <img
                 src={`../shirt_${image}-66.svg`}
