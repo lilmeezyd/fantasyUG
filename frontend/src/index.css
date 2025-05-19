@@ -799,6 +799,7 @@ form.login-cs {
   display: flex;
   flex-direction: column;
   background: linear-gradient(#7ecf8f, #3e944a);
+  /*background: url('./pitch.png');*/
   box-shadow: 0 0 2px;
   border-radius: 0.5rem;
   padding: 0.5rem 0;
