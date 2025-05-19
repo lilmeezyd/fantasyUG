@@ -97,6 +97,7 @@ const Players = (props) => {
   const minPrice = getMinMax(allPlayers).minPrice;
   const maxPrice = getMinMax(allPlayers).maxPrice;
   let totalPages = Math.ceil(allPlayers?.length / pageSize);
+  console.log('players')
 
   {
     /* Button Controls */
@@ -301,7 +302,7 @@ const Players = (props) => {
                         let short_pos = positionObj?.shortName;
                         /*let forwardImage = positionObj?.code === 1 ? `${teamObj?.code}_1-66`:
             `${teamObj?.code}-66`  */
-                        let forwardImage = `${teamObj?.code}-66`;
+                        let forwardImage = `${teamObj?.code}_1-66`;
                         return (
                           <PlayerCard
                             bgColor="rgb(255, 255, 0, 0.5)"

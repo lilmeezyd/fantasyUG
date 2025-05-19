@@ -22,7 +22,8 @@ const LivePlayer = (props) => {
   const mdFixs = fixtures?.find((x) => x?._id?.id === matchday)?.fixtures;
   const appName = players?.find((player) => player._id === baller._id)?.appName;
   const nowCost = players?.find((player) => player._id === baller._id)?.nowCost;
-  const image = teams?.find((team) => team?._id === baller?.playerTeam)?.code;
+  const teamCode = teams?.find((team) => team?._id === baller?.playerTeam)?.code;
+  const image = baller?.playerPosition === "669a41e50f8891d8e0b4eb2a" ? `${teamCode}_1` : teamCode;
   const shortName = teams?.find(
     (team) => team?._id === baller?.playerTeam
   )?.shortName;
