@@ -10,7 +10,8 @@ const PlayerDetails = (props) => {
   const { data: player } = useGetPlayerQuery(playerId)
   const { data: teams } = useGetQuery()
   const { data: positions } = useGetPositionsQuery()
-  const image = teams?.find((team) => team?._id === player?.playerTeam)?.code;
+  const teamCode = teams?.find((team) => team?._id === player ?.playerTeam)?.code;
+  const image = player ?.playerPosition === "669a41e50f8891d8e0b4eb2a" ? `${teamCode}_1` : teamCode;
 
   const handleCloseInfo = () => {
     setShowPInfo(false)

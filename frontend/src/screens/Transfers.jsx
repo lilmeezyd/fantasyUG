@@ -431,13 +431,11 @@ const Transfers = () => {
   }, [data]);
 
   const addPlayer = (data) => {
-    console.log(data);
     const { shortPos, ...rest } = data;
     dispatch({ type: `${shortPos}_ADD`, data: rest });
   };
 
   const removePlayer = (data) => {
-    console.log(data);
     const { shortPos, ...rest } = data;
     dispatch({ type: `${shortPos}_REMOVE`, data: rest });
   };
