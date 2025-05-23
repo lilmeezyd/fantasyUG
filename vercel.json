@@ -3,10 +3,6 @@
   "rewrites": [
     {
       "source": "/(.*)",
-      "destination": "/backend/server.js"
-    },
-    {
-      "source": "/(.*)",
       "destination": "/frontend/dist/index.html"
     }
   ],
