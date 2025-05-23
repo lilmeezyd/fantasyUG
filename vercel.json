@@ -2,19 +2,19 @@
   "version": 2,
   "builds": [
     {
-      "src": "frontend/vite.config.js",
+      "src": "frontend/package.json",
       "use": "@vercel/static-build",
       "config": {
         "distDir": "frontend/dist"
       }
     },
     {
-      "src": "api/**/*.js",
+      "src": "backend/**/*.js",
       "use": "@vercel/node"
     }
   ],
   "routes": [
-    { "src": "/api/(.*)", "dest": "/api/$1" },
+    { "src": "/backend/(.*)", "dest": "/api/$1" },
     { "src": "/(.*)", "dest": "/frontend/dist/$1" }
   ]
 }
