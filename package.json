@@ -2,7 +2,7 @@
   "name": "fantasyug",
   "version": "1.0.0",
   "description": "Fantasy UG App",
-  "main": "index.js",
+  "main": "server.js",
   "type": "module",
   "scripts": {
     "postinstall": "cd ./frontend && npm install && npm run build",
