@@ -80,8 +80,8 @@ const OtherPoints = () => {
           </section>
           </div>
         <div className="main">
-            {realPicks?.length === 0 ? <div>Points not recorded for this Matchday!</div> : 
-            (realPicks?.map((lp) => <div key={lp.matchday}>
+            {
+            realPicks?.map((lp) => <div key={lp.matchday}>
               <div className="pt-matchday">
               <div>Matchday&nbsp;{lp?.matchday}</div>
               </div>
@@ -102,7 +102,7 @@ const OtherPoints = () => {
               matchdayId={lp?.matchdayId}
               automaticSubs={lp?.automaticSubs}
                isLoading={isLoading} picks={lp?.picks}/>
-            </div>))}
+            </div>)}
           <LeagueDetails 
           firstName={picksDetails?.managerInfo?.firstName}
           lastName={picksDetails?.managerInfo?.lastName}
