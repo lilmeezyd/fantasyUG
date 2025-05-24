@@ -23,10 +23,9 @@ const OtherPoints = () => {
     const a = []
     picksDetails?.picks?.forEach(x => {
         a.push(...x.livePicks)})
-      const minimum = 1
-      const maximum = a.length
-      //const minimum = Math.min(...a.map(x => x.matchday))
-      //const maximum = Math.max(...a.map(x => x.matchday))
+      
+      const minimum = Math.min(...a.map(x => x.matchday))
+      const maximum = Math.max(...a.map(x => x.matchday))
       setPageDetails(prev => ({...prev, page: maximum, min: minimum, max: maximum}))
   }, [matchdays, picksDetails])
    
@@ -81,7 +80,8 @@ const OtherPoints = () => {
           </section>
           </div>
         <div className="main">
-            {realPicks?.map((lp) => <div key={lp.matchday}>
+            {realPicks?.length === 0 ? <div>Points not recorded for this Matchday!</div> : 
+            (realPicks?.map((lp) => <div key={lp.matchday}>
               <div className="pt-matchday">
               <div>Matchday&nbsp;{lp?.matchday}</div>
               </div>
@@ -102,7 +102,7 @@ const OtherPoints = () => {
               matchdayId={lp?.matchdayId}
               automaticSubs={lp?.automaticSubs}
                isLoading={isLoading} picks={lp?.picks}/>
-            </div>)}
+            </div>))}
           <LeagueDetails 
           firstName={picksDetails?.managerInfo?.firstName}
           lastName={picksDetails?.managerInfo?.lastName}
