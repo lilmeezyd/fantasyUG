@@ -23,8 +23,10 @@ const OtherPoints = () => {
     const a = []
     picksDetails?.picks?.forEach(x => {
         a.push(...x.livePicks)})
-      const minimum = Math.min(...a.map(x => x.matchday))
-      const maximum = Math.max(...a.map(x => x.matchday))
+      const minimum = 1
+      const maximum = a.length
+      //const minimum = Math.min(...a.map(x => x.matchday))
+      //const maximum = Math.max(...a.map(x => x.matchday))
       setPageDetails(prev => ({...prev, page: maximum, min: minimum, max: maximum}))
   }, [matchdays, picksDetails])
    
