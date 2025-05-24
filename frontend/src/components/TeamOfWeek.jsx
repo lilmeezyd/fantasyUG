@@ -94,9 +94,9 @@ const TeamOfWeek = () => {
             <BsChevronLeft />
           </button>
           <button
-            disabled={matchdayId === 6 ? true : false}
+            disabled={matchdayId > 6 ? true : false}
             onClick={onIncrement}
-            className={`${matchdayId === 6 && "btn-hide"} btn-controls`}
+            className={`${matchdayId > 6 && "btn-hide"} btn-controls`}
             id="nextButton"
           >
             <BsChevronRight />
