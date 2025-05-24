@@ -464,7 +464,7 @@ const getTOWs = asyncHandler(async (req, res) => {
     res.status(404)
     throw new Error('No team of the week found')
   }
-  res.status(200).json(tows)
+  res.status(200).json(tows.slice(0,7))
 })
 
 //@desc End Matchday
