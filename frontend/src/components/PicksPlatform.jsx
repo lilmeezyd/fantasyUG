@@ -94,8 +94,8 @@ const PicksPlatform = (props) => {
         bank: itb,
         teamValue,
         playerLeague,
-        overallLeague: "69036ac28188285980ec2bfb",
-        /*overallLeague: "66c13c3d1f44b30a427fb02f"*/
+        /*overallLeague: "69036ac28188285980ec2bfb",*/
+        overallLeague: "66c13c3d1f44b30a427fb02f"
       }).unwrap();
       dispatch(setCredentials({ ...res.hasPicks }));
       toast.success(res?.message); 
