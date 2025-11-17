@@ -36,7 +36,8 @@ export const userApiSlice = apiSlice.injectEndpoints({
     getTotal: builder.query({
       query: () => ({
         url: `${USERS_URL}/totalManagers`
-      })
+      }),
+      providesTags: ['User']
     })
   }),
 });

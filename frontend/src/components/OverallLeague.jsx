@@ -32,8 +32,7 @@ const OverallLeague = () => {
       {data?.standings?.map((entrant, idx) => 
         
         <div 
-        style={{background: `${userInfo._id === entrant.user.toString() ? '#ffd70063' : 'white'}`, 
-        border: `${userInfo._id === entrant.user.toString() ? '2px solid gold' : '2px solid transparent'}`}} key={entrant._id} className="standing-grid-1">
+        style={{background: `${userInfo._id === entrant.user.toString() ? '#ffd70063' : 'white'}`}} key={entrant._id} className="standing-grid-1">
             <div>
             {(entrant?.currentRank === entrant?.lastRank || entrant?.lastRank === null) && <AiFillCaretRight color="#aaa"/> }
                 {entrant?.currentRank < entrant?.lastRank && entrant?.lastRank !== null && <AiFillCaretUp color="green" />} 

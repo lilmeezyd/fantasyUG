@@ -77,7 +77,10 @@ const setPlayer = asyncHandler(async (req, res) => {
 //@role not restricted
 const getPlayers = asyncHandler(async (req, res) => {
   const players = await Player.find({});
+  const positions = await Position.find({})
   const numberOfManagers = await getAllManagers()
+  const positionMap = new Map()
+  positions.map(x => positionMap[x._id] = x.code)
     
   if (players) {
     const updatedPlayers = players.map(player => {
@@ -104,7 +107,7 @@ const getPlayers = asyncHandler(async (req, res) => {
       const b = numberOfManagers === 0 ? 0 : playerCount / numberOfManagers * 100
       return {
         _id, firstName, secondName, appName,
-        playerPosition, playerTeam, startCost, nowCost, totalPoints, goalsScored,
+        playerPosition: positionMap[playerPosition], playerTeam, startCost, nowCost, totalPoints, goalsScored,
         assists, ownGoals, penaltiesSaved, penaltiesMissed, yellowCards, redCards, saves,
         cleansheets, starts, ownership: `${b?.toFixed(1)}`
       }
@@ -217,9 +220,9 @@ const updatePlayer = asyncHandler(async (req, res) => {
 });
 
 //Increment Player number
-const playerIncrement = asyncHandler(async (playerId, increment, session, req, res) => {
-  await Player.findByIdAndUpdate(playerId, { $inc: { playerCount: increment } }, { session })
-})
+const playerIncrement = asyncHandler(async (playerId, increment, req, res) => {
+  await Player.findByIdAndUpdate(playerId, { $inc: { playerCount: increment } })
+}) 
 
 //@desc delete player
 //@route DELETE /api/players/:id

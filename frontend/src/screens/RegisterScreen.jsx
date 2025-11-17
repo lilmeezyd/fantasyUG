@@ -23,10 +23,9 @@ const RegisterScreen = () => {
 
     useEffect(() => {
         if(userInfo) {
-          navigate('/')
+          navigate('/create')
         }
       }, [navigate, userInfo])
-
     const onSubmit = async (e) => {
         e.preventDefault()
         if(password !== confirmPassword) {
@@ -34,9 +33,8 @@ const RegisterScreen = () => {
         } else {
             try {
                 const res = await register({ firstName, lastName, email, password}).unwrap()
-                console.log(res)
                 dispatch(setCredentials({...res}))
-                navigate('/') 
+                navigate('/create') 
             } catch (err) {
                 toast.error(err?.data?.message || err.error)
             }
@@ -99,7 +97,7 @@ const RegisterScreen = () => {
                 <Row className="py-3 login-cs-child">
                 <div></div>
                 <div style={{fontWeight: 600}}>
-                    Already have an account? <Link to='/login'>Sign In</Link></div>
+                    Already have an account? <Link to='/'>Sign In</Link></div>
                 </Row>
             </Form>
         </FormContainer>

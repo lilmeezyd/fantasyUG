@@ -18,12 +18,12 @@ const LivePlayer = (props) => {
   const { data: fixtures, isLoading } = useGetFixturesQuery();
   const { data: matchdays } = useGetMatchdaysQuery();
   const { data: history } = useGetHistoryQuery(baller._id)
-
+  
   const mdFixs = fixtures?.find((x) => x?._id?.id === matchday)?.fixtures;
   const appName = players?.find((player) => player._id === baller._id)?.appName;
   const nowCost = players?.find((player) => player._id === baller._id)?.nowCost;
   const teamCode = teams?.find((team) => team?._id === baller?.playerTeam)?.code;
-  const image = baller?.playerPosition === "669a41e50f8891d8e0b4eb2a" ? `${teamCode}_1` : teamCode;
+  const image = baller?.playerPosition === 1 ? `${teamCode}_1` : teamCode;
   const shortName = teams?.find(
     (team) => team?._id === baller?.playerTeam
   )?.shortName;

@@ -10,7 +10,7 @@ const AddModal = (props) => {
       const { teamHome, teamAway,matchday, kickOff, time } = data
       const { data: teams} = useGetQuery()
       const { data:matchdays } = useGetMatchdaysQuery()
- 
+      
     const onSubmit = (e) => {
       e.preventDefault()
       const kickOffTime = kickOff+'/'+time

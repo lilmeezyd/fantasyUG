@@ -25,7 +25,7 @@ export const picksApiSlice = apiSlice.injectEndpoints({
         method: "PATCH",
         body: rest,
       }),
-      invalidatesTags: ["Pick", "Player"],
+      invalidatesTags: ["Pick", "Player", "Transfer"],
     }),
   }),
 });

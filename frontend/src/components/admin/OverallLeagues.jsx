@@ -7,6 +7,7 @@ import { useUpdateOverallTableMutation, useGetOverallLeaguesQuery, useAddOverall
 import AddModal from "./overallLeagueModals/AddModal"
 import EditModal from "./overallLeagueModals/EditModal"
 import DeleteModal from "./overallLeagueModals/DeleteModal"
+import { toast } from "react-toastify";
 
 const OverallLeagues = () => {
   const [show, setShow] = useState({
@@ -21,7 +22,6 @@ const OverallLeagues = () => {
   const [addOverallLeague ] = useAddOverallLeagueMutation()
   const [ deleteOverallLeague ] = useDeleteOverallLeagueMutation() 
   const [ updateOverallTable, {isLoading: a} ] = useUpdateOverallTableMutation()
-  console.log(useGetOverallLeaguesQuery())
 
   const { deleted, edited, added } = show
   const pageSize = 5
@@ -53,7 +53,7 @@ const OverallLeagues = () => {
 
   const updateOverallLeague = async () => {
     const res = await updateOverallTable().unwrap()
-    console.log(res)
+    toast.success(res?.message)
   }
    const submit = async (data) => {
     try {

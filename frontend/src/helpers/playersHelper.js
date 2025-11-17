@@ -8,7 +8,7 @@ export const getMinMax = (players) => {
     Math.min(...players.map(x => (x.nowCost).toFixed(1))) : 0
     
     for(let i=maxPrice; i>=minPrice; i-=0.5) {
-        prices.push(+(i.toFixed(1)))
+        prices.push((i.toFixed(1)))
 	
     }
 
@@ -21,7 +21,7 @@ export const getPlayers = (players, sort, view, word, cutPrice) => {
     if(players) {
     if(view.startsWith('position')) {
         id = view.slice(9)
-        filteredPlayers.push(...players.filter(x => x.playerPosition === id))
+        filteredPlayers.push(...players.filter(x => x.playerPosition === parseInt(id)))
     } else if(view.startsWith('team')) {
         id = view.slice(5)
         filteredPlayers.push(...players.filter(x => x.playerTeam === id))
@@ -56,16 +56,16 @@ export const getArrangedPlayers = (players, curPage, pageSize) => {
                             .filter(returned)
 
     const goalkeepers = returnedPlayers
-                        .filter(player => player.playerPosition === '669a41e50f8891d8e0b4eb2a')
+                        .filter(player => player.playerPosition === 1)
     
     const defenders = returnedPlayers
-                        .filter(player => player.playerPosition === '669a4831e181cb2ed40c240f')
+                        .filter(player => player.playerPosition === 2)
                                 
     const midfielders = returnedPlayers
-                        .filter(player => player.playerPosition === '669a4846e181cb2ed40c2413')
+                        .filter(player => player.playerPosition === 3)
 
     const forwards = returnedPlayers
-                        .filter(player => player.playerPosition === '669a485de181cb2ed40c2417')
+                        .filter(player => player.playerPosition === 4)
 
     return { goalkeepers, defenders, midfielders, forwards}
 }

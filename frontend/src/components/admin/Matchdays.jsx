@@ -4,11 +4,12 @@ import {
   useStartMatchdayMutation,
   useAddMatchdayMutation,
   useCreateAutosForMdMutation,
+  useUndoAutosForMdMutation,
   useDeleteMatchdayMutation,
   useUpdateMatchdayDataMutation,
   useUpdateMatchdayTOWMutation,
   useEndMatchdayDataMutation
-} from "../../slices/matchdayApiSlice";
+} from "../../slices/matchdayApiSlice"; 
 import { useSetLivePicksMutation } from "../../slices/livePicksApiSlice";
 import { useSetLastAndCurrentRankMutation } from "../../slices/leagueApiSlice";
 import { Container, Button, Spinner } from "react-bootstrap";
@@ -38,6 +39,7 @@ const Matchdays = () => {
   const [ updateMatchdayData ] = useUpdateMatchdayDataMutation()
   const [ updateMatchdayTOW ] = useUpdateMatchdayTOWMutation()
   const [ createAutosForMd ] = useCreateAutosForMdMutation()
+  const [ undoAutosForMd ] = useUndoAutosForMdMutation()
   const [ setLastAndCurrentRank ] = useSetLastAndCurrentRankMutation()
   const {deleted, edited, added, start } = show
   const pageSize = 5
@@ -194,6 +196,14 @@ const updateAutoSubs = async (id) => {
     console.log(error)
   }
 }
+const undoAutos = async (id) => {
+  try {
+    const res = await undoAutosForMd(id).unwrap()
+    console.log(res)
+  } catch (error) {
+    console.log(error)
+  }
+}
 const setPastRank = async () => {
   try {
     const res = await setLastAndCurrentRank().unwrap()
@@ -275,6 +285,7 @@ const memoMatchdays = useMemo(() => {
           <div><Button onClick={() => updateMDdata(x._id)} className="btn btn-success">Update Data</Button></div>
           <div><Button onClick={() => updateTOW(x._id)} className="btn btn-success">Update TOW</Button></div>
           <div><Button onClick={() => updateAutoSubs(x._id)} className="btn btn-success">Auto subs</Button></div>
+          <div><Button onClick={() => undoAutos(x._id)} className="btn btn-success">Undo Autos</Button></div>
           <div><Button onClick={() => endMatchday(x._id)} className="btn btn-success">End MD</Button></div>
       </div>)}
       <div>

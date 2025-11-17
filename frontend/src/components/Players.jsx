@@ -13,7 +13,7 @@ import {
 import { useGetTotalQuery } from "../slices/userApiSlice";
 
 const Players = (props) => {
-  const { addPlayer, removePlayer, picks, GKP, DEF, MID, FWD, errorMsg } =
+  const { addPlayer, removePlayer, picks, GKP, DEF, MID, FWD, errorMsg, btnMsg } =
     props;
   const { data: players, isLoading } = useGetPlayersQuery();
   const { data: teams } = useGetQuery();
@@ -58,6 +58,7 @@ const Players = (props) => {
     if (action.type === "VIEW") {
       return {
         ...state,
+        cutPrice: 25,
         view: action.data,
       };
     }
@@ -97,8 +98,10 @@ const Players = (props) => {
   const minPrice = getMinMax(allPlayers).minPrice;
   const maxPrice = getMinMax(allPlayers).maxPrice;
   let totalPages = Math.ceil(allPlayers?.length / pageSize);
-  console.log('players')
-
+  const myPrice = useMemo(() => {
+    const price =  maxPrice
+    return price
+  } ,[maxPrice])
   {
     /* Button Controls */
   }
@@ -194,7 +197,7 @@ const Players = (props) => {
                     </optgroup>
                     <optgroup label="By Position">
                       {elementTypes?.map((pPos, idx) => {
-                        let positionId = "position_" + pPos._id;
+                        let positionId = "position_" + pPos.code;
                         return (
                           <option key={idx} value={positionId}>
                             {pPos.singularName + "s"}
@@ -257,6 +260,7 @@ const Players = (props) => {
                     onChange={onPrice}
                     className="custom-select"
                     id="cost_by"
+                    value={myPrice.toFixed(1)}
                   >
                     {prices.map((price, idx) => (
                       <option key={idx} value={price}>
@@ -274,9 +278,9 @@ const Players = (props) => {
           {players?.length ? (
             <div className="player-info">
               <div className="player-numbers">
-                <span className="number">{players?.length}</span>
+                <span className="number">{allPlayers?.length}</span>
                 <span className="numbers">
-                  {players?.length === 1 ? "Player" : "Players"}
+                  {allPlayers?.length === 1 ? "Player" : "Players"}
                 </span>
               </div>
               <div className="players-table">
@@ -297,7 +301,7 @@ const Players = (props) => {
                         );
                         let short_name = teamObj?.shortName;
                         let positionObj = elementTypes?.find(
-                          (x) => x._id === goalkeeper.playerPosition
+                          (x) => x.code === goalkeeper.playerPosition
                         );
                         let short_pos = positionObj?.shortName;
                         /*let forwardImage = positionObj?.code === 1 ? `${teamObj?.code}_1-66`:
@@ -308,7 +312,7 @@ const Players = (props) => {
                             bgColor="rgb(255, 255, 0, 0.5)"
                             picks={picks}
                             GKP={GKP}
-                            errorMsg={errorMsg}
+                            errorMsg={errorMsg} btnMsg={btnMsg}
                             addPlayer={addPlayer}
                             removePlayer={removePlayer}
                             key={goalkeeper?._id}
@@ -344,7 +348,7 @@ const Players = (props) => {
                         );
                         let short_name = teamObj?.shortName;
                         let positionObj = elementTypes?.find(
-                          (x) => x._id === defender.playerPosition
+                          (x) => x.code === defender.playerPosition
                         );
                         let short_pos = positionObj?.shortName;
                         let forwardImage =
@@ -356,7 +360,7 @@ const Players = (props) => {
                             bgColor="rgb(0, 255, 0, 0.5)"
                             picks={picks}
                             DEF={DEF}
-                            errorMsg={errorMsg}
+                            errorMsg={errorMsg} btnMsg={btnMsg}
                             addPlayer={addPlayer}
                             removePlayer={removePlayer}
                             key={defender?._id}
@@ -392,7 +396,7 @@ const Players = (props) => {
                         );
                         let short_name = teamObj?.shortName;
                         let positionObj = elementTypes?.find(
-                          (x) => x._id === midfielder.playerPosition
+                          (x) => x.code === midfielder.playerPosition
                         );
                         let short_pos = positionObj?.shortName;
                         let forwardImage =
@@ -403,7 +407,7 @@ const Players = (props) => {
                           <PlayerCard
                             bgColor="rgb(0, 0, 255, 0.5)"
                             MID={MID}
-                            errorMsg={errorMsg}
+                            errorMsg={errorMsg} btnMsg={btnMsg}
                             picks={picks}
                             key={midfielder?._id}
                             addPlayer={addPlayer}
@@ -440,7 +444,7 @@ const Players = (props) => {
                         );
                         let short_name = teamObj?.shortName;
                         let positionObj = elementTypes?.find(
-                          (x) => x._id === forward.playerPosition
+                          (x) => x.code === forward.playerPosition
                         );
                         let short_pos = positionObj?.shortName;
                         /*let forwardImage = positionObj?.code === 1 ? `${teamObj?.code}_1-66`:
@@ -450,7 +454,7 @@ const Players = (props) => {
                           <PlayerCard
                             bgColor="rgb(255, 0, 0, 0.5)"
                             FWD={FWD}
-                            errorMsg={errorMsg}
+                            errorMsg={errorMsg} btnMsg={btnMsg}
                             picks={picks}
                             addPlayer={addPlayer}
                             removePlayer={removePlayer}

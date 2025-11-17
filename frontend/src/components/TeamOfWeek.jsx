@@ -12,7 +12,7 @@ import PlayerDetails from "./PlayerDetails"
 const TeamOfWeek = () => {
   const [matchdayId, setMatchdayId] = useState(null)
   const { data: maxId, isLoading } = useGetMaxIdQuery()
-  const { data, isLoading: getAllLoading } = useGetAllTOWsQuery()
+  const { data=[], isLoading: getAllLoading } = useGetAllTOWsQuery()
   const { data: tows } = useGetMatchdayTOWQuery(matchdayId)
   const minId = 1
 
@@ -30,29 +30,29 @@ const TeamOfWeek = () => {
     }
     return newOnes.sort((a, b) => a.code > b.code ? 1 : -1)
   }, [matchdayId, data])
-  console.log(allArrays)
+  console.log(data)
   const goalkeepers = allArrays?.filter(
     (pick) =>
-      pick?.positionId
-      === "669a41e50f8891d8e0b4eb2a"
+      pick?.code
+      === 1
   );
   const defenders = allArrays
     ?.filter(
       (pick) =>
-        pick?.positionId
-        === "669a4831e181cb2ed40c240f"
+        pick?.code
+        === 2
     );
   const midfielders = allArrays
     ?.filter(
       (pick) =>
-        pick?.positionId
-        === "669a4846e181cb2ed40c2413"
+        pick?.code
+        === 3
     );
   const forwards = allArrays
     ?.filter(
       (pick) =>
-        pick?.positionId
-        === "669a485de181cb2ed40c2417"
+        pick?.code
+        === 4
     );
 
 
@@ -64,26 +64,31 @@ const TeamOfWeek = () => {
     setMatchdayId(matchdayId + 1)
   };
 
-
+/*
   if (isLoading || getAllLoading || !data?.length) {
     return (
       <div className="spinner">
         <Spinner />
       </div>
     )
-  }
-
+  }*/
+/*console.log(allArray)
   if (data?.length === 0) {
     return (
-      <div className="spinner">
+      <div className="home-section-sub" style={{fontWeight: 800}}>
         No stars of the matchday yet
       </div>
     )
-  }
+  }*/
 
   return (
     <>
-      <div className="home-section-sub">
+      {data?.length === 0 ? (<div className="home-section-sub" style={{fontWeight: 800,
+        display: "grid", placeItems: "center"
+      }}>
+        No stars of the matchday yet
+      </div>)
+      :(<div className="home-section-sub">
         <section className="btn-wrapper p-2">
           <button
             disabled={matchdayId === minId ? true : false}
@@ -143,7 +148,7 @@ const TeamOfWeek = () => {
             </div>
           ))}
         </div>
-      </div>
+      </div>)}
     </>
   )
 }

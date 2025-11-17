@@ -27,22 +27,22 @@ const ManagerPicks = (props) => {
 
   const goalkeepers = picks?.filter(
     (pick) =>
-      pick?.playerPosition === "669a41e50f8891d8e0b4eb2a" &&
+      pick?.playerPosition === 1 &&
       pick?.multiplier > 0
   );
   const defenders = picks?.filter(
     (pick) =>
-      pick?.playerPosition === "669a4831e181cb2ed40c240f" &&
+      pick?.playerPosition === 2 &&
       pick?.multiplier > 0
   )?.sort((a,b) => a.slot > b.slot ? 1 : -1);
   const midfielders = picks?.filter(
     (pick) =>
-      pick?.playerPosition === "669a4846e181cb2ed40c2413" &&
+      pick?.playerPosition === 3 &&
       pick?.multiplier > 0
   )?.sort((a,b) => a.slot > b.slot ? 1 : -1);
   const forwards = picks?.filter(
     (pick) =>
-      pick?.playerPosition === "669a485de181cb2ed40c2417" &&
+      pick?.playerPosition === 4 &&
       pick?.multiplier > 0
   )?.sort((a,b) => a.slot > b.slot ? 1 : -1);
   const bench = picks?.filter((pick) => pick.multiplier === 0)?.sort((a,b) => a.slot > b.slot ? 1 : -1);
@@ -52,8 +52,8 @@ const ManagerPicks = (props) => {
   const onSave = async (e) => {
     e.preventDefault()
     setSaveToFalse()
-    const message = await updatePicks({id: id?._id, picks, teamValue, bank: itb}).unwrap() 
-    toast.success(message?.msg)
+    const message = await updatePicks({id: id?._id, picks, teamValue, bank: itb}).unwrap()
+    toast.success(message?.message)
     navigate('/pickteam')
   }
   if(isLoading) {
@@ -128,17 +128,17 @@ const ManagerPicks = (props) => {
             {bench?.map((x, idx) => (
               <div key={x.slot} className="squad-player">
                 <div className="bench-pos">
-                  {idx > 0 && idx}.&nbsp;&nbsp;
+                  {idx > 0 && `${idx}.`}&nbsp;&nbsp;
                   {
                     positions?.find(
-                      (position) => position._id === x.playerPosition
+                      (position) => position.code === x.playerPosition
                     )?.shortName
                   }
                 </div>
                 <PickPlayer blocked={blocked} okayed={okayed} switcher={switcher} slot={x.slot} 
                 posName={`${
                   positions?.find(
-                    (position) => position._id === x.playerPosition
+                    (position) => position.code === x.playerPosition
                   )?.shortName
                 }`} multiplier={x.multiplier} switchPlayer={switchPlayer}
                 switchCaptain={switchCaptain}
@@ -153,7 +153,7 @@ const ManagerPicks = (props) => {
         <div className="save-picks form-group py-3">
             <Button
               type="submit"
-              disabled={ !save }
+              disabled={ save === false}
               className="primary btn btn-success"
             >
               Save

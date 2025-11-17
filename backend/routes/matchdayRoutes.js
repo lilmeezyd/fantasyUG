@@ -12,7 +12,8 @@ import {
   getTOW,
   getTOWs,
   getMaxMD,
-  createAutos
+  createAutos,
+  undoAutos
 } from "../controllers/matchdayController.js";
 import { protect, roles } from "../middleware/authMiddleware.js";
 import ROLES from "../config/permissions.js";
@@ -38,6 +39,7 @@ router
   .get(getTOW)
   .put(protect, roles(ROLES.ADMIN), updateTOW);
 router.route("/createautos/:id").patch(protect, roles(ROLES.ADMIN), createAutos)
+router.route("/undoautos/:id").patch(protect, roles(ROLES.ADMIN), undoAutos)
 router
   .route("/endmatchday/:id")
   .patch(protect, roles(ROLES.ADMIN), endMatchday);

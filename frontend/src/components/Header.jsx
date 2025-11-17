@@ -16,7 +16,7 @@ const Header = () => {
     try {
       await logoutApiCall().unwrap();
       dispatch(logout());
-      navigate("/");
+      navigate("/"); 
     } catch (err) {
       console.log(err);
     }
@@ -71,11 +71,11 @@ const Header = () => {
                 </>
               ) : (
                 <>
-                  <LinkContainer to="/login">
+                  {/*<LinkContainer to="/login">
                     <Nav.Link>
                       <FaSignInAlt /> Sign In
                     </Nav.Link>
-                  </LinkContainer>
+                  </LinkContainer>*/}
                   <LinkContainer to="/register">
                     <Nav.Link>
                       <FaSignOutAlt /> Sign Up

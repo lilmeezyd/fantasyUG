@@ -1,4 +1,6 @@
 import { useEffect, useReducer } from "react";
+import { useGetPlayersQuery } from "../slices/playerApiSlice";
+import { useGetQuery } from "../slices/teamApiSlice"
 import PicksPlatform from "../components/PicksPlatform";
 import Players from "../components/Players";
 import { useGetPicksQuery } from "../slices/picksSlice";
@@ -7,6 +9,8 @@ import { useSelector } from 'react-redux'
 import FixtureList from "../components/FixtureList";
 
 const Transfers = () => {
+  const { data: players } = useGetPlayersQuery();
+  const { data: teams } = useGetQuery();
   const { userInfo } = useSelector((state) => state.auth)
   const { data, isLoading } = useGetPicksQuery(userInfo?._id);
   const reducer = (state, action) => {
@@ -21,7 +25,7 @@ const Transfers = () => {
         const slotTaken = state.picks.find(x => x.slot === yourSlot)?._id
         const yourSlotIndex = state.picks.findIndex(x => x.slot === yourSlot)
         const openSlot = state.picks.findIndex(
-          (x) => x._id === '' && x.playerPosition === "669a41e50f8891d8e0b4eb2a"
+          (x) => x._id === '' && x.playerPosition === 1
         );
         if (slotTaken.trim()) {
           const newPlayer = { ...state.picks[openSlot], ...data };
@@ -31,7 +35,6 @@ const Transfers = () => {
           const superRes = { ...resident, slot: nSlot, IsCaptain: nC, IsViceCaptain: nVC, multiplier: nM }
           const superPlayer = { ...newPlayer, slot: rSlot, IsCaptain: rC, IsViceCaptain: rVC, multiplier: rM }
           const resInTrans = state.transfersIn.findIndex(x => x._id === resident._id)
-          console.log(resInTrans)
           return {
             ...state,
             transfersIn: state.transfersIn.map((x) =>
@@ -60,7 +63,7 @@ const Transfers = () => {
 
       } else {
         const openSlot = state.picks.findIndex(
-          (x) => x._id === "" && x.playerPosition === "669a41e50f8891d8e0b4eb2a"
+          (x) => x._id === "" && x.playerPosition === 1
         );
         const newPlayer = { ...state.picks[openSlot], ...data };
         return {
@@ -88,7 +91,7 @@ const Transfers = () => {
         const slotTaken = state.picks.find(x => x.slot === yourSlot)?._id
         const yourSlotIndex = state.picks.findIndex(x => x.slot === yourSlot)
         const openSlot = state.picks.findIndex(
-          (x) => x._id === '' && x.playerPosition === "669a4831e181cb2ed40c240f"
+          (x) => x._id === '' && x.playerPosition === 2
         );
         if (slotTaken.trim()) {
           const newPlayer = { ...state.picks[openSlot], ...data };
@@ -125,7 +128,7 @@ const Transfers = () => {
 
       } else {
         const openSlot = state.picks.findIndex(
-          (x) => x._id === "" && x.playerPosition === "669a4831e181cb2ed40c240f"
+          (x) => x._id === "" && x.playerPosition === 2
         );
         const newPlayer = { ...state.picks[openSlot], ...data };
         return {
@@ -149,7 +152,7 @@ const Transfers = () => {
 
     if (action.type === "MID_ADD" && state.MID < 5) {
       /*const openSlot = state.picks.findIndex(
-        (x) => x._id === "" && x.playerPosition === "669a4846e181cb2ed40c2413"
+        (x) => x._id === "" && x.playerPosition === 3
       );
       const newPlayer = { ...state.picks[openSlot], ...data };
       return {
@@ -166,7 +169,7 @@ const Transfers = () => {
         const slotTaken = state.picks.find(x => x.slot === yourSlot)?._id
         const yourSlotIndex = state.picks.findIndex(x => x.slot === yourSlot)
         const openSlot = state.picks.findIndex(
-          (x) => x._id === '' && x.playerPosition === "669a4846e181cb2ed40c2413"
+          (x) => x._id === '' && x.playerPosition === 3
         );
         if (slotTaken.trim()) {
           const newPlayer = { ...state.picks[openSlot], ...data };
@@ -203,7 +206,7 @@ const Transfers = () => {
 
       } else {
         const openSlot = state.picks.findIndex(
-          (x) => x._id === "" && x.playerPosition === "669a4846e181cb2ed40c2413"
+          (x) => x._id === "" && x.playerPosition === 3
         );
         const newPlayer = { ...state.picks[openSlot], ...data };
         return {
@@ -227,7 +230,7 @@ const Transfers = () => {
     if (action.type === "FWD_ADD" && state.FWD < 3) {
       const { data } = action;
       /*const openSlot = state.picks.findIndex(
-        (x) => x._id === "" && x.playerPosition === "669a485de181cb2ed40c2417"
+        (x) => x._id === "" && x.playerPosition === 4
       );
       const newPlayer = { ...state.picks[openSlot], ...data };
       return {
@@ -243,7 +246,7 @@ const Transfers = () => {
         const slotTaken = state.picks.find(x => x.slot === yourSlot)?._id
         const yourSlotIndex = state.picks.findIndex(x => x.slot === yourSlot)
         const openSlot = state.picks.findIndex(
-          (x) => x._id === '' && x.playerPosition === "669a485de181cb2ed40c2417"
+          (x) => x._id === '' && x.playerPosition === 4
         );
         if (slotTaken.trim()) {
           const newPlayer = { ...state.picks[openSlot], ...data };
@@ -280,7 +283,7 @@ const Transfers = () => {
 
       } else {
         const openSlot = state.picks.findIndex(
-          (x) => x._id === "" && x.playerPosition === "669a485de181cb2ed40c2417"
+          (x) => x._id === "" && x.playerPosition === 4
         );
         const newPlayer = { ...state.picks[openSlot], ...data };
         return {
@@ -305,7 +308,7 @@ const Transfers = () => {
       const { data } = action;
       const openSlot = state.picks.findIndex(
         (x) =>
-          x._id === data._id && x.playerPosition === "669a41e50f8891d8e0b4eb2a"
+          x._id === data._id && x.playerPosition === 1
       );
       const newData = { nowCost: "", playerTeam: "", _id: "" };
       const newPlayer = { ...state.picks[openSlot], ...newData };
@@ -325,7 +328,7 @@ const Transfers = () => {
       const { data } = action;
       const openSlot = state.picks.findIndex(
         (x) =>
-          x._id === data._id && x.playerPosition === "669a4831e181cb2ed40c240f"
+          x._id === data._id && x.playerPosition === 2
       );
       const newData = { nowCost: "", playerTeam: "", _id: "" };
       const newPlayer = { ...state.picks[openSlot], ...newData };
@@ -345,7 +348,7 @@ const Transfers = () => {
       const { data } = action;
       const openSlot = state.picks.findIndex(
         (x) =>
-          x._id === data._id && x.playerPosition === "669a4846e181cb2ed40c2413"
+          x._id === data._id && x.playerPosition === 3
       );
       const newData = { nowCost: "", playerTeam: "", _id: "" };
       const newPlayer = { ...state.picks[openSlot], ...newData };
@@ -365,7 +368,7 @@ const Transfers = () => {
       const { data } = action;
       const openSlot = state.picks.findIndex(
         (x) =>
-          x._id === data._id && x.playerPosition === "669a485de181cb2ed40c2417"
+          x._id === data._id && x.playerPosition === 4
       );
       const newData = { nowCost: "", playerTeam: "", _id: "" };
       const newPlayer = { ...state.picks[openSlot], ...newData };
@@ -457,6 +460,36 @@ const Transfers = () => {
     });
   };
 
+  const auto = () => {
+    const idGKP = picks.filter((x) => x.playerPosition === 1).map((x) => x._id);
+    const idDEF = picks.filter((x) => x.playerPosition === 2).map((x) => x._id);
+    const idMID = picks.filter((x) => x.playerPosition === 3).map((x) => x._id);
+    const idFWD = picks.filter((x) => x.playerPosition === 4).map((x) => x._id);
+
+    const autoPickFunc = (picks, max, available, pos, posId) => {
+      const autoPlay = players
+      .filter(
+        (player) => player.playerPosition === posId && !picks.includes(player._id)
+      )
+      .slice(0, (max-available));
+    autoPlay.map((playerPos) => {
+      addPlayer({
+        _id: playerPos._id,
+        playerPosition: playerPos.playerPosition,
+        playerTeam: playerPos.playerTeam,
+        nowCost: playerPos.nowCost,
+        shortPos: pos,
+      });
+    });
+    }
+
+    
+    autoPickFunc(idGKP, 2, GKP, 'GKP', 1)
+    autoPickFunc(idDEF, 5, DEF, 'DEF', 2)
+    autoPickFunc(idMID, 5, MID, 'MID', 3)
+    autoPickFunc(idFWD, 3, FWD, 'FWD', 4)
+  };
+
   return (
     <>
       <div className="main">
@@ -465,7 +498,10 @@ const Transfers = () => {
           id={data}
           teamValue={teamValue}
           reset={reset}
+          auto={auto}
           itb={itb}
+          players={players}
+          teams={teams}
           totalPlayers={totalPlayers}
           picks={picks}
           removePlayer={removePlayer}

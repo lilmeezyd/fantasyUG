@@ -2,27 +2,25 @@ import asyncHandler from "express-async-handler";
 import Matchday from "../models/matchdayModel.js";
 import ManagerLive from "../models/managerLive.js";
 import ManagerInfo from "../models/managerInfoModel.js";
-import PlayerHistory from "../models/playerHistoryModel.js"
+import PlayerHistory from "../models/playerHistoryModel.js";
 import Position from "../models/positionModel.js";
-import TOW from "../models/teamOfTheWeekModel.js"
+import TOW from "../models/teamOfTheWeekModel.js";
 import User from "../models/userModel.js";
 import mongoose from "mongoose";
-
 
 //@desc Get recent matchday
 //@route GET /api/matchdays/data/max/
 //@access Public
 const getMaxMD = asyncHandler(async (req, res) => {
-  const matchdays = await Matchday.find({ pastDeadline: true })
+  const matchdays = await Matchday.find({ pastDeadline: true });
   if (matchdays.length > 0) {
-    const newMd = Math.max(...matchdays.map(x => x.id))
-    console.log(newMd)
-    res.status(200).json(newMd)
+    const newMd = Math.max(...matchdays.map((x) => x.id));
+    console.log(newMd);
+    res.status(200).json(newMd);
   } else {
-    res.status(200).json(null)
+    res.status(200).json(null);
   }
-
-})
+});
 
 //@desc Set Matchday
 //@route POST /api/matchdays
@@ -81,6 +79,7 @@ const setMatchday = asyncHandler(async (req, res) => {
     name,
     deadlineTime,
     id,
+    next: id === 1 ? true : false,
   });
   res.status(200).json(matchday);
 });
@@ -119,7 +118,6 @@ const startMatchday = asyncHandler(async (req, res) => {
   const { id, next: isNext } = matchday;
   const prev = id > 1 ? id - 1 : 0;
   const next = id + 1;
-
   if (!isNext) {
     res.status(400);
     throw new Error("Matchday is not the next one");
@@ -130,9 +128,6 @@ const startMatchday = asyncHandler(async (req, res) => {
     throw new Error("User not found");
   }
 
-  const session = await mongoose.startSession();
-  session.startTransaction();
-
   try {
     let updatedMatchday, nextMatchdayDoc;
 
@@ -141,17 +136,17 @@ const startMatchday = asyncHandler(async (req, res) => {
       updatedMatchday = await Matchday.findByIdAndUpdate(
         req.params.id,
         { next: false, current: true, pastDeadline: true },
-        { new: true, session }
+        { new: true }
       );
 
       nextMatchdayDoc = await Matchday.findOneAndUpdate(
         { id: next },
         { next: true },
-        { new: true, session }
+        { new: true }
       );
     } else {
-      const prevMatchday = await Matchday.findOne({ id: prev }).session(session);
-      const nextMatchday = await Matchday.findOne({ id: next }).session(session);
+      const prevMatchday = await Matchday.findOne({ id: prev });
+      const nextMatchday = await Matchday.findOne({ id: next });
 
       if (!prevMatchday.finished || !prevMatchday.pastDeadline) {
         throw new Error(`Previous matchday isn't finished yet!`);
@@ -160,33 +155,26 @@ const startMatchday = asyncHandler(async (req, res) => {
       updatedMatchday = await Matchday.findByIdAndUpdate(
         req.params.id,
         { next: false, current: true, pastDeadline: true },
-        { new: true, session }
+        { new: true }
       );
 
       if (nextMatchday) {
         nextMatchdayDoc = await Matchday.findByIdAndUpdate(
           nextMatchday._id,
           { next: true },
-          { new: true, session }
+          { new: true }
         );
       }
     }
-
-    await session.commitTransaction();
-    session.endSession();
 
     res.status(200).json({
       currentMatchday: updatedMatchday,
       nextMatchday: nextMatchdayDoc || null,
     });
   } catch (error) {
-    await session.abortTransaction();
-    session.endSession();
-    console.error("Transaction failed:", error);
     res.status(500).json({ error: error.message });
   }
 });
-
 
 //@desc Update Matchday
 //@route PUT /api/matchdays/:id
@@ -240,26 +228,23 @@ const updateMatchday = asyncHandler(async (req, res) => {
 //@access Private
 //@role Admin, editor
 const updateMDdata = asyncHandler(async (req, res) => {
-  const session = await mongoose.startSession();
-  session.startTransaction();
-
   try {
-    const matchdayFound = await Matchday.findById(req.params.id).session(session);
+    const matchdayFound = await Matchday.findById(req.params.id);
     if (!matchdayFound) {
-      throw new Error('Matchday not found!');
+      throw new Error("Matchday not found!");
     }
 
     // Uncomment to restrict update to current matchday
     if (!matchdayFound.current) {
-      throw new Error('Matchday is not the current one!');
+      throw new Error("Matchday is not the current one!");
     }
 
-    const allPlayers = await PlayerHistory.find({ matchday: req.params.id }).session(session);
+    const allPlayers = await PlayerHistory.find({ matchday: req.params.id });
     if (allPlayers.length === 0) {
-      throw new Error('No players in this matchday yet!');
+      throw new Error("No players in this matchday yet!");
     }
 
-    const allLives = await ManagerLive.find().session(session);
+    const allLives = await ManagerLive.find();
 
     const entriesWithScore = allLives.map((x) => {
       const pick = x.livePicks.find(
@@ -283,13 +268,26 @@ const updateMDdata = asyncHandler(async (req, res) => {
       };
     });
 
-    const validScores = entriesWithScore.filter((x) => typeof (x.matchdayPoints) === 'number') ?? [];
-    const highestScore = validScores.length ? Math.max(...validScores.map(x => x.matchdayPoints)) : 0;
-    const totalPoints = validScores.reduce((sum, x) => sum + x.matchdayPoints, 0);
+    const validScores =
+      entriesWithScore.filter((x) => typeof x.matchdayPoints === "number") ??
+      [];
+    const highestScore = validScores.length
+      ? Math.max(...validScores.map((x) => x.matchdayPoints))
+      : 0;
+    const totalPoints = validScores.reduce(
+      (sum, x) => sum + x.matchdayPoints,
+      0
+    );
     const averageScore = Math.round(totalPoints / allLives.length) ?? 0;
-    const highestScoringEntry = validScores.length ? validScores.find(x => x.matchdayPoints === highestScore)?.manager : null;
-    const highestPlayerPoints = allPlayers.length  ? Math.max(...allPlayers.map((p) => p.totalPoints))  : 0;
-    const topPlayer = allPlayers.length ? allPlayers.find(p => p.totalPoints === highestPlayerPoints)?.player : null;
+    const highestScoringEntry = validScores.length
+      ? validScores.find((x) => x.matchdayPoints === highestScore)?.manager
+      : null;
+    const highestPlayerPoints = allPlayers.length
+      ? Math.max(...allPlayers.map((p) => p.totalPoints))
+      : 0;
+    const topPlayer = allPlayers.length
+      ? allPlayers.find((p) => p.totalPoints === highestPlayerPoints)?.player
+      : null;
     const updatedMatchday = await Matchday.findByIdAndUpdate(
       req.params.id,
       {
@@ -298,20 +296,14 @@ const updateMDdata = asyncHandler(async (req, res) => {
         avergeScore: averageScore,
         highestScore,
       },
-      { new: true, session }
+      { new: true }
     );
-
-    await session.commitTransaction();
-    session.endSession();
 
     res.status(200).json(updatedMatchday);
   } catch (error) {
-    await session.abortTransaction();
-    session.endSession();
-    res.status(500).json({ message: error.message || 'Something went wrong' });
+    res.status(500).json({ message: error.message || "Something went wrong" });
   }
 });
-
 
 //@desc Update Team of the week
 //@route PUT /api/matchdays/updateTOW/:id
@@ -321,20 +313,22 @@ const updateTOW = asyncHandler(async (req, res) => {
   const matchdayFound = await Matchday.findById(req.params.id);
   if (!matchdayFound) {
     res.status(404);
-    throw new Error('Matchday not found!');
+    throw new Error("Matchday not found!");
   }
 
   const { id } = matchdayFound;
 
   // Dynamically load position mappings
-  const positions = await Position.find();
-  const posObj = {}, codeObj = {};
-  positions.forEach(pos => {
+  const positions = await Position.find({});
+  const posObj = {},
+    codeObj = {};
+  positions.forEach((pos) => {
     posObj[pos._id.toString()] = pos.shortName;
     codeObj[pos._id.toString()] = pos.code;
   });
-
-  const playerHistories = await PlayerHistory.find({ matchday: req.params.id }).populate('player');
+  const playerHistories = await PlayerHistory.find({
+    matchday: req.params.id,
+  }).populate("player");
   const playerMap = playerHistories.reduce((acc, curr) => {
     const player = curr.player;
     if (!player) return acc;
@@ -348,9 +342,8 @@ const updateTOW = asyncHandler(async (req, res) => {
   }, {});
 
   const adPlayers = Object.values(playerMap);
-
   const sortedPlayers = adPlayers
-    .map(x => {
+    .map((x) => {
       const { _id, appName, playerPosition, playerTeam } = x.player;
       return {
         id: _id,
@@ -382,17 +375,19 @@ const updateTOW = asyncHandler(async (req, res) => {
     { GKP: 1, DEF: 3, MID: 5, FWD: 2 },
     { GKP: 1, DEF: 3, MID: 4, FWD: 3 },
     { GKP: 1, DEF: 5, MID: 4, FWD: 1 },
-    { GKP: 1, DEF: 4, MID: 5, FWD: 1 }
+    { GKP: 1, DEF: 4, MID: 5, FWD: 1 },
   ];
 
-  let bestTeam = null, bestScore = -1, bestFormation = null;
+  let bestTeam = null,
+    bestScore = -1,
+    bestFormation = null;
 
   for (const formation of formations) {
     let team = [];
     let valid = true;
     let total = 0;
 
-    for (const pos of ['GKP', 'DEF', 'MID', 'FWD']) {
+    for (const pos of ["GKP", "DEF", "MID", "FWD"]) {
       const needed = formation[pos] || 0;
       if (grouped[pos].length < needed) {
         valid = false;
@@ -410,6 +405,7 @@ const updateTOW = asyncHandler(async (req, res) => {
     }
   }
 
+  res.json({ bestTeam, bestScore, bestFormation });
   if (!bestTeam) {
     res.status(400);
     throw new Error("Not enough data to form a valid Team of the Week.");
@@ -424,8 +420,8 @@ const updateTOW = asyncHandler(async (req, res) => {
         $set: {
           matchday: id,
           matchdayId: req.params.id,
-          starOnes: bestTeam
-        }
+          starOnes: bestTeam,
+        },
       },
       { new: true }
     );
@@ -434,38 +430,36 @@ const updateTOW = asyncHandler(async (req, res) => {
     const created = await TOW.create({
       matchday: id,
       matchdayId: req.params.id,
-      starOnes: bestTeam
+      starOnes: bestTeam,
     });
     res.status(201).json(created);
   }
-
 });
-
 
 //@desc Get Team of the week
 //@route GET /api/matchdays/data/tows/:id
 //@access Public
 //@role Admin, editor, Normal User
 const getTOW = asyncHandler(async (req, res) => {
-  const tow = await TOW.findOne({ matchdayId: req.params.id })
+  const tow = await TOW.findOne({ matchdayId: req.params.id });
   if (!tow) {
-    res.status(404)
-    throw new Error('No team of the week found')
+    res.status(404);
+    throw new Error("No team of the week found");
   }
-  res.status(200).json(tow)
-})
+  res.status(200).json(tow);
+});
 
 //@route GET /api/matchdays/data/tows/
 //@access Public
 //@role Admin, editor, Normal User
 const getTOWs = asyncHandler(async (req, res) => {
-  const tows = await TOW.find({})
+  const tows = await TOW.find({});
   if (!tows) {
-    res.status(404)
-    throw new Error('No team of the week found')
+    res.status(404);
+    throw new Error("No team of the week found");
   }
-  res.status(200).json(tows.slice(0,7))
-})
+  res.status(200).json(tows.slice(0, 7));
+});
 
 //@desc End Matchday
 //@route PUT /api/matchdays/endmatchday/:id
@@ -520,20 +514,19 @@ const endMatchday = asyncHandler(async (req, res) => {
   res.status(200).json(updated);
 });
 
-
 //@desc Create autosubs
 //@route PATCH /api/matchdays/createautos/:id
 //@access Private
 //@role Admin, editor
 const createAutos = asyncHandler(async (req, res) => {
   const matchdayFound = await Matchday.findById(req.params.id);
-  const { current } = matchdayFound
+  const { current } = matchdayFound;
   const { id } = matchdayFound;
-   if (!current) {
-     res.status(400)
-     throw new Error(`Matchday not current Matchday!`)
-   }
-  const managerLives = await ManagerLive.find({}).lean()
+  if (!current) {
+    res.status(400);
+    throw new Error(`Matchday not current Matchday!`);
+  }
+  const managerLives = await ManagerLive.find({}).lean();
   const VALID_FORMATIONS = [
     { GKP: 1, DEF: 4, MID: 4, FWD: 2 },
     { GKP: 1, DEF: 4, MID: 3, FWD: 3 },
@@ -542,85 +535,78 @@ const createAutos = asyncHandler(async (req, res) => {
     { GKP: 1, DEF: 3, MID: 5, FWD: 2 },
     { GKP: 1, DEF: 3, MID: 4, FWD: 3 },
     { GKP: 1, DEF: 5, MID: 4, FWD: 1 },
-    { GKP: 1, DEF: 4, MID: 5, FWD: 1 }
+    { GKP: 1, DEF: 4, MID: 5, FWD: 1 },
   ];
   const POSITIONS = {
-    '669a41e50f8891d8e0b4eb2a': 'GKP',
-    '669a4831e181cb2ed40c240f': 'DEF',
-    '669a4846e181cb2ed40c2413': 'MID',
-    '669a485de181cb2ed40c2417': 'FWD'
+    1: "GKP",
+    2: "DEF",
+    3: "MID",
+    4: "FWD",
   };
 
   // Helpers
   const isValidFormation = ({ GKP, DEF, MID, FWD }) => {
-    return VALID_FORMATIONS.some(f =>
-      f.GKP === GKP && f.DEF === DEF && f.MID === MID && f.FWD === FWD
+    return VALID_FORMATIONS.some(
+      (f) => f.GKP === GKP && f.DEF === DEF && f.MID === MID && f.FWD === FWD
     );
   };
-  const getFormation = picks => {
+  const getFormation = (picks) => {
     const formation = { GKP: 0, DEF: 0, MID: 0, FWD: 0 };
     for (const pick of picks) {
       formation[POSITIONS[pick.playerPosition]]++;
     }
     return formation;
   };
-  const clonePicks = picks => picks.map(p => ({ ...p }));
+  const clonePicks = (picks) => picks.map((p) => ({ ...p }));
   const applyAutoSubs = (picks) => {
     const updatedPicks = clonePicks(picks);
     const usedPlayerIds = new Set();
     const automaticSubs = [];
-  
-    const starters = updatedPicks.filter(p => p.multiplier > 0);
+
+    const starters = updatedPicks.filter((p) => p.multiplier > 0);
     const bench = updatedPicks
-      .filter(p => p.multiplier === 0)
+      .filter((p) => p.multiplier === 0)
       .sort((a, b) => a.slot - b.slot);
-  
+
     for (const pick of starters) {
       usedPlayerIds.add(pick._id.toString());
     }
-  
+
     for (const starter of starters) {
       if (+starter.starts === 0 && +starter.bench === 0) {
         for (const sub of bench) {
-          if ((+sub.starts === 1 || +sub.bench === 1) &&
+          if (
+            (+sub.starts === 1 || +sub.bench === 1) &&
             !usedPlayerIds.has(sub._id.toString())
           ) {
             const starterPos = POSITIONS[starter.playerPosition];
             const subPos = POSITIONS[sub.playerPosition];
-  
+
             // Only allow GKP-for-GKP, others can freely sub
-            if (starterPos === 'GKP' && subPos !== 'GKP') continue;
-            if (starterPos !== 'GKP' && subPos === 'GKP') continue;
-  
+            if (starterPos === "GKP" && subPos !== "GKP") continue;
+            if (starterPos !== "GKP" && subPos === "GKP") continue;
+
             // Try simulated substitution
-            const simulated = starters.map(p =>
+            const simulated = starters.map((p) =>
               p._id === starter._id ? { ...sub, multiplier: 1 } : p
             );
-  
+
             const formation = getFormation(simulated);
             if (isValidFormation(formation)) {
               // Apply substitution
               sub.multiplier = 1;
               starter.multiplier = 0;
-  
+
               // Swap slots
               const subSlot = sub.slot;
               sub.slot = starter.slot;
               starter.slot = subSlot;
-  
+
               usedPlayerIds.add(sub._id.toString());
-  
+
               automaticSubs.push({
-                in: {
-                  _id: sub._id,
-                  playerPosition: sub.playerPosition,
-                  playerTeam: sub.playerTeam
-                },
-                out: {
-                  _id: starter._id,
-                  playerPosition: starter.playerPosition,
-                  playerTeam: starter.playerTeam
-                }
+                in: sub,
+                out: starter,
               });
               break;
             }
@@ -628,43 +614,121 @@ const createAutos = asyncHandler(async (req, res) => {
         }
       }
     }
-  
+
     return { newPicks: [...starters, ...bench], automaticSubs };
   };
-  
+
   const applyCaptainFallback = (picks) => {
-    const captainMissed = picks.find(x => x.IsCaptain === true && +x.starts === 0 && +x.bench === 0)
-    const vice = picks.find(x => x.IsViceCaptain === true && (+x.starts === 1 || +x.bench === 1))
+    const captainMissed = picks.find(
+      (x) => x.IsCaptain === true && +x.starts === 0 && +x.bench === 0
+    );
+    const vice = picks.find(
+      (x) => x.IsViceCaptain === true && (+x.starts === 1 || +x.bench === 1)
+    );
     if (captainMissed && vice) {
-      return picks
-        .map(pick => pick.IsCaptain === true ? { ...pick, multiplier: pick.multiplier === 0 ? 0 : 1 } :
-          pick.IsViceCaptain === true ? { ...pick, multiplier: 2, points: pick.points } : pick)
+      return picks.map((pick) =>
+        pick.IsCaptain === true
+          ? { ...pick, multiplier: pick.multiplier === 0 ? 0 : 1 }
+          : pick.IsViceCaptain === true
+          ? { ...pick, multiplier: 2, points: pick.points }
+          : pick
+      );
     }
-    return picks
-  }
+    return picks;
+  };
   const createSubs = (picks) => {
-    let captainFallback = applyCaptainFallback(picks)
-    let finalPicks = applyAutoSubs(captainFallback)
+    let captainFallback = applyCaptainFallback(picks);
+    let finalPicks = applyAutoSubs(captainFallback);
     return finalPicks;
-  }
-  const bulkOps = managerLives.map(lives => {
-    const { _id, livePicks } = lives
-    const mdPicks = livePicks.find(x => x.matchday === id) ?? []
+  };
+  const bulkOps = managerLives.map((lives) => {
+    const { _id, livePicks } = lives;
+    const mdPicks = livePicks.find((x) => x.matchday === id) ?? [];
     const { picks, automaticSubs: oldSubs } = mdPicks;
-    const newPicksAndSubs = createSubs(picks)
-    const { automaticSubs: newSubs, newPicks } = newPicksAndSubs
-    const newMdPicks = livePicks.map(x => x.matchday === id ? { ...x, 
-      automaticSubs: [...oldSubs, ...newSubs ], picks: newPicks.sort((a, b) => a.slot - b.slot) } : x)
+    const newPicksAndSubs = createSubs(picks);
+    const { automaticSubs: newSubs, newPicks } = newPicksAndSubs;
+    const newMdPicks = livePicks.map((x) =>
+      x.matchday === id
+        ? {
+            ...x,
+            automaticSubs: [...oldSubs, ...newSubs],
+            picks: newPicks.sort((a, b) => a.slot - b.slot),
+          }
+        : x
+    );
     return {
       updateOne: {
         filter: { _id: _id },
-        update: { $set: { livePicks: newMdPicks } }
-      }
-    }
-  })
+        update: { $set: { livePicks: newMdPicks } },
+      },
+    };
+  });
+  await ManagerLive.bulkWrite(bulkOps);
+  res.json(managerLives);
+});
+
+//@desc Undo autosubs
+//@route PATCH /api/matchdays/undoautos/:id
+//@access Private
+//@role Admin, editor
+const undoAutos = asyncHandler(async (req, res) => {
+  const matchdayFound = await Matchday.findById(req.params.id);
+  const { current } = matchdayFound;
+  const { id } = matchdayFound;
+  if (!current) {
+    res.status(400);
+    throw new Error(`Matchday not current Matchday!`);
+  }
+  const managerLives = await ManagerLive.find({}).lean();
+  const bulkOps = managerLives.map((lives) => {
+    const { _id, livePicks } = lives;
+    const mdPicks = livePicks.find((x) => x.matchday === id);
+    const { picks, automaticSubs } = mdPicks;
+
+    // Arrays of ids for players involved in autosubs
+    const ins = automaticSubs.map((x) => x.in).map((x) => x._id.toString());
+    const outs = automaticSubs.map((x) => x.out).map((x) => x._id.toString());
+
+    // Mapping IN player's id to OUT player's object
+    const inOutMap = new Map(
+      automaticSubs.map((x) => [
+        x.in._id.toString(),
+        { ...x.out, slot: x.in.slot, multiplier: x.out.IsCaptain ? 2 : 1 },
+      ])
+    );
+    // Mapping OUT player's id to IN player's object
+    const outInMap = new Map(
+      automaticSubs.map((x) => [
+        x.out._id.toString(),
+        { ...x.in, slot: x.out.slot, multiplier: 0 },
+      ])
+    );
+
+    // Swapping auto subbed IN players back to the bench and reset captain if auto subbed OUT
+    const newMdPicks = picks.map((pick) =>
+      ins.includes(pick._id.toString())
+        ? inOutMap.get(pick._id.toString())
+        : outs.includes(pick._id.toString())
+        ? outInMap.get(pick._id.toString())
+        : pick
+    ).map(x => x.IsViceCaptain ? {...x, multiplier: 1} : x);
+
+    // Mapping picks with back into the array with empty automaticSubs array
+    const oldMdPicks = livePicks.map((x) =>
+      x.matchday === id ? { ...x, automaticSubs: [], picks: newMdPicks } : x
+    );
+    
+    return {
+      updateOne: {
+        filter: { _id: _id },
+        update: { $set: { livePicks: oldMdPicks } },
+      },
+    };
+  });
+
   await ManagerLive.bulkWrite(bulkOps)
-  res.json(managerLives)
-})
+  res.json({ bulkOps, message: "Autosubs undone" });
+});
 
 //@desc Delete Matchday
 //@route DELETE /api/matchdays/:id
@@ -690,6 +754,7 @@ const deleteMatchday = asyncHandler(async (req, res) => {
 
 export {
   createAutos,
+  undoAutos,
   updateMDdata,
   getMaxMD,
   updateTOW,

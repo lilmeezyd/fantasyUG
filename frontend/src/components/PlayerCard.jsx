@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useReducer, useEffect } from "react";
 import { Modal } from "react-bootstrap";
 import { useGetPlayerQuery } from "../slices/playerApiSlice";
 import PlayerInfo from "./PlayerInfo";
@@ -15,7 +15,7 @@ const PlayerCard = (props) => {
     addPlayer,
     removePlayer,
     picks, GKP,
-    DEF, MID, FWD, errorMsg
+    DEF, MID, FWD
   } = props;
   const pickIds = picks?.map(x => x._id)
   const doesExist = pickIds?.includes(playerPos?._id)
@@ -63,9 +63,9 @@ const PlayerCard = (props) => {
           </button>
         </div>
         <div className="position-table-1">
-          <button 
-          disabled={doesExist}
+          <button
             onClick={handleShowTransfer}
+            style={{fontWeight: `${doesExist ? '200' : '700'}`}}
             className="player-cell btn-table"
           >
             <div className="images">
@@ -86,7 +86,7 @@ const PlayerCard = (props) => {
 
       <TransferPopUp
         addPlayer={addPlayer}
-        GKP={GKP} DEF={DEF} MID={MID} FWD={FWD} errorMsg={errorMsg}
+        GKP={GKP} DEF={DEF} MID={MID} FWD={FWD}
         removePlayer={removePlayer}
         picks={picks}
         team={team}
@@ -116,14 +116,16 @@ const TransferPopUp = (props) => {
     addPlayer,
     removePlayer,
     handleCloseTransfer,
-    picks,GKP, DEF,MID,FWD,errorMsg
+    position,
+    picks,GKP, DEF,MID,FWD, 
   } = props;
 
   const pickIds = picks?.map(x => x._id)
   const doesExist = pickIds?.includes(playerPos?._id)
-
+  const max = {1: 2, 2: 5, 3: 5, 4: 3}
+  const pp = position === 1 ? GKP : position === 2 ? DEF : position === 3 ? MID : FWD
   const transferIn = () => {
-    addPlayer({
+    addPlayer({ 
       _id: playerPos._id,
       playerPosition: playerPos.playerPosition,
       playerTeam: playerPos.playerTeam,
@@ -132,7 +134,7 @@ const TransferPopUp = (props) => {
     });
     handleCloseTransfer();
   };
-
+  
   const transferOut = () => {
     removePlayer({
       _id: playerPos._id,
@@ -143,6 +145,7 @@ const TransferPopUp = (props) => {
     })
     handleCloseTransfer();
   }
+  
   return (
     <Modal show={showPop} onHide={handleClosePop}>
       <Modal.Header style={{ background: "aquamarine" }} closeButton>
@@ -159,29 +162,35 @@ const TransferPopUp = (props) => {
         <span className='danger span-msg'>You already have the maximum number of Players in your squad</span>
       </div>*/}
         {
-      playerPos.playerPosition === '669a41e50f8891d8e0b4eb2a' && 
-      GKP === 2 && <div className='message'>
+      playerPos.playerPosition === 1 && 
+      GKP === 2 && !doesExist && <div className='message'>
          <span className='danger span-msg'>You already have the maximum number of Goalkeepers in your squad</span>
         </div>}
         {
-      playerPos.playerPosition ==='669a4831e181cb2ed40c240f' && 
-      DEF === 5 && <div className='message'>
+      playerPos.playerPosition === 2 && 
+      DEF === 5 && !doesExist && <div className='message'>
          <span className='danger span-msg'>You already have the maximum number of Defenders in your squad</span>
         </div>}
         {
-      playerPos.playerPosition === '669a4846e181cb2ed40c2413' && 
-      MID === 5 && <div className='message'>
+      playerPos.playerPosition === 3 && 
+      MID === 5 && !doesExist && <div className='message'>
          <span className='danger span-msg'>You already have the maximum number of Midfielders in your squad</span>
         </div>}
         {
-      playerPos.playerPosition === '669a485de181cb2ed40c2417' && 
-      FWD === 3 && <div className='message'>
+      playerPos.playerPosition === 4 && 
+      FWD === 3 && !doesExist && <div className='message'>
          <span className='danger span-msg'>You already have the maximum number of Forwards in your squad</span>
-        </div>}<div className="infobuttons">
-          <button onClick={doesExist ? transferOut : transferIn} className="btn-success form-control">
-            {doesExist ? 'Remove Player' : 'Add Player'}
+        </div>}
+        {doesExist ? <div className="infobuttons">
+          <button onClick={transferOut} 
+          className={`btn btn-danger form-control`}>
+            Remove Player
           </button>
-        </div>
+        </div> : playerPos.playerPosition === position && pp < max[position] && <div className="infobuttons">
+          <button onClick={transferIn} 
+          className={`btn btn-success form-control`}>Add Player
+          </button>
+        </div>}
       </Modal.Body>
     </Modal>
   );

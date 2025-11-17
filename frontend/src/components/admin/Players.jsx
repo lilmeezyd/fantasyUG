@@ -30,7 +30,6 @@ const Players = () => {
   const { data: positions } = useGetPositionsQuery();
   const [addPlayer] = useAddPlayerMutation();
   const [deletePlayer] = useDeletePlayerMutation();
-  console.log(useGetPlayersQuery())
 
   const { deleted, edited, added } = show;
   const pageSize = 10;
@@ -259,22 +258,26 @@ const Players = () => {
     );
   }
 
-  if(isError) {
+  if (isError) {
     /*return <div className="spinner">Something went wrong</div>*/
   }
 
   return (
     <Container>
-      {!memoPlayers?.length ? <div className="spinner">No Players Found!</div> : <><div className="admin-vs">
+      <div className="admin-vs">
         <div className="view">
           <label htmlFor="view_by">View</label>
-          <select onChange={onView} className="custom-select admin-vs-select" id="view_by">
+          <select
+            onChange={onView}
+            className="custom-select admin-vs-select"
+            id="view_by"
+          >
             <optgroup label="Global">
               <option value="allPlayers">All Players</option>
             </optgroup>
             <optgroup label="By Position">
               {positions?.map((pPos, idx) => {
-                let positionId = "position_" + pPos._id;
+                let positionId = "position_" + pPos.code;
                 return (
                   <option key={idx} value={positionId}>
                     {pPos.singularName + "s"}
@@ -298,7 +301,11 @@ const Players = () => {
         </div>
         <div className="sort">
           <label htmlFor="sort_by">Sorted by</label>
-          <select onChange={onSort} className="admin-vs-select custom-select" id="sort_by">
+          <select
+            onChange={onSort}
+            className="admin-vs-select custom-select"
+            id="sort_by"
+          >
             <option value="totalPoints">Total points</option>
             <option value="nowCost">Price</option>
             {/*<option value="event_points">Round points</option>*/}
@@ -341,35 +348,39 @@ const Players = () => {
           <div></div>
           <div></div>
         </div>
-        {memoPlayers?.map((x) => (
-          <div className="teams" key={x._id}>
-            <div className="team-name">{x.appName}</div>
-            <div>{x.nowCost.toFixed(1)}</div>
-            <div>{x.totalPoints}</div>
-            <div>{x.goalsScored}</div>
-            <div>{x.assists}</div>
-            <div>
-              {teams?.find((team) => team?._id === x.playerTeam)?.shortName}
+        {!memoPlayers?.length ? (
+          <div className="spinner">No Players Found!</div>
+        ) : (
+          memoPlayers?.map((x) => (
+            <div className="teams" key={x._id}>
+              <div className="team-name">{x.appName}</div>
+              <div>{x.nowCost.toFixed(1)}</div>
+              <div>{x.totalPoints}</div>
+              <div>{x.goalsScored}</div>
+              <div>{x.assists}</div>
+              <div>
+                {teams?.find((team) => team?._id === x.playerTeam)?.shortName}
+              </div>
+              <div>
+                {
+                  positions?.find(
+                    (position) => position?.code === x.playerPosition
+                  )?.shortName
+                }
+              </div>
+              <div>{x.ownership}%</div>
+              <div>{x.cleansheets}</div>
+              <div>{x.yellowCards}</div>
+              <div>{x.redCards}</div>
+              <div className="btn-click" onClick={() => editPlayerPop(x._id)}>
+                <BsPencilFill color="black" />
+              </div>
+              <div className="btn-click" onClick={() => deletePlayerPop(x._id)}>
+                <AiFillDelete color="black" />
+              </div>
             </div>
-            <div>
-              {
-                positions?.find(
-                  (position) => position?._id === x.playerPosition
-                )?.shortName
-              }
-            </div>
-            <div>{x.ownership}%</div>
-            <div>{x.cleansheets}</div>
-            <div>{x.yellowCards}</div>
-            <div>{x.redCards}</div>
-            <div className="btn-click" onClick={() => editPlayerPop(x._id)}>
-              <BsPencilFill color="black" />
-            </div>
-            <div className="btn-click" onClick={() => deletePlayerPop(x._id)}>
-              <AiFillDelete color="black" />
-            </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
       <Pagination
         curPage={curPage}
@@ -381,10 +392,10 @@ const Players = () => {
         onSubmit={onSubmit}
         page={page}
         changePage={changePage}
-      /></>}
+      />
       <div className="add-button p-2">
         <Button onClick={addPlayerPop} className="btn btn-success">
-          Add Player 
+          Add Player
         </Button>
       </div>
       <AddModal submit={submit} show={added} closeAdd={closeAdd}></AddModal>

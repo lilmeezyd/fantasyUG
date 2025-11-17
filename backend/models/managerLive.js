@@ -32,7 +32,7 @@ const managerLiveSchema = mongoose.Schema({
       },
       picks: [
         { _id: { type: mongoose.Schema.Types.ObjectId, ref: 'Player', required: true},
-         playerPosition: { type: mongoose.Schema.Types.ObjectId, ref: 'Position', required: true},
+         playerPosition: { type: Number, required: true},
          playerTeam: { type: mongoose.Schema.Types.ObjectId, ref: 'Team', required: true},
          multiplier: { type: Number, required: true},
          nowCost: { type: Number, required: true},

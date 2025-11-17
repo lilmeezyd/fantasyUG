@@ -13,6 +13,7 @@ import pickRoutes from './routes/pickRoutes.js'
 import leagueRoutes from './routes/leagueRoutes.js'
 import managerInfoRoutes from './routes/managerInfoRoutes.js'
 import liveRoutes from './routes/liveRoutes.js'
+import transferRoutes from './routes/transferRoutes.js'
 import cookieParser from 'cookie-parser'
 import { notFound, errorHandler } from './middleware/errorMiddleware.js'
 import connectDB from './config/db.js'
@@ -42,6 +43,7 @@ app.use('/api/picks', pickRoutes)
 app.use('/api/leagues', leagueRoutes)
 app.use('/api/managerinfo', managerInfoRoutes)
 app.use('/api/livepicks/manager', liveRoutes)
+app.use('/api/transfers', transferRoutes)
 const __filename = fileURLToPath(import.meta.url); // get the resolved path to the file
   //const __dirname = path.dirname(__filename); // get the name of the directory
   // Serve the static files from the React app

@@ -12,6 +12,7 @@ import {
 import AddModal from "./teamLeagueModals/AddModal"
 import EditModal from "./teamLeagueModals/EditModal"
 import DeleteModal from "./teamLeagueModals/DeleteModal"
+import { toast } from "react-toastify";
 const TeamLeagues = () => {
   const [show, setShow] = useState({
     edited: false,
@@ -106,7 +107,7 @@ const TeamLeagues = () => {
 
   const updateTeamLeagues = async () => {
     const res = await updateTeamTables().unwrap()
-    console.log(res)
+    toast.success(res?.message)
   }
 
   {/* Button Controls */ }

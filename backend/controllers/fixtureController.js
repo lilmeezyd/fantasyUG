@@ -274,9 +274,6 @@ const editStats = asyncHandler(async (req, res) => {
     throw new Error("User not found");
   }
 
-  const session = await mongoose.startSession();
-  session.startTransaction();
-
   // Score tracking to prevent over-counting
   let homeGoalDelta = 0;
   let awayGoalDelta = 0;
@@ -347,13 +344,13 @@ const editStats = asyncHandler(async (req, res) => {
         await PlayerHistory.findOneAndUpdate(
           { player: retrievedPlayer, fixture: req.params.id },
           { $inc: { [identifier]: newValue, totalPoints } },
-          { new: true, session, upsert: true }
+          { new: true, upsert: true }
         );
 
         await Player.findByIdAndUpdate(
           retrievedPlayer,
           { $inc: { [identifier]: newValue, totalPoints } },
-          { new: true, session }
+          { new: true }
         );
       } else {
         if (newValue < 0) {
@@ -365,17 +362,17 @@ const editStats = asyncHandler(async (req, res) => {
         await PlayerHistory.findOneAndUpdate(
           { player: retrievedPlayer, fixture: req.params.id },
           { $inc: { [identifier]: newValue, totalPoints } },
-          { new: true, session, upsert: true }
+          { new: true, upsert: true }
         );
 
         await Player.findByIdAndUpdate(
           retrievedPlayer,
           { $inc: { [identifier]: newValue, totalPoints } },
-          { new: true, session }
+          { new: true }
         );
       }
 
-      // Update scores
+      
       if (identifier === "goalsScored") {
         if (homeAway === "home") homeGoalDelta += newValue;
         if (homeAway === "away") awayGoalDelta += newValue;
@@ -390,15 +387,10 @@ const editStats = asyncHandler(async (req, res) => {
     fixture.teamHomeScore = teamHomeScore + homeGoalDelta;
     fixture.teamAwayScore = teamAwayScore + awayGoalDelta;
 
-    const updatedFixture = await Fixture.findByIdAndUpdate(req.params.id, fixture, { new: true, session });
-
-    await session.commitTransaction();
-    session.endSession();
+    const updatedFixture = await Fixture.findByIdAndUpdate(req.params.id, fixture, { new: true });
 
     res.status(200).json(updatedFixture);
   } catch (error) {
-    await session.abortTransaction();
-    session.endSession();
     console.error(error);
     res.status(500).json({ error: "Something went wrong", details: error.message });
   }

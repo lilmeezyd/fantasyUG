@@ -23,11 +23,10 @@ const PickPlayer = (props) => {
   const appName = players?.find((player) => player._id === baller._id)?.appName;
   const nowCost = players?.find((player) => player._id === baller._id)?.nowCost;
   const teamCode = teams?.find((team) => team?._id === baller?.playerTeam)?.code
-  const image = baller?.playerPosition === "669a41e50f8891d8e0b4eb2a" ? `${teamCode}_1` : teamCode
+  const image = baller?.playerPosition === 1 ? `${teamCode}_1` : teamCode
   const opponentFixArr = mdFixs?.filter(
     (x) => x?.teamAway === baller?.playerTeam || x?.teamHome === baller?.playerTeam
   )
-  
   const opponentArr = opponentFixArr?.map(opponent => baller?.playerTeam === opponent?.teamAway
     ? `${teams?.find((x) => x._id === opponent?.teamHome)?.shortName}(A)`
     : `${teams?.find((x) => x._id === opponent?.teamAway)?.shortName}(H)`)
@@ -197,7 +196,7 @@ const SwitchPopUp = (props) => {
   } = props;
 
   const playerDetails = players?.find((player) => player._id === baller?._id);
-  let positionObj = elementTypes?.find((x) => x._id === baller?.playerPosition);
+  let positionObj = elementTypes?.find((x) => x.code === baller?.playerPosition);
   let shortPos = positionObj?.shortName;
   const [ showPInfo, setShowPInfo ] = useState(false)
   const { data: player} = useGetPlayerQuery(baller?._id)
