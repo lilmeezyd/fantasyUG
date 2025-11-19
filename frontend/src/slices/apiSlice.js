@@ -6,8 +6,8 @@ const baseUrl = isProd
   ? import.meta.env.VITE_PROD_API_URL
   : import.meta.env.VITE_DEV_API_URL;
 
-const baseQuery = fetchBaseQuery({baseUrl: ''})
-console.log(baseUrl)
+const baseQuery = fetchBaseQuery({baseUrl, credentials: 'include'})
+//const baseQuery = fetchBaseQuery({baseUrl: ''})
 
 export const apiSlice = createApi({
     baseQuery,

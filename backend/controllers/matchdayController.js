@@ -300,7 +300,7 @@ const updateMDdata = asyncHandler(async (req, res) => {
       { new: true }
     );
 
-    res.status(200).json(updatedMatchday);
+    res.status(200).json({message: 'Matchday data updated'});
   } catch (error) {
     res.status(500).json({ message: error.message || "Something went wrong" });
   }
@@ -406,7 +406,7 @@ const updateTOW = asyncHandler(async (req, res) => {
     }
   }
 
-  res.json({ bestTeam, bestScore, bestFormation });
+  //res.json({ bestTeam, bestScore, bestFormation });
   if (!bestTeam) {
     res.status(400);
     throw new Error("Not enough data to form a valid Team of the Week.");
@@ -426,14 +426,14 @@ const updateTOW = asyncHandler(async (req, res) => {
       },
       { new: true }
     );
-    res.status(200).json(updated);
+    res.status(201).json({team: updated, message: 'Team of the week updateed'});
   } else {
     const created = await TOW.create({
       matchday: id,
       matchdayId: req.params.id,
       starOnes: bestTeam,
     });
-    res.status(201).json(created);
+    res.status(200).json({team: created, message: 'Team of the week created'});
   }
 });
 
@@ -512,7 +512,7 @@ const endMatchday = asyncHandler(async (req, res) => {
     { new: true }
   );
 
-  res.status(200).json(updated);
+  res.status(200).json({updated, message: 'Matchday has come to an end'});
 });
 
 //@desc Create autosubs
@@ -665,7 +665,7 @@ const createAutos = asyncHandler(async (req, res) => {
     };
   });
   await ManagerLive.bulkWrite(bulkOps);
-  res.json(managerLives);
+  res.json({managerLives, message: 'Autosubs made'});
 });
 
 //@desc Undo autosubs
@@ -728,7 +728,7 @@ const undoAutos = asyncHandler(async (req, res) => {
   });
 
   await ManagerLive.bulkWrite(bulkOps)
-  res.json({ bulkOps, message: "Autosubs undone" });
+  res.json({message: "Autosubs undone" });
 });
 
 //@desc Delete Matchday

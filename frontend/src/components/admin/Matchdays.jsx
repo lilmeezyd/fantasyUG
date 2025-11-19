@@ -112,7 +112,8 @@ const startMatchdayNow = async () => {
     const res = await startMatchday(matchdayId).unwrap();
     toast.success(res?.message)
   } catch (error) {
-    toast.error(error?.data?.message)
+    console.log(error)
+    toast.error(error?.data?.message || error?.data?.error)
   }
   setMatchdayId("");
 };
@@ -179,49 +180,50 @@ const setLive = async () => {
 const updateMDdata = async (id) => {
   try {
     const res = await updateMatchdayData(id).unwrap()
-    console.log(res)
+    toast.success(res?.message)
   } catch (error) {
-    console.log(error)
+    toast.error(error?.data?.message)
   }
 }
 const updateTOW = async (id) => {
   try {
     const res = await updateMatchdayTOW(id).unwrap()
-    console.log(res)
+     toast.success(res?.message)
   } catch (error) {
-    console.log(error)
+    toast.error(error?.data.message)
   }
 }
 const updateAutoSubs = async (id) => {
   try {
     const res = await createAutosForMd(id).unwrap()
-    console.log(res)
+     toast.success(res?.message)
   } catch (error) {
-    console.log(error)
+    toast.error(error?.data.message)
   }
 }
 const undoAutos = async (id) => {
   try {
     const res = await undoAutosForMd(id).unwrap()
-    console.log(res)
+    toast.success(res?.message)
   } catch (error) {
-    console.log(error)
+    toast.error(error?.data.message)
   }
 }
 const setPastRank = async () => {
   try {
     const res = await setLastAndCurrentRank().unwrap()
     console.log(res)
+    toast.success(res?.message)
   } catch (error) {
-    console.log(error)
+    toast.error(error?.data.message)
   }
 }
 const endMatchday = async (id) => {
   try {
     const res = await endMatchdayData(id).unwrap()
-    console.log(res)
+    toast.success(res?.message)
   } catch (error) {
-    console.log(error)
+    toast.error(error?.data.message)
   }
 }
 

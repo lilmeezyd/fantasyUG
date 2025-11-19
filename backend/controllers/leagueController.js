@@ -942,7 +942,7 @@ const setCurrentAndLastRanks = asyncHandler(async (req, res) => {
 
   ////Setting current and last ranks for private leagues
 
-  res.status(201).json("All Tables updated");
+  res.status(201).json({message: "All Tables updated"});
 });
 
 export {

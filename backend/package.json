@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "start": "node server.js",
-    "server": "node --watch server.js"
+    "server": "nodemon server.js"
   },
   "author": "Denis Moini",
   "license": "MIT",
