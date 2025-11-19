@@ -561,7 +561,7 @@ const updateOverallTable = asyncHandler(async (req, res) => {
         mdRanks: {},
       });
     }
-    console.log(managerInfos);
+
     // Update matchday points for all standings
     const finalStandings = newStandings.map((s) => {
       const info = infoMap[s.user];
@@ -572,12 +572,25 @@ const updateOverallTable = asyncHandler(async (req, res) => {
     });
     // Sort and assign overall ranks
     finalStandings.sort((a, b) => b.overallPoints - a.overallPoints);
-    finalStandings.forEach((s, i) => {
+    /*finalStandings.forEach((s, i) => {
       s.currentRank = i + 1;
+    });*/
+
+    let b = 0;
+    const superStandings = finalStandings.map((x, idx) => {
+      if (idx === 0) {
+        b += 1;
+        return { ...x, currentRank: idx + 1 };
+      }
+      if (x.overallPoints === finalStandings[idx - 1].overallPoints) {
+        return { ...x, currentRank: b };
+      }
+      b = idx + 1;
+      return { ...x, currentRank: idx + 1 };
     });
 
     // Sort and assign matchday ranks
-    const sortedMd = [...finalStandings].sort(
+    const sortedMd = [...superStandings].sort(
       (a, b) =>
         (b.matchdays[matchdayNumber] || 0) - (a.matchdays[matchdayNumber] || 0)
     );

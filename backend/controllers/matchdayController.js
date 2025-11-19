@@ -168,6 +168,7 @@ const startMatchday = asyncHandler(async (req, res) => {
     }
 
     res.status(200).json({
+      message: 'Matchday Started',
       currentMatchday: updatedMatchday,
       nextMatchday: nextMatchdayDoc || null,
     });

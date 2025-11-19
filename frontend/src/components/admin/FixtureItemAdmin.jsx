@@ -7,6 +7,7 @@ import { Button, Spinner } from "react-bootstrap";
 import { useSetInitialPointsMutation } from "../../slices/livePicksApiSlice";
 import { useGetPlayersQuery } from "../../slices/playerApiSlice";
 import EditStatsModal from "./fixtureModals/EditStatsModal";
+import { toast } from "react-toastify"
 
 const FixtureItemAdmin = (props) => {
   const { x, editFixturePop, deleteFixturePop } = props; 
@@ -47,9 +48,8 @@ const dePopulate = async (x,y) => {
 
 const setInitial= async (x, y) => {
   try {
-    const initialPts = await setInitialPoints({y:y, x:x}).unwrap()
-    const { isLoading } = initialPts
-    setInitialLoad(isLoading)
+    const res = await setInitialPoints({y:y, x:x}).unwrap();
+    toast.success(res?.message)
   } catch (error) {
     console.log(error)
   }

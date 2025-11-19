@@ -9,6 +9,7 @@ const OverallLeague = () => {
   const { data, isLoading } = useGetOverallLeagueQuery(id)
   const { data: maxId } = useGetMaxIdQuery()
   const { userInfo } = useSelector(state => state.auth)
+  console.log(data)
   if(isLoading) {
     return (
       <div className="spinner">
@@ -31,7 +32,7 @@ const OverallLeague = () => {
           </div>
       {data?.standings?.map((entrant, idx) => 
         
-        <div 
+        (<div 
         style={{background: `${userInfo._id === entrant.user.toString() ? '#ffd70063' : 'white'}`}} key={entrant._id} className="standing-grid-1">
             <div>
             {(entrant?.currentRank === entrant?.lastRank || entrant?.lastRank === null) && <AiFillCaretRight color="#aaa"/> }
@@ -51,7 +52,7 @@ const OverallLeague = () => {
 
                 <div>{entrant?.matchdays[maxId]}</div>
           <div>{entrant?.overallPoints}</div>
-          </div>
+          </div>)
       )}
       </div>
       }
@@ -67,14 +68,14 @@ const OverallLeague = () => {
             <div className="standing-grid-name">Manager</div>
           </div>
       {data?.entrants?.map(entrant => 
-        <div key={entrant._id}>
+        (<div key={entrant._id}>
           <div className="standing-grid">
           <div  className="standing-grid-name">{entrant?.teamName}</div>
           <div  className="standing-grid-name">
             {entrant?.firstName}&nbsp;&nbsp;{entrant?.lastName}
           </div>
           </div>
-        </div>
+        </div>)
       )}
       </>
       }

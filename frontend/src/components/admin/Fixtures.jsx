@@ -4,6 +4,7 @@ import {
   useAddFixtureMutation,
   useDeleteFixtureMutation
 } from "../../slices/fixtureApiSlice";
+import { useGetMatchdaysQuery } from "../../slices/matchdayApiSlice";
 import { useGetQuery } from "../../slices/teamApiSlice"
 import { Container, Button, Spinner } from "react-bootstrap";
 import AddModal from "./fixtureModals/AddModal";
@@ -28,7 +29,8 @@ const Fixtures = () => {
   const [page, setPage] = useState(1);
   const [stats, displayStats] = useState(false);
   const [copy, setCopy] = useState([]);
-  const { data: fixtures, isLoading}  = useGetFixturesQuery()
+  const { data: fixtures, isLoading}  = useGetFixturesQuery();
+  const { data: matchdays }  = useGetMatchdaysQuery();
   const [addFixture ] = useAddFixtureMutation()
   const [ deleteFixture ] = useDeleteFixtureMutation()
   const { data: teams } = useGetQuery()
@@ -39,6 +41,20 @@ const Fixtures = () => {
     copyFix?.sort((x, y) => (x?.kickOffTime > y?.kickOffTime ? 1 : -1));
     setCopy(fixtures);
   }, [fixtures]);
+
+  useEffect(() => {
+    const nextMatchday = matchdays?.find(x => x.next === true)
+    if(nextMatchday) {
+      const nextId = nextMatchday?.id
+      if(nextId === 1) {
+        setPage(1)
+      } else {
+        setPage(nextId-1)
+      }
+    } else {
+      setPage(30)
+    }
+  }, [matchdays])
 
   const onClick = () => {
     displayStats((prevState) => !prevState);
@@ -158,6 +174,11 @@ const resetEdit = async () => {
   setFixtureId("");
 };
 
+const filteredFixtures = useMemo(() => {
+  return copy?.filter((x) => +x?._id?.id === +page)
+}, [copy, page])
+
+
  if(isLoading) {
     return <div className="spinner"><Spinner /></div>
  }
@@ -182,9 +203,7 @@ const resetEdit = async () => {
       <BsChevronRight />
     </button>
   </section>
-  {copy
-    ?.filter((x) => +x?._id?.id === +page)
-    ?.map((fixture) => (
+  {filteredFixtures?.map((fixture) => (
       <div key={fixture?._id?._id}>
         <div className="deadline">
           <div>{fixture?._id?.name}</div>

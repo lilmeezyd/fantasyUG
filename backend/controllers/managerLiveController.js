@@ -140,16 +140,15 @@ const setLivePicks = asyncHandler(async (req, res) => {
 //@route PATCH api/livepicks/manager/matchday/:mid/start/fixtures/:id
 //@access ADMIN
 const setInitialPoints = asyncHandler(async (req, res) => {
-  const fixture = await Fixture.findById(req.params.id).lean();
+  //const fixture = await Fixture.findById(req.params.id).lean();
   const matchday = await Matchday.findById(req.params.mid).lean();
   const players = await PlayerHistory.find({
-    matchday: req.params.mid,
-    fixture: req.params.id,
+    matchday: req.params.mid
   }).lean();
-  if (!fixture || !matchday || !matchday.current || !players.length) {
+  if (!matchday || !matchday.current || !players.length) {
     return res
       .status(400)
-      .json({ message: "Invalid fixture, matchday, or no players" });
+      .json({ message: "Invalid matchday, or no players" });
   }
 
   const allLives = await ManagerLive.find({
@@ -166,7 +165,7 @@ const setInitialPoints = asyncHandler(async (req, res) => {
     if (!playerMap[p.player]) playerMap[p.player] = [];
     playerMap[p.player].push(p);
   }
-
+  
   const liveUpdates = [];
   const infoUpdates = [];
   for (const mLive of allLives) {
@@ -251,7 +250,7 @@ const setInitialPoints = asyncHandler(async (req, res) => {
   if (liveUpdates.length > 0) await ManagerLive.bulkWrite(liveUpdates);
   if (infoUpdates.length > 0) await ManagerInfo.bulkWrite(infoUpdates);
 
-  res.status(200).json("Points updated successfully for all managers.");
+  res.status(200).json({message: "Points updated successfully for all managers."});
 });
 
 //@desc update player scores in picks

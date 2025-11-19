@@ -215,7 +215,7 @@ const updatePlayer = asyncHandler(async (req, res) => {
       req.body,
       { new: true }
     );
-    res.status(200).json(updatedPlayer);
+    res.status(200).json({message: `${updatedPlayer.appName} updated`});
   }
 });
 

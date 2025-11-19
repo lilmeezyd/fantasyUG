@@ -19,6 +19,7 @@ import DeleteModal from "./matchdayModals/DeleteModal";
 import EditModal from "./matchdayModals/EditModal";
 import StartModal from "./matchdayModals/StartModal";
 import getTime from "../../utils/getTime";
+import { toast } from 'react-toastify';
 
 const Matchdays = () => {  
   const [show, setShow] = useState({
@@ -108,9 +109,10 @@ const startMatchdayNow = async () => {
     start: false,
   }));
   try {
-    await startMatchday(matchdayId).unwrap();
+    const res = await startMatchday(matchdayId).unwrap();
+    toast.success(res?.message)
   } catch (error) {
-    console.log(error);
+    toast.error(error?.data?.message)
   }
   setMatchdayId("");
 };
@@ -166,9 +168,11 @@ const resetEdit = async () => {
 
 const setLive = async () => {
   try {
-  await setLivePicks().unwrap()
+  const res = await setLivePicks().unwrap()
+  toast.success(res?.message)
   } catch (error) {
     console.log(error)
+    toast.error(error?.data?.message)
   }
 }
 

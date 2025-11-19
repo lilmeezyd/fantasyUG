@@ -124,7 +124,8 @@ const Points = () => {
                           ?.avergeScore.toFixed(0)}
                       </div>
                     </div>
-                    <Link
+                    {matchdays?.find((x) => x.id === lp?.matchday)
+                              ?.highestScore > 0 && <Link
                       to={`/points/${
                         matchdays?.find((x) => x.id === lp?.matchday)
                           ?.highestScoringEntry
@@ -140,7 +141,7 @@ const Points = () => {
                           }
                         </div>
                       </div>
-                    </Link>
+                    </Link>}
                   </div>
                 </div>
 

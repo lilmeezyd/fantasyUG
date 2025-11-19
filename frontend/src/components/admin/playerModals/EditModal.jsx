@@ -3,6 +3,7 @@ import { useState, useEffect } from "react"
 import {  useGetQuery } from "../../../slices/teamApiSlice"
 import { useGetPositionsQuery } from "../../../slices/positionApiSlice" 
 import { useGetPlayerQuery, useEditPlayerMutation } from "../../../slices/playerApiSlice"
+import { toast } from 'react-toastify';
 
 const EditModal = (props) => { 
   const {show, closeEdit, resetEdit, playerId} = props
@@ -30,12 +31,13 @@ const EditModal = (props) => {
     const firstName = elements.tname.value
     const secondName = elements.sname.value
     const appName = elements.code.value
-    const team = elements.team.value
-    const position = elements.position.value
-    const price = elements.price.value
+    const playerTeam = elements.team.value
+    const playerPosition = elements.position.value
+    const nowCost = elements.price.value
 
     if(firstName && secondName && appName && team && position && price) {
-      await editPlayer({id: player?._id, firstName, secondName, appName, team, position, price})
+     const res = await editPlayer({id: player?._id, firstName, secondName, appName, playerTeam, playerPosition, nowCost}).unwrap()
+     toast.success(res?.message)
       closeEdit()
       resetEdit()
     }
