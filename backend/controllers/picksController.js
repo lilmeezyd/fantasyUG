@@ -22,7 +22,7 @@ const setPicks = asyncHandler(async (req, res) => {
   const userHasPicks = await Picks.find({ user: req.user.id });
   const mgrExists = await ManagerInfo.findOne({ user: req.user.id });
   const nextMD = await Matchday.findOne({ next: true });
-  const { id } = nextMD;
+  const id = nextMD ? nextMD?.id : 30;
 
   const goalkeepers = picks?.filter(
     (pick) => pick?.playerPosition === 1
