@@ -314,12 +314,15 @@ const getOverallLeague = asyncHandler(async (req, res) => {
   const league = await OverallLeague.findById(req.params.id)
     .populate("entrants")
     .exec();
+    const currentMatchay = await Matchday.findOne({current: true});
+    const nextMatchay = await Matchday.findOne({next: true});
+    
 
   if (!league) {
     res.status(404);
     throw new Error("League not found");
   }
-
+const matchdayId = currentMatchay?.id || nextMatchay?.id || 30;
   const {
     _id,
     name,
@@ -331,6 +334,7 @@ const getOverallLeague = asyncHandler(async (req, res) => {
     entrants,
     standings,
   } = league;
+  const startGW = await Matchday.findById(startMatchday);
 
   const sortedStandings = [...standings].sort(
     (a, b) => b.overallPoints - a.overallPoints
@@ -339,7 +343,8 @@ const getOverallLeague = asyncHandler(async (req, res) => {
   const newLeague = {
     _id,
     name,
-    startMatchday,
+    startMatchday: startGW?.id,
+    currentMatchday: matchdayId,
     endMatchday,
     creator,
     createdAt,

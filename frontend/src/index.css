@@ -267,17 +267,18 @@ form.login-cs {
   justify-items: center;
 }
 
-.positions > div {
+.positions>div {
   border: 1px solid rgba(0, 0, 0, 0.1);
   width: calc(100%);
   height: calc(100%);
 }
 
-.positions > div:first-of-type, .positions > div:nth-of-type(4) {
+.positions>div:first-of-type,
+.positions>div:nth-of-type(4) {
   border-right: 0;
 }
 
-.positions > div:nth-of-type(3) {
+.positions>div:nth-of-type(3) {
   border-left: 0;
   border-right: 0;
 }
@@ -304,7 +305,8 @@ form.login-cs {
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
 }
 
-.teams div, .positions div {
+.teams div,
+.positions div {
   text-align: center;
   margin-top: auto;
   margin-bottom: auto;
@@ -1313,27 +1315,27 @@ form.login-cs {
 }
 
 .transfer-block {
-    display: grid;
-    grid-template-columns: 10% 45% 45%;
-    font-weight: 800;
-    place-items: center;
-    padding: 0.25rem;
+  display: grid;
+  grid-template-columns: 10% 45% 45%;
+  font-weight: 800;
+  place-items: center;
+  padding: 0.25rem;
 }
 
 .transfer-time {
-    font-style: italic;
-    display: flex;
-    justify-content: center;
-    font-size: .9em;
-    padding-top: 0.5rem;
+  font-style: italic;
+  display: flex;
+  justify-content: center;
+  font-size: .9em;
+  padding-top: 0.5rem;
 }
 
 .position-team {
-    display: flex;
-    justify-self: stretch;
-    justify-content: space-evenly;
-    font-size: .9em;
-    font-style: italic;
+  display: flex;
+  justify-self: stretch;
+  justify-content: space-evenly;
+  font-size: .9em;
+  font-style: italic;
 }
 
 
@@ -1710,6 +1712,9 @@ h1.stats {
   font-size: 1.1rem;
   text-align: center;
   padding: 0.5rem;
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
 }
 
 .standing-grid {
@@ -1815,7 +1820,7 @@ h1.stats {
 .auto-class-header {
   text-align: center;
   font-weight: 700;
-  border-bottom: 1px solid rgba(0,0,0,0.1);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
   margin-bottom: 0.5rem;
   background: white;
   border-radius: 0.5rem;
