@@ -168,7 +168,7 @@ const startMatchday = asyncHandler(async (req, res) => {
     }
 
     res.status(200).json({
-      message: 'Matchday Started',
+      message: "Matchday Started",
       currentMatchday: updatedMatchday,
       nextMatchday: nextMatchdayDoc || null,
     });
@@ -300,7 +300,7 @@ const updateMDdata = asyncHandler(async (req, res) => {
       { new: true }
     );
 
-    res.status(200).json({message: 'Matchday data updated'});
+    res.status(200).json({ message: "Matchday data updated" });
   } catch (error) {
     res.status(500).json({ message: error.message || "Something went wrong" });
   }
@@ -426,14 +426,18 @@ const updateTOW = asyncHandler(async (req, res) => {
       },
       { new: true }
     );
-    res.status(201).json({team: updated, message: 'Team of the week updateed'});
+    res
+      .status(201)
+      .json({ team: updated, message: "Team of the week updateed" });
   } else {
     const created = await TOW.create({
       matchday: id,
       matchdayId: req.params.id,
       starOnes: bestTeam,
     });
-    res.status(200).json({team: created, message: 'Team of the week created'});
+    res
+      .status(200)
+      .json({ team: created, message: "Team of the week created" });
   }
 });
 
@@ -512,7 +516,7 @@ const endMatchday = asyncHandler(async (req, res) => {
     { new: true }
   );
 
-  res.status(200).json({updated, message: 'Matchday has come to an end'});
+  res.status(200).json({ updated, message: "Matchday has come to an end" });
 });
 
 //@desc Create autosubs
@@ -577,7 +581,7 @@ const createAutos = asyncHandler(async (req, res) => {
       if (+starter.starts === 0 && +starter.bench === 0) {
         for (const sub of bench) {
           if (
-            (+sub.starts === 1 || +sub.bench === 1) &&
+            (+sub.starts >= 1 || +sub.bench >= 1) &&
             !usedPlayerIds.has(sub._id.toString())
           ) {
             const starterPos = POSITIONS[starter.playerPosition];
@@ -589,7 +593,7 @@ const createAutos = asyncHandler(async (req, res) => {
 
             // Try simulated substitution
             const simulated = starters.map((p) =>
-              p._id === starter._id ? { ...sub, multiplier: 1 } : p
+              p._id.toString() === starter._id.toString() ? { ...sub, multiplier: 1 } : p
             );
 
             const formation = getFormation(simulated);
@@ -624,7 +628,7 @@ const createAutos = asyncHandler(async (req, res) => {
       (x) => x.IsCaptain === true && +x.starts === 0 && +x.bench === 0
     );
     const vice = picks.find(
-      (x) => x.IsViceCaptain === true && (+x.starts === 1 || +x.bench === 1)
+      (x) => x.IsViceCaptain === true && (+x.starts >= 1 || +x.bench >= 1)
     );
     if (captainMissed && vice) {
       return picks.map((pick) =>
@@ -665,7 +669,7 @@ const createAutos = asyncHandler(async (req, res) => {
     };
   });
   await ManagerLive.bulkWrite(bulkOps);
-  res.json({managerLives, message: 'Autosubs made'});
+  res.json({ managerLives, message: "Autosubs made" });
 });
 
 //@desc Undo autosubs
@@ -706,19 +710,21 @@ const undoAutos = asyncHandler(async (req, res) => {
     );
 
     // Swapping auto subbed IN players back to the bench and reset captain if auto subbed OUT
-    const newMdPicks = picks.map((pick) =>
-      ins.includes(pick._id.toString())
-        ? inOutMap.get(pick._id.toString())
-        : outs.includes(pick._id.toString())
-        ? outInMap.get(pick._id.toString())
-        : pick
-    ).map(x => x.IsViceCaptain ? {...x, multiplier: 1} : x);
+    const newMdPicks = picks
+      .map((pick) =>
+        ins.includes(pick._id.toString())
+          ? inOutMap.get(pick._id.toString())
+          : outs.includes(pick._id.toString())
+          ? outInMap.get(pick._id.toString())
+          : pick
+      )
+      .map((x) => (x.IsViceCaptain ? { ...x, multiplier: 1 } : x));
 
     // Mapping picks with back into the array with empty automaticSubs array
     const oldMdPicks = livePicks.map((x) =>
       x.matchday === id ? { ...x, automaticSubs: [], picks: newMdPicks } : x
     );
-    
+
     return {
       updateOne: {
         filter: { _id: _id },
@@ -727,8 +733,8 @@ const undoAutos = asyncHandler(async (req, res) => {
     };
   });
 
-  await ManagerLive.bulkWrite(bulkOps)
-  res.json({message: "Autosubs undone" });
+  await ManagerLive.bulkWrite(bulkOps);
+  res.json({ message: "Autosubs undone" });
 });
 
 //@desc Delete Matchday

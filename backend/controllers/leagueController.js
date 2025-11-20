@@ -6,6 +6,7 @@ import User from "../models/userModel.js";
 import ManagerInfo from "../models/managerInfoModel.js";
 import ManagerLive from "../models/managerLive.js";
 import Matchday from "../models/matchdayModel.js";
+import Team from "../models/teamModel.js";
 
 //@desc Set League
 //@route POST /api/leagues/privateleagues
@@ -269,12 +270,14 @@ const getTeamLeague = asyncHandler(async (req, res) => {
   const league = await TeamLeague.findById(req.params.id)
     .populate("entrants")
     .exec();
+    const currentMatchay = await Matchday.findOne({current: true});
+    const nextMatchay = await Matchday.findOne({next: true});
 
   if (!league) {
     res.status(404);
     throw new Error("League not found");
   }
-
+const matchdayId = currentMatchay?.id || nextMatchay?.id || 30;
   const {
     _id,
     team,
@@ -286,6 +289,8 @@ const getTeamLeague = asyncHandler(async (req, res) => {
     entrants,
     standings,
   } = league;
+  const startGW = await Matchday.findById(startMatchday);
+  const teamName = await Team.findById(team)
 
   const sortedStandings = [...standings].sort(
     (a, b) => b.overallPoints - a.overallPoints
@@ -293,8 +298,9 @@ const getTeamLeague = asyncHandler(async (req, res) => {
 
   const newLeague = {
     _id,
-    team,
-    startMatchday,
+    name: teamName?.name,
+    startMatchday: startGW?.id,
+    currentMatchday: matchdayId,
     endMatchday,
     creator,
     createdAt,

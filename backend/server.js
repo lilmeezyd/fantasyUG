@@ -1,6 +1,6 @@
 import express, { urlencoded } from "express";
 import path from "path";
-import cors from 'cors'
+import cors from "cors";
 import { fileURLToPath } from "url";
 import dotenv from "dotenv";
 import userRoutes from "./routes/userRoutes.js";
@@ -25,7 +25,10 @@ const port = process.env.PORT || 5000;
 app.use(express.json());
 app.use(urlencoded({ extended: true }));
 app.use(cookieParser());
-const allowedOrigins = ["https://fantasy-ug.vercel.app", "http://localhost:3000"];
+const allowedOrigins = [
+  "https://fantasy-ug.vercel.app",
+  "http://localhost:3000",
+];
 app.use(
   cors({
     origin: function (origin, callback) {
@@ -38,8 +41,8 @@ app.use(
     credentials: true,
   })
 );
-app.get('/', (req, res) => {
-  res.send('API is running...');
+app.get("/", (req, res) => {
+  res.send("API is running...");
 });
 app.use("/api/users", userRoutes);
 app.use("/api/teams", teamRoutes);
@@ -66,19 +69,19 @@ app.use("/api/transfers", transferRoutes);
   process.env.NODE_ENV === "Production" ||
   process.env.NODE_ENV === "production"
 ) {*/
-  /*const __dirname = path.resolve();
+/*const __dirname = path.resolve();
   app.use(express.static(path.join(__dirname, '/frontend/dist')));
   app.get('*', (req, res) => {
     res.sendFile(path.resolve(__dirname, 'frontend', 'dist', 'index.html'));
 }) */
 
-  //const __filename = fileURLToPath(import.meta.url); // get the resolved path to the file
-  //const __dirname = path.dirname(__filename); // get the name of the directory
-  // Serve the static files from the React app
-  //app.use(express.static(path.join(__dirname, "../frontend/dist")));
+//const __filename = fileURLToPath(import.meta.url); // get the resolved path to the file
+//const __dirname = path.dirname(__filename); // get the name of the directory
+// Serve the static files from the React app
+//app.use(express.static(path.join(__dirname, "../frontend/dist")));
 
-  // Handle requests by serving index.html for all routes
- /* app.get("*", (req, res) => {
+// Handle requests by serving index.html for all routes
+/* app.get("*", (req, res) => {
     res.sendFile(path.join(__dirname, "../frontend/dist", "index.html"));
   });
 } else {

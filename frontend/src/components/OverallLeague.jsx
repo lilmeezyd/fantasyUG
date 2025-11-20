@@ -58,7 +58,6 @@ const OverallLeague = () => {
       return newCopy?.sort((x, y) => (x.mdRank > y.mdRank ? 1 : -1));
     }
   }, [sortParam, copy]);
-  console.log(sortedStandings);
   if (isLoading) {
     return (
       <div className="spinner">
@@ -111,7 +110,7 @@ const OverallLeague = () => {
                 key={entrant._id}
                 className="standing-grid-1"
               >
-                <div>
+                {sortParam === 'overallPoints' ? <div>
                   {(entrant?.currentRank === entrant?.lastRank ||
                     entrant?.lastRank === null) && (
                     <AiFillCaretRight color="#aaa" />
@@ -124,8 +123,8 @@ const OverallLeague = () => {
                     entrant?.lastRank !== null && (
                       <AiFillCaretDown color="red" />
                     )}
-                </div>
-                <div>{entrant?.currentRank}</div>
+                </div>: <div><AiFillCaretRight color="#aaa" /></div>}
+                <div>{sortParam === 'overallPoints' ? entrant?.currentRank : entrant?.mdRank}</div>
                 <div className="standing-grid-name">
                   <Link to={`/points/${entrant.user.toString()}`}>
                     <div>
