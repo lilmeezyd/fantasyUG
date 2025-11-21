@@ -273,7 +273,7 @@ const PickTeam = () => {
         /* Defender swap */
         if (state.switcher.shortPos === "DEF") {
           if (state.switcher.multiplier === 0) {
-            if (data.multiplier === 1) {
+            if (data.multiplier >= 1) {
               if (data.shortPos === "MID") {
                 MID -= 1;
                 DEF += 1;
@@ -298,7 +298,7 @@ const PickTeam = () => {
         /* Midfielder swap */
         if (state.switcher.shortPos === "MID") {
           if (state.switcher.multiplier === 0) {
-            if (data.multiplier === 1) {
+            if (data.multiplier >= 1) {
               if (data.shortPos === "DEF") {
                 MID += 1;
                 DEF -= 1;
@@ -322,7 +322,7 @@ const PickTeam = () => {
         /* Forward swap */
         if (state.switcher.shortPos === "FWD") {
           if (state.switcher.multiplier === 0) {
-            if (data.multiplier === 1) {
+            if (data.multiplier >= 1) {
               if (data.shortPos === "DEF") {
                 FWD += 1;
                 DEF -= 1;
@@ -443,6 +443,7 @@ const PickTeam = () => {
   const inform = (data) => {
     console.log("view info");
   };
+  console.log(picks)
   if (isLoading && managerPicks === undefined) {
     return (
       <div className="spinner">
