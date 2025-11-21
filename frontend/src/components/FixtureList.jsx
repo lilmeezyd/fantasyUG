@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useGetFixturesQuery } from "../slices/fixtureApiSlice";
+import { useGetMatchdaysQuery } from "../slices/matchdayApiSlice";
 import { Spinner } from "react-bootstrap";
 import {
   BsChevronLeft,
@@ -9,8 +10,11 @@ import FixtureItem from "./FixtureItem";
 const FixtureList = (props) => {
   const { mdParam } = props
   const [page, setPage] = useState(1);
+  const [minGW, setMinGW ] = useState(1)
+    const [maxGW, setMaxGW ] = useState(1)
   const [copy, setCopy] = useState([]); 
   const { data: fixtures, isLoading } = useGetFixturesQuery();
+  const { data: matchdays }  = useGetMatchdaysQuery();
   //const md = matchdays?.find(matchday => matchday?.next === true)
   useEffect(() => {
     const copyFix = fixtures?.length > 0 ? [...fixtures] : [];
@@ -20,9 +24,15 @@ const FixtureList = (props) => {
     setPage(mdParam)
     setCopy(fixtures);
   }, [fixtures, mdParam]);
-  /*console.log(mdParam)
-  console.log(copy)
-  console.log(page)*/
+  
+  useEffect(() => {
+      const nextMatchday = matchdays?.find(x => x.next === true)
+        const ids = matchdays?.map(x => x.id) || []
+        const smallest = ids?.length === 0 ? 1 : Math.min(...ids)
+        const largest = ids?.length === 0 ? 1 : Math.max(...ids)
+        setMinGW(smallest)
+        setMaxGW(largest)
+    }, [matchdays])
 
   const onDecrement = () => {
     setPage((prevState) => prevState - 1);
@@ -64,9 +74,9 @@ const FixtureList = (props) => {
     <div className="fix-body">
       <section className="btn-wrapper p-2">
         <button
-          disabled={page === 1 ? true : false}
+          disabled={page === minGW ? true : false}
           onClick={onDecrement}
-          className={`${page === +1 && "btn-hide"} btn-controls`}
+          className={`${page === +minGW && "btn-hide"} btn-controls`}
           id="prevButton"
         >
           <BsChevronLeft />

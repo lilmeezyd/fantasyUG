@@ -27,6 +27,8 @@ const Fixtures = () => {
   });
   const [fixtureId, setFixtureId] = useState("");
   const [page, setPage] = useState(1);
+  const [minGW, setMinGW ] = useState(1)
+  const [maxGW, setMaxGW ] = useState(1)
   const [stats, displayStats] = useState(false);
   const [copy, setCopy] = useState([]);
   const { data: fixtures, isLoading}  = useGetFixturesQuery();
@@ -44,20 +46,23 @@ const Fixtures = () => {
 
   useEffect(() => {
     const nextMatchday = matchdays?.find(x => x.next === true)
-      const ids = matchdays?.map(x => x.id)
+      const ids = matchdays?.map(x => x.id) || []
+      const smallest = ids?.length === 0 ? 1 : Math.min(...ids)
+      const largest = ids?.length === 0 ? 1 : Math.max(...ids)
+      setMinGW(smallest)
+      setMaxGW(largest)
     if(nextMatchday) {
       const nextId = nextMatchday?.id
-      const smallest = ids?.length === 0 ? 1 : Math.min(...ids)
       if(nextId === smallest) {
         setPage(smallest)
       } else {
         setPage(nextId-1)
       }
     } else {
-      setPage(30)
+      setPage(largest)
     }
   }, [matchdays])
-  console.log(page)
+  
 
   const onClick = () => {
     displayStats((prevState) => !prevState);
@@ -190,9 +195,9 @@ const filteredFixtures = useMemo(() => {
       <div className="fix-body">
   <section className="btn-wrapper p-2">
     <button
-      disabled={page === 1 ? true : false}
+      disabled={page === minGW ? true : false}
       onClick={onDecrement}
-      className={`${page === +1 && "btn-hide"} btn-controls`}
+      className={`${page === +minGW && "btn-hide"} btn-controls`}
       id="prevButton"
     >
       <BsChevronLeft />
