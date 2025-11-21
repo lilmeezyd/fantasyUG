@@ -62,9 +62,6 @@ const Fixtures = () => {
       setPage(largest)
     }
   }, [matchdays])
-  console.log(fixtures)
-  console.log(fixtures?.length)
-  console.log(maxGW)
 
   const onClick = () => {
     displayStats((prevState) => !prevState);
@@ -205,9 +202,9 @@ const filteredFixtures = useMemo(() => {
       <BsChevronLeft />
     </button>
     <button
-      disabled={page === fixtures?.length ? true : false}
+      disabled={page === maxGW ? true : false}
       onClick={onIncrement}
-      className={`${page === fixtures?.length && "btn-hide"} btn-controls`}
+      className={`${page === maxGW && "btn-hide"} btn-controls`}
       id="nextButton"
     >
       <BsChevronRight />

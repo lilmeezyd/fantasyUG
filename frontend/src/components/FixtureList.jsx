@@ -82,9 +82,9 @@ const FixtureList = (props) => {
           <BsChevronLeft />
         </button>
         <button
-          disabled={page === fixtures?.length ? true : false}
+          disabled={page === maxGW ? true : false}
           onClick={onIncrement}
-          className={`${page === fixtures?.length && "btn-hide"} btn-controls`}
+          className={`${page === maxGW && "btn-hide"} btn-controls`}
           id="nextButton"
         >
           <BsChevronRight />
