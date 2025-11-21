@@ -62,7 +62,9 @@ const Fixtures = () => {
       setPage(largest)
     }
   }, [matchdays])
-  
+  console.log(fixtures)
+  console.log(fixtures?.length)
+  console.log(maxGW)
 
   const onClick = () => {
     displayStats((prevState) => !prevState);
