@@ -44,10 +44,12 @@ const Fixtures = () => {
 
   useEffect(() => {
     const nextMatchday = matchdays?.find(x => x.next === true)
+      const ids = matchdays?.map(x => x.id)
     if(nextMatchday) {
       const nextId = nextMatchday?.id
-      if(nextId === 1) {
-        setPage(1)
+      const smallest = ids?.length === 0 ? 1 : Math.min(...ids)
+      if(nextId === smallest) {
+        setPage(smallest)
       } else {
         setPage(nextId-1)
       }
@@ -55,6 +57,7 @@ const Fixtures = () => {
       setPage(30)
     }
   }, [matchdays])
+  console.log(page)
 
   const onClick = () => {
     displayStats((prevState) => !prevState);
