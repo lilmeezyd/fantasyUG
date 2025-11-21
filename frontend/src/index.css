@@ -990,6 +990,7 @@ form.login-cs {
 @media (max-width: 760px) {
   .button-wrapper {
     font-size: 9px;
+    width: 100%;
   }
 }
 
@@ -1464,6 +1465,14 @@ form.login-cs {
   background: rgba(0, 0, 55, 0.9);
   color: white;
   width: calc(100%);
+  min-height: 16px;
+}
+
+.blank {
+    height: 1px;
+    width: calc(50%);
+    background: white;
+    align-self: center;
 }
 
 .league-details {

@@ -56,9 +56,9 @@ const SquadPlayer = (props) => {
             />
             <div className="player-name">
               <div className="data_name">{appName}</div>
-              {opponentArr?.length > 0 && <div style={{padding: `${opponentArr?.length === 0 && 0}`}} className="data_fixtures">
+              {opponentArr?.length > 0 ? <div style={{padding: `${opponentArr?.length === 0 && 0}`}} className="data_fixtures">
               {opponentArr?.map((x, idx) => <div key={idx+1}>{x}</div>)}
-              </div>}
+              </div> : <div className="data_fixtures"><div className="blank"></div></div>}
             </div>
           </button>
           </div>
