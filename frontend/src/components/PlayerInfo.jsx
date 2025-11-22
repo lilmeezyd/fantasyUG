@@ -43,8 +43,9 @@ const PlayerInfo = (props) => {
   useEffect(() => {
     const id = matchdays?.find((x) => x.current === true)?.id || 1;
     const mid = matchdays?.find((x) => x.id === id)?._id;
+    // === mid?.toString()
     const currentFixtures = player?.fixtures
-      ?.filter?.((x) => x.matchday.toString() === mid?.toString())
+      ?.filter?.((x) => x.matchday.toString())
       ?.sort((x, y) => (x?.kickOffTime > y?.kickOffTime ? 1 : -1)) || [];
     const fixtureId = currentFixtures[0]?._id?.toString() || 1
     setFixId(fixtureId)
@@ -54,7 +55,6 @@ const PlayerInfo = (props) => {
   const showHistory = async (md) => {
     setFixId(md);
   };
-  //console.log(player);
 
   const showPlayerHistory = useMemo(() => {
     const hist =
@@ -64,9 +64,6 @@ const PlayerInfo = (props) => {
       ...hist,
     };
   }, [fixId, copyFix, history]);
-  //console.log(showPlayerHistory);
-  //console.log(history);
-  //console.log(copyFix)
   return (
     <>
       <Modal show={showPInfo} onHide={handleCloseInfo}>
