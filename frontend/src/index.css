@@ -409,6 +409,20 @@ form.login-cs {
 }
 
 /* Button Controls */
+.upbutton {
+  display: none;
+  position: absolute;
+  z-index: 5;
+  right: 50%;
+  transform: translate(50%, -50%)
+}
+
+@media(max-width: 970px) {
+  .upbutton {
+    display: block;
+  }
+}
+
 .button-controls {
   display: flex;
   padding: 8px 0;
@@ -1469,10 +1483,10 @@ form.login-cs {
 }
 
 .blank {
-    height: 1px;
-    width: calc(50%);
-    background: white;
-    align-self: center;
+  height: 1px;
+  width: calc(50%);
+  background: white;
+  align-self: center;
 }
 
 .league-details {

@@ -35,6 +35,7 @@ const FixtureList = (props) => {
         setMaxGW(largest)
         setPage(nextId)
     }, [matchdays])
+    console.log(copy)
 
   const onDecrement = () => {
     setPage((prevState) => prevState - 1);
@@ -84,9 +85,9 @@ const FixtureList = (props) => {
           <BsChevronLeft />
         </button>
         <button
-          disabled={page === maxGW ? true : false}
+          disabled={page === copy?.length ? true : false}
           onClick={onIncrement}
-          className={`${page === maxGW && "btn-hide"} btn-controls`}
+          className={`${page === copy?.length && "btn-hide"} btn-controls`}
           id="nextButton"
         >
           <BsChevronRight />

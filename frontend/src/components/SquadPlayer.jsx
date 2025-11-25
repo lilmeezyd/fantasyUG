@@ -8,7 +8,7 @@ import { Modal, Button, Spinner } from "react-bootstrap";
 import PlayerInfo from "./PlayerInfo";
 
 const SquadPlayer = (props) => {
-  const { baller, posName, removePlayer, transfersOut, 
+  const { baller, posName, scrollToPlayers, removePlayer, transfersOut, 
               transfersIn } = props;
   const [show, setShow] = useState(false);
   const { data: teams, isLoading: teamLoading } = useGetQuery();
@@ -38,10 +38,11 @@ const SquadPlayer = (props) => {
   };
   const outIds = transfersOut?.map(x => x?._id?.toString()) || []
   const inIds = transfersIn?.map(x => x?._id?.toString()) || []
-  //console.log(outIds)
-  //console.log(baller)
-  /*console.log(transfersOut)
-  console.log(transfersIn)*/
+
+  const jumpToPlayerList = (name) => {
+    const codes = {GKP: 1, DEF: 2, MID: 3, FWD: 4}
+    scrollToPlayers(codes[name]);
+  }
   
   if (fixtureLoading && teamLoading && playerLoading) {
     return (
@@ -72,7 +73,7 @@ const SquadPlayer = (props) => {
           </div>
         ) : (
           <div className="button-wrapper">
-          <button className="player-btn empty-btn">
+          <button onClick={() => jumpToPlayerList(posName)} className="player-btn empty-btn">
           <img
               src={`../shirt_0-66.svg`}
               className="image_pic"

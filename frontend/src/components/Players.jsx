@@ -1,10 +1,11 @@
-import { useMemo, useState, Suspense, useReducer } from "react";
+import { useMemo, useState, Suspense, useReducer, useEffect } from "react";
 import { useGetPlayersQuery } from "../slices/playerApiSlice";
 import { useGetPositionsQuery } from "../slices/positionApiSlice";
 import { useGetQuery } from "../slices/teamApiSlice";
 import { Spinner, Container } from "react-bootstrap";
 import Pagination from "./Pagination";
 import PlayerCard from "./PlayerCard";
+import { BsChevronUp } from "react-icons/bs";
 import {
   getMinMax,
   getPlayers,
@@ -13,8 +14,19 @@ import {
 import { useGetTotalQuery } from "../slices/userApiSlice";
 
 const Players = (props) => {
-  const { addPlayer, removePlayer, picks, GKP, DEF, MID, FWD, errorMsg, btnMsg } =
-    props;
+  const {
+    addPlayer,
+    transferView,
+    goUp,
+    removePlayer,
+    picks,
+    GKP,
+    DEF,
+    MID,
+    FWD,
+    errorMsg,
+    btnMsg,
+  } = props;
   const { data: players, isLoading } = useGetPlayersQuery();
   const { data: teams } = useGetQuery();
   const { data: elementTypes } = useGetPositionsQuery();
@@ -73,6 +85,11 @@ const Players = (props) => {
 
   const { sort, view, word, cutPrice, sortWord } = state;
   const { data: totalPlayers } = useGetTotalQuery();
+  useEffect(() => {
+    dispatch({ type: "VIEW", data: transferView });
+    setCurPage(1);
+  }, [transferView]);
+  console.log(view);
 
   const allPlayers = getPlayers(
     players,
@@ -99,9 +116,9 @@ const Players = (props) => {
   const maxPrice = getMinMax(allPlayers).maxPrice;
   let totalPages = Math.ceil(allPlayers?.length / pageSize);
   const myPrice = useMemo(() => {
-    const price =  maxPrice
-    return price
-  } ,[maxPrice])
+    const price = maxPrice;
+    return price;
+  }, [maxPrice]);
   {
     /* Button Controls */
   }
@@ -176,7 +193,7 @@ const Players = (props) => {
   }
 
   return (
-    <>
+    <div>
       <div className="players-col">
         <div className="players small">
           <div className="players-container">
@@ -189,6 +206,7 @@ const Players = (props) => {
                   <label htmlFor="view_by">View</label>
                   <select
                     onChange={onView}
+                    value={view}
                     className="custom-select"
                     id="view_by"
                   >
@@ -312,7 +330,8 @@ const Players = (props) => {
                             bgColor="rgb(255, 255, 0, 0.5)"
                             picks={picks}
                             GKP={GKP}
-                            errorMsg={errorMsg} btnMsg={btnMsg}
+                            errorMsg={errorMsg}
+                            btnMsg={btnMsg}
                             addPlayer={addPlayer}
                             removePlayer={removePlayer}
                             key={goalkeeper?._id}
@@ -360,7 +379,8 @@ const Players = (props) => {
                             bgColor="rgb(0, 255, 0, 0.5)"
                             picks={picks}
                             DEF={DEF}
-                            errorMsg={errorMsg} btnMsg={btnMsg}
+                            errorMsg={errorMsg}
+                            btnMsg={btnMsg}
                             addPlayer={addPlayer}
                             removePlayer={removePlayer}
                             key={defender?._id}
@@ -407,7 +427,8 @@ const Players = (props) => {
                           <PlayerCard
                             bgColor="rgb(0, 0, 255, 0.5)"
                             MID={MID}
-                            errorMsg={errorMsg} btnMsg={btnMsg}
+                            errorMsg={errorMsg}
+                            btnMsg={btnMsg}
                             picks={picks}
                             key={midfielder?._id}
                             addPlayer={addPlayer}
@@ -454,7 +475,8 @@ const Players = (props) => {
                           <PlayerCard
                             bgColor="rgb(255, 0, 0, 0.5)"
                             FWD={FWD}
-                            errorMsg={errorMsg} btnMsg={btnMsg}
+                            errorMsg={errorMsg}
+                            btnMsg={btnMsg}
                             picks={picks}
                             addPlayer={addPlayer}
                             removePlayer={removePlayer}
@@ -491,8 +513,12 @@ const Players = (props) => {
             <div className="no-trans small">No Players Found</div>
           )}
         </Suspense>
+
+        <button onClick={goUp} className="upbutton btn-controls">
+          <BsChevronUp />
+        </button>
       </div>
-    </>
+    </div>
   );
 };
 
