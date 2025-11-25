@@ -7,6 +7,7 @@ import PlayerHistory from "../models/playerHistoryModel.js";
 import { getAllManagers } from "./userController.js";
 import Picks from "../models/picksModel.js";
 import ManagerInfo from "../models/managerInfoModel.js";
+import Matchday from "../models/matchdayModel.js"
 
 //@desc Set Player
 //@route POST /api/players
@@ -80,7 +81,10 @@ const setPlayer = asyncHandler(async (req, res) => {
 const getPlayers = asyncHandler(async (req, res) => {
   const players = await Player.find({});
   const positions = await Position.find({});
-  const managers = await ManagerInfo.find({matchdayJoined: {$lte: 5}}).lean();
+  const matchdays = await Matchday.find({}).lean()
+  const matchDayNext =  await Matchday.findOne({next: true});
+  const idNeeded = matchDayNext ? matchDayNext.id : Math.max(...matchdays.map(x => x.id))
+  const managers = await ManagerInfo.find({matchdayJoined: {$lte: idNeeded}}).lean();
   const managerArray = managers.map(x => x._id)
   const picks = await Picks.aggregate([
     {$match: {manager: { $in: managerArray}}},
@@ -119,7 +123,7 @@ const getPlayers = asyncHandler(async (req, res) => {
           playerCount
         } = player;
         const b =
-          !playerCountMap.get(_id.toString()) === 0 ? 0 : (playerCountMap.get(_id.toString()) / numberOfManagers) * 100;
+          !playerCountMap.get(_id.toString()) ? 0 : (playerCountMap.get(_id.toString()) / managers.length) * 100;
         return {
           _id,
           firstName,
