@@ -24,6 +24,7 @@ import { setCredentials } from "../slices/authSlice";
 import { toast } from "react-toastify";
 const PicksPlatform = (props) => {
   const {
+    scrollToPlayers,
     isLoading,
     picks,
     removePlayer,
@@ -157,6 +158,7 @@ const PicksPlatform = (props) => {
           {goalkeepers?.map((x) => (
             <div key={x.slot} className="squad-player">
               <SquadPlayer
+              scrollToPlayers={scrollToPlayers}
               transfersOut={transfersOut}
               transfersIn={transfersIn}
                 removePlayer={removePlayer}
@@ -170,6 +172,7 @@ const PicksPlatform = (props) => {
           {defenders?.map((x) => (
             <div key={x.slot} className="squad-player">
               <SquadPlayer
+              scrollToPlayers={scrollToPlayers}
               transfersOut={transfersOut}
               transfersIn={transfersIn}
                 removePlayer={removePlayer}
@@ -183,6 +186,7 @@ const PicksPlatform = (props) => {
           {midfielders?.map((x) => (
             <div key={x.slot} className="squad-player">
               <SquadPlayer
+              scrollToPlayers={scrollToPlayers}
               transfersOut={transfersOut}
               transfersIn={transfersIn}
                 removePlayer={removePlayer}
@@ -196,6 +200,7 @@ const PicksPlatform = (props) => {
           {forwards?.map((x) => (
             <div key={x.slot} className="squad-player">
               <SquadPlayer
+              scrollToPlayers={scrollToPlayers}
               transfersOut={transfersOut}
               transfersIn={transfersIn}
                 removePlayer={removePlayer}
@@ -205,7 +210,7 @@ const PicksPlatform = (props) => {
             </div>
           ))}
         </div>
-      </div>
+      </div> 
 
       {!userInfo?.hasPicks && (
         <section className="form">
