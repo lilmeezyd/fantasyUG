@@ -30,8 +30,10 @@ const FixtureList = (props) => {
         const ids = matchdays?.map(x => x.id) || []
         const smallest = ids?.length === 0 ? 1 : Math.min(...ids)
         const largest = ids?.length === 0 ? 1 : Math.max(...ids)
+      const nextId = nextMatchday ? nextMatchday.id : largest
         setMinGW(smallest)
         setMaxGW(largest)
+        setPage(nextId)
     }, [matchdays])
 
   const onDecrement = () => {
@@ -72,7 +74,7 @@ const FixtureList = (props) => {
 
   return ( 
     <div className="fix-body">
-      <section className="btn-wrapper p-2">
+      {copy?.length && <section className="btn-wrapper p-2">
         <button
           disabled={page === minGW ? true : false}
           onClick={onDecrement}
@@ -89,7 +91,7 @@ const FixtureList = (props) => {
         >
           <BsChevronRight />
         </button>
-      </section>
+      </section>}
       {copy
         ?.filter((x) => +x?._id?.id === +page)
         ?.map((fixture) => (

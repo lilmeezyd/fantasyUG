@@ -8,7 +8,8 @@ import { Modal, Button, Spinner } from "react-bootstrap";
 import PlayerInfo from "./PlayerInfo";
 
 const SquadPlayer = (props) => {
-  const { baller, posName, removePlayer } = props;
+  const { baller, posName, removePlayer, transfersOut, 
+              transfersIn } = props;
   const [show, setShow] = useState(false);
   const { data: teams, isLoading: teamLoading } = useGetQuery();
   const { data: players, isLoading: playerLoading } = useGetPlayersQuery();
@@ -29,11 +30,18 @@ const SquadPlayer = (props) => {
     ? `${teams?.find((x) => x._id === opponent?.teamHome)?.shortName}(A)`
     : `${teams?.find((x) => x._id === opponent?.teamAway)?.shortName}(H)`)
   const handleClose = () => {
+    console.log(baller)
     setShow(false);
   };
   const handleShow = () => {
     setShow(true);
   };
+  const outIds = transfersOut?.map(x => x?._id?.toString()) || []
+  const inIds = transfersIn?.map(x => x?._id?.toString()) || []
+  //console.log(outIds)
+  //console.log(baller)
+  /*console.log(transfersOut)
+  console.log(transfersIn)*/
   
   if (fixtureLoading && teamLoading && playerLoading) {
     return (
@@ -100,6 +108,7 @@ const TransferPopUp = (props) => {
   const { data: player} = useGetPlayerQuery(baller?._id)
   let shortPos = positionObj?.shortName;
   const transferOut = () => {
+    console.log(baller)
     removePlayer({ ...baller, shortPos });
     handleClose();
   };

@@ -4,6 +4,7 @@ import { LinkContainer } from "react-router-bootstrap";
 import { useNavigate, Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { useLogoutMutation } from "../slices/userApiSlice";
+import { useGetMatchdaysQuery } from "../slices/matchdayApiSlice";
 import { logout } from "../slices/authSlice";
 
 const Header = () => {
@@ -11,7 +12,8 @@ const Header = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [logoutApiCall] = useLogoutMutation();
-
+const { data: matchdays, isLoading: isMatchday } = useGetMatchdaysQuery();
+const md = matchdays?.find(matchday => matchday?.next === true)
   const logoutHandler = async () => {
     try {
       await logoutApiCall().unwrap();

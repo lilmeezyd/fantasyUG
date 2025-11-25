@@ -52,6 +52,7 @@ const setInitial= async (x, y) => {
     toast.success(res?.message)
   } catch (error) {
     console.log(error)
+    toast.error(error?.data?.message)
   }
 }
 
@@ -118,19 +119,19 @@ const statExists = (field) => {
               <div><Button onClick={() => deleteFixturePop(x._id)} className="btn btn-danger">Delete</Button></div>
                 <div>
                   {x?.stats?.length === 0 ? <Button onClick={() => initialStats(x._id)}>
-                    Populate
+                    Start
                   </Button> : <Button onClick={() => dePopulate(x._id, x.matchday)}>
-                    Depopulate
+                    Reset
                   </Button>}
                 </div>
                 <div>
                   <Button onClick={handleShow}>Edit Stats</Button>
                 </div>
-                {x?.stats?.length > 0 &&<div>
+                {/*x?.stats?.length > 0 &&<div>
                     <Button onClick={() => setInitial(x._id, x.matchday)}>
                          {initialLoad === true ? <Spinner/> : 'Set Initial Points'}
                     </Button>
-                </div>}
+                </div>*/}
               </div>
     </div>
 

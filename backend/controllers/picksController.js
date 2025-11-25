@@ -6,6 +6,7 @@ import ManagerInfo from "../models/managerInfoModel.js";
 import OverallLeague from "../models/overallLeagueModel.js";
 import TeamLeague from "../models/teamLeagueModel.js";
 import TransfersModel from "../models/transfersModel.js";
+import Player from "../models/playerModel.js"
 import { joinOverallLeague } from "./leagueController.js";
 import { joinTeamLeague } from "./leagueController.js";
 import { updateHasPicks } from "./userController.js";
@@ -18,171 +19,153 @@ import mongoose from "mongoose";
 const setPicks = asyncHandler(async (req, res) => {
   const { picks, teamName, bank, teamValue, playerLeague, overallLeague } =
     req.body;
+
+  if (!picks) throw new Error("No players added");
+  if (picks.length !== 15) throw new Error("15 players should be picked");
+
+  const pos = { 1: 0, 2: 0, 3: 0, 4: 0 };
+  picks.forEach((p) => pos[p.playerPosition]++);
+  if (pos[1] !== 2) throw new Error("2 goalkeepers required");
+  if (pos[2] !== 5) throw new Error("5 defenders required");
+  if (pos[3] !== 5) throw new Error("5 midfielders required");
+  if (pos[4] !== 3) throw new Error("3 forwards required");
+
+  if (!teamValue || isNaN(bank)) throw new Error("Missing fields");
+  if (bank < 0) throw new Error("Not enough funds");
+
   const user = await User.findById(req.user.id);
-  const userHasPicks = await Picks.find({ user: req.user.id });
+  if (!user) throw new Error("User not found");
+
+  const existing = await Picks.findOne({ user: req.user.id });
+  if (existing) throw new Error("User has already made picks");
+
   const mgrExists = await ManagerInfo.findOne({ user: req.user.id });
+  if (mgrExists) throw new Error("Manager info already exists");
+
+  const allMatchdays = await Matchday.find({}).lean();
+  const maxMD = Math.max(...allMatchdays.map(x => x.id))
   const nextMD = await Matchday.findOne({ next: true });
-  const id = nextMD ? nextMD?.id : 30;
+  const matchdayId = nextMD ? nextMD.id : maxMD+1;
 
-  const goalkeepers = picks?.filter(
-    (pick) => pick?.playerPosition === 1
-  ).length;
-  const defenders = picks?.filter((pick) => pick?.playerPosition === 2).length;
-  const midfielders = picks?.filter(
-    (pick) => pick?.playerPosition === 3
-  ).length;
-  const forwards = picks?.filter((pick) => pick?.playerPosition === 4).length;
-  if (!picks) {
-    res.status(400);
-    throw new Error("No players added");
-  }
-  if (picks.length < 15 || picks.length > 15) {
-    res.status(400);
-    throw new Error("15 players should be picked");
-  }
+  const overallL = await OverallLeague.findById(overallLeague);
+  const teamL = await TeamLeague.findById(playerLeague);
 
-  if (goalkeepers !== 2) {
-    res.status(400);
-    throw new Error("2 goalkeepers should be selected");
-  }
-  if (defenders !== 5) {
-    res.status(400);
-    throw new Error("5 defenders should be selected");
-  }
-  if (midfielders !== 5) {
-    res.status(400);
-    throw new Error("5 midfielders should be selected");
-  }
-  if (forwards !== 3) {
-    res.status(400);
-    throw new Error("3 forwards should be selected");
-  }
+  if (!overallL) throw new Error("Overall league not found");
+  if (!teamL) throw new Error("Team league not found");
 
-  //Check if user already has a team
-  if (!user) {
-    res.status(400);
-    throw new Error("User not found");
-  }
-  if (userHasPicks.length > 0) {
-    res.status(400);
-    throw new Error("User has already made picks");
-  }
-
-  if (mgrExists) {
-    res.status(400);
-    throw new Error("Manager Info already created");
-  }
-
-  if (!teamValue || isNaN(bank)) {
-    res.status(400);
-    throw new Error("Please add all fields");
-  }
-
-  if (+bank < 0) {
-    res.status(400);
-    throw new Error("Not enough funds");
-  }
-
-  const requiredLeague = await OverallLeague.findById(overallLeague);
-  const requiredTeamLeague = await TeamLeague.findById(playerLeague);
-  const {
-    creator: oCreator,
-    name,
-    id: oId,
-    startMatchday: oSM,
-    endMatchday: oEM,
-  } = requiredLeague;
-  const {
-    creator: tCreator,
-    team,
-    id: tId,
-    startMatchday: tSM,
-    endMatchday: tEM,
-  } = requiredTeamLeague;
-
-  const newOverallLeague = {
-    creator: oCreator,
-    id: oId,
-    name,
-    startMatchday: oSM,
-    endMatchday: oEM,
+  const newOverall = {
+    creator: overallL.creator,
+    id: overallL.id,
+    name: overallL.name,
+    startMatchday: overallL.startMatchday,
+    endMatchday: overallL.endMatchday,
     lastRank: null,
     currentRank: null,
     matchdayPoints: 0,
     overallPoints: 0,
   };
-  const newTeamLeague = {
-    creator: tCreator,
-    team,
-    id: tId,
-    startMatchday: tSM,
-    endMatchday: tEM,
+
+  const newTeam = {
+    creator: teamL.creator,
+    team: teamL.team,
+    id: teamL.id,
+    startMatchday: teamL.startMatchday,
+    endMatchday: teamL.endMatchday,
     lastRank: null,
     currentRank: null,
     matchdayPoints: 0,
     overallPoints: 0,
   };
-  /*const session = await mongoose.startSession();
-  session.startTransaction()*/
+
+  let createdManager = null;
+  let createdPicks = null;
+  let ownershipIncrements = [];
+  let overallJoin = null;
+  let teamJoin = null;
 
   try {
-    const managerInfo = await ManagerInfo.create([
-      {
-        user: req.user.id,
-        firstName: req.user.firstName,
-        lastName: req.user.lastName,
-        matchdayJoined: id,
-        teamName,
-        teamLeagues: newTeamLeague,
-        overallLeagues: newOverallLeague,
-      },
-    ]);
+    createdManager = await ManagerInfo.create({
+      user: req.user.id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      matchdayJoined: matchdayId,
+      teamName,
+      teamLeagues: newTeam,
+      overallLeagues: newOverall,
+    });
 
-    if (!managerInfo || !managerInfo[0])
-      throw new Error("Manager creation failed");
+    if (!createdManager) throw new Error("Manager creation failed");
 
-    const matchdayPicks = await Picks.create([
-      {
-        picks,
-        teamValue,
-        bank,
-        manager: managerInfo[0]._id,
-      },
-    ]);
-    if (!matchdayPicks || !matchdayPicks[0])
-      throw new Error("Picks creation failed");
+    createdPicks = await Picks.create({
+      picks,
+      teamValue,
+      bank,
+      manager: createdManager._id,
+    });
 
-    // Update player ownership counts
-    await Promise.all(picks.map((pick) => playerIncrement(pick._id, 1)));
+    if (!createdPicks) throw new Error("Picks creation failed");
 
-    // Join leagues
-    await joinOverallLeague(
+    for (const pick of picks) {
+      await Player.updateOne({ _id: pick._id }, { $inc: { playerCount: 1 } });
+      ownershipIncrements.push(pick._id);
+    }
+
+    overallJoin = await joinOverallLeague(
       req.user,
-      managerInfo[0]._id,
+      createdManager._id,
       overallLeague,
       req,
       res
     );
-    await joinTeamLeague(req.user, managerInfo[0]._id, playerLeague, req, res);
 
-    // Update flag
-    const hasPicks = await updateHasPicks(req.user.id);
+    teamJoin = await joinTeamLeague(
+      req.user,
+      createdManager._id,
+      playerLeague,
+      req,
+      res
+    );
 
-    /*await session.commitTransaction();
-    session.endSession()*/
+    const hasPicks = await User.findByIdAndUpdate({ _id: req.user.id }, {hasPicks: true}, {new: true}).select('-password')
+
     res.status(200).json({
-      managerInfo: managerInfo[0],
-      matchdayPicks: matchdayPicks[0],
+      managerInfo: createdManager,
+      matchdayPicks: createdPicks,
       hasPicks,
-      message: 'Team saved'
+      message: "Team saved",
     });
   } catch (error) {
-    /*await session.abortTransaction();
-    session.endSession();*/
-    console.error(error);
-    res
-      .status(500)
-      .json({ error: "Something went wrong", details: error.message });
+    if (createdPicks) {
+      await Picks.deleteOne({ manager: createdManager._id });
+    }
+
+    if (createdManager) {
+      await ManagerInfo.deleteOne({ _id: createdManager._id });
+    }
+
+    if (ownershipIncrements.length) {
+      for (const id of ownershipIncrements) {
+        await Player.updateOne({ _id: id }, { $inc: { playerCount: -1 } });
+      }
+    }
+    
+    if (overallJoin) {
+      await OverallLeague.findByIdAndUpdate(overallLeague, {
+        $pull: { entrants: createdManager._id }
+      });
+    }
+    if (teamJoin) {
+      await TeamLeague.findByIdAndUpdate(playerLeague, {
+        $pull: { entrants: createdManager._id },
+      });
+    }
+
+    await User.updateOne({ _id: req.user.id }, { hasPicks: false });
+
+    res.status(500).json({
+      message: "Operation failed, Try again",
+      details: error.message,
+    });
   }
 });
 
@@ -291,6 +274,7 @@ const updatePicks = asyncHandler(async (req, res) => {
   if (!user) throw new Error("User not found");
   if (!playerPicks) throw new Error("Picks not found");
   if (!userManager) throw new Error("Manager profile not found");
+  if(!matchday) throw new Error("No more matchdays left")
 
   if (playerPicks.manager.toString() !== userManager._id.toString())
     throw new Error("Unauthorized access");
@@ -332,9 +316,10 @@ const updatePicks = asyncHandler(async (req, res) => {
       user: req.user.id,
     }));
 
-    userManager.matchdayJoined < matchday.id && 
-    await Promise.allSettled([
-      ...transfers.map((t) => TransfersModel.create(t))]) 
+    userManager.matchdayJoined < matchday.id &&
+      (await Promise.allSettled([
+        ...transfers.map((t) => TransfersModel.create(t)),
+      ]));
 
     // Handle all async work safely
     await Promise.allSettled([
@@ -348,6 +333,5 @@ const updatePicks = asyncHandler(async (req, res) => {
     message: "Changes saved",
   });
 });
-
 
 export { setPicks, getPicks, getMatchdayPicks, updatePicks, previousPicks };

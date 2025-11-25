@@ -5,6 +5,8 @@ import Position from "../models/positionModel.js";
 import Fixture from "../models/fixtureModel.js";
 import PlayerHistory from "../models/playerHistoryModel.js";
 import { getAllManagers } from "./userController.js";
+import Picks from "../models/picksModel.js";
+import ManagerInfo from "../models/managerInfoModel.js";
 
 //@desc Set Player
 //@route POST /api/players
@@ -77,49 +79,79 @@ const setPlayer = asyncHandler(async (req, res) => {
 //@role not restricted
 const getPlayers = asyncHandler(async (req, res) => {
   const players = await Player.find({});
-  const positions = await Position.find({})
-  const numberOfManagers = await getAllManagers()
-  const positionMap = new Map()
-  positions.map(x => positionMap[x._id] = x.code)
-    
+  const positions = await Position.find({});
+  const managers = await ManagerInfo.find({matchdayJoined: {$lte: 5}}).lean();
+  const managerArray = managers.map(x => x._id)
+  const picks = await Picks.aggregate([
+    {$match: {manager: { $in: managerArray}}},
+    { $unwind: "$picks" },
+    { $group: { _id: "$picks._id", total: { $sum: 1 } } },
+  ]);
+  
+  const playerCountMap = new Map(picks.map(x => [x._id.toString(), x.total]))
+  const numberOfManagers = await getAllManagers();
+  const positionMap = new Map();
+  positions.map((x) => (positionMap[x._id] = x.code));
+
   if (players) {
-    const updatedPlayers = players.map(player => {
-      const { _id,
-        firstName,
-        secondName,
-        appName,
-        playerPosition,
-        playerTeam,
-        startCost,
-        nowCost,
-        totalPoints,
-        goalsScored,
-        assists,
-        ownGoals,
-        penaltiesSaved,
-        penaltiesMissed,
-        yellowCards,
-        redCards,
-        saves,
-        cleansheets,
-        starts,
-        playerCount } = player
-      const b = numberOfManagers === 0 ? 0 : playerCount / numberOfManagers * 100
-      return {
-        _id, firstName, secondName, appName,
-        playerPosition: positionMap[playerPosition], playerTeam, startCost, nowCost, totalPoints, goalsScored,
-        assists, ownGoals, penaltiesSaved, penaltiesMissed, yellowCards, redCards, saves,
-        cleansheets, starts, ownership: `${b?.toFixed(1)}`
-      }
-    }).sort((a,b) => a.appName-b.appName ? 1:-1)
-    res.status(200).json(updatedPlayers)
+    const updatedPlayers = players
+      .map((player) => {
+        const {
+          _id,
+          firstName,
+          secondName,
+          appName,
+          playerPosition,
+          playerTeam,
+          startCost,
+          nowCost,
+          totalPoints,
+          goalsScored,
+          assists,
+          ownGoals,
+          penaltiesSaved,
+          penaltiesMissed,
+          yellowCards,
+          redCards,
+          saves,
+          cleansheets,
+          starts,
+          playerCount
+        } = player;
+        const b =
+          !playerCountMap.get(_id.toString()) === 0 ? 0 : (playerCountMap.get(_id.toString()) / numberOfManagers) * 100;
+        return {
+          _id,
+          firstName,
+          secondName,
+          appName,
+          playerPosition: positionMap[playerPosition],
+          playerTeam,
+          startCost,
+          nowCost,
+          totalPoints,
+          goalsScored,
+          assists,
+          ownGoals,
+          penaltiesSaved,
+          penaltiesMissed,
+          yellowCards,
+          redCards,
+          saves,
+          cleansheets,
+          starts,
+          ownership: `${b?.toFixed(1)}`,
+        };
+      })
+      .sort((a, b) => (a.appName - b.appName ? 1 : -1));
+    res.status(200).json(updatedPlayers);
   }
 });
 
 //@desc Get Players
 //@route GET /api/players/:id
 //@access public
-//@role not restricted 
+//@role not restricted
 const getPlayer = asyncHandler(async (req, res) => {
   const player = await Player.findById(req.params.id);
 
@@ -128,32 +160,70 @@ const getPlayer = asyncHandler(async (req, res) => {
     throw new Error("Player not found");
   }
 
-  const team = player?.playerTeam
-  const pFixtures = await Fixture.find({ $or: [{ teamHome: team }, { teamAway: team }] })
-  const pResults = await PlayerHistory.find({ player: req.params.id })
-  const numberOfManagers = await getAllManagers()
-  const { _id, firstName, secondName, appName,
-    playerPosition, playerTeam, startCost, nowCost, totalPoints, goalsScored,
-    assists, ownGoals, penaltiesSaved, penaltiesMissed, yellowCards, redCards, saves,
-    cleansheets, starts, playerCount } = player
-  const b = numberOfManagers === 0 ? 0 : playerCount / numberOfManagers * 100
+  const team = player?.playerTeam;
+  const pFixtures = await Fixture.find({
+    $or: [{ teamHome: team }, { teamAway: team }],
+  });
+  const pResults = await PlayerHistory.find({ player: req.params.id });
+  const numberOfManagers = await getAllManagers();
+  const {
+    _id,
+    firstName,
+    secondName,
+    appName,
+    playerPosition,
+    playerTeam,
+    startCost,
+    nowCost,
+    totalPoints,
+    goalsScored,
+    assists,
+    ownGoals,
+    penaltiesSaved,
+    penaltiesMissed,
+    yellowCards,
+    redCards,
+    saves,
+    cleansheets,
+    starts,
+    playerCount,
+  } = player;
+  const b = numberOfManagers === 0 ? 0 : (playerCount / numberOfManagers) * 100;
   const newPlayer = {
-    _id, firstName, secondName, appName,
-    playerPosition, playerTeam, startCost, nowCost, totalPoints, goalsScored,
-    assists, ownGoals, penaltiesSaved, penaltiesMissed, yellowCards, redCards, saves,
-    cleansheets, starts, ownership: `${b.toFixed(1)}%`, fixtures: pFixtures, results: pResults
-  }
+    _id,
+    firstName,
+    secondName,
+    appName,
+    playerPosition,
+    playerTeam,
+    startCost,
+    nowCost,
+    totalPoints,
+    goalsScored,
+    assists,
+    ownGoals,
+    penaltiesSaved,
+    penaltiesMissed,
+    yellowCards,
+    redCards,
+    saves,
+    cleansheets,
+    starts,
+    ownership: `${b.toFixed(1)}%`,
+    fixtures: pFixtures,
+    results: pResults,
+  };
   res.status(200).json(newPlayer);
 });
 
 //@desc Get Players
 //@route GET /api/players/:id/history
 //@access public
-//@role not restricted 
+//@role not restricted
 const getPlayerHistory = asyncHandler(async (req, res) => {
-  const playerHistory = await PlayerHistory.find({ player: req.params.id })
-  res.status(200).json(playerHistory)
-})
+  const playerHistory = await PlayerHistory.find({ player: req.params.id });
+  res.status(200).json(playerHistory);
+});
 
 //@desc update player
 //@route PUT /api/players/:id
@@ -215,14 +285,16 @@ const updatePlayer = asyncHandler(async (req, res) => {
       req.body,
       { new: true }
     );
-    res.status(200).json({message: `${updatedPlayer.appName} updated`});
+    res.status(200).json({ message: `${updatedPlayer.appName} updated` });
   }
 });
 
 //Increment Player number
 const playerIncrement = asyncHandler(async (playerId, increment, req, res) => {
-  await Player.findByIdAndUpdate(playerId, { $inc: { playerCount: increment } })
-}) 
+  await Player.findByIdAndUpdate(playerId, {
+    $inc: { playerCount: increment },
+  });
+});
 
 //@desc delete player
 //@route DELETE /api/players/:id
@@ -255,4 +327,12 @@ const deletePlayer = asyncHandler(async (req, res) => {
   res.status(200).json({ id: req.params.id });
 });
 
-export { setPlayer, getPlayers, playerIncrement, getPlayer, getPlayerHistory, updatePlayer, deletePlayer };
+export {
+  setPlayer,
+  getPlayers,
+  playerIncrement,
+  getPlayer,
+  getPlayerHistory,
+  updatePlayer,
+  deletePlayer,
+};

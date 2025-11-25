@@ -98,7 +98,7 @@ const joinOverallLeague = asyncHandler(
       throw new Error("User not found");
     }
 
-    await OverallLeague.findByIdAndUpdate(
+    return await OverallLeague.findByIdAndUpdate(
       overallLeague,
       { $push: { entrants: manager } },
       {
@@ -143,7 +143,7 @@ const joinTeamLeague = asyncHandler(
       throw new Error("User not found");
     }
 
-    await TeamLeague.findByIdAndUpdate(
+    return await TeamLeague.findByIdAndUpdate(
       playerLeague,
       { $push: { entrants: manager } },
       {

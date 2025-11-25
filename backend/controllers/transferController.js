@@ -13,7 +13,7 @@ const getTransfers = asyncHandler(async (req, res) => {
   const positions = await Position.find({});
   const matchdays = await Matchday.find({})
   const transfers = await TransfersModel.find({
-    $or: [{ user: req.params.id }, { manager: req.params.id }],
+    $or: [{ user: req.params.id }, { manager: req.params.id }], 
   });
   
   const playerMap = new Map(players.map((x) => [x._id.toString(), x.appName]));
@@ -21,7 +21,7 @@ const getTransfers = asyncHandler(async (req, res) => {
   const positionMap = new Map(positions.map((x) => [x.code, x.shortName]));
   const matchdayMap = new Map(matchdays.map((x) => [x._id.toString(), x.id]))
   const matchdayTransfers = req.params.id.toString() === req.user._id.toString() ? 
-  transfers.filter((x) => x.matchday.toString() === nextMatchday._id.toString()) : 
+  transfers.filter((x) => x.matchday.toString() === nextMatchday?._id?.toString()) || [] : 
     transfers.filter(
       (x) => x.matchday.toString() === matchday._id.toString()
     ) || [];

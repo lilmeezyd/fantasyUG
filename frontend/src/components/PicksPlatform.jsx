@@ -66,7 +66,7 @@ const PicksPlatform = (props) => {
     setShow(false)
   }
   const onSave = async () => {
-    const message = await updatePicks({
+    try {const message = await updatePicks({
       id: id?._id,
       picks,
       teamValue,
@@ -76,6 +76,10 @@ const PicksPlatform = (props) => {
     }).unwrap();
     toast.success(message?.message);
     navigate("/pickteam");
+  } catch(error) {
+    console.log(error)
+    toast.error(error?.data?.message)
+  }
   };
   const onSubmit = async (e) => {
     e.preventDefault();
@@ -102,6 +106,7 @@ const PicksPlatform = (props) => {
       navigate("/pickteam");
     } catch (error) {
       console.log(error);
+      toast.error(error?.data?.message)
     }
   };
   const selectLeague = (e) => {
@@ -152,6 +157,8 @@ const PicksPlatform = (props) => {
           {goalkeepers?.map((x) => (
             <div key={x.slot} className="squad-player">
               <SquadPlayer
+              transfersOut={transfersOut}
+              transfersIn={transfersIn}
                 removePlayer={removePlayer}
                 baller={x}
                 posName={"GKP"}
@@ -163,10 +170,12 @@ const PicksPlatform = (props) => {
           {defenders?.map((x) => (
             <div key={x.slot} className="squad-player">
               <SquadPlayer
+              transfersOut={transfersOut}
+              transfersIn={transfersIn}
                 removePlayer={removePlayer}
                 baller={x}
                 posName={"DEF"}
-              ></SquadPlayer>
+              ></SquadPlayer> 
             </div>
           ))}
         </div>
@@ -174,6 +183,8 @@ const PicksPlatform = (props) => {
           {midfielders?.map((x) => (
             <div key={x.slot} className="squad-player">
               <SquadPlayer
+              transfersOut={transfersOut}
+              transfersIn={transfersIn}
                 removePlayer={removePlayer}
                 baller={x}
                 posName={"MID"}
@@ -185,6 +196,8 @@ const PicksPlatform = (props) => {
           {forwards?.map((x) => (
             <div key={x.slot} className="squad-player">
               <SquadPlayer
+              transfersOut={transfersOut}
+              transfersIn={transfersIn}
                 removePlayer={removePlayer}
                 baller={x}
                 posName={"FWD"}

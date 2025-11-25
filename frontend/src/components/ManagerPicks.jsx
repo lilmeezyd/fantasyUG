@@ -72,6 +72,7 @@ const ManagerPicks = (props) => {
         <div className="pick-team-name">{teamName}</div>
         </div>
         <div className="deadline">
+          {md ? <>
           <div className="pick-team-name">{md?.name}</div>
           <div className="pick-team-name">
           {getTime1(md?.deadlineTime)},&nbsp;
@@ -80,6 +81,7 @@ const ManagerPicks = (props) => {
                         )}&nbsp;
                         {getPm(md?.deadlineTime)}
           </div>
+          </> : <>The Season is over!</>}
         </div>
       </div>}
       <div className="no-picks-team">

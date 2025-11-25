@@ -7,6 +7,7 @@ import Position from "../models/positionModel.js";
 import TOW from "../models/teamOfTheWeekModel.js";
 import User from "../models/userModel.js";
 import mongoose from "mongoose";
+import { setInitialPoints } from "./managerLiveController.js";
 
 //@desc Get recent matchday
 //@route GET /api/matchdays/data/max/
@@ -110,13 +111,15 @@ const getMatchday = asyncHandler(async (req, res) => {
 //@role ADMIN
 const startMatchday = asyncHandler(async (req, res) => {
   const matchday = await Matchday.findById(req.params.id);
+  const matchdays = await Matchday.find({}).lean();
+  const firstGW = Math.min(...matchdays.map(x => x.id))
   if (!matchday) {
     res.status(400);
     throw new Error("Matchday not found");
   }
 
   const { id, next: isNext } = matchday;
-  const prev = id > 1 ? id - 1 : 0;
+  const prev = id > firstGW ? id - 1 : 0;
   const next = id + 1;
   if (!isNext) {
     res.status(400);
@@ -472,6 +475,8 @@ const getTOWs = asyncHandler(async (req, res) => {
 //@role Admin, editor
 const endMatchday = asyncHandler(async (req, res) => {
   const matchdayFound = await Matchday.findById(req.params.id);
+  const matchdays = await Matchday.find({}).lean();
+  const firstGW = Math.min(...matchdays.map(x => x.id))
 
   if (!matchdayFound) {
     res.status(404);
@@ -484,7 +489,7 @@ const endMatchday = asyncHandler(async (req, res) => {
   }
 
   const { id } = matchdayFound;
-  const prevId = id > 1 ? id - 1 : null;
+  const prevId = id > firstGW ? id - 1 : null;
 
   if (prevId === null) {
     // First matchday - no previous to validate
@@ -568,15 +573,24 @@ const createAutos = asyncHandler(async (req, res) => {
     const usedPlayerIds = new Set();
     const automaticSubs = [];
 
-    const starters = updatedPicks.filter((p) => p.multiplier > 0);
+    const starters = updatedPicks
+      .filter((p) => p.multiplier > 0)
+      .sort((x, y) => (x.playerPosition > y.playerPosition ? 1 : -1));
     const bench = updatedPicks
       .filter((p) => p.multiplier === 0)
       .sort((a, b) => a.slot - b.slot);
-
+      const newBench = [];
+      const newStarters = []
     for (const pick of starters) {
       usedPlayerIds.add(pick._id.toString());
     }
 
+    const playerCount = {
+      GKP: starters.filter((x) => x.playerPosition === 1).length,
+      DEF: starters.filter((x) => x.playerPosition === 2).length,
+      MID: starters.filter((x) => x.playerPosition === 3).length,
+      FWD: starters.filter((x) => x.playerPosition === 4).length,
+    };
     for (const starter of starters) {
       if (+starter.starts === 0 && +starter.bench === 0) {
         for (const sub of bench) {
@@ -590,30 +604,37 @@ const createAutos = asyncHandler(async (req, res) => {
             // Only allow GKP-for-GKP, others can freely sub
             if (starterPos === "GKP" && subPos !== "GKP") continue;
             if (starterPos !== "GKP" && subPos === "GKP") continue;
+            
+            if (playerCount.DEF === 3 && starterPos === "DEF" && subPos !== "DEF") continue;
+            if (playerCount.FWD === 1 && starterPos === "FWD" && subPos !== "FWD") continue;
+
+  
+            playerCount[starterPos]--;
+            playerCount[subPos]++;
 
             // Try simulated substitution
-            const simulated = starters.map((p) =>
+             const simulated = starters.map((p) =>
               p._id.toString() === starter._id.toString() ? { ...sub, multiplier: 1 } : p
             );
-
+            
             const formation = getFormation(simulated);
             if (isValidFormation(formation)) {
-              // Apply substitution
-              sub.multiplier = 1;
-              starter.multiplier = 0;
+            // Apply substitution
+            sub.multiplier = 1;
+            starter.multiplier = 0;
 
-              // Swap slots
-              const subSlot = sub.slot;
-              sub.slot = starter.slot;
-              starter.slot = subSlot;
+            // Swap slots
+            const subSlot = sub.slot;
+            sub.slot = starter.slot;
+            starter.slot = subSlot;
 
-              usedPlayerIds.add(sub._id.toString());
+            usedPlayerIds.add(sub._id.toString());
 
-              automaticSubs.push({
-                in: sub,
-                out: starter,
-              });
-              break;
+            automaticSubs.push({
+              in: sub,
+              out: starter,
+            });
+            break;
             }
           }
         }
@@ -669,7 +690,8 @@ const createAutos = asyncHandler(async (req, res) => {
     };
   });
   await ManagerLive.bulkWrite(bulkOps);
-  res.json({ managerLives, message: "Autosubs made" });
+  const message = await setInitialPoints(req, res, req.params.id);
+  res.json({ managerLives, message: `Autosubs made and ${message.message}.`});
 });
 
 //@desc Undo autosubs
@@ -734,7 +756,8 @@ const undoAutos = asyncHandler(async (req, res) => {
   });
 
   await ManagerLive.bulkWrite(bulkOps);
-  res.json({ message: "Autosubs undone" });
+  const message = await setInitialPoints(req, res, req.params.id);
+  res.json({ message: `Autosubs undone and ${message.message}.`  });
 });
 
 //@desc Delete Matchday

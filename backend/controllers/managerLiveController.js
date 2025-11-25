@@ -139,12 +139,13 @@ const setLivePicks = asyncHandler(async (req, res) => {
 //@desc set initial points
 //@route PATCH api/livepicks/manager/matchday/:mid/start/fixtures/:id
 //@access ADMIN
-const setInitialPoints = asyncHandler(async (req, res) => {
+const setInitialPoints = asyncHandler(async (req, res, mid) => {
   //const fixture = await Fixture.findById(req.params.id).lean();
-  const matchday = await Matchday.findById(req.params.mid).lean();
+  const matchday = await Matchday.findById(mid).lean();
   const players = await PlayerHistory.find({
-    matchday: req.params.mid
+    matchday: mid
   }).lean();
+  console.log(players)
   if (!matchday || !matchday.current || !players.length) {
     return res
       .status(400)
@@ -152,7 +153,7 @@ const setInitialPoints = asyncHandler(async (req, res) => {
   }
 
   const allLives = await ManagerLive.find({
-    "livePicks.matchdayId": req.params.mid,
+    "livePicks.matchdayId": mid,
   }).lean();
   /*
     if (mLive.length === 0) {
@@ -170,7 +171,7 @@ const setInitialPoints = asyncHandler(async (req, res) => {
   const infoUpdates = [];
   for (const mLive of allLives) {
     const mdPicks = mLive.livePicks.find(
-      (p) => p.matchdayId.toString() === req.params.mid.toString()
+      (p) => p.matchdayId.toString() === mid.toString()
     );
     if (!mdPicks) continue;
 
@@ -194,7 +195,7 @@ const setInitialPoints = asyncHandler(async (req, res) => {
       .filter((p) => p.multiplier > 0)
       .reduce((a, b) => a + (b.points * b.multiplier), 0);
     const updatedLivePicks = mLive.livePicks.map((p) =>
-      p.matchdayId.toString() === req.params.mid
+      p.matchdayId.toString() === mid.toString()
         ? { ...mdPicks, picks: formatted, matchdayPoints: newMdPoints }
         : p
     );
@@ -250,8 +251,9 @@ const setInitialPoints = asyncHandler(async (req, res) => {
   if (liveUpdates.length > 0) await ManagerLive.bulkWrite(liveUpdates);
   if (infoUpdates.length > 0) await ManagerInfo.bulkWrite(infoUpdates);
 
-  res.status(200).json({message: "Points updated successfully for all managers."});
-});
+  //res.status(200).json({message: "Points updated successfully for all managers."});
+  return {message: "Points updated successfully for all managers."}
+}); 
 
 //@desc update player scores in picks
 //@route PUT api/livepicks/manager/matchday/:mid/player/:pid

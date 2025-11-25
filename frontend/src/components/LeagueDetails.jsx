@@ -40,6 +40,7 @@ const LeagueDetails = (props) => {
     copyFix?.sort((x, y) => (x?.createdAt > y?.createdAt ? 1 : -1));
     setCopy(copyFix);
   }, [transferObj]);
+  console.log(transferObj)
   const toggleView = () => {
     setShow((prev) => !prev);
   };
@@ -56,7 +57,6 @@ const LeagueDetails = (props) => {
       (x, idx) => idx >= (page - 1) * pageSize && idx < page * pageSize
     );
   }, [copy, page, pageSize]);
-  console.log(transferList);
   const totalPages = Math.ceil(transferObj?.transfers?.length / pageSize);
   return (
     <div className="league-details">

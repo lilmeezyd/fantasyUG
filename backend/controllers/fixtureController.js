@@ -11,9 +11,10 @@ import ManagerLive from "../models/managerLive.js";
 import ManagerInfo from "../models/managerInfoModel.js";
 import { rollbackFixtureStats } from "../services/rollbackFixtureStats.js";
 import mongoose from "mongoose";
+import { setInitialPoints } from "./managerLiveController.js";
 
 //@desc Set Fixture
-//@route POST /api/fixtures 
+//@route POST /api/fixtures
 //@access Private
 //@role Admin
 const setFixture = asyncHandler(async (req, res) => {
@@ -104,7 +105,7 @@ const populateStats = asyncHandler(async (req, res) => {
     identifier9: "cleansheets",
     identifier10: "starts",
     identifier11: "bestPlayer",
-    identifier12: "bench"
+    identifier12: "bench",
   };
   if (!fixture) {
     res.status(400);
@@ -123,7 +124,6 @@ const populateStats = asyncHandler(async (req, res) => {
     throw new Error("No players found");
   }
 
-
   const results = await Promise.allSettled(
     players.map((player) => {
       const isHomeTeam = fixture.teamHome === player.playerTeam;
@@ -140,9 +140,12 @@ const populateStats = asyncHandler(async (req, res) => {
   );
 
   // Separate successes and failures
-  const successes = results.filter(r => r.status === 'fulfilled').map(r => r.value);
-  const errors = results.filter(r => r.status === 'rejected').map(r => r.reason);
-
+  const successes = results
+    .filter((r) => r.status === "fulfilled")
+    .map((r) => r.value);
+  const errors = results
+    .filter((r) => r.status === "rejected")
+    .map((r) => r.reason);
 
   fixture.teamAwayScore = 0;
   fixture.teamHomeScore = 0;
@@ -192,10 +195,16 @@ const dePopulateStats = asyncHandler(async (req, res) => {
     res.status(400);
     throw new Error("No players found");
   }
+  await setInitialPoints(req, res, req.params.mid);
   fixture.stats.length = 0;
   fixture.teamAwayScore = null;
   fixture.teamHomeScore = null;
-  rollbackFixtureStats(req.params.id, req.params.mid, affectedPlayers, allLives)
+  rollbackFixtureStats(
+    req.params.id,
+    req.params.mid,
+    affectedPlayers,
+    allLives
+  );
 
   const updatedFixture = await Fixture.findByIdAndUpdate(
     req.params.id,
@@ -258,11 +267,21 @@ const editStats = asyncHandler(async (req, res) => {
     throw new Error("Fixture not found");
   }
 
-  let { teamHomeScore, teamAwayScore } = fixture;
-  const { identifier, homeAway, player, value } = req.body;
 
-  if (!identifier || !homeAway || value === undefined || !Array.isArray(player) || player.length === 0) {
-    throw new Error("Please provide all required fields and at least one player");
+  let { teamHomeScore, teamAwayScore, matchday } = fixture;
+  const { identifier, homeAway, player, value } = req.body;
+  const newValue = +value;
+
+  if (
+    !identifier ||
+    !homeAway ||
+    value === undefined ||
+    !Array.isArray(player) ||
+    player.length === 0
+  ) {
+    throw new Error(
+      "Please provide all required fields and at least one player"
+    );
   }
 
   if (fixture.stats.length === 0) {
@@ -277,6 +296,7 @@ const editStats = asyncHandler(async (req, res) => {
   // Score tracking to prevent over-counting
   let homeGoalDelta = 0;
   let awayGoalDelta = 0;
+  let oldFixture = fixture;
 
   // Utility function for weighted points
   const getWeight = (identifier, code) => {
@@ -297,7 +317,10 @@ const editStats = asyncHandler(async (req, res) => {
     const value = weightMap[identifier];
     return Array.isArray(value) ? value[code - 1] || 0 : value || 0;
   };
-
+  // Arrays for rollbacks
+  let playerHistoryArray = [];
+  let playerArray = [];
+  let message = null;
   try {
     const statBlock = fixture.stats.find((x) => x.identifier === identifier);
     if (!statBlock) {
@@ -311,8 +334,10 @@ const editStats = asyncHandler(async (req, res) => {
       }
 
       if (
-        (homeAway === "home" && playerFound.playerTeam.toString() !== fixture.teamHome.toString()) ||
-        (homeAway === "away" && playerFound.playerTeam.toString() !== fixture.teamAway.toString())
+        (homeAway === "home" &&
+          playerFound.playerTeam.toString() !== fixture.teamHome.toString()) ||
+        (homeAway === "away" &&
+          playerFound.playerTeam.toString() !== fixture.teamAway.toString())
       ) {
         throw new Error("Player does not belong to the selected team");
       }
@@ -320,9 +345,10 @@ const editStats = asyncHandler(async (req, res) => {
       const position = await Position.findOne(playerFound.playerPosition);
       const code = position.code;
       const retrievedPlayer = playerFound._id;
-      const newValue = +value;
       const statArray = statBlock[homeAway];
-      const playerIndex = statArray.findIndex((x) => x.player.toString() === retrievedPlayer.toString());
+      const playerIndex = statArray.findIndex(
+        (x) => x.player.toString() === retrievedPlayer.toString()
+      );
       const weight = getWeight(identifier, code);
 
       let totalPoints = weight * newValue;
@@ -346,15 +372,18 @@ const editStats = asyncHandler(async (req, res) => {
           { $inc: { [identifier]: newValue, totalPoints } },
           { new: true, upsert: true }
         );
+        playerHistoryArray.push(retrievedPlayer);
 
         await Player.findByIdAndUpdate(
           retrievedPlayer,
           { $inc: { [identifier]: newValue, totalPoints } },
           { new: true }
         );
+
+        playerArray.push(retrievedPlayer);
       } else {
-        if (newValue < 0) {
-          throw new Error("Stat value cannot be negative");
+        if (newValue <= 0) {
+          throw new Error("Stat value cannot be negative or 0");
         }
 
         statArray.push({ player: retrievedPlayer, value: newValue });
@@ -365,14 +394,16 @@ const editStats = asyncHandler(async (req, res) => {
           { new: true, upsert: true }
         );
 
+        playerHistoryArray.push(retrievedPlayer);
+
         await Player.findByIdAndUpdate(
           retrievedPlayer,
           { $inc: { [identifier]: newValue, totalPoints } },
           { new: true }
         );
+        playerArray.push(retrievedPlayer);
       }
 
-      
       if (identifier === "goalsScored") {
         if (homeAway === "home") homeGoalDelta += newValue;
         if (homeAway === "away") awayGoalDelta += newValue;
@@ -387,15 +418,54 @@ const editStats = asyncHandler(async (req, res) => {
     fixture.teamHomeScore = teamHomeScore + homeGoalDelta;
     fixture.teamAwayScore = teamAwayScore + awayGoalDelta;
 
-    const updatedFixture = await Fixture.findByIdAndUpdate(req.params.id, fixture, { new: true });
-
-    res.status(200).json(updatedFixture);
+    const updatedFixture = await Fixture.findByIdAndUpdate(req.params.id, fixture, {
+      new: true,
+    });
+    message = await setInitialPoints(req, res, matchday);
+    res.status(200).json({message: `Player Points Added and ${message.message}`, updatedFixture});
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Something went wrong", details: error.message });
+    let negativeValue = -(newValue)
+    if (playerHistoryArray.length) {
+      for (const playerId of player) {
+        const playerFound = await Player.findById(playerId);
+        const position = await Position.findOne(playerFound.playerPosition);
+        const code = position.code;
+        const weight = getWeight(identifier, code);
+        let totalPoints = weight * negativeValue;
+        await PlayerHistory.findOneAndUpdate(
+          { player: playerId, fixture: req.params.id },
+          { $inc: { [identifier]: negativeValue, totalPoints } },
+          { new: true, upsert: true }
+        );
+      }
+    }
+    if (playerArray.length) {
+      for (const playerId of player) {
+        const playerFound = await Player.findById(playerId);
+        const position = await Position.findOne(playerFound.playerPosition);
+        const code = position.code;
+        const weight = getWeight(identifier, code);
+        let totalPoints = weight * negativeValue;
+        await Player.findByIdAndUpdate(
+          playerId,
+          { $inc: { [identifier]: negativeValue, totalPoints } },
+          { new: true }
+        );
+      }
+    }
+
+    if(message) {
+      await setInitialPoints(req, res, req.params.id);
+    }
+
+    await Fixture.findByIdAndUpdate(req.params.id, oldFixture, {
+      new: true,
+    });
+    res
+      .status(500)
+      .json({ error: "Something went wrong", details: error.message });
   }
 });
-
 
 //@desc Get Fixture
 //@route GET /api/fixtures/:id

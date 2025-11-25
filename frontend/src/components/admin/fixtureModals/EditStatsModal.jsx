@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Modal } from "react-bootstrap";
 import { useGetPlayersQuery } from "../../../slices/playerApiSlice";
 import { useEditStatsMutation } from "../../../slices/fixtureApiSlice";
+import { toast } from "react-toastify";
 
 
 const EditStatsModal = (props) => {
@@ -20,13 +21,14 @@ const { identifier, homeAway, player, value } = data
     const stats = {
       identifier, homeAway, player, value: newValue
   }
-  console.log(stats)
   setData({identifier: '', homeAway: '', player: [], value: ''})
   
   try {
-    await editStats({id: fixture._id, ...stats}).unwrap()
+    const res = await editStats({id: fixture._id, ...stats}).unwrap()
+    toast.success(res?.message)
   } catch (error) {
     console.log(error)
+    toast.error(error?.data?.details)
   }
 
   handleClose()
