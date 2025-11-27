@@ -19,10 +19,10 @@ export const getPlayers = (players, sort, view, word, cutPrice) => {
     let id
     const filteredPlayers = []
     if(players) {
-    if(view.startsWith('position')) {
+    if(view?.startsWith('position')) {
         id = view.slice(9)
         filteredPlayers.push(...players.filter(x => x.playerPosition === parseInt(id)))
-    } else if(view.startsWith('team')) {
+    } else if(view?.startsWith('team')) {
         id = view.slice(5)
         filteredPlayers.push(...players.filter(x => x.playerTeam === id))
     } else {

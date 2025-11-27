@@ -25,9 +25,12 @@ import { toast } from "react-toastify";
 const PicksPlatform = (props) => {
   const {
     scrollToPlayers,
+    gotoPlayersList,
     isLoading,
+    isSmallScreen,
     picks,
     removePlayer,
+    restore,
     totalPlayers,
     itb,
     reset,
@@ -36,6 +39,7 @@ const PicksPlatform = (props) => {
     id,
     transfersIn,
     transfersOut,
+    outMap
   } = props;
   const [teamName, setTeamName] = useState("");
   const [ show, setShow ] = useState(false)
@@ -66,6 +70,9 @@ const PicksPlatform = (props) => {
   const closeTransfers = () => {
     setShow(false)
   }
+  const goBack = () => {
+    gotoPlayersList();
+  }
   const onSave = async () => {
     try {const message = await updatePicks({
       id: id?._id,
@@ -84,14 +91,6 @@ const PicksPlatform = (props) => {
   };
   const onSubmit = async (e) => {
     e.preventDefault();
-    if (
-      goalkeepers.length === 2 &&
-      defenders.length === 5 &&
-      midfielders.length === 5 &&
-      forwards.length === 3
-    ) {
-      console.log("team is full");
-    }
     try {
       const res = await setPicks({
         picks,
@@ -152,6 +151,7 @@ const PicksPlatform = (props) => {
         <Button onClick={reset} style={{ color: "white" }} className="btn-dark">
           Reset
         </Button>
+        {isSmallScreen && <button onClick={goBack} className="btn btn-primary">Go To Players</button>}
       </div>
       <div className="no-picks-team">
         <div className="default-player">
@@ -162,8 +162,10 @@ const PicksPlatform = (props) => {
               transfersOut={transfersOut}
               transfersIn={transfersIn}
                 removePlayer={removePlayer}
+                restore={restore}
                 baller={x}
                 posName={"GKP"}
+                outMap={outMap}
               ></SquadPlayer>
             </div>
           ))}
@@ -175,7 +177,9 @@ const PicksPlatform = (props) => {
               scrollToPlayers={scrollToPlayers}
               transfersOut={transfersOut}
               transfersIn={transfersIn}
+              outMap={outMap}
                 removePlayer={removePlayer}
+                restore={restore}
                 baller={x}
                 posName={"DEF"}
               ></SquadPlayer> 
@@ -189,7 +193,9 @@ const PicksPlatform = (props) => {
               scrollToPlayers={scrollToPlayers}
               transfersOut={transfersOut}
               transfersIn={transfersIn}
+              outMap={outMap}
                 removePlayer={removePlayer}
+                restore={restore}
                 baller={x}
                 posName={"MID"}
               ></SquadPlayer>
@@ -203,7 +209,9 @@ const PicksPlatform = (props) => {
               scrollToPlayers={scrollToPlayers}
               transfersOut={transfersOut}
               transfersIn={transfersIn}
+              outMap={outMap}
                 removePlayer={removePlayer}
+                restore={restore}
                 baller={x}
                 posName={"FWD"}
               ></SquadPlayer>

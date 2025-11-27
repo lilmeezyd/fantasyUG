@@ -18,7 +18,9 @@ const Players = (props) => {
     addPlayer,
     transferView,
     goUp,
+    isSmallScreen,
     removePlayer,
+    gotoPicks,
     picks,
     GKP,
     DEF,
@@ -89,7 +91,6 @@ const Players = (props) => {
     dispatch({ type: "VIEW", data: transferView });
     setCurPage(1);
   }, [transferView]);
-  console.log(view);
 
   const allPlayers = getPlayers(
     players,
@@ -121,6 +122,11 @@ const Players = (props) => {
   }, [maxPrice]);
   {
     /* Button Controls */
+    
+  }
+
+  const goBack = () => {
+    gotoPicks();
   }
   const onSubmit = (e) => {
     e.preventDefault();
@@ -199,6 +205,7 @@ const Players = (props) => {
           <div className="players-container">
             <div className="players-heading-container">
               <h4 className="players-heading">Player Selection</h4>
+              {isSmallScreen && <button onClick={goBack} style={{fontWeight: 700}} className="btn btn-primary">Go To Picks</button>}
             </div>
             <div className="plan-form">
               <form>
@@ -514,9 +521,9 @@ const Players = (props) => {
           )}
         </Suspense>
 
-        <button onClick={goUp} className="upbutton btn-controls">
+        {/*<button onClick={goUp} className="upbutton btn-controls">
           <BsChevronUp />
-        </button>
+        </button>*/}
       </div>
     </div>
   );

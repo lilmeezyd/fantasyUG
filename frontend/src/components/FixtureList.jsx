@@ -35,7 +35,6 @@ const FixtureList = (props) => {
         setMaxGW(largest)
         setPage(nextId)
     }, [matchdays])
-    console.log(copy)
 
   const onDecrement = () => {
     setPage((prevState) => prevState - 1);

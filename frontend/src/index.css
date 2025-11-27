@@ -497,6 +497,7 @@ form.login-cs {
   padding: 0.1rem 0.5rem;
   display: flex;
   align-items: center;
+  justify-content: space-between;
 }
 
 .players-table {
@@ -821,7 +822,7 @@ form.login-cs {
   padding: 0 0.5rem
 }
 
-@media (max-width: 970px) {
+@media (max-width: 768px) {
   .main {
     width: 100%;
     grid-template-columns: 1fr;
@@ -1116,9 +1117,9 @@ form.login-cs {
 }
 
 .empty-btn {
-  background: darkgoldenrod;
+  /*background: darkgoldenrod;*/
   height: 100%;
-  border: 1px solid rgba(0, 0, 0);
+  opacity: 0.5;
   border-radius: 0.5rem;
   /* border-radius: 0.8rem;*/
 }
@@ -1126,6 +1127,10 @@ form.login-cs {
 .p-holder {
   font-weight: 600;
   font-style: italic;
+  position: absolute;
+  bottom: 50%;
+  right: 50%;
+  transform: translate(50%, -50%);
 }
 
 .namesection {

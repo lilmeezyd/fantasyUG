@@ -15,7 +15,8 @@ const TeamOfWeek = () => {
   const { data: maxId, isLoading } = useGetMaxIdQuery();
   const { data = [], isLoading: getAllLoading } = useGetAllTOWsQuery();
   const { data: tows } = useGetMatchdayTOWQuery(matchdayId);
-  const minId = 1;
+  const { data: matchdays = [] } = useGetMatchdaysQuery();
+  const minId = matchdays.length > 0 ? Math.min(...matchdays.map(x => x.id)) : 1;
 
   useEffect(() => {
     setMatchdayId(maxId);

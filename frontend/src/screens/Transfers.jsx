@@ -11,6 +11,8 @@ import FixtureList from "../components/FixtureList";
 const Transfers = () => {
   const playersRef = useRef(null);
   const upRef = useRef(null);
+  const [ platform, setPlatform ] = useState({playersPlatform: false, picksPlatform: true})
+  const [ isSmallScreen, setIsSmallScreen ] = useState(window.innerWidth < 768)
   const [transferView, setTransferView] = useState("");
   const { data: players } = useGetPlayersQuery();
   const { data: teams } = useGetQuery();
@@ -548,14 +550,25 @@ const Transfers = () => {
   });
   const { GKP, DEF, MID, FWD, picks, errorMsg, transfersOut, transfersIn } =
     state;
+    const { playersPlatform, picksPlatform } = platform
   const totalPlayers = GKP + DEF + MID + FWD;
   const teamValue = picks?.reduce((x, y) => x + +y.nowCost, 0);
   const itb = 100 - teamValue;
+  const outMap = new Map(transfersOut.map(x => [x.slot, x])) || {}
 
   const gotoPlayers = (data) => {
+    setPlatform((prev) => ({picksPlatform: false, playersPlatform: true}));
     setTransferView(`position_${data}`);
-    playersRef.current.scrollIntoView({ behavior: "smooth" });
+    /*playersRef.current.scrollIntoView({ behavior: "smooth" });*/
   };
+
+  const gotoPicks = () => {
+    setPlatform((prev) => ({picksPlatform: true, playersPlatform: false}));
+  }
+  
+  const gotoPlayersList = () => {
+    setPlatform((prev) => ({picksPlatform: false, playersPlatform: true}));
+  }
 
   const goUp = () => upRef.current.scrollIntoView({ behavior: "smooth" });
 
@@ -576,6 +589,14 @@ const Transfers = () => {
       },
     });
   }, [data]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsSmallScreen(window.innerWidth < 768)
+    }
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  },[])
 
   const addPlayer = (data) => {
     const { shortPos, ...rest } = data;
@@ -637,7 +658,8 @@ const Transfers = () => {
   return (
     <>
       <div ref={upRef} className="main">
-        <PicksPlatform
+        {(picksPlatform || isSmallScreen === false) && <PicksPlatform
+          picksPlatform={picksPlatform}
           scrollToPlayers={gotoPlayers}
           isLoading={isLoading}
           id={data}
@@ -650,11 +672,15 @@ const Transfers = () => {
           totalPlayers={totalPlayers}
           picks={picks}
           removePlayer={removePlayer}
+          restore={addPlayer}
           transfersOut={transfersOut}
           transfersIn={transfersIn}
-        />
-        <div ref={playersRef}>
-          <Players
+          outMap={outMap}
+          gotoPlayersList={gotoPlayersList}
+          isSmallScreen={isSmallScreen}
+        />}
+        <div className="hide-platform">
+          {(playersPlatform || isSmallScreen === false) && <Players
             GKP={GKP}
             DEF={DEF}
             MID={MID}
@@ -665,7 +691,9 @@ const Transfers = () => {
             picks={picks}
             removePlayer={removePlayer}
             addPlayer={addPlayer}
-          />
+            gotoPicks={gotoPicks}
+            isSmallScreen={isSmallScreen}
+          />}
         </div>
       </div>
 
