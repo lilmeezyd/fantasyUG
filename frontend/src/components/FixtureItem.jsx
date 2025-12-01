@@ -38,7 +38,7 @@ const FixtureItem = (props) => {
           <img src={`../${teams?.find((team) => team._id === x.teamHome)?.shortName}.png`} alt="logo" />
         </div>
       </div>
-      <div className="time-score">
+      <div className={`time-score ${x.live ? 'bg-color' : ''}`}>
         <div className={`${x?.stats?.length > 0 ? "score" : "time-1"}`}>
           {x?.stats?.length > 0
             ? x?.stats

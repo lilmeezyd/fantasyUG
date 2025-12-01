@@ -51,6 +51,8 @@ const PlayerInfo = (props) => {
     setFixId(fixtureId)
     setId(mid?.toString());
   }, [player]);
+  console.log(copyFix)
+  console.log(fixId)
 
   const showHistory = async (md) => {
     setFixId(md);

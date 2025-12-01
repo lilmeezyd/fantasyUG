@@ -7,8 +7,14 @@ export const transferApiSlice = apiSlice.injectEndpoints({
                 url: `${TRANSFERS_URL}/${id}`
             }),
             providesTags: ['Transfer']
+        }),
+        getNextMatchdayDetails: builder.query({
+            query: () => ({
+                url: `${TRANSFERS_URL}/next-md-details`
+            }),
+            providesTags: ['Transfer']
         })
     })
 })
 
-export const { useGetTransfersQuery } = transferApiSlice
+export const { useGetTransfersQuery, useGetNextMatchdayDetailsQuery } = transferApiSlice

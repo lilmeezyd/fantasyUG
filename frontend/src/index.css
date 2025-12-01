@@ -136,8 +136,9 @@ form.login-cs {
 }
 
 .home-section {
-  display: flex;
-  gap: 15px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 5px;
 }
 
 .home-name {
@@ -160,24 +161,27 @@ form.login-cs {
 .most-owned {
   cursor: pointer;
 }
-
+/*
 @media(max-width: 760px) {
   .home-section {
     flex-direction: column;
   }
-}
+}*/
 
 .home-section-sub {
-  flex: 1 0 0%;
-  text-align: center;
-  padding: 1rem 0;
-  border: 1px solid #aaa;
-  /*background: linear-gradient(45deg, aquamarine, #0000ff57);*/
-  background: linear-gradient(#7ecf8f, #3e944a);
+  border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 0.5rem;
-  font-weight: 700;
 }
-
+.home-section-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 5px;
+}
+.home-section-grid-sub {
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 0.5rem;
+}
+/*
 .home-section-details {
   display: flex;
   padding: 0.25rem;
@@ -196,7 +200,7 @@ form.login-cs {
 
 .home-section-details:nth-of-type(odd) {
   background: white;
-}
+}*/
 
 .stars {
   /*background: linear-gradient(45deg, aquamarine, #0000ff57);*/
@@ -1366,7 +1370,7 @@ form.login-cs {
 .fix-body {
   padding: 1rem 0;
   overflow-x: auto;
-}
+} 
 
 .fix-admin-buttons {
   display: grid;
