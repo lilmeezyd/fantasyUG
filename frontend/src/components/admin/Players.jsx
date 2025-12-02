@@ -84,7 +84,7 @@ const Players = () => {
   const { sort, view, cutPrice } = state;
 
   const upPlayers = getPlayers(
-    players,
+    players?.updatedPlayers,
     sort,
     view,
     word,

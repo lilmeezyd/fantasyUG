@@ -12,7 +12,6 @@ const MDStar = (props) => {
   const image = teams?.find((team) => team?._id === player?.playerTeam)?.code;
   const points = player?.results?.filter((x) => x?.matchday === _id)?.reduce((a,b) => a+b.totalPoints,0);
   const handleShow = () => {};
-  console.log(players)
   return (
     <>
       {topPlayer ? (

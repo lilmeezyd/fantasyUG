@@ -59,7 +59,7 @@ const setInitial= async (x, y) => {
 const createStats = (field, ground) => {
   return x?.stats?.length > 0 && x?.stats?.filter(x => x.identifier === field)[0][ground].map((x) => (
       <p key={x.player} className="player">
-          <span className="stats">{players?.find(player => player._id === x.player).appName}</span>
+          <span className="stats">{players?.updatedPlayers?.find(player => player._id === x.player).appName}</span>
           <span>({x.value})</span></p>
   ))
 }

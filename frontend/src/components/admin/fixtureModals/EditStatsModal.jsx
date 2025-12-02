@@ -92,7 +92,7 @@ const { identifier, homeAway, player, value } = data
                 <div>Select Players</div>
 
                 {homeAway === "home" &&
-                  players?.filter(
+                  players?.updatedPlayers?.filter(
                       (x) => x.playerTeam.toString() === fixture?.teamHome?.toString()
                     )?.map((player) => (
                       <div key={player._id}>
@@ -102,7 +102,7 @@ const { identifier, homeAway, player, value } = data
                     ))}
 
                 {homeAway === "away" &&
-                  players?.filter(
+                  players?.updatedPlayers?.filter(
                       (x) => x.playerTeam.toString() === fixture?.teamAway?.toString()
                     )?.map((player) => (
                       <div key={player._id}>
