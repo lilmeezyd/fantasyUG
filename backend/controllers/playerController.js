@@ -7,7 +7,9 @@ import PlayerHistory from "../models/playerHistoryModel.js";
 import { getAllManagers } from "./userController.js";
 import Picks from "../models/picksModel.js";
 import ManagerInfo from "../models/managerInfoModel.js";
-import Matchday from "../models/matchdayModel.js"
+import Matchday from "../models/matchdayModel.js";
+import ManagerLive from "../models/managerLive.js";
+import Team from "../models/teamModel.js";
 
 //@desc Set Player
 //@route POST /api/players
@@ -79,23 +81,73 @@ const setPlayer = asyncHandler(async (req, res) => {
 //@access public
 //@role not restricted
 const getPlayers = asyncHandler(async (req, res) => {
+  const teams = await Team.find({});
   const players = await Player.find({});
   const positions = await Position.find({});
-  const matchdays = await Matchday.find({}).lean()
-  const matchDayNext =  await Matchday.findOne({next: true});
-  const idNeeded = matchDayNext ? matchDayNext.id : Math.max(...matchdays.map(x => x.id))
-  const managers = await ManagerInfo.find({matchdayJoined: {$lte: idNeeded}}).lean();
-  const managerArray = managers.map(x => x._id)
+  const matchdays = await Matchday.find({}).lean();
+  const matchDayNext = await Matchday.findOne({ next: true });
+  const idNeeded = matchDayNext
+    ? matchDayNext.id
+    : Math.max(...matchdays.map((x) => x.id));
+  const managers = await ManagerInfo.find({
+    matchdayJoined: { $lte: idNeeded },
+  }).lean();
+  const managerArray = managers.map((x) => x._id);
   const picks = await Picks.aggregate([
-    {$match: {manager: { $in: managerArray}}},
+    { $match: { manager: { $in: managerArray } } },
     { $unwind: "$picks" },
     { $group: { _id: "$picks._id", total: { $sum: 1 } } },
   ]);
-  
-  const playerCountMap = new Map(picks.map(x => [x._id.toString(), x.total]))
+
+  const lives = await ManagerLive.aggregate([
+    { $unwind: "$livePicks" },
+    { $unwind: "$livePicks.picks" },
+    { $match: { "livePicks.picks.IsCaptain": true } },
+    {
+      $group: {
+        _id: {
+          matchday: "$livePicks.matchday",
+          player: "$livePicks.picks._id",
+        },
+        times: { $sum: 1 },
+      },
+    },
+    {
+      $group: {
+        _id: "$_id.matchday",
+        players: {
+          $push: {
+            player: "$_id.player",
+            times: "$times",
+          },
+        },
+        max: { $max: "$times" },
+      },
+    },
+    {
+      $project: {
+        _id: 1,
+        mostCaptained: {
+          $filter: {
+            input: "$players",
+            cond: { $eq: ["$$this.times", "$max"] },
+          },
+        },
+      },
+    },
+    { $sort: { _id: 1 } },
+  ]);
+
+  console.log(lives);
+
+  const playerCountMap = new Map(picks.map((x) => [x._id.toString(), x.total]));
   const numberOfManagers = await getAllManagers();
   const positionMap = new Map();
   positions.map((x) => (positionMap[x._id] = x.code));
+  const playerMap = new Map(players.map((x) => [x._id.toString(), x.appName]));
+  const teamMap = new Map(teams.map((x) => [x._id.toString(), x.name]));
+  const teamCodeMap = new Map(teams.map((x) => [x._id.toString(), x.code]));
+  const positionNameMap = new Map(positions.map((x) => [x._id.toString(), x.shortName]));
 
   if (players) {
     const updatedPlayers = players
@@ -120,10 +172,11 @@ const getPlayers = asyncHandler(async (req, res) => {
           saves,
           cleansheets,
           starts,
-          playerCount
+          playerCount,
         } = player;
-        const b =
-          !playerCountMap.get(_id.toString()) ? 0 : (playerCountMap.get(_id.toString()) / managers.length) * 100;
+        const b = !playerCountMap.get(_id.toString())
+          ? 0
+          : (playerCountMap.get(_id.toString()) / managers.length) * 100;
         return {
           _id,
           firstName,
@@ -144,11 +197,23 @@ const getPlayers = asyncHandler(async (req, res) => {
           saves,
           cleansheets,
           starts,
+          playerTeamName: teamMap.get(playerTeam.toString()),
+          playerPositionName: positionNameMap.get(playerPosition.toString()),
+          forwardImage:
+            playerPosition === 1
+              ? `${teamCodeMap.get(playerTeam.toString())}_1-66`
+              : `${teamCodeMap.get(playerTeam.toString())}-66`,
           ownership: `${b?.toFixed(1)}`,
         };
       })
       .sort((a, b) => (a.appName - b.appName ? 1 : -1));
-    res.status(200).json(updatedPlayers);
+    const max = updatedPlayers.length
+      ? Math.max(...updatedPlayers.map((x) => +x.ownership))
+      : 0;
+    const highestOwned = updatedPlayers.length
+      ? updatedPlayers.filter((x) => +x.ownership === max).slice(0,5)
+      : [];
+    res.status(200).json({ highestOwned, updatedPlayers });
   }
 });
 

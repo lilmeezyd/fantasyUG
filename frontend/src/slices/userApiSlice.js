@@ -38,7 +38,13 @@ export const userApiSlice = apiSlice.injectEndpoints({
         url: `${USERS_URL}/totalManagers`
       }),
       providesTags: ['User']
-    })
+    }),
+    getMe:  builder.query({
+      query: () => ({
+        url: `${USERS_URL}/me`
+      }),
+      providesTags: ['User']
+    }),
   }),
 });
 
@@ -47,5 +53,6 @@ export const {
   useRegisterMutation,
   useLogoutMutation,
   useUpdateUserMutation,
-  useGetTotalQuery
+  useGetTotalQuery,
+  useGetMeQuery
 } = userApiSlice;

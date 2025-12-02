@@ -632,8 +632,7 @@ const Transfers = () => {
     const idFWD = picks.filter((x) => x.playerPosition === 4).map((x) => x._id);
 
     const autoPickFunc = (picks, max, available, pos, posId) => {
-      const autoPlay = players
-        .filter(
+      const autoPlay = players?.updatedPlayers?.filter(
           (player) =>
             player.playerPosition === posId && !picks.includes(player._id)
         )
@@ -667,7 +666,7 @@ const Transfers = () => {
           reset={reset}
           auto={auto}
           itb={itb}
-          players={players}
+          players={players?.updatedPlayers}
           teams={teams}
           totalPlayers={totalPlayers}
           picks={picks}

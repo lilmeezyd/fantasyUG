@@ -5,13 +5,14 @@ import { useGetPlayersQuery } from "../slices/playerApiSlice";
 const MDStar = (props) => {
   const { id, _id, topPlayer } = props;
   const { data: player } = useGetPlayerQuery(topPlayer);
-  const { data: players } = useGetPlayersQuery();
+  const { data: players = [] } = useGetPlayersQuery();
   const { data: teams } = useGetQuery();
-  const appName = players?.find((play) => play._id === topPlayer)?.appName;
-  const nowCost = players?.find((play) => play._id === topPlayer)?.nowCost;
+  const appName = players?.updatedPlayers?.find((play) => play._id === topPlayer)?.appName;
+  const nowCost = players?.updatedPlayers?.find((play) => play._id === topPlayer)?.nowCost;
   const image = teams?.find((team) => team?._id === player?.playerTeam)?.code;
   const points = player?.results?.filter((x) => x?.matchday === _id)?.reduce((a,b) => a+b.totalPoints,0);
   const handleShow = () => {};
+  console.log(players)
   return (
     <>
       {topPlayer ? (

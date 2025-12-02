@@ -383,8 +383,7 @@ const CreateTeam = () => {
     const idFWD = picks.filter((x) => x.playerPosition === 4).map((x) => x._id);
 
     const autoPickFunc = (picks, max, available, pos, posId) => {
-      const autoPlay = players
-      .filter(
+      const autoPlay = players?.updatedPlayers?.filter(
         (player) => player.playerPosition === posId && !picks.includes(player._id)
       )
       .slice(0, (max-available));

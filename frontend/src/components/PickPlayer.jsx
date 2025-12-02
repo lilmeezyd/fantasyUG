@@ -20,8 +20,8 @@ const PickPlayer = (props) => {
 
   const mdId = matchdays?.find((matchday) => matchday?.next === true)?.id;
   const mdFixs = fixtures?.find((x) => x?._id?.id === mdId)?.fixtures;
-  const appName = players?.find((player) => player._id === baller._id)?.appName;
-  const nowCost = players?.find((player) => player._id === baller._id)?.nowCost;
+  const appName = players?.updatedPlayers?.find((player) => player._id === baller._id)?.appName;
+  const nowCost = players?.updatedPlayers?.find((player) => player._id === baller._id)?.nowCost;
   const teamCode = teams?.find((team) => team?._id === baller?.playerTeam)?.code
   const image = baller?.playerPosition === 1 ? `${teamCode}_1` : teamCode
   const opponentFixArr = mdFixs?.filter(
@@ -171,7 +171,7 @@ const PickPlayer = (props) => {
           switchCaptain={switchCaptain}
           switchVice={switchVice}
           inform={inform}
-          players={players}
+          players={players?.updatedPlayers}
           handleClose={handleClose}
           show={show}
           baller={baller}

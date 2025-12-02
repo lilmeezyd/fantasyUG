@@ -304,7 +304,7 @@ const PicksPlatform = (props) => {
       )}
       {userInfo?.hasPicks && (<TransferModal show={show} closeTransfers={closeTransfers} onSave={onSave}
       transfersIn={transfersIn}
-      transfersOut={transfersOut} teams={teams} players={players}/>)}
+      transfersOut={transfersOut} teams={teams} players={players?.updatedPlayers}/>)}
     </div>
   );
 };

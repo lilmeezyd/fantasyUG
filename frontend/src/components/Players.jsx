@@ -84,7 +84,6 @@ const Players = (props) => {
     sortWord: "Points",
     cutPrice: 25,
   });
-
   const { sort, view, word, cutPrice, sortWord } = state;
   const { data: totalPlayers } = useGetTotalQuery();
   useEffect(() => {
@@ -93,7 +92,7 @@ const Players = (props) => {
   }, [transferView]);
 
   const allPlayers = getPlayers(
-    players,
+    players?.updatedPlayers,
     sort,
     view,
     word,
@@ -112,7 +111,7 @@ const Players = (props) => {
     pageSize
   ).midfielders;
   const forwards = getArrangedPlayers(allPlayers, curPage, pageSize).forwards;
-  const prices = getMinMax(players).prices;
+  const prices = getMinMax(players?.updatedPlayers).prices;
   const minPrice = getMinMax(allPlayers).minPrice;
   const maxPrice = getMinMax(allPlayers).maxPrice;
   let totalPages = Math.ceil(allPlayers?.length / pageSize);
@@ -300,7 +299,7 @@ const Players = (props) => {
         </div>
 
         <Suspense fallback={<Spinner />}>
-          {players?.length ? (
+          {players?.updatedPlayers?.length ? (
             <div className="player-info">
               <div className="player-numbers">
                 <span className="number">{allPlayers?.length}</span>

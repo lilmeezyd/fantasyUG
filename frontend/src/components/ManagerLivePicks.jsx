@@ -69,7 +69,7 @@ const ManagerPicks = (props) => {
             <div key={x.slot} className="squad-player">
               <LivePlayer
                 teams={teams}
-                players={players}
+                players={players?.updatedPlayers}
                 matchday={matchday}
                 matchdayId={matchdayId}
                 slot={x.slot}
@@ -85,7 +85,7 @@ const ManagerPicks = (props) => {
             <div key={x.slot} className="squad-player">
               <LivePlayer
                 teams={teams}
-                players={players}
+                players={players?.updatedPlayers}
                 matchday={matchday}
                 matchdayId={matchdayId}
                 slot={x.slot}
@@ -101,7 +101,7 @@ const ManagerPicks = (props) => {
             <div key={x.slot} className="squad-player">
               <LivePlayer
                 teams={teams}
-                players={players}
+                players={players?.updatedPlayers}
                 matchday={matchday}
                 matchdayId={matchdayId}
                 slot={x.slot}
@@ -117,7 +117,7 @@ const ManagerPicks = (props) => {
             <div key={x.slot} className="squad-player">
               <LivePlayer
                 teams={teams}
-                players={players}
+                players={players?.updatedPlayers}
                 matchday={matchday}
                 matchdayId={matchdayId}
                 slot={x.slot}
@@ -141,7 +141,7 @@ const ManagerPicks = (props) => {
               </div>
               <LivePlayer
                 teams={teams}
-                players={players}
+                players={players?.updatedPlayers}
                 slot={x.slot}
                 matchday={matchday}
                 matchdayId={matchdayId}
@@ -166,8 +166,8 @@ const ManagerPicks = (props) => {
           </div>
           {automaticSubs?.map((x, idx) => (
             <div className="auto-class" key={idx + 1}>
-              <div className="ac">{players?.find((y) => y?._id === x?.in?._id)?.appName}</div>
-              <div className="ac">{players?.find((y) => y?._id === x?.out?._id)?.appName}</div>
+              <div className="ac">{players?.updatedPlayers?.find((y) => y?._id === x?.in?._id)?.appName}</div>
+              <div className="ac">{players?.updatedPlayers?.find((y) => y?._id === x?.out?._id)?.appName}</div>
             </div>
           ))}
           </div>

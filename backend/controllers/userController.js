@@ -143,7 +143,21 @@ const updateHasPicks = asyncHandler(async (userId, session, req, res) => {
   return user
 })
 
+const getProfile = asyncHandler(async (req, res) => {
+  if (!req.user) {
+    //return res.status(401).json({ message: "Unauthorized" });
+    throw new Error(`Unauthorized`);
+  }
+
+  res.status(200).json({
+    _id: req.user._id,
+    name: req.user.name,
+    email: req.user.email,
+  });
+});
+
 export {
+  getProfile,
   updateHasPicks,
   authUser,
   registerUser,

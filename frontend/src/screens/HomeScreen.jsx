@@ -5,17 +5,18 @@ import MostOwned from "../components/MostOwned";
 import TeamOfWeek from "../components/TeamOfWeek";
 import StarsOfWeek from "../components/StarsOfWeek";
 import { useGetNextMatchdayDetailsQuery } from "../slices/transferApiSlice";
+import { useGetPlayersQuery } from "../slices/playerApiSlice";
 import PlayerInfo from "../components/PlayerInfo";
 const HomeScreen = () => {
   const { userInfo } = useSelector((state) => state.auth);
   const { data = [] } = useGetNextMatchdayDetailsQuery();
+  const { data: players = [] } = useGetPlayersQuery()
   const [transfers, setTransfers] = useState({
     transfersIn: [],
     transfersOut: [],
   });
   const [showPInfo, setShowPInfo] = useState(false);
   const { transfersIn, transfersOut } = transfers;
-  console.log(data);
   useEffect(() => {
     const transIn = data?.transfersIn || [];
     const transOut = data?.transfersOut || [];
@@ -47,6 +48,68 @@ const HomeScreen = () => {
           <div className="home-section-grid-sub">
             <div>
               <h4 className="p-2">Highest Owned</h4>
+              <div class="player-header-1">
+                  <div class="info"></div>
+                  <div class="position-table-1">
+                    <div class="p-t-1"></div>
+                  </div>
+                  <div class="money"></div>
+                  <div class="others">Ownership</div>
+                </div>
+              {players?.highestOwned?.length > 0 ? (
+                <>
+                {players?.highestOwned?.map(player => (
+                  <div className="player-tbh">
+                    <div className="info">
+                      {/* <button
+                        onClick={getInfo}
+                        className="player-info-button-table"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="16"
+                          height="16"
+                          fill="currentColor"
+                          className="bi bi-info-square"
+                          viewBox="0 0 16 16"
+                        >
+                          <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z" />
+                          <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z" />
+                        </svg>
+                      </button>*/}
+                    </div>
+                    <div className="position-table-1">
+                      <button
+                        style={{ fontWeight: "700" }}
+                        className="player-cell btn-table"
+                      >
+                        <div className="images">
+                          <img
+                            src={`../shirt_${player.forwardImage}.svg`}
+                            alt={player.forwardImage}
+                          />
+                        </div>
+                        <div className="player-cell-info">
+                          <div className="name-1">{player.appName}</div>
+                          <div className="player-cell-details">
+                            <div className="team_name">
+                              {player.playerTeamName}
+                            </div>
+                            <div className="position">
+                              {player.playerPositionName}
+                            </div>
+                          </div>
+                        </div>
+                      </button>
+                    </div>
+                    <div></div>
+                    <div className="points others">{player.ownership}%</div>
+                  </div>
+                ))}
+                </>
+              ) : (
+                "No Data yet"
+              ) }
             </div>
           </div>
           <div className="home-section-grid-sub">

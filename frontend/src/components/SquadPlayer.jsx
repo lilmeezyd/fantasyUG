@@ -30,10 +30,10 @@ const SquadPlayer = (props) => {
 
   const outBaller = outMap?.get(baller?.slot) || {};
   const ballerObj = baller._id ? baller : outBaller;
-  const appName = players?.find(
+  const appName = players?.updatedPlayers?.find(
     (player) => player._id === ballerObj._id
   )?.appName;
-  const nowCost = players?.find(
+  const nowCost = players?.updatedPlayers?.find(
     (player) => player._id === ballerObj._id
   )?.nowCost;
   const teamCode = teams?.find(
@@ -159,7 +159,7 @@ const SquadPlayer = (props) => {
           elementTypes={elementTypes}
           removePlayer={removePlayer}
           restore={restore}
-          players={players}
+          players={players?.updatedPlayers}
           handleClose={handleClose}
           show={show}
           baller={ballerObj}

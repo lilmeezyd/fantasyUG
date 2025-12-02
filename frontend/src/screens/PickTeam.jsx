@@ -8,7 +8,7 @@ import { useSelector } from "react-redux";
 import { useGetManagerInfoQuery } from "../slices/managerInfoApiSlice";
 import { useGetPicksQuery } from "../slices/picksSlice";
 
-const PickTeam = () => {
+const PickTeam = () => { 
   const { userInfo } = useSelector((state) => state.auth);
   const { data: managerInfo } = useGetManagerInfoQuery(userInfo?._id);
   const { data: managerPicks, isLoading } = useGetPicksQuery(userInfo?._id);

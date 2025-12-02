@@ -67,7 +67,7 @@ const getTransferDetails = asyncHandler(async (req, res) => {
   const nextMatchday = await Matchday.findOne({ next: true });
   //const transfers = await TransfersModel.find({matchday: nextMatchday._id})
   const transfersIn = await TransfersModel.aggregate([
-    {$match: {matchday: nextMatchday._id}},
+    {$match: {matchday: nextMatchday?._id}},
     {
       $group: {
         _id: "$transferIn._id",
@@ -78,7 +78,7 @@ const getTransferDetails = asyncHandler(async (req, res) => {
     },
   ]);
   const transfersOut = await TransfersModel.aggregate([
-    {$match: {matchday: nextMatchday._id}},
+    {$match: {matchday: nextMatchday?._id}},
     {
       $group: {
         _id: "$transferOut._id",
