@@ -15,10 +15,11 @@ const TeamOfWeek = () => {
   const [matchdayId, setMatchdayId] = useState(null);
   const { data: maxId, isLoading } = useGetMaxIdQuery();
   const { data = [], isLoading: getAllLoading } = useGetAllTOWsQuery();
-  const { data: tows } = useGetMatchdayTOWQuery(matchdayId);
+  //const { data: tows } = useGetMatchdayTOWQuery(matchdayId);
   const { data: matchdays = [] } = useGetMatchdaysQuery();
   const { data: teams = [] } = useGetQuery();
-  const minId = matchdays.length > 0 ? Math.min(...matchdays.map(x => x.id)) : 1;
+  const minId =
+    matchdays.length > 0 ? Math.min(...matchdays.map((x) => x.id)) : 1;
 
   useEffect(() => {
     setMatchdayId(maxId);
@@ -37,15 +38,20 @@ const TeamOfWeek = () => {
     if (all !== undefined && all.length > 0) {
       newOnes.push(...all[0].starOnes);
     }
-    return newOnes.map(x => {
-      return {
-        ...x, 
-        appName: x.player,
-        playerTeam: teamMap.get(x.playerTeam.toString()), playerPosition: x.position, forwardImage: x.playerPosition === 1
-          ? `${teamCodeMap.get(x.playerTeam.toString())}_1-66`
-          : `${teamCodeMap.get(x.playerTeam.toString())}-66`
-      }
-    }).sort((a, b) => (a.code > b.code ? 1 : -1));
+    return newOnes
+      .map((x) => {
+        return {
+          ...x,
+          appName: x.player,
+          playerTeam: teamMap.get(x.playerTeam.toString()),
+          playerPosition: x.position,
+          forwardImage:
+            x.playerPosition === 1
+              ? `${teamCodeMap.get(x.playerTeam.toString())}_1-66`
+              : `${teamCodeMap.get(x.playerTeam.toString())}-66`,
+        };
+      })
+      .sort((a, b) => (a.code > b.code ? 1 : -1));
   }, [matchdayId, data, teams]);
 
   const goalkeepers = allArrays?.filter((pick) => pick?.code === 1);
@@ -81,9 +87,7 @@ const TeamOfWeek = () => {
   return (
     <>
       {data?.length === 0 ? (
-        <div>
-          No stars of the matchday yet
-        </div>
+        <div>No stars of the matchday yet</div>
       ) : (
         <div className="home-section-sub">
           <section className="btn-wrapper p-2">
@@ -106,17 +110,13 @@ const TeamOfWeek = () => {
           </section>
           {/*<h6 className="home-stars">Stars of Matchday {matchdayId}</h6>*/}
           <div>
-              <h4 className="p-2">Stars of Matchday {matchdayId}</h4>
-            </div>
+            <h4 className="p-2">Stars of Matchday {matchdayId}</h4>
+          </div>
           {allArrays?.length === 0 ? (
-            <div
-              className="p-2"
-            >
-              No stars yet
-            </div>
+            <div className="p-2">No stars yet</div>
           ) : (
             <>
-            {/*<>
+              {/*<>
 
               <div className="default-player">
                 {goalkeepers?.map((x) => (
@@ -159,18 +159,18 @@ const TeamOfWeek = () => {
                 ))}
               </div>
             </>*/}
-            <div class="player-header-1">
-                  <div class="info"></div>
-                  <div class="position-table-1">
-                    <div class="p-t-1"></div>
-                  </div>
-                  <div class="money"></div>
-                  <div class="others">Points</div>
+              <div class="player-header-1">
+                <div class="info"></div>
+                <div class="position-table-1">
+                  <div class="p-t-1">Player</div>
                 </div>
-                {goalkeepers?.map((teamPlayer) => (
-                  <div className="player-tbh">
-                    <div className="info">
-                      {/*<button
+                <div class="money"></div>
+                <div class="others">Points</div>
+              </div>
+              {goalkeepers?.map((teamPlayer) => (
+                <div key={teamPlayer?.id} className="player-tbh">
+                  <div className="info">
+                    {/*<button
                         className="player-info-button-table"
                       >
                         <svg
@@ -185,39 +185,39 @@ const TeamOfWeek = () => {
                           <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z" />
                         </svg>
                       </button>*/}
-                    </div>
-                    <div className="position-table-1">
-                      <button
-                        style={{ fontWeight: "700" }}
-                        className="player-cell btn-table"
-                      >
-                        <div className="images">
-                          <img
-                            src={`../shirt_${teamPlayer.forwardImage}.svg`}
-                            alt={teamPlayer.forwardImage}
-                          />
-                        </div>
-                        <div className="player-cell-info">
-                          <div className="name-1">{teamPlayer.appName}</div>
-                          <div className="player-cell-details">
-                            <div className="team_name">
-                              {teamPlayer.playerTeam}
-                            </div>
-                            <div className="position">
-                              {teamPlayer.playerPosition}
-                            </div>
+                  </div>
+                  <div className="position-table-1">
+                    <button
+                      style={{ fontWeight: "700" }}
+                      className="player-cell btn-table"
+                    >
+                      <div className="images">
+                        <img
+                          src={`../shirt_${teamPlayer.forwardImage}.svg`}
+                          alt={teamPlayer.forwardImage}
+                        />
+                      </div>
+                      <div className="player-cell-info">
+                        <div className="name-1">{teamPlayer.appName}</div>
+                        <div className="player-cell-details">
+                          <div className="team_name">
+                            {teamPlayer.playerTeam}
+                          </div>
+                          <div className="position">
+                            {teamPlayer.playerPosition}
                           </div>
                         </div>
-                      </button>
-                    </div>
-                    <div></div>
-                    <div className="points others">{teamPlayer.totalPoints}</div>
+                      </div>
+                    </button>
                   </div>
-                ))}
-                {defenders?.map((teamPlayer) => (
-                  <div className="player-tbh">
-                    <div className="info">
-                      {/*<button
+                  <div></div>
+                  <div className="points others">{teamPlayer.totalPoints}</div>
+                </div>
+              ))}
+              {defenders?.map((teamPlayer) => (
+                <div key={teamPlayer?.id} className="player-tbh">
+                  <div className="info">
+                    {/*<button
                         className="player-info-button-table"
                       >
                         <svg
@@ -232,39 +232,39 @@ const TeamOfWeek = () => {
                           <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z" />
                         </svg>
                       </button>*/}
-                    </div>
-                    <div className="position-table-1">
-                      <button
-                        style={{ fontWeight: "700" }}
-                        className="player-cell btn-table"
-                      >
-                        <div className="images">
-                          <img
-                            src={`../shirt_${teamPlayer.forwardImage}.svg`}
-                            alt={teamPlayer.forwardImage}
-                          />
-                        </div>
-                        <div className="player-cell-info">
-                          <div className="name-1">{teamPlayer.appName}</div>
-                          <div className="player-cell-details">
-                            <div className="team_name">
-                              {teamPlayer.playerTeam}
-                            </div>
-                            <div className="position">
-                              {teamPlayer.playerPosition}
-                            </div>
+                  </div>
+                  <div className="position-table-1">
+                    <button
+                      style={{ fontWeight: "700" }}
+                      className="player-cell btn-table"
+                    >
+                      <div className="images">
+                        <img
+                          src={`../shirt_${teamPlayer.forwardImage}.svg`}
+                          alt={teamPlayer.forwardImage}
+                        />
+                      </div>
+                      <div className="player-cell-info">
+                        <div className="name-1">{teamPlayer.appName}</div>
+                        <div className="player-cell-details">
+                          <div className="team_name">
+                            {teamPlayer.playerTeam}
+                          </div>
+                          <div className="position">
+                            {teamPlayer.playerPosition}
                           </div>
                         </div>
-                      </button>
-                    </div>
-                    <div></div>
-                    <div className="points others">{teamPlayer.totalPoints}</div>
+                      </div>
+                    </button>
                   </div>
-                ))}
-                {midfielders?.map((teamPlayer) => (
-                  <div className="player-tbh">
-                    <div className="info">
-                      {/*<button
+                  <div></div>
+                  <div className="points others">{teamPlayer.totalPoints}</div>
+                </div>
+              ))}
+              {midfielders?.map((teamPlayer) => (
+                <div key={teamPlayer?.id} className="player-tbh">
+                  <div className="info">
+                    {/*<button
                         className="player-info-button-table"
                       >
                         <svg
@@ -279,39 +279,39 @@ const TeamOfWeek = () => {
                           <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z" />
                         </svg>
                       </button>*/}
-                    </div>
-                    <div className="position-table-1">
-                      <button
-                        style={{ fontWeight: "700" }}
-                        className="player-cell btn-table"
-                      >
-                        <div className="images">
-                          <img
-                            src={`../shirt_${teamPlayer.forwardImage}.svg`}
-                            alt={teamPlayer.forwardImage}
-                          />
-                        </div>
-                        <div className="player-cell-info">
-                          <div className="name-1">{teamPlayer.appName}</div>
-                          <div className="player-cell-details">
-                            <div className="team_name">
-                              {teamPlayer.playerTeam}
-                            </div>
-                            <div className="position">
-                              {teamPlayer.playerPosition}
-                            </div>
+                  </div>
+                  <div className="position-table-1">
+                    <button
+                      style={{ fontWeight: "700" }}
+                      className="player-cell btn-table"
+                    >
+                      <div className="images">
+                        <img
+                          src={`../shirt_${teamPlayer.forwardImage}.svg`}
+                          alt={teamPlayer.forwardImage}
+                        />
+                      </div>
+                      <div className="player-cell-info">
+                        <div className="name-1">{teamPlayer.appName}</div>
+                        <div className="player-cell-details">
+                          <div className="team_name">
+                            {teamPlayer.playerTeam}
+                          </div>
+                          <div className="position">
+                            {teamPlayer.playerPosition}
                           </div>
                         </div>
-                      </button>
-                    </div>
-                    <div></div>
-                    <div className="points others">{teamPlayer.totalPoints}</div>
+                      </div>
+                    </button>
                   </div>
-                ))}
-            {forwards?.map((teamPlayer) => (
-                  <div className="player-tbh">
-                    <div className="info">
-                      {/*<button
+                  <div></div>
+                  <div className="points others">{teamPlayer.totalPoints}</div>
+                </div>
+              ))}
+              {forwards?.map((teamPlayer) => (
+                <div key={teamPlayer?.id} className="player-tbh">
+                  <div className="info">
+                    {/*<button
                         className="player-info-button-table"
                       >
                         <svg
@@ -326,35 +326,35 @@ const TeamOfWeek = () => {
                           <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z" />
                         </svg>
                       </button>*/}
-                    </div>
-                    <div className="position-table-1">
-                      <button
-                        style={{ fontWeight: "700" }}
-                        className="player-cell btn-table"
-                      >
-                        <div className="images">
-                          <img
-                            src={`../shirt_${teamPlayer.forwardImage}.svg`}
-                            alt={teamPlayer.forwardImage}
-                          />
-                        </div>
-                        <div className="player-cell-info">
-                          <div className="name-1">{teamPlayer.appName}</div>
-                          <div className="player-cell-details">
-                            <div className="team_name">
-                              {teamPlayer.playerTeam}
-                            </div>
-                            <div className="position">
-                              {teamPlayer.playerPosition}
-                            </div>
+                  </div>
+                  <div className="position-table-1">
+                    <button
+                      style={{ fontWeight: "700" }}
+                      className="player-cell btn-table"
+                    >
+                      <div className="images">
+                        <img
+                          src={`../shirt_${teamPlayer.forwardImage}.svg`}
+                          alt={teamPlayer.forwardImage}
+                        />
+                      </div>
+                      <div className="player-cell-info">
+                        <div className="name-1">{teamPlayer.appName}</div>
+                        <div className="player-cell-details">
+                          <div className="team_name">
+                            {teamPlayer.playerTeam}
+                          </div>
+                          <div className="position">
+                            {teamPlayer.playerPosition}
                           </div>
                         </div>
-                      </button>
-                    </div>
-                    <div></div>
-                    <div className="points others">{teamPlayer.totalPoints}</div>
+                      </div>
+                    </button>
                   </div>
-                ))}
+                  <div></div>
+                  <div className="points others">{teamPlayer.totalPoints}</div>
+                </div>
+              ))}
             </>
           )}
         </div>

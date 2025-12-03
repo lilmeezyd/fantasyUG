@@ -74,7 +74,7 @@ const FixtureList = (props) => {
 
   return ( 
     <div className="fix-body">
-      {copy?.length && <section className="btn-wrapper p-2">
+      {copy?.length && <section className="btn-wrapper p-2"> 
         <button
           disabled={page === minGW ? true : false}
           onClick={onDecrement}
@@ -84,9 +84,9 @@ const FixtureList = (props) => {
           <BsChevronLeft />
         </button>
         <button
-          disabled={page === copy?.length ? true : false}
+          disabled={page === maxGW ? true : false}
           onClick={onIncrement}
-          className={`${page === copy?.length && "btn-hide"} btn-controls`}
+          className={`${page === maxGW && "btn-hide"} btn-controls`}
           id="nextButton"
         >
           <BsChevronRight />

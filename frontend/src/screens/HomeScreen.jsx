@@ -48,18 +48,18 @@ const HomeScreen = () => {
           <div className="home-section-grid-sub">
             <div>
               <h4 className="p-2">Highest Owned</h4>
-              <div class="player-header-1">
+              {players?.highestOwned?.length > 0 ? (
+                <>
+                <div class="player-header-1">
                   <div class="info"></div>
                   <div class="position-table-1">
-                    <div class="p-t-1"></div>
+                    <div class="p-t-1">Player</div>
                   </div>
                   <div class="money"></div>
                   <div class="others">Ownership</div>
                 </div>
-              {players?.highestOwned?.length > 0 ? (
-                <>
                 {players?.highestOwned?.map(player => (
-                  <div className="player-tbh">
+                  <div key={player?._id} className="player-tbh">
                     <div className="info">
                       {/* <button
                         onClick={getInfo}
@@ -139,7 +139,7 @@ const HomeScreen = () => {
                 <div class="player-header-1">
                   <div class="info"></div>
                   <div class="position-table-1">
-                    <div class="p-t-1"></div>
+                    <div class="p-t-1">Player</div>
                   </div>
                   <div class="money"></div>
                   <div class="others">Transfers</div>
@@ -206,7 +206,7 @@ const HomeScreen = () => {
                 <div class="player-header-1">
                   <div class="info"></div>
                   <div class="position-table-1">
-                    <div class="p-t-1"></div>
+                    <div class="p-t-1">Player</div>
                   </div>
                   <div class="money"></div>
                   <div class="others">Transfers</div>
