@@ -1,69 +1,85 @@
-import { useState, useEffect, useMemo } from "react";
-import { useGetQuery } from "../slices/teamApiSlice";
+import React, { useMemo, useState, useEffect } from "react";
+import { Modal } from "react-bootstrap";
+import { useGetQuery as useGetTeamsQuery } from "../slices/teamApiSlice";
 import { useGetPositionsQuery } from "../slices/positionApiSlice";
 import { useGetMatchdaysQuery } from "../slices/matchdayApiSlice";
-import { useGetHistoryQuery } from "../slices/playerApiSlice";
-import { Modal } from "react-bootstrap";
+import usePlayerHistory from "../hooks/usePlayerHistory";
+import useSafeFixtures from "../hooks/useSafeFixtures";
 import { getPm, getPmString } from "../utils/getPm";
-import getTime from "../utils/getTime";
+
 const PlayerInfo = (props) => {
   const { showPInfo, handleCloseInfo, player } = props;
-  /*const [matchdayAndWord, setMatchdayAndWord] = useState({
-    id: "",
-    matchday: "669a668a212789c00133c756",
-    infoWord: "res",
-    realInfo: "",
-  });*/
-  const [results, setResults] = useState(true);
-  const [fixtures, setFixtures] = useState(false);
-  const [copyFix, setCopyFix] = useState([]);
-  const [copyRes, setCopyRes] = useState([]);
-  const [id, setId] = useState(1);
-  const [fixId, setFixId] = useState(1);
-  const { data: teams } = useGetQuery();
-  const { data: elementTypes } = useGetPositionsQuery();
-  const { data: matchdays } = useGetMatchdaysQuery();
-  const { data: history } = useGetHistoryQuery(player?._id);
-  //const { id, matchday, infoWord, realInfo } = matchdayAndWord;
-  const playerTeam = teams?.find(
-    (team) => team?._id === player?.playerTeam
-  )?.name;
-  const shortTeamName = teams?.find(
-    (team) => team?._id === player?.playerTeam
-  )?.shortName;
-  const playerPosition = elementTypes?.find(
-    (x) => x?._id === player?.playerPosition
-  )?.singularName;
+
+  // Local UI state
+  const [selectedFixtureId, setSelectedFixtureId] = useState(null);
+
+  // Static data (can be hoisted to App for global loading/caching)
+  const { data: teams } = useGetTeamsQuery(undefined, { skip: false });
+  const { data: elementTypes } = useGetPositionsQuery(undefined, {
+    skip: false,
+  });
+  const { data: matchdays } = useGetMatchdaysQuery(undefined, { skip: false });
+
+  // Player-specific data
+  const history = usePlayerHistory(player?._id);
+
+  // Safe, memoized sorted fixtures array
+  const fixtures = useSafeFixtures(player?.fixtures);
+
+  // Derive player team and position safely
+  const playerTeamName = useMemo(() => {
+    if (!teams || !player) return "";
+    return teams.find((t) => t._id === player.playerTeam)?.name || "";
+  }, [teams, player]);
+
+  const playerShortTeam = useMemo(() => {
+    if (!teams || !player) return "";
+    return teams.find((t) => t._id === player.playerTeam)?.shortName || "";
+  }, [teams, player]);
+
+  const playerPosition = useMemo(() => {
+    if (!elementTypes || !player) return "";
+    return (
+      elementTypes.find((p) => p._id === player.playerPosition)?.singularName ||
+      ""
+    );
+  }, [elementTypes, player]);
+
+  // default selected fixture: first upcoming fixture or the first fixture from the list
   useEffect(() => {
-    const copyFix = player?.fixtures?.length > 0 ? [...player?.fixtures] : [];
-    copyFix?.sort((x, y) => (x?.kickOffTime > y?.kickOffTime ? 1 : -1));
-    setCopyFix(copyFix);
-  }, [player]);
+    if (!fixtures || fixtures.length === 0) {
+      setSelectedFixtureId(null);
+      return;
+    }
 
-  useEffect(() => {
-    const id = matchdays?.find((x) => x.current === true)?.id || 1;
-    const mid = matchdays?.find((x) => x.id === id)?._id;
-    // === mid?.toString()
-    const currentFixtures = player?.fixtures
-      ?.filter?.((x) => x.matchday.toString())
-      ?.sort((x, y) => (x?.kickOffTime > y?.kickOffTime ? 1 : -1)) || [];
-    const fixtureId = currentFixtures[0]?._id?.toString() || 1
-    setFixId(fixtureId)
-    setId(mid?.toString());
-  }, [player]);
+    // pick the first fixture that has a kickoff in the future, fallback to first fixture
+    const upcoming = fixtures.find((f) => new Date(f.kickOffTime) > new Date());
+    setSelectedFixtureId(
+      upcoming?._id?.toString() || fixtures[0]._id?.toString()
+    );
+  }, [fixtures]);
 
-  const showHistory = async (md) => {
-    setFixId(md);
-  };
-
-  const showPlayerHistory = useMemo(() => {
+  // Merge fixture + history for the selected fixture
+  const selectedFixtureWithHistory = useMemo(() => {
+    if (!selectedFixtureId) return null;
+    const fixture =
+      fixtures.find(
+        (f) => f._id?.toString() === selectedFixtureId?.toString()
+      ) || null;
     const hist =
-      history?.find((x) => x?.fixture?.toString() === fixId?.toString()) || {};
-    return {
-      ...copyFix?.find((x) => x._id?.toString() === fixId?.toString()),
-      ...hist,
-    };
-  }, [fixId, copyFix, history]);
+      history?.find(
+        (h) => h.fixture?.toString() === selectedFixtureId?.toString()
+      ) || null;
+    // prefer history values when available
+    return fixture ? { ...fixture, ...(hist || {}) } : hist || null;
+  }, [selectedFixtureId, fixtures, history]);
+
+  // defensive rendering helpers
+  const getTeamShortName = (teamId) =>
+    teams?.find((t) => t._id === teamId)?.shortName || "";
+  const getTeamFullName = (teamId) =>
+    teams?.find((t) => t._id === teamId)?.name || "";
+
   return (
     <>
       <Modal show={showPInfo} onHide={handleCloseInfo}>
@@ -71,14 +87,16 @@ const PlayerInfo = (props) => {
           <Modal.Title style={{ fontWeight: 500 }}>
             <div className="namesection">
               <span>
-                {player?.firstName}&nbsp;{player?.secondName}
+                {player?.firstName} {player?.secondName}
               </span>
               <span>{playerPosition}</span>
               <div className="player-info-img">
                 <div className="ticker-image">
-                  <img src={`../${shortTeamName}.png`} alt="logo" />
+                  {playerShortTeam && (
+                    <img src={`../${playerShortTeam}.png`} alt="logo" />
+                  )}
                 </div>
-                <span>{playerTeam}</span>
+                <span>{playerTeamName}</span>
               </div>
             </div>
           </Modal.Title>
@@ -101,166 +119,128 @@ const PlayerInfo = (props) => {
           <div className="player-info-wrapper">
             <div className="games-info-fixtures">
               <div className="playerInfoFix">
-                {copyFix
-                  ?.sort((x, y) => (x?.kickOffTime > y?.kickOffTime ? 1 : -1))
-                  ?.map((x, idx) => {
-                    let teamImg =
-                      player?.playerTeam === x.teamAway
-                        ? teams?.find((tname) => tname._id === x.teamHome)
-                            ?.shortName
-                        : teams?.find((tname) => tname._id === x.teamAway)
-                            ?.shortName;
-                    return (
-                      <div
-                        style={{
-                          border: fixId === x._id && 0,
-                          background:
-                            fixId === x._id && "aquamarine",
-                        }}
-                        onClick={() => showHistory(x?._id)}
-                        className="playerFix"
-                        key={idx + 1}
-                      >
-                        <div className="ticker-image">
+                {fixtures.map((f, idx) => {
+                  const teamImg =
+                    player?.playerTeam === f.teamAway
+                      ? getTeamShortName(f.teamHome)
+                      : getTeamShortName(f.teamAway);
+                  const isSelected =
+                    selectedFixtureId?.toString() === f._id?.toString();
+                  return (
+                    <div
+                      key={f._id ?? idx}
+                      className="playerFix"
+                      onClick={() => setSelectedFixtureId(f._id?.toString())}
+                      style={{
+                        border: isSelected ? "none" : undefined,
+                        background: isSelected ? "aquamarine" : undefined,
+                      }}
+                    >
+                      <div className="ticker-image">
+                        {teamImg && (
                           <img src={`../${teamImg}.png`} alt="logo" />
-                        </div>
+                        )}
                       </div>
-                    );
-                  })}
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
-            {fixId && (
+            {selectedFixtureWithHistory && (
               <div className="player-info-3">
                 <>
                   <div>
-                    {
-                      matchdays?.find(
-                        (y) => y._id === showPlayerHistory?.matchday
-                      )?.name
-                    }
+                    {matchdays?.find(
+                      (m) => m._id === selectedFixtureWithHistory.matchday
+                    )?.name || ""}
                   </div>
                   <div className="pf">
                     <div>
-                      {player?.playerTeam === showPlayerHistory?.teamAway
-                        ? teams?.find(
-                            (tname) => tname._id === showPlayerHistory?.teamHome
-                          )?.name
-                        : teams?.find(
-                            (tname) => tname._id === showPlayerHistory?.teamAway
-                          )?.name}
+                      {player?.playerTeam ===
+                      selectedFixtureWithHistory?.teamAway
+                        ? getTeamFullName(selectedFixtureWithHistory?.teamHome)
+                        : getTeamFullName(selectedFixtureWithHistory?.teamAway)}
                     </div>
                     <div>
-                      {player?.playerTeam === showPlayerHistory?.teamHome
+                      {player?.playerTeam ===
+                      selectedFixtureWithHistory?.teamHome
                         ? "Home"
                         : "Away"}
                     </div>
                   </div>
-                  {typeof showPlayerHistory?.teamHomeScore === "number" &&
-                    typeof showPlayerHistory?.teamAwayScore === "number" && (
-                      <div>
-                        <div>
-                          {typeof showPlayerHistory?.teamHomeScore === "number"
-                            ? showPlayerHistory?.teamHomeScore
-                            : ""}
-                          &nbsp;:&nbsp;
-                          {typeof showPlayerHistory?.teamHomeScore === "number"
-                            ? showPlayerHistory?.teamAwayScore
-                            : ""}
-                        </div>
-                      </div>
-                    )}
+                  {(typeof selectedFixtureWithHistory?.teamHomeScore === 'number' && typeof selectedFixtureWithHistory?.teamAwayScore === 'number') && (
+                <div>
                   <div>
-                    {showPlayerHistory?.kickOffTime === "" ? (
-                      ""
-                    ) : (
-                      <div>
-                        {new Date(
-                          showPlayerHistory?.kickOffTime
-                        ).toDateString()}
-                      </div>
-                    )}
-                    {showPlayerHistory?.kickOffTime === "" ? (
-                      ""
-                    ) : (
-                      <div>
-                        {getPmString(showPlayerHistory?.kickOffTime)}
-                        {getPm(showPlayerHistory?.kickOffTime)}
-                      </div>
-                    )}
+                    {selectedFixtureWithHistory.teamHomeScore} : {selectedFixtureWithHistory.teamAwayScore}
                   </div>
+                </div>
+              )}
+                  {selectedFixtureWithHistory?.kickOffTime && (
+                <div>
+                  <div>{new Date(selectedFixtureWithHistory.kickOffTime).toDateString()}</div>
+                  <div>{getPmString(selectedFixtureWithHistory.kickOffTime)}{getPm(selectedFixtureWithHistory.kickOffTime)}</div>
+                </div>
+              )}
                 </>
 
-                {showPlayerHistory?.stats?.length > 0 && (
+                {selectedFixtureWithHistory?.stats?.length > 0 && (
                   <div className="player-info-1">
                     <div className="player-info-2">
                       <div>Points</div>
-                      <div>{showPlayerHistory?.totalPoints}</div>
+                      <div>{selectedFixtureWithHistory.totalPoints ?? 0}</div>
                     </div>
-                    {showPlayerHistory?.goalsScored ? (
-                      <div className="player-info-2">
-                        <div>Goals</div>
-                        <div>{showPlayerHistory?.goalsScored}</div>
-                      </div>
-                    ) : (
-                      ""
-                    )}
-                    {showPlayerHistory?.assists ? (
-                      <div className="player-info-2">
-                        <div>Assists</div>
-                        <div>{showPlayerHistory?.assists}</div>
-                      </div>
-                    ) : (
-                      " "
-                    )}
-                    {showPlayerHistory?.bestPlayer ? (
-                      <div className="player-info-2">
-                        <div>Man of the match</div>
-                        <div>{showPlayerHistory?.bestPlayer}</div>
-                      </div>
-                    ) : (
-                      ""
-                    )}
-                    {showPlayerHistory?.yellowCards ? (
-                      <div className="player-info-2">
-                        <div>Yellow card</div>
-                        <div>{showPlayerHistory?.yellowCards}</div>
-                      </div>
-                    ) : (
-                      ""
-                    )}
-                    {showPlayerHistory?.redCards ? (
-                      <div className="player-info-2">
-                        <div>Red card</div>
-                        <div>{showPlayerHistory?.redCards}</div>
-                      </div>
-                    ) : (
-                      ""
-                    )}
-                    {showPlayerHistory?.ownGoals ? (
-                      <div className="player-info-2">
-                        <div>Own goals</div>
-                        <div>{showPlayerHistory?.ownGoals}</div>
-                      </div>
-                    ) : (
-                      ""
-                    )}
-                    {showPlayerHistory?.penaltiesMissed ? (
-                      <div className="player-info-2">
-                        <div>Penalties missed</div>
-                        <div>{showPlayerHistory?.penaltiesMissed}</div>
-                      </div>
-                    ) : (
-                      ""
-                    )}
-                    {showPlayerHistory?.penaltiesSaved ? (
-                      <div className="player-info-2">
-                        <div>Penalties saved</div>
-                        <div>{showPlayerHistory?.penaltiesSaved}</div>
-                      </div>
-                    ) : (
-                      ""
-                    )}
+                    {selectedFixtureWithHistory.goalsScored ? (
+                    <div className="player-info-2">
+                      <div>Goals</div>
+                      <div>{selectedFixtureWithHistory.goalsScored}</div>
+                    </div>
+                  ) : null}
+                    {selectedFixtureWithHistory.assists ? (
+                    <div className="player-info-2">
+                      <div>Assists</div>
+                      <div>{selectedFixtureWithHistory.assists}</div>
+                    </div>
+                  ) : null}
+                    {selectedFixtureWithHistory.bestPlayer ? (
+                    <div className="player-info-2">
+                      <div>Man of the match</div>
+                      <div>{selectedFixtureWithHistory.bestPlayer}</div>
+                    </div>
+                  ) : null}
+                    {selectedFixtureWithHistory.yellowCards ? (
+                    <div className="player-info-2">
+                      <div>Yellow card</div>
+                      <div>{selectedFixtureWithHistory.yellowCards}</div>
+                    </div>
+                  ) : null}
+                    {selectedFixtureWithHistory.redCards ? (
+                    <div className="player-info-2">
+                      <div>Red card</div>
+                      <div>{selectedFixtureWithHistory.redCards}</div>
+                    </div>
+                  ) : null}
+
+                  {selectedFixtureWithHistory.ownGoals ? (
+                    <div className="player-info-2">
+                      <div>Own goals</div>
+                      <div>{selectedFixtureWithHistory.ownGoals}</div>
+                    </div>
+                  ) : null}
+
+                  {selectedFixtureWithHistory.penaltiesMissed ? (
+                    <div className="player-info-2">
+                      <div>Penalties missed</div>
+                      <div>{selectedFixtureWithHistory.penaltiesMissed}</div>
+                    </div>
+                  ) : null}
+
+                  {selectedFixtureWithHistory.penaltiesSaved ? (
+                    <div className="player-info-2">
+                      <div>Penalties saved</div>
+                      <div>{selectedFixtureWithHistory.penaltiesSaved}</div>
+                    </div>
+                  ) : null}
                   </div>
                 )}
               </div>
