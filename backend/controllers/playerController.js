@@ -138,7 +138,6 @@ const getPlayers = asyncHandler(async (req, res) => {
     { $sort: { _id: 1 } },
   ]);
 
-  console.log(lives);
 
   const playerCountMap = new Map(picks.map((x) => [x._id.toString(), x.total]));
   const numberOfManagers = await getAllManagers();
@@ -223,18 +222,32 @@ const getPlayers = asyncHandler(async (req, res) => {
 //@role not restricted
 const getPlayer = asyncHandler(async (req, res) => {
   const player = await Player.findById(req.params.id);
+  const matchdays = await Matchday.find({}).lean();
+  const matchDayNext = await Matchday.findOne({ next: true });
+  const idNeeded = matchDayNext
+    ? matchDayNext.id
+    : Math.max(...matchdays.map((x) => x.id));
+  const managers = await ManagerInfo.find({
+    matchdayJoined: { $lte: idNeeded },
+  }).lean();
+  const managerArray = managers.map((x) => x._id);
+  const picks = await Picks.aggregate([
+    { $match: { manager: { $in: managerArray } } },
+    { $unwind: "$picks" },
+    { $group: { _id: "$picks._id", total: { $sum: 1 } } },
+  ]);
 
   if (!player) {
     res.status(400);
     throw new Error("Player not found");
   }
 
+  const playerCountMap = new Map(picks.map((x) => [x._id.toString(), x.total]));
   const team = player?.playerTeam;
   const pFixtures = await Fixture.find({
     $or: [{ teamHome: team }, { teamAway: team }],
   });
   const pResults = await PlayerHistory.find({ player: req.params.id });
-  const numberOfManagers = await getAllManagers();
   const {
     _id,
     firstName,
@@ -257,7 +270,9 @@ const getPlayer = asyncHandler(async (req, res) => {
     starts,
     playerCount,
   } = player;
-  const b = numberOfManagers === 0 ? 0 : (playerCount / numberOfManagers) * 100;
+  const b = !playerCountMap.get(_id.toString())
+          ? 0
+          : (playerCountMap.get(_id.toString()) / managers.length) * 100;
   const newPlayer = {
     _id,
     firstName,
@@ -278,7 +293,7 @@ const getPlayer = asyncHandler(async (req, res) => {
     saves,
     cleansheets,
     starts,
-    ownership: `${b.toFixed(1)}%`,
+    ownership: `${b.toFixed(1)}`,
     fixtures: pFixtures,
     results: pResults,
   };

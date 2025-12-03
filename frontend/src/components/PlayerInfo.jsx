@@ -51,8 +51,6 @@ const PlayerInfo = (props) => {
     setFixId(fixtureId)
     setId(mid?.toString());
   }, [player]);
-  console.log(copyFix)
-  console.log(fixId)
 
   const showHistory = async (md) => {
     setFixId(md);
@@ -88,8 +86,8 @@ const PlayerInfo = (props) => {
         <Modal.Body className="p-3">
           <div className="player-info-data">
             <div className="player-info-data-t">
-              <div className="player-info-data-h">Selected %</div>
-              <div>{player?.ownership}</div>
+              <div className="player-info-data-h">Selected By</div>
+              <div>{player?.ownership}%</div>
             </div>
             <div className="player-info-data-t">
               <div className="player-info-data-h">Total</div>
