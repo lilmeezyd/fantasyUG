@@ -2,39 +2,36 @@ import { useState, useEffect } from "react";
 import { useGetFixturesQuery } from "../slices/fixtureApiSlice";
 import { useGetMatchdaysQuery } from "../slices/matchdayApiSlice";
 import { Spinner } from "react-bootstrap";
-import {
-  BsChevronLeft,
-  BsChevronRight
-} from "react-icons/bs";
+import { BsChevronLeft, BsChevronRight } from "react-icons/bs";
 import FixtureItem from "./FixtureItem";
 const FixtureList = (props) => {
-  const { mdParam } = props
+  const { mdParam } = props;
   const [page, setPage] = useState(1);
-  const [minGW, setMinGW ] = useState(1)
-    const [maxGW, setMaxGW ] = useState(1)
-  const [copy, setCopy] = useState([]); 
+  const [minGW, setMinGW] = useState(1);
+  const [maxGW, setMaxGW] = useState(1);
+  const [copy, setCopy] = useState([]);
   const { data: fixtures, isLoading } = useGetFixturesQuery();
-  const { data: matchdays }  = useGetMatchdaysQuery();
-  //const md = matchdays?.find(matchday => matchday?.next === true)
+  const { data: matchdays } = useGetMatchdaysQuery();
   useEffect(() => {
-    const copyFix = fixtures?.length > 0 ? [...fixtures] : [];
-    copyFix?.sort((x, y) => (x?.kickOffTime > y?.kickOffTime ? 1 : -1));
-    mdParam === 'next' ? 
-    setPage(copyFix?.find(x => x?._id?.[mdParam] === true)?._id?.id) :
-    setPage(mdParam)
-    setCopy(fixtures);
-  }, [fixtures, mdParam]);
-  
+    const sorted = fixtures?.length ? [...fixtures] : [];
+    sorted.sort((a, b) => (a.kickOffTime > b.kickOffTime ? 1 : -1));
+    setCopy(sorted);
+  }, [fixtures]);
+
   useEffect(() => {
-      const nextMatchday = matchdays?.find(x => x.next === true)
-        const ids = matchdays?.map(x => x.id) || []
-        const smallest = ids?.length === 0 ? 1 : Math.min(...ids)
-        const largest = ids?.length === 0 ? 1 : Math.max(...ids)
-      const nextId = nextMatchday ? nextMatchday.id : largest
-        setMinGW(smallest)
-        setMaxGW(largest)
-        setPage(nextId)
-    }, [matchdays])
+    const ids = matchdays?.map((m) => Number(m.id)) ?? [];
+    const smallest = ids.length ? Math.min(...ids) : 1;
+    const largest = ids.length ? Math.max(...ids) : 1;
+
+    const nextMatchday = matchdays?.find((m) => m.next);
+    const nextId = nextMatchday ? Number(nextMatchday.id) : largest;
+
+    const pageValue = mdParam === "next" ? nextId : Number(mdParam);
+
+    setPage(pageValue);
+    setMinGW(smallest);
+    setMaxGW(largest);
+  }, [matchdays, mdParam]);
 
   const onDecrement = () => {
     setPage((prevState) => prevState - 1);
@@ -67,39 +64,45 @@ const FixtureList = (props) => {
   };
 
   if (isLoading) {
-    <div className="spinner">
-      <Spinner />
-    </div>;
+    return (
+      <div className="spinner">
+        <Spinner />
+      </div>
+    );
   }
 
-  return ( 
+  return (
     <div className="fix-body">
-      {copy?.length && <section className="btn-wrapper p-2"> 
-        <button
-          disabled={page === minGW ? true : false}
-          onClick={onDecrement}
-          className={`${page === +minGW && "btn-hide"} btn-controls`}
-          id="prevButton"
-        >
-          <BsChevronLeft />
-        </button>
-        <button
-          disabled={page === maxGW ? true : false}
-          onClick={onIncrement}
-          className={`${page === maxGW && "btn-hide"} btn-controls`}
-          id="nextButton"
-        >
-          <BsChevronRight />
-        </button>
-      </section>}
+      {copy.length > 0 && (
+        <section className="btn-wrapper p-2">
+          <button
+            disabled={page === minGW ? true : false}
+            onClick={onDecrement}
+            className={`${page === +minGW && "btn-hide"} btn-controls`}
+            id="prevButton"
+          >
+            <BsChevronLeft />
+          </button>
+          <button
+            disabled={page === maxGW ? true : false}
+            onClick={onIncrement}
+            className={`${page === maxGW && "btn-hide"} btn-controls`}
+            id="nextButton"
+          >
+            <BsChevronRight />
+          </button>
+        </section>
+      )}
       {copy
         ?.filter((x) => +x?._id?.id === +page)
         ?.map((fixture) => (
           <div key={fixture?._id?._id}>
-            <div className="deadline"> 
-              <h5 className="pick-team-name home-stars">{fixture?._id?.name}</h5>
+            <div className="deadline">
+              <h5 className="pick-team-name home-stars">
+                {fixture?._id?.name}
+              </h5>
             </div>
-            <div  className="fix-item-bg">
+            <div className="fix-item-bg">
               {fixture?.fixtures?.map((x, idx) => (
                 <div className="fix-item" key={x._id}>
                   <div className="deadline">

@@ -1,12 +1,7 @@
 import { useGetPlayersQuery } from "../slices/playerApiSlice";
 import { useGetQuery } from "../slices/teamApiSlice";
-import { useGetPicksQuery, useUpdatePicksMutation } from "../slices/picksSlice";
 import { useGetPositionsQuery } from "../slices/positionApiSlice";
 import { useGetMatchdaysQuery } from "../slices/matchdayApiSlice";
-import getTime from "../utils/getTime";
-import getTime1 from "../utils/getTime1";
-import { getPm, getPmString } from "../utils/getPm";
-import { Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import LivePlayer from "./LivePlayer";
 import { Spinner } from "react-bootstrap";
@@ -18,8 +13,6 @@ const ManagerPicks = (props) => {
   const { data: positions, isLoading: positionLoading } =
     useGetPositionsQuery();
   const { data: matchdays } = useGetMatchdaysQuery();
-  const navigate = useNavigate();
-  console.log(picks)
   const md = matchdays?.find((matchday) => matchday?.next === true);
   const goalkeepers = picks?.filter(
     (pick) =>
@@ -39,7 +32,7 @@ const ManagerPicks = (props) => {
         pick?.playerPosition === 3 &&
         pick?.multiplier > 0
     )
-    ?.sort((a, b) => (a.slot > b.slot ? 1 : -1));
+    ?.sort((a, b) => (a.slot > b.slot ? 1 : -1)); 
   const forwards = picks
     ?.filter(
       (pick) =>
@@ -54,7 +47,14 @@ const ManagerPicks = (props) => {
   const teamValue = picks?.reduce((x, y) => x + +y.nowCost, 0);
   const itb = 100 - teamValue;
 
-  if (playerLoading && teamLoading && positionLoading) {
+  const positionsArray = [
+  { name: "GKP", list: goalkeepers },
+  { name: "DEF", list: defenders },
+  { name: "MID", list: midfielders },
+  { name: "FWD", list: forwards }
+];
+
+  if (playerLoading || teamLoading || positionLoading) {
     return (
       <div className="spinner">
         <Spinner />
@@ -64,8 +64,9 @@ const ManagerPicks = (props) => {
   return (
     <div>
       <div className="no-picks-team">
-        <div className="default-player">
-          {goalkeepers?.map((x) => (
+        {positionsArray.map(group => (
+          <div className="default-player">
+            {group.list.map((x) => (
             <div key={x.slot} className="squad-player">
               <LivePlayer
                 teams={teams}
@@ -73,61 +74,14 @@ const ManagerPicks = (props) => {
                 matchday={matchday}
                 matchdayId={matchdayId}
                 slot={x.slot}
-                posName={"GKP"}
+                posName={group.name}
                 multiplier={x.multiplier}
                 baller={x}
               />
             </div>
           ))}
-        </div>
-        <div className="default-player">
-          {defenders?.map((x) => (
-            <div key={x.slot} className="squad-player">
-              <LivePlayer
-                teams={teams}
-                players={players?.updatedPlayers}
-                matchday={matchday}
-                matchdayId={matchdayId}
-                slot={x.slot}
-                posName={"DEF"}
-                multiplier={x.multiplier}
-                baller={x}
-              />
-            </div>
-          ))}
-        </div>
-        <div className="default-player">
-          {midfielders?.map((x) => (
-            <div key={x.slot} className="squad-player">
-              <LivePlayer
-                teams={teams}
-                players={players?.updatedPlayers}
-                matchday={matchday}
-                matchdayId={matchdayId}
-                slot={x.slot}
-                posName={"MID"}
-                multiplier={x.multiplier}
-                baller={x}
-              />
-            </div>
-          ))}
-        </div>
-        <div className="default-player">
-          {forwards?.map((x) => (
-            <div key={x.slot} className="squad-player">
-              <LivePlayer
-                teams={teams}
-                players={players?.updatedPlayers}
-                matchday={matchday}
-                matchdayId={matchdayId}
-                slot={x.slot}
-                posName={"FWD"}
-                multiplier={x.multiplier}
-                baller={x}
-              />
-            </div>
-          ))}
-        </div>
+          </div>
+        ))}
         <div className="default-bench">
           {bench?.map((x, idx) => (
             <div key={x.slot} className="squad-player">

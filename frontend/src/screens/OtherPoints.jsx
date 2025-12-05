@@ -20,29 +20,24 @@ const OtherPoints = () => {
 
   const { data: matchdays } = useGetMatchdaysQuery();
   const { page, min, max } = pageDetails;
-  useEffect(() => {
-    const a = [];
-    picksDetails?.picks?.forEach((x) => {
-      a.push(...x.livePicks);
-    });
+  const allLivePicks = useMemo(() => {
+    return picksDetails?.picks?.flatMap(p => p.livePicks) ?? [];
+  }, [picksDetails]);
 
-    const minimum = Math.min(...a.map((x) => x.matchday));
-    const maximum = Math.max(...a.map((x) => x.matchday));
-    setPageDetails((prev) => ({
-      ...prev,
-      page: maximum,
-      min: minimum,
-      max: maximum,
-    }));
-  }, [matchdays, picksDetails]);
+  useEffect(() => {
+    if (!allLivePicks.length) return;
+
+    const matchdayValues = allLivePicks.map(x => x.matchday);
+    const min = Math.min(...matchdayValues);
+    const max = Math.max(...matchdayValues);
+
+    setPageDetails({ page: max, min, max });
+  }, [allLivePicks]);
+
 
   const realPicks = useMemo(() => {
-    const a = [];
-    picksDetails?.picks?.forEach((x) => {
-      a.push(...x.livePicks);
-    });
-    return a.filter((x) => x.matchday === +page);
-  }, [picksDetails, page]);
+    return allLivePicks.filter(x => x.matchday === +page);
+  }, [allLivePicks, page]);
   const onDecrement = () => {
     setPageDetails((prev) => ({ ...prev, page: prev.page - 1 }));
   };
@@ -71,7 +66,7 @@ const OtherPoints = () => {
           <div className="main">
             <section className="btn-wrapper p-2">
               <button
-                disabled={page === min ? true : false}
+                disabled={page === +min}
                 onClick={onDecrement}
                 className={`${page === +min && "btn-hide"} btn-controls`}
                 id="prevButton"
@@ -79,7 +74,7 @@ const OtherPoints = () => {
                 <BsChevronLeft />
               </button>
               <button
-                disabled={page === +max ? true : false}
+                disabled={page === +max}
                 onClick={onIncrement}
                 className={`${page === +max && "btn-hide"} btn-controls`}
                 id="nextButton"
