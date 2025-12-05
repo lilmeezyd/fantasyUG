@@ -128,21 +128,21 @@ export const leagueApiSlice = apiSlice.injectEndpoints({
     }),
     updateOverallTable: builder.mutation({
       query: () => ({
-        url: `${LEAGUES_URL}/overallleagues/`,
+        url: `${LEAGUES_URL}/overallleagues`,
         method: "PATCH",
       }),
       invalidatesTags: ['OverallLeague']
     }),
     updateTeamTables: builder.mutation({
       query: () => ({
-        url: `${LEAGUES_URL}/teamleagues/`, 
+        url: `${LEAGUES_URL}/teamleagues`, 
         method: "PATCH",
       }),
       invalidatesTags: ['TeamLeague']
     }),
     updatePrivateTables: builder.mutation({
       query: () => ({
-        url: `${LEAGUES_URL}/privateleagues/`, 
+        url: `${LEAGUES_URL}/privateleagues`, 
         method: "PATCH",
       }),
       invalidatesTags: ['TeamLeague']
