@@ -139,121 +139,120 @@ const setLivePicks = asyncHandler(async (req, res) => {
 //@desc set initial points
 //@route PATCH api/livepicks/manager/matchday/:mid/start/fixtures/:id
 //@access ADMIN
-const setInitialPoints = asyncHandler(async (req, res, mid) => {
-  //const fixture = await Fixture.findById(req.params.id).lean();
-  const matchday = await Matchday.findById(mid).lean();
-  const players = await PlayerHistory.find({
-    matchday: mid
-  }).lean();
-  console.log(players)
-  if (!matchday || !matchday.current || !players.length) {
-    return res
-      .status(400)
-      .json({ message: "Invalid matchday, or no players" });
-  }
+const setInitialPoints = asyncHandler(
+  async (req, res, format, fid, mid, playerArray) => {
+    const matchday = await Matchday.findById(mid).lean();
+    const players = await PlayerHistory.find({
+      matchday: mid,
+      fixture: fid,
+      player: { $in: playerArray },
+    }).lean();
+    if (!matchday || !matchday.current || !players.length) {
+      return res
+        .status(400)
+        .json({ message: "Invalid matchday, or no players" });
+    }
 
-  const allLives = await ManagerLive.find({
+    const allLives = await ManagerLive.find({
     "livePicks.matchdayId": mid,
+    "livePicks.picks._id": { $in: playerArray }
   }).lean();
-  /*
-    if (mLive.length === 0) {
-      res.status(400);
-      throw new Error("No live Picks for this matchday");
-    }*/
-  // Build lookup maps
-  const playerMap = {};
-  for (const p of players) {
-    if (!playerMap[p.player]) playerMap[p.player] = [];
-    playerMap[p.player].push(p);
-  }
-  
-  const liveUpdates = [];
-  const infoUpdates = [];
-  for (const mLive of allLives) {
-    const mdPicks = mLive.livePicks.find(
-      (p) => p.matchdayId.toString() === mid.toString()
-    );
-    if (!mdPicks) continue;
 
-    const formatted = mdPicks.picks.map((pick) => {
-      const stats = playerMap[pick._id] || [];
-      if (stats.length > 0) {
-        const starts = stats.reduce((a, b) => a + b.starts, 0);
-        const bench = stats.reduce((a, b) => a + b.bench, 0);
-        const totalPoints = stats.reduce((a, b) => a + b.totalPoints, 0);
-        return {
-          ...pick,
-          starts,
-          bench,
-          points: totalPoints,
-        };
-      } else {
-        return pick;
-      }
-    });
-    const newMdPoints = formatted
-      .filter((p) => p.multiplier > 0)
-      .reduce((a, b) => a + (b.points * b.multiplier), 0);
-    const updatedLivePicks = mLive.livePicks.map((p) =>
-      p.matchdayId.toString() === mid.toString()
-        ? { ...mdPicks, picks: formatted, matchdayPoints: newMdPoints }
-        : p
-    );
-    liveUpdates.push({
-      updateOne: {
-        filter: { manager: mLive.manager },
-        update: { $set: { livePicks: updatedLivePicks } },
-      },
-    });
-    const managerInfo = await ManagerInfo.findById(mLive.manager).lean();
-    if (!managerInfo) continue;
+    // Build lookup maps
+    const playerMap = {};
+    for (const p of players) {
+      if (!playerMap[p.player]) playerMap[p.player] = [];
+      playerMap[p.player].push(p);
+    }
 
-    const livePicks = updatedLivePicks;
+    const liveUpdates = [];
+    const infoUpdates = [];
+   for (const mLive of allLives) {
+      const mdPicks = mLive.livePicks.find(
+        (p) => p.matchdayId.toString() === mid.toString()
+      );
+      if (!mdPicks) continue;
 
-    const calculatePoints = (startId, endId) => {
-      return livePicks
-        .filter((x) => x.matchday >= startId && x.matchday <= (endId ?? 100))
-        .reduce((sum, x) => sum + x.matchdayPoints, 0);
-    };
+      const formatted = mdPicks.picks.map((pick) => {
+        const stats = playerMap[pick._id] || [];
+        if (stats.length > 0) {
+          const starts = stats.reduce((a, b) => a + b.starts, 0);
+          const bench = stats.reduce((a, b) => a + b.bench, 0);
+          const totalPoints = stats.reduce((a, b) => a + b.totalPoints, 0);
+          return {
+            ...pick,
+            starts,
+            bench,
+            points: format === "reset" ? pick.points - totalPoints : totalPoints,
+          };
+        } else {
+          return pick;
+        }
+      });
+      const newMdPoints = formatted
+        .filter((p) => p.multiplier > 0)
+        .reduce((a, b) => a + b.points * b.multiplier, 0);
+      const updatedLivePicks = mLive.livePicks.map((p) =>
+        p.matchdayId.toString() === mid.toString()
+          ? { ...mdPicks, picks: formatted, matchdayPoints: newMdPoints }
+          : p
+      );
+      liveUpdates.push({
+        updateOne: {
+          filter: { manager: mLive.manager },
+          update: { $set: { livePicks: updatedLivePicks } },
+        },
+      });
+      const managerInfo = await ManagerInfo.findById(mLive.manager).lean();
+      if (!managerInfo) continue;
 
-    const teamStart = await Matchday.findById(
-      managerInfo.teamLeagues[0].startMatchday
-    ).lean();
-    const teamEnd = await Matchday.findById(
-      managerInfo.teamLeagues[0].endMatchday
-    ).lean();
-    const overallStart = await Matchday.findById(
-      managerInfo.overallLeagues[0].startMatchday
-    ).lean();
-    const overallEnd = await Matchday.findById(
-      managerInfo.overallLeagues[0].endMatchday
-    ).lean();
+      const livePicks = updatedLivePicks;
 
-    const teamPts = calculatePoints(teamStart?.id ?? 0, teamEnd?.id);
-    const overallPts = calculatePoints(overallStart?.id ?? 0, overallEnd?.id);
-    const totalPts = livePicks.reduce((a, b) => a + b.matchdayPoints, 0);
-    infoUpdates.push({
-      updateOne: {
-        filter: { _id: mLive.manager },
-        update: {
-          $set: {
-            matchdayPoints: newMdPoints,
-            "teamLeagues.0.matchdayPoints": newMdPoints,
-            "overallLeagues.0.matchdayPoints": newMdPoints,
-            "teamLeagues.0.overallPoints": teamPts,
-            "overallLeagues.0.overallPoints": overallPts,
-            overallPoints: totalPts,
+      const calculatePoints = (startId, endId) => {
+        return livePicks
+          .filter((x) => x.matchday >= startId && x.matchday <= (endId ?? 100))
+          .reduce((sum, x) => sum + x.matchdayPoints, 0);
+      };
+
+      const teamStart = await Matchday.findById(
+        managerInfo.teamLeagues[0].startMatchday
+      ).lean();
+      const teamEnd = await Matchday.findById(
+        managerInfo.teamLeagues[0].endMatchday
+      ).lean();
+      const overallStart = await Matchday.findById(
+        managerInfo.overallLeagues[0].startMatchday
+      ).lean();
+      const overallEnd = await Matchday.findById(
+        managerInfo.overallLeagues[0].endMatchday
+      ).lean();
+
+      const teamPts = calculatePoints(teamStart?.id ?? 0, teamEnd?.id);
+      const overallPts = calculatePoints(overallStart?.id ?? 0, overallEnd?.id);
+      const totalPts = livePicks.reduce((a, b) => a + b.matchdayPoints, 0);
+      infoUpdates.push({
+        updateOne: {
+          filter: { _id: mLive.manager },
+          update: {
+            $set: {
+              matchdayPoints: newMdPoints,
+              "teamLeagues.0.matchdayPoints": newMdPoints,
+              "overallLeagues.0.matchdayPoints": newMdPoints,
+              "teamLeagues.0.overallPoints": teamPts,
+              "overallLeagues.0.overallPoints": overallPts,
+              overallPoints: totalPts,
+            },
           },
         },
-      },
-    });
-  }
-  if (liveUpdates.length > 0) await ManagerLive.bulkWrite(liveUpdates);
-  if (infoUpdates.length > 0) await ManagerInfo.bulkWrite(infoUpdates);
+      });
+    }
+    if (liveUpdates.length > 0) await ManagerLive.bulkWrite(liveUpdates);
+    if (infoUpdates.length > 0) await ManagerInfo.bulkWrite(infoUpdates);
 
-  //res.status(200).json({message: "Points updated successfully for all managers."});
-  return {message: "Points updated successfully for all managers."}
-}); 
+    //res.status(200).json({message: "Points updated successfully for all managers."});
+    return { message: "Points updated successfully for all managers." };
+  }
+);
 
 //@desc update player scores in picks
 //@route PUT api/livepicks/manager/matchday/:mid/player/:pid
