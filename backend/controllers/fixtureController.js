@@ -80,12 +80,83 @@ const getFixtures = asyncHandler(async (req, res) => {
 //@access private
 //@role ADMIN & EDITOR
 const populateStats = asyncHandler(async (req, res) => {
-  const fixture = await Fixture.findById(req.params.id);
+  const fixtureId = req.params.id;
+  const fixture = await Fixture.findOneAndUpdate(
+    { _id: fixtureId, "stats.0": { $exists: false } }, // atomic guard
+    {
+      $set: {
+        teamHomeScore: 0,
+        teamAwayScore: 0,
+        stats: [
+          "goalsScored",
+          "assists",
+          "ownGoals",
+          "penaltiesSaved",
+          "penaltiesMissed",
+          "yellowCards",
+          "redCards",
+          "saves",
+          "cleansheets",
+          "starts",
+          "bestPlayer",
+          "bench",
+        ].map(identifier => ({
+          identifier,
+          home: [],
+          away: [],
+        })),
+      },
+    },
+    { new: true }
+  ).lean();
+
+  if (!fixture) {
+    throw new Error("Fixture not found or already populated");
+  }
+  const players = await Player.find(
+    { playerTeam: { $in: [fixture.teamHome, fixture.teamAway] } },
+    { _id: 1, playerTeam: 1 }
+  ).lean();
+
+   if (!players.length) {
+    throw new Error("No players found");
+  }
+
+   const ops = players.map(p => ({
+    insertOne: {
+      document: {
+        matchday: fixture.matchday,
+        fixture: fixture._id,
+        player: p._id,
+        home: p.playerTeam.toString() === fixture.teamHome.toString(),
+        opponent:
+          p.playerTeam.toString() === fixture.teamHome.toString()
+            ? fixture.teamAway
+            : fixture.teamHome,
+      },
+    },
+  }));
+
+  let result;
+  try {
+    result = await PlayerHistory.bulkWrite(ops, { ordered: false });
+  } catch (err) {
+    // duplicate key errors expected on retry
+    result = err.result;
+  }
+
+  res.status(200).json({
+    message: "Fixture stats populated",
+    expectedPlayers: ops.length,
+    inserted: result?.insertedCount ?? 0,
+    skipped: ops.length - (result?.insertedCount ?? 0),
+  });
+  /*const fixture = await Fixture.findById(req.params.id);
   const players = await Player.find({
     $or: [{ playerTeam: fixture.teamHome }, { playerTeam: fixture.teamAway }],
   });
 
-  // Find user
+  
   const user = await User.findById(req.user.id).select("-password");
 
   if (!user) {
@@ -122,9 +193,9 @@ const populateStats = asyncHandler(async (req, res) => {
   Object.values(identifiers).forEach((identifier) => {
     const statObj = { identifier, away: [], home: [] };
     fixture.stats.push(statObj);
-  });
+  });*/
 
-  const results = await Promise.allSettled(
+/*  const results = await Promise.allSettled(
     players.map((player) => {
       const isHomeTeam = fixture.teamHome === player.playerTeam;
       let opponent;
@@ -139,7 +210,7 @@ const populateStats = asyncHandler(async (req, res) => {
         { $set: { opponent } }
       );*/
 
-      return PlayerHistory.create({
+     /* return PlayerHistory.create({
         matchday: fixture.matchday,
         player: player._id,
         fixture: fixture._id,
@@ -147,10 +218,10 @@ const populateStats = asyncHandler(async (req, res) => {
         home: isHomeTeam,
       });
     })
-  );
+  );*/
 
   // Separate successes and failures
-  const successes = results
+ /* const successes = results
     .filter((r) => r.status === "fulfilled")
     .map((r) => r.value);
   const errors = results
@@ -163,7 +234,7 @@ const populateStats = asyncHandler(async (req, res) => {
     req.params.id,
     fixture,
     { new: true }
-  );
+  );*/
   res.status(200).json({ updatedFixture, successes, errors });
 });
 

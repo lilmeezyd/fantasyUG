@@ -81,6 +81,7 @@ const playerHistorySchema = mongoose.Schema({
 
 playerHistorySchema.index({ matchday: 1, fixture: 1 });
 playerHistorySchema.index({ player: 1, matchday: 1 });
+playerHistorySchema.index({ player: 1, fixture: 1 }, {unique: true});
 
 
 const PlayerHistory = mongoose.model('PlayerHistory', playerHistorySchema)
