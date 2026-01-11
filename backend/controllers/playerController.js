@@ -138,7 +138,6 @@ const getPlayers = asyncHandler(async (req, res) => {
     { $sort: { _id: 1 } },
   ]);
 
-
   const playerCountMap = new Map(picks.map((x) => [x._id.toString(), x.total]));
   const numberOfManagers = await getAllManagers();
   const positionMap = new Map();
@@ -146,7 +145,9 @@ const getPlayers = asyncHandler(async (req, res) => {
   const playerMap = new Map(players.map((x) => [x._id.toString(), x.appName]));
   const teamMap = new Map(teams.map((x) => [x._id.toString(), x.name]));
   const teamCodeMap = new Map(teams.map((x) => [x._id.toString(), x.code]));
-  const positionNameMap = new Map(positions.map((x) => [x._id.toString(), x.shortName]));
+  const positionNameMap = new Map(
+    positions.map((x) => [x._id.toString(), x.shortName])
+  );
 
   if (players) {
     const updatedPlayers = players
@@ -210,7 +211,7 @@ const getPlayers = asyncHandler(async (req, res) => {
       ? Math.max(...updatedPlayers.map((x) => +x.ownership))
       : 0;
     const highestOwned = updatedPlayers.length
-      ? updatedPlayers.filter((x) => +x.ownership === max).slice(0,5)
+      ? updatedPlayers.filter((x) => +x.ownership === max).slice(0, 5)
       : [];
     res.status(200).json({ highestOwned, updatedPlayers });
   }
@@ -245,9 +246,30 @@ const getPlayer = asyncHandler(async (req, res) => {
   const playerCountMap = new Map(picks.map((x) => [x._id.toString(), x.total]));
   const team = player?.playerTeam;
   const pFixtures = await Fixture.find({
+    stats: [],
     $or: [{ teamHome: team }, { teamAway: team }],
-  });
-  const pResults = await PlayerHistory.find({ player: req.params.id });
+  }).lean();
+  const pResults = await PlayerHistory.find({ player: req.params.id })
+    .populate("fixture")
+    .lean();
+  const newFixtures = [
+    ...pFixtures.map((x) => {
+      return {
+        ...x,
+        opponent:
+          x.teamHome.toString() === player.playerTeam.toString()
+            ? x.teamAway.toString()
+            : x.teamHome.toString(),
+      };
+    }),
+    ...pResults.map((x) => {
+      return {
+        ...x.fixture,
+        opponent: x.opponent.toString(),
+        playerTeam: player.playerTeam,
+      };
+    }),
+  ];
   const {
     _id,
     firstName,
@@ -271,8 +293,8 @@ const getPlayer = asyncHandler(async (req, res) => {
     playerCount,
   } = player;
   const b = !playerCountMap.get(_id.toString())
-          ? 0
-          : (playerCountMap.get(_id.toString()) / managers.length) * 100;
+    ? 0
+    : (playerCountMap.get(_id.toString()) / managers.length) * 100;
   const newPlayer = {
     _id,
     firstName,
@@ -294,7 +316,7 @@ const getPlayer = asyncHandler(async (req, res) => {
     cleansheets,
     starts,
     ownership: `${b.toFixed(1)}`,
-    fixtures: pFixtures,
+    fixtures: newFixtures,
     results: pResults,
   };
   res.status(200).json(newPlayer);
@@ -344,31 +366,26 @@ const updatePlayer = asyncHandler(async (req, res) => {
     req.body.playerTeam ||
     req.body.nowCost
   ) {
-    /*Object.keys(req.body).forEach((val) => {
-      if (val === "firstName") {
-        req.body.firstName = req.body.firstName
-          .split(" ")
-          .map((x) => x[0].toLocaleUpperCase() + x.slice(1).toLocaleLowerCase())
-          .join(" ");
-      }
-      if (val === "secondName") {
-        req.body.secondName = req.body.secondName
-          .split(" ")
-          .map((x) => x[0].toLocaleUpperCase() + x.slice(1).toLocaleLowerCase())
-          .join(" ");
-      }
-      if (val === "appName") {
-        req.body.appName = req.body.appName
-          .split(" ")
-          .map((x) => x[0].toLocaleUpperCase() + x.slice(1).toLocaleLowerCase())
-          .join(" ");
-      }
-    });*/
+    
     const updatedPlayer = await Player.findByIdAndUpdate(
       req.params.id,
       req.body,
       { new: true }
     );
+
+    if (req.body.playerTeam) {
+      await Picks.updateMany(
+        { "picks._id": req.params.id },
+        {
+          $set: {
+            "picks.$[p].playerTeam": req.body.playerTeam,
+          },
+        },
+        {
+          arrayFilters: [{ "p._id": req.params.id }],
+        }
+      );
+    }
     res.status(200).json({ message: `${updatedPlayer.appName} updated` });
   }
 });
