@@ -73,6 +73,7 @@ const PlayerInfo = (props) => {
     // prefer history values when available
     return fixture ? { ...fixture, ...(hist || {}) } : hist || null;
   }, [selectedFixtureId, fixtures, history]);
+  //console.log(fixtures)
 
   // defensive rendering helpers
   const getTeamShortName = (teamId) =>
@@ -120,10 +121,7 @@ const PlayerInfo = (props) => {
             <div className="games-info-fixtures">
               <div className="playerInfoFix">
                 {fixtures.map((f, idx) => {
-                  const teamImg =
-                    player?.playerTeam === f.teamAway
-                      ? getTeamShortName(f.teamHome)
-                      : getTeamShortName(f.teamAway);
+                  const teamImg = getTeamShortName(f.opponent)
                   const isSelected =
                     selectedFixtureId?.toString() === f._id?.toString();
                   return (
@@ -157,14 +155,11 @@ const PlayerInfo = (props) => {
                   </div>
                   <div className="pf">
                     <div>
-                      {player?.playerTeam ===
-                      selectedFixtureWithHistory?.teamAway
-                        ? getTeamFullName(selectedFixtureWithHistory?.teamHome)
-                        : getTeamFullName(selectedFixtureWithHistory?.teamAway)}
+                      {getTeamFullName(selectedFixtureWithHistory?.opponent)}
                     </div>
                     <div>
-                      {player?.playerTeam ===
-                      selectedFixtureWithHistory?.teamHome
+                      {selectedFixtureWithHistory?.opponent ===
+                      selectedFixtureWithHistory?.teamAway
                         ? "Home"
                         : "Away"}
                     </div>
@@ -190,6 +185,18 @@ const PlayerInfo = (props) => {
                       <div>Points</div>
                       <div>{selectedFixtureWithHistory.totalPoints ?? 0}</div>
                     </div>
+                    {selectedFixtureWithHistory.starts ? (
+                    <div className="player-info-2">
+                      <div>Started</div>
+                      <div>{selectedFixtureWithHistory.starts}</div>
+                    </div>
+                  ) : null}
+                  {selectedFixtureWithHistory.bench ? (
+                    <div className="player-info-2">
+                      <div>Sub</div>
+                      <div>{selectedFixtureWithHistory.bench}</div>
+                    </div>
+                  ) : null}
                     {selectedFixtureWithHistory.goalsScored ? (
                     <div className="player-info-2">
                       <div>Goals</div>
@@ -226,7 +233,7 @@ const PlayerInfo = (props) => {
                       <div>Own goals</div>
                       <div>{selectedFixtureWithHistory.ownGoals}</div>
                     </div>
-                  ) : null}
+                  ) : null} 
 
                   {selectedFixtureWithHistory.penaltiesMissed ? (
                     <div className="player-info-2">

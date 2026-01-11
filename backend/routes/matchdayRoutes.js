@@ -11,7 +11,9 @@ import {
   updateTOW,
   getTOW,
   getTOWs,
+  getCurrentMD,
   getMaxMD,
+  getMinMD,
   createAutos,
   undoAutos
 } from "../controllers/matchdayController.js";
@@ -30,7 +32,9 @@ router
   .patch(protect, roles(ROLES.ADMIN, ROLES.EDITOR), updateMatchday)
   .delete(protect, roles(ROLES.ADMIN), deleteMatchday);
 
+  router.route("/data/current").get(getCurrentMD)
 router.route("/data/max").get(getMaxMD);
+router.route("/data/min").get(getMinMD);
 router.route("/data/tows").get(getTOWs);
 router.route("/data/tows/:id").get(getTOW);
 

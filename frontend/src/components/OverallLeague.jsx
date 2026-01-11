@@ -1,7 +1,7 @@
 import { useMemo, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useGetOverallLeagueQuery } from "../slices/leagueApiSlice";
-import { useGetMaxIdQuery } from "../slices/matchdayApiSlice";
+import { useGetMaxIdQuery, useGetCurrentMDQuery } from "../slices/matchdayApiSlice";
 import { Spinner } from "react-bootstrap";
 import { useSelector } from "react-redux";
 import {
@@ -17,6 +17,7 @@ const OverallLeague = () => {
   const { id } = useParams();
   const { data = [], isLoading } = useGetOverallLeagueQuery(id);
   const { data: maxId } = useGetMaxIdQuery();
+  const { data: currentId } = useGetCurrentMDQuery();
   const { userInfo } = useSelector((state) => state.auth);
 
   useEffect(() => {
@@ -25,8 +26,8 @@ const OverallLeague = () => {
   }, [data]);
 
   useEffect(() => {
-    setGw(maxId);
-  }, [maxId]);
+    setGw(currentId);
+  }, [currentId]);
 
   const start = data?.startMatchday;
   const end = data?.currentMatchday;

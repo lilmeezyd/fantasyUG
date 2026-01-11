@@ -111,10 +111,10 @@ const populateStats = asyncHandler(async (req, res) => {
     res.status(400);
     throw new Error("Fixture not found");
   }
-  /*if (fixture.stats.length > 0) {
+  if (fixture.stats.length > 0) {
     res.status(400);
     throw new Error("Fixture already populated");
-  }*/
+  }
   if (!players) {
     res.status(400);
     throw new Error("No players found");
@@ -127,26 +127,25 @@ const populateStats = asyncHandler(async (req, res) => {
   const results = await Promise.allSettled(
     players.map((player) => {
       const isHomeTeam = fixture.teamHome === player.playerTeam;
-      //const opponent = isHomeTeam ? fixture.teamAway : fixture.teamHome;
       let opponent;
       if (player.playerTeam.toString() === fixture.teamAway.toString()) opponent = fixture.teamHome.toString();
       if (player.playerTeam.toString() === fixture.teamHome.toString()) opponent = fixture.teamAway.toString();
 
-      console.log(player.playerTeam);
+     /* console.log(player.playerTeam);
       console.log(opponent);
 
       return PlayerHistory.findOneAndUpdate(
         { fixture: req.params.id, player: player._id },
         { $set: { opponent } }
-      );
+      );*/
 
-      /*return PlayerHistory.create({
+      return PlayerHistory.create({
         matchday: fixture.matchday,
         player: player._id,
         fixture: fixture._id,
         opponent,
         home: isHomeTeam,
-      });*/
+      });
     })
   );
 
@@ -158,14 +157,14 @@ const populateStats = asyncHandler(async (req, res) => {
     .filter((r) => r.status === "rejected")
     .map((r) => r.reason);
 
-  /*fixture.teamAwayScore = 0;
+  fixture.teamAwayScore = 0;
   fixture.teamHomeScore = 0;
   const updatedFixture = await Fixture.findByIdAndUpdate(
     req.params.id,
     fixture,
     { new: true }
-  );*/
-  res.status(200).json({ successes, errors });
+  );
+  res.status(200).json({ updatedFixture, successes, errors });
 });
 
 //@desc remove stats for a specific fixture

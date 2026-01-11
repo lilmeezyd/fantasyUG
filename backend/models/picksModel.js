@@ -21,5 +21,8 @@ const picksSchema = mongoose.Schema({
     
 })
 
+picksSchema.index({ "picks._id": 1 })
+
+
 const Picks = mongoose.model('Picks', picksSchema)
 export default Picks

@@ -27,8 +27,7 @@ const { identifier, homeAway, player, value } = data
     const res = await editStats({id: fixture._id, ...stats}).unwrap()
     toast.success(res?.message)
   } catch (error) {
-    console.log(error)
-    toast.error(error?.data?.details)
+    toast.error(error?.data?.details || error?.data?.message)
   }
 
   handleClose()

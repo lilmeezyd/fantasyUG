@@ -13,10 +13,31 @@ import { setInitialPoints } from "./managerLiveController.js";
 //@route GET /api/matchdays/data/max/
 //@access Public
 const getMaxMD = asyncHandler(async (req, res) => {
-  const matchdays = await Matchday.find({ pastDeadline: true });
+  const matchdays = await Matchday.find({});
   if (matchdays.length > 0) {
     const newMd = Math.max(...matchdays.map((x) => x.id));
-    console.log(newMd);
+    res.status(200).json(newMd);
+  } else {
+    res.status(200).json(null);
+  }
+});
+
+const getCurrentMD = asyncHandler(async (req, res) => {
+  const matchday = await Matchday.findOne({current: true});
+  if (!matchday) {
+    throw new Error("Matchday not found!")
+  } 
+  const { id } = matchday
+  res.json(id)
+});
+
+//@desc Get recent matchday
+//@route GET /api/matchdays/data/max/
+//@access Public
+const getMinMD = asyncHandler(async (req, res) => {
+  const matchdays = await Matchday.find({});
+  if (matchdays.length > 0) {
+    const newMd = Math.min(...matchdays.map((x) => x.id));
     res.status(200).json(newMd);
   } else {
     res.status(200).json(null);
@@ -786,7 +807,9 @@ export {
   createAutos,
   undoAutos,
   updateMDdata,
+  getCurrentMD,
   getMaxMD,
+  getMinMD,
   updateTOW,
   getTOW,
   getTOWs,

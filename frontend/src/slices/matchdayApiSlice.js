@@ -64,6 +64,12 @@ export const matchdayApiSlice = apiSlice.injectEndpoints({
         method: 'GET'
       }),
     }),
+    getCurrentMD: builder.query({
+      query: () => ({
+        url: `${MATCHDAYS_URL}/data/current`,
+        method: 'GET'
+      }),
+    }),
     getMatchdayTOW: builder.query({
       query: (id) => ({
         url: `${MATCHDAYS_URL}/data/tows/${id}`,
@@ -109,6 +115,7 @@ export const {
   useGetMatchdayTOWQuery,
   useGetAllTOWsQuery,
   useGetMaxIdQuery,
+  useGetCurrentMDQuery,
   useGetMatchdaysQuery,
   useGetMatchdayQuery,
   useAddMatchdayMutation,

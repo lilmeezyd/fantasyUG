@@ -7,8 +7,6 @@ const Leagues = () => {
   const { userInfo } = useSelector((state) => state.auth)
   const { data } = useGetManagerInfoQuery(userInfo?._id)
   const { data: teams } = useGetQuery()
-  console.log(data)
-  console.log(teams)
   return (
     <div className="league-bg">
       <div className="standing-wrap">
