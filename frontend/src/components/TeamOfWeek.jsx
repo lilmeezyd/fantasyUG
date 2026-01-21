@@ -13,7 +13,8 @@ import PlayerDetails from "./PlayerDetails";
 
 const TeamOfWeek = () => {
   const [matchdayId, setMatchdayId] = useState(null);
-  const { data: maxId, isLoading } = useGetMaxIdQuery();
+  const [maxId, setMaxId] = useState(null);
+  //const { data: maxId, isLoading } = useGetMaxIdQuery();
   const { data = [], isLoading: getAllLoading } = useGetAllTOWsQuery();
   //const { data: tows } = useGetMatchdayTOWQuery(matchdayId);
   const { data: matchdays = [] } = useGetMatchdaysQuery();
@@ -22,8 +23,10 @@ const TeamOfWeek = () => {
     matchdays.length > 0 ? Math.min(...matchdays.map((x) => x.id)) : 1;
 
   useEffect(() => {
-    setMatchdayId(maxId);
-  }, [maxId]);
+    const myId = Math.max(...data.map(x => x.matchday)) || 1
+    setMatchdayId(myId);
+    setMaxId(myId);
+  }, [data]);
 
   const allArray = useMemo(
     () => data?.filter((x) => +x.matchday === +matchdayId),
@@ -53,7 +56,8 @@ const TeamOfWeek = () => {
       })
       .sort((a, b) => (a.code > b.code ? 1 : -1));
   }, [matchdayId, data, teams]);
-  console.log(allArray)
+  console.log(data)
+  console.log(matchdayId)
 
   const goalkeepers = allArrays?.filter((pick) => pick?.code === 1);
   const defenders = allArrays?.filter((pick) => pick?.code === 2);
