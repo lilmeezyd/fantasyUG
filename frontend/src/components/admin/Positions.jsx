@@ -18,7 +18,7 @@ const Positions = () => {
     added: false,
   });
   const [positionId, setPositionId] = useState("");
-  const { data: positions, isLoading } = useGetPositionsQuery();
+  const { data: positions = [], isLoading } = useGetPositionsQuery();
   const [addPosition] = useAddPositionMutation();
   const [deletePosition] = useDeletePositionMutation();
   const { deleted, edited, added } = show;
@@ -116,47 +116,80 @@ const Positions = () => {
   }
   return (
     <Container>
-      <div className="positions">
-        <div></div>
-        <div></div>
-        <div>Count</div>
-        <div></div>
-        <div></div>
-      </div>
-      {positions?.map((x) => (
-        <div className="positions" key={x._id}>
-          <div className="team-name">{x.singularName}</div>
-          <div>{x.shortName}</div>
-          <div>{x.total}</div>
-          <div onClick={() => editPositionPop(x._id)} className="btn-click btn">
-            <BsPencilFill color="black" />
-          </div>
-          <div
-            onClick={() => deletePositionPop(x._id)}
-            className="btn btn-click"
-          >
-            <AiFillDelete color="black" />
-          </div>
+      {positions?.length === 0 ? (
+          <div className="spinner">No Data Found!</div>
+        ) : (<div className="flex justify-center">
+        <div className="overflow-auto min-w-[320px]">
+          <table className="border rounded-lg">
+            <thead>
+              <tr className="border-b border-gray-500 p-2">
+                <th className="px-4 py-2"></th>
+                <th className="px-4 py-2"></th>
+                <th className="px-4 py-2">Count</th>
+                <th className="px-4 py-2"></th>
+                <th className="px-4 py-2"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {positions?.map((x, idx) => (
+                <tr
+                  className={`border border-gray-500 p-2 ${
+                    idx % 2 === 1 && "bg-green-200"
+                  }`}
+                  key={x._id}
+                >
+                  <td className="team-name px-4 py-2 font-bold">
+                    {x.singularName}
+                  </td>
+                  <td className="px-4 py-2 font-semibold text-center">
+                    {x.shortName}
+                  </td>
+                  <td className="px-4 py-2 font-semibold text-center">
+                    {x.total}
+                  </td>
+                  {/*<td
+                    onClick={() => editPositionPop(x._id)}
+                    className="border px-4 py-2 btn-click btn"
+                  >
+                    <BsPencilFill color="black" />
+                  </td>
+                  <td
+                    onClick={() => deletePositionPop(x._id)}
+                    className="border px-4 py-2 btn btn-click"
+                  >
+                    <AiFillDelete color="black" />
+                  </td>*/}
+                  <td className="btn-click px-4 py-2 text-center" onClick={() => editPositionPop(x._id)}>
+                                    <BsPencilFill color="black" />
+                                  </td>
+                                  <td className="btn-click px-4 py-2 text-center" onClick={() => deletePositionPop(x._id)}>
+                                    <AiFillDelete color="black" />
+                                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
-      ))}
-      <div className="add-button p-2">
-        <Button onClick={addPositionPop} className="btn btn-success">
-          Add Position
-        </Button>
+      </div>)}
+      <div className="p-2 add-button ">
+        <Button onClick={addPositionPop}>Add Position</Button>
       </div>
-      <AddModal submit={submit} show={added} closeAdd={closeAdd}></AddModal>
-      <EditModal
-        positionId={positionId}
-        resetEdit={resetEdit}
-        show={edited}
-        closeEdit={closeEdit}
-      ></EditModal>
-      <DeleteModal
-        deletePositionNow={deletePositionNow}
-        cancelDelete={cancelDelete}
-        show={deleted}
-        closeDelete={closeDelete}
-      ></DeleteModal>
+      {added && <AddModal submit={submit} closeAdd={closeAdd} />}
+      {edited && (
+        <EditModal
+          positionId={positionId}
+          resetEdit={resetEdit}
+          closeEdit={closeEdit}
+        />
+      )}
+      {deleted && (
+        <DeleteModal
+          positionId={positionId}
+          deletePositionNow={deletePositionNow}
+          cancelDelete={cancelDelete}
+          closeDelete={closeDelete}
+        />
+      )}
     </Container>
   );
 };

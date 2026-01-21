@@ -38,7 +38,8 @@ export const getPlayers = (players, sort, view, word, cutPrice) => {
                             .sort(sortPlayer)
                             .filter(player => +(player.nowCost).toFixed(1)<=cutPrice)
                             .filter(player => player?.firstName?.toLowerCase()?.includes(word.toLowerCase())
-                            || player?.secondName?.toLowerCase()?.includes(word.toLowerCase()))
+                            || player?.secondName?.toLowerCase()?.includes(word.toLowerCase())
+                        || player?.appName?.toLowerCase()?.includes(word.toLowerCase()))
                             //.filter(player => player.appName.toLowerCase().startsWith(word?.toLowerCase()))
 
     

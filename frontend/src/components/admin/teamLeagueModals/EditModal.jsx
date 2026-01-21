@@ -3,6 +3,7 @@ import { useState, useEffect } from "react"
 import { useGetTeamLeagueQuery, useEditTeamLeagueMutation } from "../../../slices/leagueApiSlice"
 import { useGetMatchdaysQuery } from "../../../slices/matchdayApiSlice"
 import { useGetQuery } from "../../../slices/teamApiSlice"
+import { toast } from "react-toastify"
 const EditModal = (props) => {
   const { show, closeEdit, resetEdit, teamLeagueId } = props
   const [data, setData] = useState({
@@ -11,15 +12,15 @@ const EditModal = (props) => {
     endMatchday: "",
   })
 
-  const { data: teamLeague } = useGetTeamLeagueQuery(teamLeagueId)
-  const { data: matchdays } = useGetMatchdaysQuery()
-  const { data: teams } = useGetQuery()
+  const { data: teamLeague = {}, refetch } = useGetTeamLeagueQuery(teamLeagueId)
+  const { data: matchdays = [] } = useGetMatchdaysQuery()
+  const { data: teams = [] } = useGetQuery()
   const [editTeamLeague] = useEditTeamLeagueMutation()
   const { team, startMatchday, endMatchday } = data
  
 
   useEffect(() => {
-    setData({ team: teamLeague?.team, startMatchday: teamLeague?.startMatchday, endMatchday: teamLeague?.endMatchday })
+    setData({ team: teamLeague?.team, startMatchday: teamLeague?.startGW, endMatchday: teamLeague?.endMatchday })
   }, [teamLeague?.team, teamLeague?.startMatchday, teamLeague?.endMatchday])
   const onSubmit = async (e) => {
     e.preventDefault()
@@ -29,10 +30,19 @@ const EditModal = (props) => {
     const endMatchday = elements.end.value
 
     if (team && startMatchday && endMatchday) {
-      await editTeamLeague({ id: teamLeague?._id, team, startMatchday, endMatchday })
+      try {
+        const res = await editTeamLeague({ id: teamLeague?._id, team, startMatchday, endMatchday }).unwrap();
+        toast.success("Update complete")
       closeEdit()
       resetEdit()
+      } catch (error) {
+        toast.error("Update failed")
+        closeEdit()
+      resetEdit()
+      }
+      
     }
+    refetch()
 
     if (!teamLeague) {
       return (
@@ -44,21 +54,15 @@ const EditModal = (props) => {
 
   }
   return (
-    <Modal show={show} onHide={closeEdit}>
-      <Modal.Header style={{ background: "aquamarine" }} closeButton>
-        <Modal.Title>
-          <div className="info-details">Edit Team League</div></Modal.Title>
-      </Modal.Header>
-      <Modal.Body>
-        <div>
-          <form onSubmit={onSubmit} action="">
-            <div className="form-group my-2">
-              <label className="py-2" htmlFor="name">
-                League
-              </label>
-              <select
-                value={team}
-                onChange={(e) => {
+    <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+      <div className="bg-white p-4 rounded-lg shadow-md max-w-sm w-full space-y-4">
+        <h3 className="text-lg font-bold">Edit Team League</h3>
+        <form onSubmit={onSubmit}>
+        <div className="py-2">
+          <label className="block text-sm font-medium" htmlFor="name">Team League</label>
+          <select
+          value={team}
+              onChange={(e) => {
                   setData((prev) => ({
                     ...prev,
                     team: e.target.value,
@@ -66,70 +70,62 @@ const EditModal = (props) => {
                 }}
                 name="name"
                 id="name"
-                className="form-control"
-              >
-                {teams?.map((team) => (
+            className="w-full px-3 py-1 border rounded"
+          >
+            <option value="">---Select---</option>
+            {teams?.map((team) => (
                   <option key={team._id} value={team._id}>
                     {team.name}
                   </option>
                 ))}
-              </select>
-            </div>
-            <div className="form-group my-2">
-              <label className="py-2" htmlFor="start">
-                Start Matchday
-              </label>
-              <select
-                value={startMatchday}
-                onChange={(e) => {
-                  setData((prev) => ({
-                    ...prev,
-                    startMatchday: e.target.value,
-                  }));
-                }}
-                name="start"
-                id="start"
-                className="form-control"
-              >
-                {matchdays?.map((matchday) => (
-                  <option key={matchday._id} value={matchday._id}>
-                    {matchday.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="form-group my-2">
-              <label className="py-2" htmlFor="end">
-                End matchday
-              </label>
-              <select
-                value={endMatchday}
-                onChange={(e) => {
-                  setData((prev) => ({
-                    ...prev,
-                    endMatchday: e.target.value,
-                  }));
-                }}
-                id="end"
-                name="end"
-                className="form-control"
-              >
-                {matchdays?.map((matchday) => (
-                  <option key={matchday._id} value={matchday._id}>
-                    {matchday.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className=" py-2 my-2">
-              <Button type="submit" className="btn-success form-control">
-                Submit
-              </Button>
-            </div>
-          </form>
+          </select>
         </div>
-      </Modal.Body>
-    </Modal>
+        <div className="py-2">
+          <label className="block text-sm font-medium" htmlFor="start">Start Matchday</label>
+          <select
+          value={startMatchday}
+              onChange={(e) => {
+                setData((prev) => ({
+                  ...prev, startMatchday: e.target.value
+                }))
+              }} name="start" id="start"
+            className="w-full px-3 py-1 border rounded"
+          >
+            <option value="">---Select---</option>
+            {matchdays?.map(matchday => <option key={matchday._id} value={matchday._id}>
+                  {matchday.name} </option>)}
+          </select>
+        </div>
+        <div className="py-2">
+          <label className="block text-sm font-medium" htmlFor="end">End matchday</label>
+              <select
+              value={endMatchday}
+              onChange={(e) => {
+                setData((prev) => ({
+                  ...prev, endMatchday: e.target.value
+                }))
+              }} id="end" name="end"
+            className="w-full px-3 py-1 border rounded"
+          >
+            <option value="">---Select---</option>
+            {matchdays?.map(matchday => <option key={matchday._id} value={matchday._id}>
+                  {matchday.name}
+                </option>)}
+          </select>
+        </div>
+        <div className="py-2 flex justify-between space-x-3">
+          <button onClick={closeEdit} className="px-3 py-1 border rounded">
+            Cancel
+          </button>
+          <button
+            className="px-3 py-1 bg-blue-600 text-white rounded"
+          >
+            Save
+          </button>
+        </div>
+        </form>
+      </div>
+    </div>
   )
 }
 

@@ -9,7 +9,7 @@ import {
 
 const EditModal = (props) => {
   const { show, closeEdit, resetEdit, fixtureId } = props;
-  const { data: fixture } = useGetFixtureQuery(fixtureId);
+  const { data: fixture = {} } = useGetFixtureQuery(fixtureId);
   const { data: teams } = useGetQuery();
   const { data: matchdays } = useGetMatchdaysQuery();
   const [editFixture] = useEditFixtureMutation();
@@ -18,6 +18,7 @@ const EditModal = (props) => {
     matchday: '', kickOff: '', time: ''
   })
   const { teamHome, teamAway, matchday, kickOff, time } = data;
+  console.log(fixture)
 
   useEffect(() => {
     if (fixtureId) {
@@ -25,8 +26,8 @@ const EditModal = (props) => {
       teamHome: fixture?.teamHome,
       teamAway: fixture?.teamAway,
       matchday: fixture?.matchday,
-      kickOff: new Date(fixture?.kickOffTime).toISOString().split("T")[0],
-      time: new Date(fixture?.kickOffTime).toTimeString().split(":").slice(0, 2).join(":")
+      kickOff: fixture?.kickOffTime?.substring(0, 10),
+      time: fixture?.kickOffTime?.substring(11, 23)
     });
   }
   }, [
@@ -71,116 +72,102 @@ const EditModal = (props) => {
     );
   }
   return (
-    <Modal show={show} onHide={closeEdit}>
-      <Modal.Header style={{ background: "aquamarine" }} closeButton>
-        <Modal.Title>
-          <div className="info-details">Edit Fixture</div>
-        </Modal.Title>
-      </Modal.Header>
-      <Modal.Body>
-        <div>
-          <form onSubmit={onSubmit} action="">
-            <div className="form-group my-2">
-              <label className="py-2" htmlFor="matchday">
-                Matchday
-              </label>
-              <select
-                name="matchday"
-                id="matchday"
-                className="form-control"
-                value={matchday}
-                onChange={(e) => {
-                  setData((prev) => ({
-                    ...prev,
-                    matchday: e.target.value,
-                  }));
+    <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+      <div className="bg-white p-4 rounded-lg shadow-md max-w-sm w-full space-y-4">
+        <h6 className="text-lg font-bold">Edit Fixture</h6>
+        <form onSubmit={onSubmit}>
+        <div className="py-2">
+          <label className="block text-sm font-medium" htmlFor="matchday">Matchday</label>
+          <select
+          value={matchday}
+            onChange={(e) => {
+                  setData(prev => ({
+                    ...prev, matchday: e.target.value
+                  }))
                 }}
-              >
-                {matchdays?.map((md) => (
-                  <option key={md?._id} value={md?._id}>
-                    {md?.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="form-group my-2">
-              <label className="py-2" htmlFor="kickoff">Date</label>
-              <input name="kickoff" id="kickoff" type="date"
-                value={kickOff}
-                className="form-control"
-                onChange={(e) => {
+            name="matchday" id="matchday"
+            className="w-full px-3 py-1 border rounded"
+            type="text"
+          >
+            <option value="">---Select Matchday---</option>
+            {matchdays?.map(matchday => 
+                    <option key={matchday._id} value={matchday._id}>
+                      {matchday.name}
+                    </option>
+                  )}
+          </select>
+        </div>
+        <div className="py-2">
+          <label className="block text-sm font-medium" htmlFor="kickoff">Date</label>
+          <input name="kickoff" id="kickoff" type="date"
+          value={kickOff}
+            onChange={(e) => {
                   setData(prev => ({
                     ...prev, kickOff: e.target.value
                   }))
                 }}
-              />
-
-            </div>
-            <div className="form-group my-2">
-              <label className="py-2" htmlFor="time">Time</label>
-              <input
-                value={time}
-                onChange={(e) => {
-                  setData((prev) => ({
-                    ...prev, time: e.target.value
-                  }))
-                }} name="time" id="time" className="form-control" type="time" />
-            </div>
-            <div className="form-group my-2">
-              <label className="py-2" htmlFor="hteam">
-                Home Team
-              </label>
-              <select
-                name="hteam"
-                id="hteam"
-                className="form-control"
-                value={teamHome}
-                onChange={(e) => {
-                  setData((prev) => ({
-                    ...prev,
-                    teamHome: e.target.value,
-                  }));
-                }}
-              >
-                {teams?.map((team) => (
-                  <option key={team._id} value={team._id}>
-                    {team?.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="form-group my-2">
-              <label className="py-2" htmlFor="ateam">
-                Away Team
-              </label>
-              <select
-                name="ateam"
-                id="ateam"
-                className="form-control"
-                value={teamAway}
-                onChange={(e) => {
-                  setData((prev) => ({
-                    ...prev,
-                    teamAway: e.target.value,
-                  }));
-                }}
-              >
-                {teams?.map((team) => (
-                  <option key={team._id} value={team._id}>
-                    {team?.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className=" py-2 my-2">
-              <Button type="submit" className="btn-success form-control">
-                Submit
-              </Button>
-            </div>
-          </form>
+            className="w-full px-3 py-1 border rounded"
+          />
         </div>
-      </Modal.Body>
-    </Modal>
+        <div className="py-2">
+          <label className="block text-sm font-medium" htmlFor="time">Time</label>
+          <input
+          value={time}
+            onChange={(e) => {
+                setData((prev) => ({
+                  ...prev, time: e.target.value
+                }))
+              }} name="time" id="time"
+            className="w-full px-3 py-1 border rounded"
+            type="time"
+          />
+        </div>
+        <div className="py-2">
+          <label className="block text-sm font-medium" htmlFor="hteam">Home Team</label>
+          <select value={teamHome} onChange={(e) => {
+                  setData(prev => ({
+                    ...prev, teamHome: e.target.value
+                  }))
+                }} className="w-full px-3 py-1 border rounded" name="hteam" id="hteam">
+                      <option value="">---Select---</option>
+                  {teams?.map(team => 
+                    <option 
+                    key={team._id} 
+                    value={team._id}
+                    >{team.name}</option>
+                  )}
+                </select>
+        </div>
+        <div className="py-2">
+          <label className="block text-sm font-medium" htmlFor="ateam">Away Team</label>
+          <select value={teamAway} onChange={(e) => {
+                  setData(prev => ({
+                    ...prev, teamAway: e.target.value
+                  }))
+                }} className="w-full px-3 py-1 border rounded" name="ateam" id="ateam">
+                      <option value="">---Select---</option>
+                  {teams?.map(team => 
+                    <option 
+                    key={team._id} 
+                    value={team._id}
+                    >{team.name}</option>
+                  )}
+                </select>
+        </div>
+        <div className="py-2 flex justify-between space-x-3">
+          <button onClick={closeEdit} className="px-3 py-1 border rounded">
+            Cancel
+          </button>
+          <button
+            type="submit"
+            className="px-3 py-1 bg-blue-600 text-white rounded"
+          >
+            Save
+          </button>
+        </div>
+        </form>
+      </div>
+    </div>
   );
 };
 

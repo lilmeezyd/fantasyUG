@@ -7,7 +7,7 @@ import { toast } from 'react-toastify';
 
 const EditModal = (props) => { 
   const {show, closeEdit, resetEdit, playerId} = props
-  const { data: player } = useGetPlayerQuery(playerId)
+  const { data: player = {} , refetch} = useGetPlayerQuery(playerId)
   const [ data, setData ] = useState({firstName: '', secondName: '', appName: '',
     playerPosition: '', playerTeam: '', startCost: ''
   })
@@ -30,17 +30,18 @@ const EditModal = (props) => {
     const {elements}  = e.currentTarget
     const firstName = elements.tname.value
     const secondName = elements.sname.value
-    const appName = elements.code.value
+    const appName = elements.appName.value
     const playerTeam = elements.team.value
     const playerPosition = elements.position.value
-    const nowCost = elements.price.value
+    const startCost = elements.price.value
 
-    if(firstName && secondName && appName && team && position && price) {
-     const res = await editPlayer({id: player?._id, firstName, secondName, appName, playerTeam, playerPosition, nowCost}).unwrap()
+    if(firstName && secondName && appName && playerTeam && playerPosition && startCost) {
+     const res = await editPlayer({id: player?._id, firstName, secondName, appName, playerTeam, playerPosition, startCost}).unwrap()
      toast.success(res?.message)
       closeEdit()
       resetEdit()
     }
+    refetch()
   }
   if(!player) {
     return (
@@ -50,52 +51,70 @@ const EditModal = (props) => {
     )
   }
 return (
-  <Modal show={show} onHide={closeEdit}>
-      <Modal.Header style={{ background: "aquamarine" }} closeButton>
-          <Modal.Title>
-            <div className="info-details">Edit Player</div></Modal.Title>
-      </Modal.Header>
-      <Modal.Body>
-      <div>
-            <form onSubmit={onSubmit} action="">
-              <div className="form-group my-2">
-                <label className="py-2" htmlFor="tname">Player Name</label>
-                <input
-                onChange={(e) => {
+  <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+      <div className="bg-white p-4 rounded-lg shadow-md max-w-sm w-full space-y-4">
+        <h6 className="text-lg font-bold">Edit Player</h6>
+        <form onSubmit={onSubmit}>
+        <div className="py-2">
+          <label className="block text-sm font-medium" htmlFor="tname">
+            Player Name
+          </label>
+          <input
+            onChange={(e) => {
                   setData((prev) => ({
                     ...prev, firstName: e.target.value
                   }))
                 }}
                 value={firstName}
-                 name="tname" id="tname" className="form-control" type="text" />
-              </div>
-              <div className="form-group my-2">
-              <label className="py-2" htmlFor="sname">Second Name</label>
-              <input
-              value={secondName}
-              onChange={(e) => {
+            name="tname"
+            id="tname"
+            className="w-full px-3 py-1 border rounded"
+            type="text"
+          />
+        </div>
+        <div className="py-2">
+          <label className="block text-sm font-medium" htmlFor="sname">
+            Second Name
+          </label>
+          <input
+            onChange={(e) => {
                 setData((prev) => ({
                   ...prev, secondName: e.target.value
                 }))
-              }} name="sname" id="sname" className="form-control" type="text" />
-              </div>
-              <div className="form-group my-2">
-              <label className="py-2" htmlFor="code">App Name</label>
-              <input
-              value={appName}
-              onChange={(e) => {
+              }}
+              value={secondName}
+            name="sname"
+            id="sname"
+            className="w-full px-3 py-1 border rounded"
+            type="text"
+          />
+        </div>
+        <div className="py-2">
+          <label className="block text-sm font-medium" htmlFor="appName">
+            App Name
+          </label>
+          <input
+            onChange={(e) => {
                 setData((prev) => ({
                   ...prev, appName: e.target.value
                 }))
-              }} id="code" className="form-control" type="text" />
-              </div>
-              <div className="form-group my-2">
-              <label className="py-2" htmlFor="team">Team</label>
-                <select value={playerTeam} onChange={(e) => {
+              }}
+              value={appName}
+            id="appName"
+            className="w-full px-3 py-1 border rounded"
+            type="text"
+          />
+        </div>
+        <div className="py-2">
+          <label className="block text-sm font-medium" htmlFor="team">
+            Team
+          </label>
+          <select value={playerTeam} onChange={(e) => {
                       setData((prev) => ({
                         ...prev, playerTeam: e.target.value
                       }))
-                    }} className="form-control" name="team" id="team">
+                    }} className="w-full px-3 py-1 border rounded" name="team" id="team">
+                      <option value="">---Select---</option>
                   {teams?.map(team => 
                     <option 
                     key={team._id} 
@@ -103,17 +122,17 @@ return (
                     >{team.name}</option>
                   )}
                 </select>
-              </div>
-              <div className="form-group my-2">
-              <label className="py-2" htmlFor="position">Position</label>
-                <select
-                value={playerPosition}
-                onChange={(e) => {
-                  setData((prev) => ({
-                    ...prev, playerPosition: e.target.value
-                  }))
-                }}
-                className="form-control" name="position" id="position">
+        </div>
+        <div className="py-2">
+          <label className="block text-sm font-medium" htmlFor="position">
+            Position
+          </label>
+          <select value={playerPosition} onChange={(e) => {
+                      setData((prev) => ({
+                        ...prev, playerPosition: e.target.value
+                      }))
+                    }} className="w-full px-3 py-1 border rounded" name="position" id="position">
+                      <option value="">---Select---</option>
                   {positions?.map(position => 
                     <option 
                     key={position._id} 
@@ -121,24 +140,37 @@ return (
                     >{position.singularName}</option>
                   )}
                 </select>
-              </div>
-              <div className="form-group my-2">
-              <label className="py-2" htmlFor="price">Price</label>
-              <input
-              value={startCost}
-              onChange={(e) => {
+        </div>
+        <div className="py-2">
+          <label className="block text-sm font-medium" htmlFor="price">
+            Price
+          </label>
+          <input
+          value={startCost}
+             onChange={(e) => {
                 setData((prev) => ({
                   ...prev, startCost: +e.target.value
                 }))
-              }} id="price" name="price" className="form-control" type="number" />
-              </div>
-              <div className=" py-2 my-2">
-                <Button type="submit" className="btn-success form-control">Submit</Button>
-              </div>
-            </form>
-          </div>
-      </Modal.Body>
-  </Modal>
+              }}
+            id="price"
+            className="w-full px-3 py-1 border rounded"
+            type="number"
+          />
+        </div>
+        <div className="py-2 flex justify-between space-x-3">
+          <button onClick={closeEdit} className="px-3 py-1 border rounded">
+            Cancel
+          </button>
+          <button
+          type="submit"
+            className="px-3 py-1 bg-blue-600 text-white rounded"
+          >
+            Save
+          </button>
+        </div>
+        </form>
+      </div>
+    </div>
 )
 }
 

@@ -14,6 +14,7 @@ import Pagination from "../Pagination";
 import AddModal from "./playerModals/AddModal";
 import EditModal from "./playerModals/EditModal";
 import DeleteModal from "./playerModals/DeleteModal";
+import { toast } from "react-toastify";
 
 const Players = () => {
   const [show, setShow] = useState({
@@ -25,7 +26,7 @@ const Players = () => {
   const [curPage, setCurPage] = useState(1);
   const [page, setPage] = useState(1);
   const [word, setWord] = useState("");
-  const { data: players, isLoading, isError } = useGetPlayersQuery();
+  const { data: players = [], isLoading, isError } = useGetPlayersQuery();
   const { data: teams } = useGetQuery();
   const { data: positions } = useGetPositionsQuery();
   const [addPlayer] = useAddPlayerMutation();
@@ -90,13 +91,7 @@ const Players = () => {
     word,
     cutPrice
   ).returnedPlayers;
-  /*
-  const upPlayers = useMemo(() => {
-    return players?.filter(
-      player => player?.firstName?.toLowerCase()?.includes(word.toLowerCase())
-      || player?.secondName?.toLowerCase()?.includes(word.toLowerCase())
-    )
-  }, [word, players])*/
+  
   const memoPlayers = useMemo(() => {
     return upPlayers?.filter((player, key) => {
       let start = (curPage - 1) * pageSize;
@@ -140,9 +135,10 @@ const Players = () => {
   };
   const submit = async (data) => {
     try {
-      await addPlayer(data).unwrap();
+      const res = await addPlayer(data).unwrap();
+      toast.success(`${res?.appName} added`)
     } catch (error) {
-      console.log(error);
+      toast.error(error?.data?.message)
     }
     setShow((prevState) => ({
       ...prevState,
@@ -185,8 +181,9 @@ const Players = () => {
   const deletePlayerNow = async () => {
     try {
       await deletePlayer(playerId).unwrap();
+      toast.success("Player deleted")
     } catch (error) {
-      console.log(error);
+      toast.error("Deletion failed")
     }
     setShow((prevState) => ({
       ...prevState,
@@ -332,55 +329,62 @@ const Players = () => {
           id="word"
         />
       </div>
-      <div className="admin-teams">
-        <div className="teams teams-head">
-          <div className="team-name">Player</div>
-          <div>Price</div>
-          <div>Points</div>
-          <div>Goals</div>
-          <div>Assists</div>
-          <div>Team</div>
-          <div>Pos</div>
-          <div>Ownership</div>
-          <div>CS</div>
-          <div>YC</div>
-          <div>RC</div>
-          <div></div>
-          <div></div>
-        </div>
-        {!memoPlayers?.length ? (
+        
+        {players?.length === 0 ? (
           <div className="spinner">No Players Found!</div>
         ) : (
-          memoPlayers?.map((x) => (
-            <div className="teams" key={x._id}>
-              <div className="team-name">{x.appName}</div>
-              <div>{x.nowCost.toFixed(1)}</div>
-              <div>{x.totalPoints}</div>
-              <div>{x.goalsScored}</div>
-              <div>{x.assists}</div>
-              <div>
+          <>
+          <div className="min-w-[320px] overflow-auto">
+      <table className="border rounded-lg">
+        <thead>
+          <tr className="border-b border-gray-400">
+          <th className="team-name px-4 py-2">Player</th>
+          <th className="px-4 py-2">Price</th>
+          <th className="px-4 py-2">Points</th>
+          <th className="px-4 py-2">Goals</th>
+          <th className="px-4 py-2">Assists</th>
+          <th className="px-4 py-2">Team</th>
+          <th className="px-4 py-2">Pos</th>
+          <th className="px-4 py-2">Ownership</th>
+          <th className="px-4 py-2">CS</th>
+          <th className="px-4 py-2">YC</th>
+          <th className="px-4 py-2">RC</th>
+          <th className="px-4 py-2"></th>
+          <th className="px-4 py-2"></th>
+        </tr>
+        </thead>
+        <tbody>
+          {memoPlayers?.map((x, idx) => (
+            <tr className={`border border-gray-400 ${idx % 2 === 1 && 'bg-green-200'}`} key={x._id}>
+              <td className="team-name px-4 py-2  font-bold">{x.appName}</td>
+              <td className="px-4 py-2 font-semibold text-center">{x.startCost.toFixed(1)}</td>
+              <td className="px-4 py-2 font-semibold text-center">{x.totalPoints}</td>
+              <td className="px-4 py-2 font-semibold text-center">{x.goalsScored}</td>
+              <td className="px-4 py-2 font-semibold text-center">{x.assists}</td>
+              <td className="px-4 py-2 font-semibold text-center">
                 {teams?.find((team) => team?._id === x.playerTeam)?.shortName}
-              </div>
-              <div>
+              </td>
+              <td className="px-4 py-2 font-semibold text-center">
                 {
                   positions?.find(
                     (position) => position?.code === x.playerPosition
                   )?.shortName
                 }
-              </div>
-              <div>{x.ownership}%</div>
-              <div>{x.cleansheets}</div>
-              <div>{x.yellowCards}</div>
-              <div>{x.redCards}</div>
-              <div className="btn-click" onClick={() => editPlayerPop(x._id)}>
+              </td>
+              <td className="px-4 py-2 font-semibold text-center">{x.ownership}%</td>
+              <td className="px-4 py-2 font-semibold text-center">{x.cleansheets}</td>
+              <td className="px-4 py-2 font-semibold text-center">{x.yellowCards}</td>
+              <td className="px-4 py-2 font-semibold text-center">{x.redCards}</td>
+              <td className="btn-click px-4 py-2 text-center" onClick={() => editPlayerPop(x._id)}>
                 <BsPencilFill color="black" />
-              </div>
-              <div className="btn-click" onClick={() => deletePlayerPop(x._id)}>
+              </td>
+              <td className="btn-click px-4 py-2 text-center" onClick={() => deletePlayerPop(x._id)}>
                 <AiFillDelete color="black" />
-              </div>
-            </div>
-          ))
-        )}
+              </td>
+            </tr>
+          ))}
+          </tbody>       
+      </table>
       </div>
       <Pagination
         curPage={curPage}
@@ -392,25 +396,32 @@ const Players = () => {
         onSubmit={onSubmit}
         page={page}
         changePage={changePage}
-      />
+      /> 
+      </>
+    )}
+      
       <div className="add-button p-2">
-        <Button onClick={addPlayerPop} className="btn btn-success">
+        <Button onClick={addPlayerPop}>
           Add Player
         </Button>
       </div>
-      <AddModal submit={submit} show={added} closeAdd={closeAdd}></AddModal>
-      <EditModal
-        playerId={playerId}
-        resetEdit={resetEdit}
-        show={edited}
-        closeEdit={closeEdit}
-      ></EditModal>
-      <DeleteModal
-        deletePlayerNow={deletePlayerNow}
-        cancelDelete={cancelDelete}
-        show={deleted}
-        closeDelete={closeDelete}
-      ></DeleteModal>
+      
+      {added && <AddModal submit={submit} closeAdd={closeAdd} />}
+            {edited && (
+              <EditModal
+                playerId={playerId}
+                resetEdit={resetEdit}
+                closeEdit={closeEdit}
+              />
+            )}
+            {deleted && (
+              <DeleteModal
+              playerId={playerId}
+                deletePlayerNow={deletePlayerNow}
+                cancelDelete={cancelDelete}
+                closeDelete={closeDelete}
+              />
+            )}
     </Container>
   );
 };

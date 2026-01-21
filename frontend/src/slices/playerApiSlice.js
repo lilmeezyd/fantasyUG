@@ -12,7 +12,14 @@ export const playerApiSlice = apiSlice.injectEndpoints({
     getPlayer: builder.query({
       query: (id) => ({
         url: `${PLAYERS_URL}/${id}`
-      })
+      }),
+      providesTags: ['Player']
+    }),
+    getPlayersByFixture: builder.query({
+      query: (id) => ({
+        url: `${PLAYERS_URL}/fixture/${id}`
+      }),
+      providesTags: ['Player']
     }),
     addPlayer: builder.mutation({
       query: (data) => ({
@@ -50,9 +57,9 @@ export const playerApiSlice = apiSlice.injectEndpoints({
 export const {
   useGetPlayersQuery,
   useGetPlayerQuery,
+  useGetPlayersByFixtureQuery,
   useAddPlayerMutation,
   useGetHistoryQuery,
   useEditPlayerMutation,
-  useDeletePlayerMutation,
-  useGetSomeQuery
+  useDeletePlayerMutation
 } = playerApiSlice; 

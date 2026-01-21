@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react"
-import { Row, Col, Button, Form } from 'react-bootstrap'
+import { Row, Col, Form } from 'react-bootstrap'
 import { Link, useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { useLoginMutation } from "../slices/userApiSlice"
 import { setCredentials } from '../slices/authSlice'
 import { toast } from 'react-toastify'
 import Loader from "../components/Loader"
+import {Button} from "../../@/components/ui/button"
 const LoginScreen = () => {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
@@ -59,7 +60,7 @@ const LoginScreen = () => {
                 {isLoading && <Loader />}
                 <div className="login-cs-child">
                     <div></div>
-                <Button type="submit" variant="primary" className=" form-control">
+                <Button type="submit" className="bg-blue-500 text-white">
                     Sign In
                 </Button>
                 </div>

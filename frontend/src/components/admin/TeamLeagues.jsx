@@ -222,15 +222,23 @@ const TeamLeagues = () => {
         >{a === true ? <Spinner /> : `Update Tables`}
         </Button>}
       </div>
-      <AddModal
-        submit={submit}
-        show={added} closeAdd={closeAdd} ></AddModal>
-      <EditModal teamLeagueId={teamLeagueId} resetEdit={resetEdit} show={edited} closeEdit={closeEdit} ></EditModal>
-      <DeleteModal
-        deleteTeamLeagueNow={deleteTeamLeagueNow}
-        cancelDelete={cancelDelete} show={deleted} closeDelete={closeDelete} ></DeleteModal>
 
-
+      {added && <AddModal submit={submit} closeAdd={closeAdd} />}
+            {edited && (
+              <EditModal
+                teamLeagueId={teamLeagueId}
+                resetEdit={resetEdit}
+                closeEdit={closeEdit}
+              />
+            )}
+            {deleted && (
+              <DeleteModal
+              teamLeagueId={teamLeagueId}
+                deleteTeamLeagueNow={deleteTeamLeagueNow}
+                cancelDelete={cancelDelete}
+                closeDelete={closeDelete}
+              />
+            )}
     </Container>
   );
 };

@@ -46,13 +46,14 @@ const TeamOfWeek = () => {
           playerTeam: teamMap.get(x.playerTeam.toString()),
           playerPosition: x.position,
           forwardImage:
-            x.playerPosition === 1
+            x.position === 'GKP'
               ? `${teamCodeMap.get(x.playerTeam.toString())}_1-66`
               : `${teamCodeMap.get(x.playerTeam.toString())}-66`,
         };
       })
       .sort((a, b) => (a.code > b.code ? 1 : -1));
   }, [matchdayId, data, teams]);
+  console.log(allArray)
 
   const goalkeepers = allArrays?.filter((pick) => pick?.code === 1);
   const defenders = allArrays?.filter((pick) => pick?.code === 2);
@@ -191,7 +192,7 @@ const TeamOfWeek = () => {
                       style={{ fontWeight: "700" }}
                       className="player-cell btn-table"
                     >
-                      <div className="images">
+                      <div className="images"> 
                         <img
                           src={`../shirt_${teamPlayer.forwardImage}.svg`}
                           alt={teamPlayer.forwardImage}

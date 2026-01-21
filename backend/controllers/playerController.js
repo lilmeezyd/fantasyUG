@@ -217,6 +217,87 @@ const getPlayers = asyncHandler(async (req, res) => {
   }
 });
 
+//@desc Get Players By Fixture
+//@route GET /api/players/fixture/:id
+//@access public
+//@role not restricted
+const getPlayersByFixture = asyncHandler(async (req, res) => {
+  const fixture = await Fixture.findById(req.params.id)
+  if(!fixture) {
+    throw new Error("Fixture not found!")
+  }
+  const teams = await Team.find({});
+  const players = await Player.find(
+    { playerTeam: { $in: [fixture.teamHome, fixture.teamAway] } }
+  ).lean();
+  const positions = await Position.find({});
+
+  const positionMap = new Map();
+  positions.map((x) => (positionMap[x._id] = x.code));
+  const teamMap = new Map(teams.map((x) => [x._id.toString(), x.name]));
+  const teamCodeMap = new Map(teams.map((x) => [x._id.toString(), x.code]));
+
+  const positionNameMap = new Map(
+    positions.map((x) => [x._id.toString(), x.shortName])
+  );
+
+  if (players) {
+    const updatedPlayers = players
+      .map((player) => {
+        const {
+          _id,
+          firstName,
+          secondName,
+          appName,
+          playerPosition,
+          playerTeam,
+          startCost,
+          nowCost,
+          totalPoints,
+          goalsScored,
+          assists,
+          ownGoals,
+          penaltiesSaved,
+          penaltiesMissed,
+          yellowCards,
+          redCards,
+          saves,
+          cleansheets,
+          starts,
+        } = player;
+        return {
+          _id,
+          firstName,
+          secondName,
+          appName,
+          playerPosition: positionMap[playerPosition],
+          playerTeam,
+          startCost,
+          nowCost,
+          totalPoints,
+          goalsScored,
+          assists,
+          ownGoals,
+          penaltiesSaved,
+          penaltiesMissed,
+          yellowCards,
+          redCards,
+          saves,
+          cleansheets,
+          starts,
+          playerTeamName: teamMap.get(playerTeam.toString()),
+          playerPositionName: positionNameMap.get(playerPosition.toString()),
+          forwardImage:
+            playerPosition === 1
+              ? `${teamCodeMap.get(playerTeam.toString())}_1-66`
+              : `${teamCodeMap.get(playerTeam.toString())}-66`
+        };
+      })
+      .sort((a, b) => (a.appName - b.appName ? 1 : -1));
+    res.status(200).json({ updatedPlayers });
+  }
+});
+
 //@desc Get Players
 //@route GET /api/players/:id
 //@access public
@@ -265,7 +346,7 @@ const getPlayer = asyncHandler(async (req, res) => {
     ...pResults.map((x) => {
       return {
         ...x.fixture,
-        opponent: x.opponent.toString(),
+        opponent: x?.opponent?.toString() || "",
         playerTeam: player.playerTeam,
       };
     }),
@@ -364,9 +445,8 @@ const updatePlayer = asyncHandler(async (req, res) => {
     req.body.appName ||
     req.body.playerPosition ||
     req.body.playerTeam ||
-    req.body.nowCost
+    req.body.startCost
   ) {
-    
     const updatedPlayer = await Player.findByIdAndUpdate(
       req.params.id,
       req.body,
@@ -431,6 +511,7 @@ const deletePlayer = asyncHandler(async (req, res) => {
 export {
   setPlayer,
   getPlayers,
+  getPlayersByFixture,
   playerIncrement,
   getPlayer,
   getPlayerHistory,

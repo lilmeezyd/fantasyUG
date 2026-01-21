@@ -28,9 +28,11 @@ router
 router
   .route("/:id")
   .get(getMatchday)
-  .patch(protect, roles(ROLES.ADMIN), startMatchday)
   .patch(protect, roles(ROLES.ADMIN, ROLES.EDITOR), updateMatchday)
   .delete(protect, roles(ROLES.ADMIN), deleteMatchday);
+
+  router.route("/:id/start")
+  .patch(protect, roles(ROLES.ADMIN), startMatchday)
 
   router.route("/data/current").get(getCurrentMD)
 router.route("/data/max").get(getMaxMD);

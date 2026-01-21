@@ -8,59 +8,70 @@ const AddModal = (props) => {
     const onSubmit = (e) => {
       e.preventDefault()
       submit(data) 
-
+ 
     }
   return (
-    <Modal show={show} onHide={closeAdd}>
-        <Modal.Header style={{ background: "aquamarine" }} closeButton>
-            <Modal.Title><div className="info-details">Add Overall League</div></Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <div>
-            <form onSubmit={onSubmit} action="">
-              <div className="form-group my-2">
-                <label className="py-2" htmlFor="lname">League Name</label>
-                <input
-                onChange={(e) => {
+    <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+      <div className="bg-white p-4 rounded-lg shadow-md max-w-sm w-full space-y-4">
+        <h3 className="text-lg font-bold">Add Overall League</h3>
+        <div className="py-2">
+          <label className="block text-sm font-medium" htmlFor="lname">League Name</label>
+          <input
+            onChange={(e) => {
                   setData((prev) => ({
                     ...prev, name: e.target.value
                   }))
                 }}
-                 name="lname" id="lname" className="form-control" type="text" />
-              </div>
-              <div className="form-group my-2">
-              <label className="py-2" htmlFor="start">Start Matchday</label>
-              <select
+            name="lname" id="lname"
+            className="w-full px-3 py-1 border rounded"
+            type="text"
+          />
+        </div>
+        <div className="py-2">
+          <label className="block text-sm font-medium" htmlFor="start">Start Matchday</label>
+          <select
               onChange={(e) => {
                 setData((prev) => ({
                   ...prev, startMatchday: e.target.value
                 }))
-              }} name="start" id="start" className="form-control">
-                {matchdays?.map(matchday => <option key={matchday._id} value={matchday._id}>
-                  {matchday.name}
-                </option>)}
-              </select>
-              </div>
-              <div className="form-group my-2">
-              <label className="py-2" htmlFor="end">End matchday</label>
+              }} name="start" id="start"
+            className="w-full px-3 py-1 border rounded"
+          >
+            <option value="">---Select---</option>
+            {matchdays?.map(matchday => <option key={matchday._id} value={matchday._id}>
+                  {matchday.name} </option>)}
+          </select>
+        </div>
+        <div className="py-2">
+          <label className="block text-sm font-medium" htmlFor="end">End matchday</label>
               <select
               onChange={(e) => {
                 setData((prev) => ({
                   ...prev, endMatchday: e.target.value
                 }))
-              }} id="end" name="end" className="form-control">
-                {matchdays?.map(matchday => <option key={matchday._id} value={matchday._id}>
+              }} id="end" name="end"
+            className="w-full px-3 py-1 border rounded"
+            type="time"
+          >
+            <option value="">---Select---</option>
+            {matchdays?.map(matchday => <option key={matchday._id} value={matchday._id}>
                   {matchday.name}
                 </option>)}
-              </select>
-              </div>
-              <div className=" py-2 my-2">
-                <Button type="submit" className="btn-success form-control">Submit</Button>
-              </div>
-            </form>
-          </div>
-        </Modal.Body>
-    </Modal>
+          </select>
+        </div>
+        <div className="py-2 flex justify-between space-x-3">
+          <button onClick={closeAdd} className="px-3 py-1 border rounded">
+            Cancel
+          </button>
+          <button
+            onClick={onSubmit}
+            className="px-3 py-1 bg-blue-600 text-white rounded"
+          >
+            Save
+          </button>
+        </div>
+      </div>
+    </div>
   )
 }
 

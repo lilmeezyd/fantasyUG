@@ -305,25 +305,27 @@ const memoMatchdays = useMemo(() => {
         <Button onClick={addMatchdayPop} className="btn btn-success">Add Matchday</Button>
       </div>
       </div>
-      <AddModal submit={submit} show={added} closeAdd={closeAdd}></AddModal>
-      <EditModal
-        matchdayId={matchdayId}
-        resetEdit={resetEdit}
-        show={edited}
-        closeEdit={closeEdit}
-      ></EditModal>
-      <StartModal
+      {added && <AddModal submit={submit} closeAdd={closeAdd} />}
+      {start && <StartModal
       startMatchdayNow={startMatchdayNow}
       cancelStart={cancelStart}
-      show={start}
       closeStart={closeStart}
-      ></StartModal>
-      <DeleteModal
-        deleteMatchdayNow={deleteMatchdayNow}
-        cancelDelete={cancelDelete}
-        show={deleted}
-        closeDelete={closeDelete}
-      ></DeleteModal>
+      />}
+      {edited && (
+        <EditModal
+          matchdayId={matchdayId}
+          resetEdit={resetEdit}
+          closeEdit={closeEdit}
+        />
+      )}
+      {deleted && (
+        <DeleteModal
+        matchdayId={matchdayId}
+          deleteMatchdayNow={deleteMatchdayNow}
+          cancelDelete={cancelDelete}
+          closeDelete={closeDelete}
+        />
+      )}
 
 <Pagination curPage={curPage} viewFirstPage={viewFirstPage}
          viewPreviousPage={viewPreviousPage}

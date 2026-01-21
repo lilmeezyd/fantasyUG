@@ -81,6 +81,11 @@ const getFixtures = asyncHandler(async (req, res) => {
 //@role ADMIN & EDITOR
 const populateStats = asyncHandler(async (req, res) => {
   const fixtureId = req.params.id;
+  const mdFixture = await Fixture.findById(req.params.id);
+  const matchday = await Matchday.findById(mdFixture?.matchday);
+  if (!matchday.current) {
+    throw new Error("Fixture not in current matchday");
+  }
   const fixture = await Fixture.findOneAndUpdate(
     { _id: fixtureId, "stats.0": { $exists: false } }, // atomic guard
     {
@@ -100,7 +105,7 @@ const populateStats = asyncHandler(async (req, res) => {
           "starts",
           "bestPlayer",
           "bench",
-        ].map(identifier => ({
+        ].map((identifier) => ({
           identifier,
           home: [],
           away: [],
@@ -118,11 +123,11 @@ const populateStats = asyncHandler(async (req, res) => {
     { _id: 1, playerTeam: 1 }
   ).lean();
 
-   if (!players.length) {
+  if (!players.length) {
     throw new Error("No players found");
   }
 
-   const ops = players.map(p => ({
+  const ops = players.map((p) => ({
     insertOne: {
       document: {
         matchday: fixture.matchday,
@@ -195,7 +200,7 @@ const populateStats = asyncHandler(async (req, res) => {
     fixture.stats.push(statObj);
   });*/
 
-/*  const results = await Promise.allSettled(
+  /*  const results = await Promise.allSettled(
     players.map((player) => {
       const isHomeTeam = fixture.teamHome === player.playerTeam;
       let opponent;
@@ -210,7 +215,7 @@ const populateStats = asyncHandler(async (req, res) => {
         { $set: { opponent } }
       );*/
 
-     /* return PlayerHistory.create({
+  /* return PlayerHistory.create({
         matchday: fixture.matchday,
         player: player._id,
         fixture: fixture._id,
@@ -221,7 +226,7 @@ const populateStats = asyncHandler(async (req, res) => {
   );*/
 
   // Separate successes and failures
- /* const successes = results
+  /* const successes = results
     .filter((r) => r.status === "fulfilled")
     .map((r) => r.value);
   const errors = results
@@ -235,7 +240,7 @@ const populateStats = asyncHandler(async (req, res) => {
     fixture,
     { new: true }
   );*/
-  res.status(200).json({ updatedFixture, successes, errors });
+  //res.status(200).json({ updatedFixture, successes, errors });
 });
 
 //@desc remove stats for a specific fixture
@@ -245,6 +250,9 @@ const populateStats = asyncHandler(async (req, res) => {
 const dePopulateStats = asyncHandler(async (req, res) => {
   const fixture = await Fixture.findById(req.params.id);
   const matchday = await Matchday.findById(req.params.mid);
+  if (!matchday.current) {
+    throw new Error("Fixture not in current matchday");
+  }
   const allLives = await ManagerLive.find({});
   const players = await Player.find({
     $or: [{ playerTeam: fixture.teamHome }, { playerTeam: fixture.teamAway }],
@@ -438,6 +446,12 @@ const editStats = asyncHandler(async (req, res) => {
       const code = position.code;
       const retrievedPlayer = playerFound._id;
       const statArray = statBlock[homeAway];
+      const opponent =
+        playerFound.playerTeam.toString() === fixture.teamHome.toString()
+          ? fixture.teamAway
+          : fixture.teamHome;
+      const home =
+        playerFound.playerTeam.toString() === fixture.teamHome.toString();
       const playerIndex = statArray.findIndex(
         (x) => x.player.toString() === retrievedPlayer.toString()
       );
@@ -460,10 +474,29 @@ const editStats = asyncHandler(async (req, res) => {
         }
 
         await PlayerHistory.findOneAndUpdate(
-          { player: retrievedPlayer, fixture: req.params.id },
-          { $inc: { [identifier]: newValue, totalPoints } },
-          { new: true, upsert: true }
+          {
+            player: retrievedPlayer,
+            fixture: req.params.id,
+          },
+          {
+            $inc: {
+              [identifier]: newValue,
+              totalPoints,
+            },
+            $setOnInsert: {
+              matchday: fixture.matchday,
+              opponent,
+              home,
+              player: retrievedPlayer,
+              fixture: req.params.id,
+            },
+          },
+          {
+            new: true,
+            upsert: true,
+          }
         );
+
         playerHistoryArray.push(retrievedPlayer);
 
         await Player.findByIdAndUpdate(
@@ -481,9 +514,27 @@ const editStats = asyncHandler(async (req, res) => {
         statArray.push({ player: retrievedPlayer, value: newValue });
 
         await PlayerHistory.findOneAndUpdate(
-          { player: retrievedPlayer, fixture: req.params.id },
-          { $inc: { [identifier]: newValue, totalPoints } },
-          { new: true, upsert: true }
+          {
+            player: retrievedPlayer,
+            fixture: req.params.id,
+          },
+          {
+            $inc: {
+              [identifier]: newValue,
+              totalPoints,
+            },
+            $setOnInsert: {
+              matchday: fixture.matchday,
+              opponent,
+              home,
+              player: retrievedPlayer,
+              fixture: req.params.id,
+            },
+          },
+          {
+            new: true,
+            upsert: true,
+          }
         );
 
         playerHistoryArray.push(retrievedPlayer);

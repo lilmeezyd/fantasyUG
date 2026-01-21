@@ -1,23 +1,31 @@
 import { Modal, Button } from "react-bootstrap"
+import { useGetPlayerQuery } from "../../../slices/playerApiSlice";
 
 const DeleteModal = (props) => {
-  const {show, closeDelete, cancelDelete, deletePlayerNow} = props
+  const { cancelDelete, deletePlayerNow, playerId } = props;
+  const { data: player } = useGetPlayerQuery(playerId)
+  console.log(player)
   return (
-    <Modal show={show} onHide={closeDelete}>
-        <Modal.Header style={{ background: "aquamarine" }} closeButton>
-            <Modal.Title><div className="info-details">Delete Player</div></Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <div className="p-2 delete-group">
-          <div className="info-details mb-2">Are you sure?</div>
-          <div className="delete-buttons mt-2">
-            <Button onClick={cancelDelete} className="btn-default">Cancel</Button>
-            <Button onClick={deletePlayerNow} className="btn-danger">Delete</Button>
-          </div>
-          </div>
-          
-        </Modal.Body>
-    </Modal>
+    <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+      <div className="bg-white p-4 rounded-lg shadow-md max-w-sm w-full">
+        <h3 className="text-lg font-semibold mb-4">Confirm Deletion</h3>
+        <p>
+          Are you sure you want to delete{" "}
+          <span className="font-medium">{player?.appName}</span>?
+        </p>
+        <div className="py-2 flex justify-between space-x-3">
+          <button onClick={cancelDelete} className="px-3 py-1 border rounded">
+            Cancel
+          </button>
+          <button
+            onClick={deletePlayerNow}
+            className="px-3 py-1 bg-red-600 text-white rounded"
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
   )
 }
 

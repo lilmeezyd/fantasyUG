@@ -298,8 +298,10 @@ const matchdayId = currentMatchay?.id || nextMatchay?.id || 30;
 
   const newLeague = {
     _id,
+    team,
     name: teamName?.name,
     startMatchday: startGW?.id,
+    startGW: startMatchday,
     currentMatchday: matchdayId,
     endMatchday,
     creator,
@@ -350,6 +352,7 @@ const matchdayId = currentMatchay?.id || nextMatchay?.id || 30;
     _id,
     name,
     startMatchday: startGW?.id,
+    startGW: startMatchday,
     currentMatchday: matchdayId,
     endMatchday,
     creator,

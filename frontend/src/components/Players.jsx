@@ -269,7 +269,6 @@ const Players = (props) => {
                   <input
                     onChange={onSearch}
                     id="search"
-                    className="blur"
                     type="text"
                     name=""
                   />

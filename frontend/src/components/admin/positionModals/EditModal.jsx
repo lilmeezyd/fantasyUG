@@ -1,10 +1,11 @@
 import { Modal, Button } from "react-bootstrap"
 import { useState, useEffect } from "react"
 import { useGetPositionQuery, useEditPositionMutation } from "../../../slices/positionApiSlice"
+import { toast } from "react-toastify";
 
 const EditModal = (props) => {
   const {show, closeEdit, resetEdit, positionId} = props
-  const { data: position } = useGetPositionQuery(positionId)
+  const { data: position, refetch } = useGetPositionQuery(positionId)
   const [ data, setData ] = useState({singularName: '', shortName: '', code: ''})
   const { name, shortName, code} = data
   const [ editPosition ] = useEditPositionMutation()
@@ -21,56 +22,92 @@ const EditModal = (props) => {
     const code = +elements.code.value
 
     if(name && shortName && code) {
-      await editPosition({id: position._id, singularName, shortName, code})
+      try {
+        const res = await editPosition({id: position._id, singularName, shortName, code}).unwrap()
+        toast.success(res?.msg);
       closeEdit()
       resetEdit()
+      } catch (error) {
+        toast.error("Update failed!");
+        closeEdit()
+      resetEdit()
+      }
+      
     }
+    refetch();
   }
 return (
-  <Modal show={show} onHide={closeEdit}>
-      <Modal.Header style={{ background: "aquamarine" }} closeButton>
-          <Modal.Title>
-            <div className="info-details">Edit Position</div></Modal.Title>
-      </Modal.Header>
-      <Modal.Body>
-      <div>
-            <form onSubmit={onSubmit} action="">
-              <div className="form-group my-2">
-                <label className="py-2" htmlFor="tname">Position Name</label>
-                <input
-                onChange={(e) => {
-                  setData((prev) => ({
-                    ...prev, name: e.target.value
-                  }))
-                }}
-                value={name}
-                 name="tname" id="tname" className="form-control" type="text" />
-              </div>
-              <div className="form-group my-2">
-              <label className="py-2" htmlFor="sname">Short Name</label>
-              <input
+      <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+      <div className="bg-white p-4 rounded-lg shadow-md max-w-sm w-full space-y-4">
+        <h6 className="text-lg font-bold">Edit Position</h6>
+        <form onSubmit={onSubmit} action="">
+          <div className="py-2">
+            <label className="block text-sm font-medium" htmlFor="tname">
+              Position Name
+            </label>
+            <input
               onChange={(e) => {
                 setData((prev) => ({
-                  ...prev, shortName: e.target.value
-                }))
-              }} value={shortName} name="sname" id="sname" className="form-control" type="text" />
-              </div>
-              <div className="form-group my-2">
-              <label className="py-2" htmlFor="code">Position Code</label>
-              <input
-              onChange={(e) => {
-                setData((prev) => ({
-                  ...prev, code: +e.target.value
-                }))
-              }} value={code} id="code" className="form-control" type="number" />
-              </div>
-              <div className=" py-2 my-2">
-                <Button type="submit" className="btn-success form-control">Submit</Button>
-              </div>
-            </form>
+                  ...prev,
+                  name: e.target.value,
+                }));
+              }}
+              value={name}
+              name="tname"
+              id="tname"
+              className="w-full px-3 py-1 border rounded"
+              type="text"
+            />
           </div>
-      </Modal.Body>
-  </Modal>
+          <div className="py-2">
+            <label className="block text-sm font-medium" htmlFor="sname">
+              Short Name
+            </label>
+            <input
+              onChange={(e) => {
+                setData((prev) => ({
+                  ...prev,
+                  shortName: e.target.value,
+                }));
+              }}
+              value={shortName}
+              name="sname"
+              id="sname"
+              className="w-full px-3 py-1 border rounded"
+              type="text"
+            />
+          </div>
+          <div className="py-2">
+            <label className="block text-sm font-medium" htmlFor="code">
+              Position Code
+            </label>
+            <input
+              onChange={(e) => {
+                setData((prev) => ({
+                  ...prev,
+                  code: +e.target.value,
+                }));
+              }}
+              value={code}
+              id="code"
+              className="w-full px-3 py-1 border rounded"
+              type="number"
+            />
+          </div>
+          <div className="py-2 flex justify-between space-x-3">
+            <button onClick={closeEdit} className="px-3 py-1 border rounded">
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-3 py-1 bg-blue-600 text-white rounded"
+            >
+              Save
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
 )
 }
 

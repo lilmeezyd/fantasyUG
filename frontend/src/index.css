@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap');
+@import "tailwindcss";
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
@@ -161,6 +162,7 @@ form.login-cs {
 .most-owned {
   cursor: pointer;
 }
+
 /*
 @media(max-width: 760px) {
   .home-section {
@@ -172,15 +174,18 @@ form.login-cs {
   border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 0.5rem;
 }
+
 .home-section-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 5px;
 }
+
 .home-section-grid-sub {
   border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 0.5rem;
 }
+
 /*
 .home-section-details {
   display: flex;
@@ -256,23 +261,20 @@ form.login-cs {
   /*grid-template-columns: repeat(4, 1fr);
   place-items: center;*/
   font-weight: 700;
-  padding: 0.25rem 0;
-  width: fit-content;
-  grid-template-columns: 120px 50px 50px 50px 50px 50px 50px 100px 50px 50px 50px 50px 50px;
+  grid-template-columns: 1fr 50px 50px 50px 50px 50px 50px 100px 50px 50px 50px 50px 50px;
 }
 
 .positions {
   display: grid;
   font-weight: 700;
-  padding: 0.25rem 0;
   width: fit-content;
   grid-template-columns: 50% 15% 15% 10% 10%;
   width: calc(100%);
   justify-items: center;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.5);
 }
 
 .positions>div {
-  border: 1px solid rgba(0, 0, 0, 0.1);
   width: calc(100%);
   height: calc(100%);
 }
@@ -288,10 +290,8 @@ form.login-cs {
 }
 
 .admin-teams {
-  border: 1px solid;
   border-radius: 0.5rem;
   overflow: auto;
-  margin: auto;
 }
 
 .admin-vs {
@@ -326,7 +326,7 @@ form.login-cs {
 }
 
 .teams:nth-of-type(even) {
-  background: aquamarine;
+  /*background: aquamarine;*/
 }
 
 .team-name {
@@ -690,11 +690,24 @@ form.login-cs {
   width: 80%;
 }
 
+.team_name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 60%;
+    text-align: left;
+    padding-left: 5px;
+}
+
 .player-cell-details {
   display: flex;
   padding-left: 0.2rem;
   margin-top: 0.2rem;
   gap: 0.5rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 100%;
 }
 
 .btn-table {
@@ -1101,6 +1114,7 @@ form.login-cs {
 .image_pic {
   width: 44px;
   height: 65px;
+  margin: auto;
 }
 
 .captain {
@@ -1370,7 +1384,7 @@ form.login-cs {
 .fix-body {
   padding: 1rem 0;
   overflow-x: auto;
-} 
+}
 
 .fix-admin-buttons {
   display: grid;
@@ -1970,15 +1984,5 @@ h1.stats {
     to {
       height: 0;
     }
-  }
-}
-
-@layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
-
-  body {
-    @apply bg-background text-foreground;
   }
 }

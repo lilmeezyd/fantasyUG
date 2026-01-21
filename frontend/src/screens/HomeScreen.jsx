@@ -22,8 +22,6 @@ const HomeScreen = () => {
     const transOut = data?.transfersOut || [];
     setTransfers({ transfersIn: transIn, transfersOut: transOut });
   }, [data]);
-  console.log(transfersIn);
-  console.log(transfersOut);
   const handleClose = () => setShow(false);
   const getInfo = () => {
     setShowPInfo(true);

@@ -7,7 +7,7 @@ import Position from "../models/positionModel.js";
 import TOW from "../models/teamOfTheWeekModel.js";
 import User from "../models/userModel.js";
 import mongoose from "mongoose";
-import { setInitialPoints } from "./managerLiveController.js";
+import { setPointsWithAutoSubs } from "./managerLiveController.js";
 
 //@desc Get recent matchday
 //@route GET /api/matchdays/data/max/
@@ -213,16 +213,11 @@ const updateMatchday = asyncHandler(async (req, res) => {
     res.status(400);
     throw new Error("User not found");
   }
-  // Make sure the logged in user is an ADMIN
-  /*if (!Object.values(req.user.roles).includes(2048)) {
-    res.status(401);
-    throw new Error("Not authorized");
-  }*/
 
   if (!matchday) {
     res.status(400);
     throw new Error("Matchday not found");
-  } else {
+  } /*else {
     Object.keys(req.body).forEach((val) => {
       if (val === "name") {
         if (req.body.name.slice(0, 8).toLocaleLowerCase() !== "matchday") {
@@ -238,14 +233,40 @@ const updateMatchday = asyncHandler(async (req, res) => {
           .map((x) => x[0].toLocaleUpperCase() + x.slice(1).toLocaleLowerCase())
           .join(" ");
       }
-    });
+    });*/
+    let { name, deadlineTime } = req.body;
+    if(!name || !deadlineTime) {
+      throw new Error("Add all fields")
+    }
+
+    name =
+    name &&
+    name
+      .split(" ")
+      .map((x) => x[0].toLocaleUpperCase() + x.slice(1).toLocaleLowerCase())
+      .join(" ");
+  let id = +name.slice(8).trim();
+  const nameExists = await Matchday.findOne({ name });
+  const idExists = await Matchday.findOne({ id });
+
+  if (!!id === false) {
+    res.status(400);
+    throw new Error("Entry has no id");
+  }
+  if (name.slice(0, 8).toLocaleLowerCase() !== "matchday") {
+    res.status(400);
+    throw new Error("name should start with matchday");
+  }
+  if (idExists && (id !== Number(req.body.oldId))) {
+    res.status(400);
+    throw new Error("Matchday Id already taken");
+  }
     const updatedMatchday = await Matchday.findByIdAndUpdate(
       req.params.id,
-      req.body,
+      {$set: { name, id, deadlineTime }},
       { new: true }
     );
-    res.status(200).json({ msg: `${updatedMatchday.name} updated` });
-  }
+    res.status(200).json({ msg: `${updatedMatchday.name} updated`, updatedMatchday });
 });
 
 //@desc Update Matchday Data
@@ -711,7 +732,7 @@ const createAutos = asyncHandler(async (req, res) => {
     };
   });
   await ManagerLive.bulkWrite(bulkOps);
-  const message = await setInitialPoints(req, res, req.params.id);
+  const message = await setPointsWithAutoSubs(req, res, "normal", req.params.id);
   res.json({ managerLives, message: `Autosubs made and ${message.message}.`});
 });
 
@@ -777,7 +798,7 @@ const undoAutos = asyncHandler(async (req, res) => {
   });
 
   await ManagerLive.bulkWrite(bulkOps);
-  const message = await setInitialPoints(req, res, req.params.id);
+  const message = await setPointsWithAutoSubs(req, res, "normal", req.params.id);
   res.json({ message: `Autosubs undone and ${message.message}.`  });
 });
 

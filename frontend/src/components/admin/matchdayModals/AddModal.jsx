@@ -2,57 +2,68 @@ import { Modal, Button } from "react-bootstrap"
 import { useState } from "react"
 const AddModal = (props) => {
     const {show, closeAdd, submit} = props
-    const [ data, setData ] = useState({name: '', deadline:'', time:''})
-    const { deadline, time, name} = data
+    const [ data, setData ] = useState({nameId: '', deadline:'', time:''})
+    const { deadline, time, nameId} = data
     const onSubmit = (e) => {
+      const matchdayName = `Matchday ${nameId}`
       e.preventDefault() 
      const deadlineTime = deadline+'/'+time
-      submit({name, deadlineTime}) 
-
+      submit({name: matchdayName, deadlineTime}) 
+ 
     }
   return (
-    <Modal show={show} onHide={closeAdd}>
-        <Modal.Header style={{ background: "aquamarine" }} closeButton>
-            <Modal.Title><div className="info-details">Add Matchday</div></Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <div>
-            <form onSubmit={onSubmit} action="">
-              <div className="form-group my-2">
-                <label className="py-2" htmlFor="tname">Name</label>
-                <input
-                onChange={(e) => {
+    <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+      <div className="bg-white p-4 rounded-lg shadow-md max-w-sm w-full space-y-4">
+        <h6 className="text-lg font-bold">Add Matchday</h6>
+        <div className="py-2">
+          <label className="block text-sm font-medium" htmlFor="matchday">Matchday</label>
+          <input
+            onChange={(e) => {
                   setData((prev) => ({
-                    ...prev, name: e.target.value
+                    ...prev, nameId: e.target.value
                   }))
                 }}
-                 name="tname" id="tname" className="form-control" type="text" />
-              </div>
-              <div className="form-group my-2">
-              <label className="py-2" htmlFor="sname">Date</label>
-              <input
-              onChange={(e) => {
+            name="matchday" id="matchday"
+            className="w-full px-3 py-1 border rounded"
+            type="number"
+          />
+        </div>
+        <div className="py-2">
+          <label className="block text-sm font-medium" htmlFor="deadline">Date</label>
+          <input name="deadline" id="deadline" type="date"
+            onChange={(e) => {
                 setData((prev) => ({
                   ...prev, deadline: e.target.value
                 }))
-              }} name="sname" id="sname" className="form-control" type="date" />
-              </div>
-              <div className="form-group my-2">
-              <label className="py-2" htmlFor="time">Time</label>
-              <input
-              onChange={(e) => {
+              }}
+            className="w-full px-3 py-1 border rounded"
+          />
+        </div>
+        <div className="py-2">
+          <label className="block text-sm font-medium" htmlFor="time">Time</label>
+          <input
+            onChange={(e) => {
                 setData((prev) => ({
                   ...prev, time: e.target.value
                 }))
-              }} name="time" id="time" className="form-control" type="time" />
-              </div>
-              <div className=" py-2 my-2">
-                <Button type="submit" className="btn-success form-control">Submit</Button>
-              </div>
-            </form>
-          </div>
-        </Modal.Body>
-    </Modal>
+              }} name="time" id="time"
+            className="w-full px-3 py-1 border rounded"
+            type="time"
+          />
+        </div>
+        <div className="py-2 flex justify-between space-x-3">
+          <button onClick={closeAdd} className="px-3 py-1 border rounded">
+            Cancel
+          </button>
+          <button
+            onClick={onSubmit}
+            className="px-3 py-1 bg-blue-600 text-white rounded"
+          >
+            Save
+          </button>
+        </div>
+      </div>
+    </div>
   )
 }
 

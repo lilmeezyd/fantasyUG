@@ -10,7 +10,7 @@ const Pagination = (props) => {
         viewNextPage, viewLastPage,
          totalPages, onSubmit, page, changePage } = props
   return (
-    <div className="button-controls">
+    <div className="w-[300px] m-auto flex gap-2 justify-center items-center mt-2">
     <button
       disabled={curPage === 1 ? true : false}
       onClick={viewFirstPage}

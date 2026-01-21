@@ -1,7 +1,7 @@
 import { Navbar, Nav, Container, NavDropdown, Badge } from "react-bootstrap";
 import { FaSignInAlt, FaSignOutAlt } from "react-icons/fa";
 import { LinkContainer } from "react-router-bootstrap";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { useLogoutMutation } from "../slices/userApiSlice";
 import { useGetMatchdaysQuery } from "../slices/matchdayApiSlice";
@@ -11,6 +11,7 @@ const Header = () => {
   const { userInfo } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
   const [logoutApiCall] = useLogoutMutation();
 const { data: matchdays, isLoading: isMatchday } = useGetMatchdaysQuery();
 const md = matchdays?.find(matchday => matchday?.next === true)
@@ -34,14 +35,40 @@ const md = matchdays?.find(matchday => matchday?.next === true)
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="ms-auto">
               {userInfo && userInfo?.roles?.ADMIN && (
+                <>
                 <LinkContainer to="/admin/dashboard">
                   <Nav.Link>Dashboard</Nav.Link>
                 </LinkContainer>
+                <LinkContainer to="/admin/dashboard/users">
+                  <Nav.Link>Users</Nav.Link>
+                </LinkContainer>
+                <LinkContainer to="/admin/dashboard/teams">
+                  <Nav.Link>Teams</Nav.Link>
+                </LinkContainer>
+                <LinkContainer to="/admin/dashboard/positions">
+                  <Nav.Link>Positions</Nav.Link>
+                </LinkContainer>
+                <LinkContainer to="/admin/dashboard/players">
+                  <Nav.Link>Players</Nav.Link>
+                </LinkContainer>
+                <LinkContainer to="/admin/dashboard/fixtures">
+                  <Nav.Link>Fixtures</Nav.Link>
+                </LinkContainer>
+                <LinkContainer to="/admin/dashboard/matchdays">
+                  <Nav.Link>Matchdays</Nav.Link>
+                </LinkContainer>
+                <LinkContainer to="/admin/dashboard/leagues">
+                  <Nav.Link>leagues</Nav.Link>
+                </LinkContainer>
+                <LinkContainer to="/admin/dashboard/actions">
+                  <Nav.Link>Actions</Nav.Link>
+                </LinkContainer>
+                </>
               )}
               {userInfo?.roles?.NORMAL_USER && !userInfo?.hasPicks && 
               <LinkContainer to="/create">
               <Nav.Link>Create Team</Nav.Link>
-            </LinkContainer>}
+            </LinkContainer>} 
               
                   {
                     userInfo?.hasPicks && (
