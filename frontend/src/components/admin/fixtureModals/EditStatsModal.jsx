@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Modal } from "react-bootstrap";
 import { useGetPlayersByFixtureQuery } from "../../../slices/playerApiSlice";
 import { useEditStatsMutation } from "../../../slices/fixtureApiSlice";
@@ -16,6 +16,9 @@ const EditStatsModal = (props) => {
   const { identifier, homeAway, player, value } = data;
   const { data: players = [] } = useGetPlayersByFixtureQuery(fixture?._id);
   const [editStats, isLoading] = useEditStatsMutation();
+  const superPlayers = useMemo(() => {
+
+  }, [players, homeAway, fixture])
   console.log(players)
 
   const onSubmit = async (e) => {
@@ -65,10 +68,10 @@ const EditStatsModal = (props) => {
   return (
     <div className="overflow-auto w-min-[320px] fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
       <div className="bg-white p-4 rounded-lg shadow-md max-w-sm w-full space-y-4">
-        <h6 className="text-lg font-bold">Edit Fixture Statistics</h6>
+        <h4 className="text-3xl font-bold">Edit Fixture Statistics</h4>
         <form onSubmit={onSubmit}>
           <div className="py-2">
-            <label className="block text-sm font-medium" htmlFor="identifier">
+            <label className="block font-medium pb-2" htmlFor="identifier">
               Statistic
             </label>
             <select
@@ -88,7 +91,7 @@ const EditStatsModal = (props) => {
             </select>
           </div>
           <div className="py-2">
-            <label className="block text-sm font-medium" htmlFor="homeAway">
+            <label className="block font-medium pb-2" htmlFor="homeAway">
               Select Team
             </label>
             <select
@@ -103,8 +106,9 @@ const EditStatsModal = (props) => {
             </select>
           </div>
           <div className="py-2">
-            <div>Select Players</div>
-
+            <div className="font-medium pb-2">Select Players</div>
+                <div className="overflow-auto">
+                  <div className="p-2">
             {homeAway === "home" &&
               players?.updatedPlayers
                 ?.filter(
@@ -112,7 +116,7 @@ const EditStatsModal = (props) => {
                     x.playerTeam.toString() === fixture?.teamHomeId?.toString()
                 )
                 ?.map((player) => (
-                  <div key={player._id}>
+                  <div className="flex items-center" key={player._id}>
                     <input
                       onChange={onChange}
                       type="checkbox"
@@ -120,7 +124,7 @@ const EditStatsModal = (props) => {
                       name="player"
                       id={player.appName}
                     />
-                    <label htmlFor={player.appName}>{player.appName}</label>
+                    <label className="block font-medium p-1" htmlFor={player.appName}>{player.appName}</label>
                   </div>
                 ))}
 
@@ -131,7 +135,7 @@ const EditStatsModal = (props) => {
                     x.playerTeam.toString() === fixture?.teamAwayId?.toString()
                 )
                 ?.map((player) => (
-                  <div key={player._id}>
+                  <div className="flex items-center" key={player._id}>
                     <input
                       onChange={onChange}
                       type="checkbox"
@@ -139,9 +143,11 @@ const EditStatsModal = (props) => {
                       name="player"
                       id={player.appName}
                     />
-                    <label htmlFor={player.appName}>{player.appName}</label>
+                    <label className="block font-medium p-1" htmlFor={player.appName}>{player.appName}</label>
                   </div>
                 ))}
+                </div>
+                </div>
           </div>
           <div className="py-2">
             <select

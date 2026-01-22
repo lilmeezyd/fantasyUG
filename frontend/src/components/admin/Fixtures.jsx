@@ -31,6 +31,7 @@ const Fixtures = () => {
     reset: false,
   });
   const [fixtureId, setFixtureId] = useState("");
+  const [matchdayId, setMatchdayId] = useState("");
   const [page, setPage] = useState(1);
   const [minGW, setMinGW] = useState(1);
   const [maxGW, setMaxGW] = useState(1);
@@ -159,12 +160,13 @@ const Fixtures = () => {
     }));
     setFixtureId(id);
   };
-  const resetFixturePop = (id) => {
+  const resetFixturePop = (id, mid) => {
     setShow((prevState) => ({
       ...prevState,
       reset: true,
     }));
     setFixtureId(id);
+    setMatchdayId(mid)
   };
 
   const cancelDelete = () => {
@@ -196,9 +198,9 @@ const Fixtures = () => {
     }));
   };
 
-  const resetFixtureNow = async (x, y) => {
+  const resetFixtureNow = async () => {
     try {
-      const res = await depopulateFixture({ y, x }).unwrap();
+      const res = await depopulateFixture({ y: matchdayId, x: fixtureId }).unwrap();
       console.log(res);
     } catch (error) {
       console.log(error);
@@ -209,6 +211,7 @@ const Fixtures = () => {
       reset: false,
     }));
     setFixtureId("");
+    setMatchdayId("")
   };
 
   const submit = async (data) => {

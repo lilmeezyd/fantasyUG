@@ -13,6 +13,7 @@ import {
 import { useSetLivePicksMutation } from "../../slices/livePicksApiSlice";
 import { useSetLastAndCurrentRankMutation } from "../../slices/leagueApiSlice";
 import { Container, Button, Spinner } from "react-bootstrap";
+import MatchdayAdmin from "./MatchdayAdmin";
 import Pagination from "../Pagination"
 import AddModal from "./matchdayModals/AddModal";
 import DeleteModal from "./matchdayModals/DeleteModal";
@@ -31,7 +32,7 @@ const Matchdays = () => {
   const [matchdayId, setMatchdayId] = useState("");
   const [curPage, setCurPage] = useState(1);
   const [page, setPage] = useState(1);
-  const { data: matchdays,  isLoading}  = useGetMatchdaysQuery()
+  const { data: matchdays = [],  isLoading}  = useGetMatchdaysQuery()
   const [addMatchday ] = useAddMatchdayMutation()
   const [ deleteMatchday ] = useDeleteMatchdayMutation()
   const [ startMatchday ] = useStartMatchdayMutation()
@@ -270,30 +271,44 @@ const viewLastPage = () => {
   setPage(totalPages);
 };
 
-const memoMatchdays = useMemo(() => { 
-  return matchdays?.filter((matchday, key) => {
+const memoMatchdays = useMemo(() => {  
+  return matchdays?.map(x => {
+    const newDate = new Date(x.deadlineTime);
+      const newTime = newDate.toLocaleTimeString();
+      const time =
+        newTime.length === 11
+          ? newTime.replace(newTime.substring(5, 10), newTime.substring(8, 10))
+          : newTime.replace(newTime.substring(4, 9), newTime.substring(7, 9));
+        return {
+          ...x,
+          deadlineTime1: time,
+        deadlineDate: newDate.toLocaleDateString()
+        }
+  })?.filter((matchday, key) => {
     let start = (curPage - 1) * pageSize;
     let end = curPage * pageSize;
     if (key >= start && key < end) return true;
   })
 }, [matchdays, pageSize, curPage])
+console.log(memoMatchdays)
  if(isLoading) {
     return <div className="spinner"><Spinner /></div>
  }
   return (
     <Container>
-    {memoMatchdays?.map(x => <div className="teams p-2" key={x._id}>
-          <div className="team-name">{x.name}</div>
-          <div>{getTime(x.deadlineTime)}</div>
-          <div><Button onClick={()=>startMatchdayPop(x._id)}>Start</Button></div>
-          <div><Button onClick={() => editMatchdayPop(x._id)} className="btn btn-warning">Edit</Button></div>
-          <div><Button onClick={() => deleteMatchdayPop(x._id)} className="btn btn-danger">Delete</Button></div>
-          <div><Button onClick={() => updateMDdata(x._id)} className="btn btn-success">Update Data</Button></div>
-          <div><Button onClick={() => updateTOW(x._id)} className="btn btn-success">Update TOW</Button></div>
-          <div><Button onClick={() => updateAutoSubs(x._id)} className="btn btn-success">Auto subs</Button></div>
-          <div><Button onClick={() => undoAutos(x._id)} className="btn btn-success">Undo Autos</Button></div>
-          <div><Button onClick={() => endMatchday(x._id)} className="btn btn-success">End MD</Button></div>
-      </div>)}
+    {memoMatchdays?.map(matchday => (
+      <MatchdayAdmin
+      matchday={matchday}
+      startMatchdayPop={startMatchdayPop}
+      editMatchdayPop={editMatchdayPop}
+      deleteMatchdayPop={deleteMatchdayPop}
+      updateMDdata={updateMDdata}
+      updateTOW={updateTOW}
+      updateAutoSubs={updateAutoSubs}
+      undoAutos={undoAutos}
+      endMatchday={endMatchday}
+       />
+    ))}
       <div>
       <div className="add-button p-2">
       <div><Button onClick={setLive}>Set Live Picks</Button></div>
