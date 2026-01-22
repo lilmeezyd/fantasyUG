@@ -107,8 +107,8 @@ const EditStatsModal = (props) => {
           </div>
           <div className="py-2">
             <div className="font-medium pb-2">Select Players</div>
-                <div className="overflow-auto">
-                  <div className="p-2">
+                <div className="overflow-auto border rounded-lg">
+                  <div className="p-2 h-[200px]">
             {homeAway === "home" &&
               players?.updatedPlayers
                 ?.filter(
