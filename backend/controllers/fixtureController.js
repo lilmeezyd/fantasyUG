@@ -285,9 +285,7 @@ const dePopulateStats = asyncHandler(async (req, res) => {
     res.status(400);
     throw new Error("No players found");
   }
-  await setInitialPoints(
-    req,
-    res,
+  const message = await setInitialPoints(
     "reset",
     req.params.id,
     req.params.mid,
@@ -308,7 +306,8 @@ const dePopulateStats = asyncHandler(async (req, res) => {
     fixture,
     { new: true }
   );
-  res.status(200).json(updatedFixture);
+  res.status(200).json({message: `Player Points Added and ${message.message}`,
+    updatedFixture});
 });
 
 //@desc Edit a specific fixture
@@ -357,7 +356,7 @@ const editFixture = asyncHandler(async (req, res) => {
 //@desc Set stats for a specific fixture
 //@route PUT /api/fixtures/:id/stats
 //@access private
-//@role ADMIN, EDITOR
+//@role ADMIN, EDITOR 
 const editStats = asyncHandler(async (req, res) => {
   const fixture = await Fixture.findById(req.params.id);
   if (!fixture) {
@@ -569,8 +568,6 @@ const editStats = asyncHandler(async (req, res) => {
       }
     );
     message = await setInitialPoints(
-      req,
-      res,
       "normal",
       req.params.id,
       matchday,
