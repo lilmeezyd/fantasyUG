@@ -24,7 +24,6 @@ const FixtureItemAdmin = (props) => {
   const [populateFixture, {isLoading: isSetLive }] = usePopulateFixtureMutation();
   const [depopulateFixture] = useDepopulateFixtureMutation();
   const [setInitialPoints] = useSetInitialPointsMutation();
-  console.log(fixture)
 
   const handleShow = () => {
     setShow(true);
