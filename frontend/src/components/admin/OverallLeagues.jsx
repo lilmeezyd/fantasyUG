@@ -200,7 +200,7 @@ const OverallLeagues = () => {
           </td>
           <td className="px-4 py-2">
             <Button
-              onClick={() => editTeamLeaguePop(x._id)}
+              onClick={() => editOverallLeaguePop(x._id)}
               style={{ background: 'white', border: '1px solid black' }}
             >
               <BsPencilFill color="black" />
@@ -208,7 +208,7 @@ const OverallLeagues = () => {
           </td>
           <td className="px-4 py-2">
             <Button
-              onClick={() => deleteTeamLeaguePop(x._id)}
+              onClick={() => deleteOverallLeaguePop(x._id)}
               style={{ background: 'white', border: '1px solid black' }}
             >
               <AiFillDelete color="black" />
