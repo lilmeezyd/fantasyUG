@@ -186,7 +186,7 @@ const Teams = () => {
       ) : (
         <>
         <div className="flex justify-center">
-          <div className="overflow-auto min-w-[320px]">
+          <div className="overflow-auto">
             <table className="border rounded-lg">
               <thead>
             <tr className="border-b border-gray-500 p-2">

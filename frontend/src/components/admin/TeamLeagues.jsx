@@ -12,6 +12,7 @@ import {
 import AddModal from "./teamLeagueModals/AddModal"
 import EditModal from "./teamLeagueModals/EditModal"
 import DeleteModal from "./teamLeagueModals/DeleteModal"
+import formattedLeagues from "../../hooks/formattedLeagues";
 import { toast } from "react-toastify";
 const TeamLeagues = () => {
   const [show, setShow] = useState({
@@ -22,7 +23,7 @@ const TeamLeagues = () => {
   const [teamLeagueId, setTeamLeagueId] = useState("");
   const [curPage, setCurPage] = useState(1);
   const [page, setPage] = useState(1);
-  const { data: teamLeagues, isLoading, isError } = useGetTeamLeaguesQuery();
+  const { data: teamLeagues = [], isLoading, isError } = useGetTeamLeaguesQuery();
   const [addTeamLeague] = useAddTeamLeagueMutation()
   const [deleteTeamLeague] = useDeleteTeamLeagueMutation()
   const [updateTeamTables, { isLoading: a }] = useUpdateTeamTablesMutation()
@@ -30,6 +31,8 @@ const TeamLeagues = () => {
   const { deleted, edited, added } = show
   const pageSize = 5
   let totalPages = Math.ceil(teamLeagues?.length / pageSize);
+  const formattedDetails = formattedLeagues(teamLeagues)
+  console.log(formattedDetails)
 
   const closeAdd = () => {
     setShow((prevState) => ({
@@ -172,41 +175,58 @@ const TeamLeagues = () => {
   if (isError) {
     return (<div className="spinner">Something went wrong</div>)
   }
-  /*
-    if (memoTeamLeagues.length === 0) {
-      return (
-        <Container>
-          <div className="spinner">No Team Leagues Found!</div>
-          <div className="add-button p-2">
-            <Button onClick={addTeamLeaguePop} className="btn btn-success">
-              Add Team League
-            </Button>
-          </div>
-        </Container>
-      );
-    }*/
   return (
     <Container className="p-2">
       {!memoTeamLeagues?.length ? <div className="spinner">No Team Leagues Found!</div> :
-        <>{memoTeamLeagues?.map(x => <div className="teams p-2" key={x._id}>
-          <div className="team-name">{x?.team?.name}</div>
-          <div>
+        <>
+        <div className="overflow-auto">
+        <table className="border rounded-lg">
+          <thead>
+            <tr className="border-b border-gray-400">
+              <th className="team-name px-4 py-2">Name</th>
+              <th className="px-4 py-2 text-center">Start GW</th>
+              <th className="px-4 py-2 text-center">End GW</th>
+              <th className="px-4 py-2 text-center">Current Managers</th>
+              <th className="px-4 py-2 text-center">New Entrants</th>
+              <th className="px-4 py-2 text-center">Created</th>
+              <th className="px-4 py-2 text-center">Last Updated</th>
+              <th className="px-4 py-2"></th>
+              <th className="px-4 py-2"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {formattedDetails?.map((x, idx) => <tr className={`${idx%2 === 1 ? 'bg-green-200' : 'bg-white'} border border-gray-400 font-semibold`} key={x._id}>
+          <td className="team-name px-4 py-2">{x?.team?.name}</td>
+          <td className="px-4 py-2 text-center">{x?.startMatchday}</td>
+          <td className="px-4 py-2 text-center">{x?.endMatchday}</td>
+          <td className="px-4 py-2 text-center">{x?.standings}</td>
+          <td className="px-4 py-2 text-center">{x?.entrants}</td>
+          <td className="px-4 py-2 text-center">
+            <span>{x?.createdDate}</span>,&nbsp;<span>{x?.createdTime}</span>
+          </td>
+          <td className="px-4 py-2 text-center">
+            <span>{x?.updatedDate}</span>,&nbsp;<span>{x?.updatedTime}</span>
+          </td>
+          <td className="px-4 py-2">
             <Button
               onClick={() => editTeamLeaguePop(x._id)}
               style={{ background: 'white', border: '1px solid black' }}
             >
               <BsPencilFill color="black" />
             </Button>
-          </div>
-          <div>
+          </td>
+          <td className="px-4 py-2">
             <Button
               onClick={() => deleteTeamLeaguePop(x._id)}
               style={{ background: 'white', border: '1px solid black' }}
             >
               <AiFillDelete color="black" />
             </Button>
-          </div>
-        </div>)}
+          </td>
+        </tr>)}
+          </tbody>
+        </table>
+        </div>
           <Pagination curPage={curPage} viewFirstPage={viewFirstPage}
             viewPreviousPage={viewPreviousPage}
             viewNextPage={viewNextPage} viewLastPage={viewLastPage}
@@ -239,7 +259,7 @@ const TeamLeagues = () => {
                 closeDelete={closeDelete}
               />
             )}
-    </Container>
+    </Container> 
   );
 };
 

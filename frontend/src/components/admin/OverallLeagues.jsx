@@ -7,6 +7,7 @@ import { useUpdateOverallTableMutation, useGetOverallLeaguesQuery, useAddOverall
 import AddModal from "./overallLeagueModals/AddModal"
 import EditModal from "./overallLeagueModals/EditModal"
 import DeleteModal from "./overallLeagueModals/DeleteModal"
+import formattedLeagues from "../../hooks/formattedLeagues"
 import { toast } from "react-toastify";
 
 const OverallLeagues = () => {
@@ -18,7 +19,7 @@ const OverallLeagues = () => {
   const [overallLeagueId, setOverallLeagueId] = useState("");
   const [curPage, setCurPage] = useState(1);
   const [page, setPage] = useState(1);
-  const { data: overallLeagues, isLoading, isFetching, isError} = useGetOverallLeaguesQuery()
+  const { data: overallLeagues = [], isLoading, isFetching, isError} = useGetOverallLeaguesQuery()
   const [addOverallLeague ] = useAddOverallLeagueMutation()
   const [ deleteOverallLeague ] = useDeleteOverallLeagueMutation() 
   const [ updateOverallTable, {isLoading: a} ] = useUpdateOverallTableMutation()
@@ -26,6 +27,8 @@ const OverallLeagues = () => {
   const { deleted, edited, added } = show
   const pageSize = 5
   let totalPages = Math.ceil(overallLeagues?.length / pageSize);
+  const formattedDetails = formattedLeagues(overallLeagues)
+  console.log(formattedDetails)
 
   const closeAdd = () => {
     setShow((prevState) => ({
@@ -164,43 +167,58 @@ const OverallLeagues = () => {
     if(isError) {
       return (<div className="spinner">Something went wrong</div>)
     }
-/*
-    if(memoOverallLeagues.length === 0) {
-      return (
-        <Container>
-          <div className="spinner">No Overall Leagues Found!</div>
-          <div className="add-button p-2">
-            <Button onClick={addOverallLeaguePop} className="btn btn-success">
-              Add Overall League
-            </Button>
-          </div>
-        </Container>
-      );
-    }*/
   return (
     <Container className="p-2">
       {!memoOverallLeagues?.length ? <div className="spinner">No overall Leagues Found!</div> : 
-      <>{memoOverallLeagues?.map(x => <div className="teams p-2" key={x._id}>
-        <div className="team-name">{x?.name}</div>
-        <div>
+      <>
+      <div className="overflow-auto">
+      <table className="border rounded-lg">
+          <thead>
+            <tr className="border-b border-gray-400">
+              <th className="team-name px-4 py-2">Name</th>
+              <th className="px-4 py-2 text-center">Start GW</th>
+              <th className="px-4 py-2 text-center">End GW</th>
+              <th className="px-4 py-2 text-center">Current Managers</th>
+              <th className="px-4 py-2 text-center">New Entrants</th>
+              <th className="px-4 py-2 text-center">Created</th>
+              <th className="px-4 py-2 text-center">Last Updated</th>
+              <th className="px-4 py-2"></th>
+              <th className="px-4 py-2"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {formattedDetails?.map((x, idx) => <tr className={`${idx%2 === 1 ? 'bg-green-200' : 'bg-white'} border border-gray-400 font-semibold`} key={x._id}>
+          <td className="team-name px-4 py-2">{x?.name}</td>
+          <td className="px-4 py-2 text-center">{x?.startMatchday}</td>
+          <td className="px-4 py-2 text-center">{x?.endMatchday}</td>
+          <td className="px-4 py-2 text-center">{x?.standings}</td>
+          <td className="px-4 py-2 text-center">{x?.entrants}</td>
+          <td className="px-4 py-2 text-center">
+            <span>{x?.createdDate}</span>,&nbsp;<span>{x?.createdTime}</span>
+          </td>
+          <td className="px-4 py-2 text-center">
+            <span>{x?.updatedDate}</span>,&nbsp;<span>{x?.updatedTime}</span>
+          </td>
+          <td className="px-4 py-2">
             <Button
-              onClick={() => editOverallLeaguePop(x._id)}
-              style={{background: 'white', border: 'white'}}
+              onClick={() => editTeamLeaguePop(x._id)}
+              style={{ background: 'white', border: '1px solid black' }}
             >
-              <BsPencilFill color="black"/>
+              <BsPencilFill color="black" />
             </Button>
-          </div>
-          <div>
+          </td>
+          <td className="px-4 py-2">
             <Button
-              onClick={() => deleteOverallLeaguePop(x._id)}
-              style={{background: 'white', border: 'white'}}
+              onClick={() => deleteTeamLeaguePop(x._id)}
+              style={{ background: 'white', border: '1px solid black' }}
             >
               <AiFillDelete color="black" />
             </Button>
-          </div>
-          <div>
-          </div>
-      </div>)}
+          </td>
+        </tr>)}
+          </tbody>
+        </table>
+        </div>
       <Pagination curPage={curPage} viewFirstPage={viewFirstPage}
          viewPreviousPage={viewPreviousPage}
         viewNextPage={viewNextPage} viewLastPage={viewLastPage}
