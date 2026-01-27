@@ -38,7 +38,7 @@ const OverallLeague = () => {
   const onChange = (e) => {
     setSortParam(e.target.value);
     if (e.target.value === "overallPoints") {
-      setGw(maxId);
+      setGw(currentId);
     } else {
       setGw(e.target.value);
     }
