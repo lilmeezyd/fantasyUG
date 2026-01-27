@@ -183,13 +183,13 @@ const TeamOfWeek = () => {
                 ))}
               </div>
             </>*/}
-              <div class="player-header-1">
-                <div class="info"></div>
-                <div class="position-table-1">
-                  <div class="p-t-1">Player</div>
+              <div className="player-header-1">
+                <div className="info"></div>
+                <div className="position-table-1">
+                  <div className="p-t-1">Player</div>
                 </div>
-                <div class="money"></div>
-                <div class="others">Points</div>
+                <div className="money"></div>
+                <div className="others">Points</div>
               </div>
               {goalkeepers?.map((teamPlayer) => (
                 <div key={teamPlayer?.id} className="player-tbh">
@@ -204,7 +204,7 @@ const TeamOfWeek = () => {
                         viewBox="0 0 6 13"
                         fill="currentColor"
                         xmlns="http://www.w3.org/2000/svg"
-                        class="yss5pg0"
+                        className="yss5pg0"
                         aria-label="Player info"
                       >
                         <path
@@ -270,7 +270,7 @@ const TeamOfWeek = () => {
                         viewBox="0 0 6 13"
                         fill="currentColor"
                         xmlns="http://www.w3.org/2000/svg"
-                        class="yss5pg0"
+                        className="yss5pg0"
                         aria-label="Player info"
                       >
                         <path
@@ -321,7 +321,7 @@ const TeamOfWeek = () => {
                         viewBox="0 0 6 13"
                         fill="currentColor"
                         xmlns="http://www.w3.org/2000/svg"
-                        class="yss5pg0"
+                        className="yss5pg0"
                         aria-label="Player info"
                       >
                         <path
@@ -372,7 +372,7 @@ const TeamOfWeek = () => {
                         viewBox="0 0 6 13"
                         fill="currentColor"
                         xmlns="http://www.w3.org/2000/svg"
-                        class="yss5pg0"
+                        className="yss5pg0"
                         aria-label="Player info"
                       >
                         <path

@@ -53,13 +53,13 @@ const HomeScreen = () => {
               <h4 className="p-2">Highest Owned</h4>
               {players?.highestOwned?.length > 0 ? (
                 <>
-                <div class="player-header-1">
-                  <div class="info"></div>
-                  <div class="position-table-1">
-                    <div class="p-t-1">Player</div>
+                <div className="player-header-1">
+                  <div className="info"></div>
+                  <div className="position-table-1">
+                    <div className="p-t-1">Player</div>
                   </div>
-                  <div class="money"></div>
-                  <div class="others">Ownership</div>
+                  <div className="money"></div>
+                  <div className="others">Ownership</div>
                 </div>
                 {players?.highestOwned?.map(player => (
                   <div key={player?._id} className="player-tbh">
@@ -74,7 +74,7 @@ const HomeScreen = () => {
                         viewBox="0 0 6 13"
                         fill="currentColor"
                         xmlns="http://www.w3.org/2000/svg"
-                        class="yss5pg0"
+                        className="yss5pg0"
                         aria-label="Player info"
                       >
                         <path
@@ -142,16 +142,16 @@ const HomeScreen = () => {
             <h4 className="p-2">Transfers IN</h4>
             {transfersIn.length > 0 ? (
               <>
-                <div class="player-header-1">
-                  <div class="info"></div>
-                  <div class="position-table-1">
-                    <div class="p-t-1">Player</div>
+                <div className="player-header-1">
+                  <div className="info"></div>
+                  <div className="position-table-1">
+                    <div className="p-t-1">Player</div>
                   </div>
-                  <div class="money"></div>
-                  <div class="others">Transfers</div>
+                  <div className="money"></div>
+                  <div className="others">Transfers</div>
                 </div>
                 {transfersIn.map((transfer) => (
-                  <div className="player-tbh">
+                  <div key={transfer?._id} className="player-tbh">
                     <div className="info">
                       <button
                       onClick={() => getInfo(transfer?._id)}
@@ -163,7 +163,7 @@ const HomeScreen = () => {
                         viewBox="0 0 6 13"
                         fill="currentColor"
                         xmlns="http://www.w3.org/2000/svg"
-                        class="yss5pg0"
+                        className="yss5pg0"
                         aria-label="Player info"
                       >
                         <path
@@ -212,16 +212,16 @@ const HomeScreen = () => {
             <h4 className="p-2">Transfers OUT</h4>
             {transfersOut.length > 0 ? (
               <>
-                <div class="player-header-1">
-                  <div class="info"></div>
-                  <div class="position-table-1">
-                    <div class="p-t-1">Player</div>
+                <div className="player-header-1">
+                  <div className="info"></div>
+                  <div className="position-table-1">
+                    <div className="p-t-1">Player</div>
                   </div>
-                  <div class="money"></div>
-                  <div class="others">Transfers</div>
+                  <div className="money"></div>
+                  <div className="others">Transfers</div>
                 </div>
                 {transfersOut.map((transfer) => (
-                  <div className="player-tbh">
+                  <div key={transfer?._id} className="player-tbh">
                     <div className="info">
                       <button
                       onClick={() => getInfo(transfer?._id)}
@@ -233,7 +233,7 @@ const HomeScreen = () => {
                         viewBox="0 0 6 13"
                         fill="currentColor"
                         xmlns="http://www.w3.org/2000/svg"
-                        class="yss5pg0"
+                        className="yss5pg0"
                         aria-label="Player info"
                       >
                         <path
