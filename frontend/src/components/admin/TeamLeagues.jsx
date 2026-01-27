@@ -31,8 +31,7 @@ const TeamLeagues = () => {
   const { deleted, edited, added } = show
   const pageSize = 5
   let totalPages = Math.ceil(teamLeagues?.length / pageSize);
-  const formattedDetails = formattedLeagues(teamLeagues)
-  console.log(formattedDetails)
+  const formattedDetails = formattedLeagues(teamLeagues, pageSize, curPage)
 
   const closeAdd = () => {
     setShow((prevState) => ({

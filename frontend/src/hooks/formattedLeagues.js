@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useGetMatchdaysQuery } from "../slices/matchdayApiSlice";
-export default function formattedLeagues(leaguesArray) {
+export default function formattedLeagues(leaguesArray, pageSize, curPage) {
   const { data = [] } = useGetMatchdaysQuery();
   const matchdayMap = new Map(data.map((x) => [x._id, x.id]));
   return useMemo(() => {
@@ -29,6 +29,10 @@ export default function formattedLeagues(leaguesArray) {
         updatedTime: time_1,
         updatedDate: newDate_1.toLocaleDateString(),
       };
+    }).filter((x, idx) => {
+        let start = (curPage - 1) * pageSize;
+        let end = curPage * pageSize;
+        if(idx >= start && idx < end) return true
     });
-  }, [matchdayMap, leaguesArray]);
+  }, [matchdayMap, leaguesArray, pageSize, curPage]);
 }

@@ -2,7 +2,7 @@ import { useGetMatchdaysQuery } from "../slices/matchdayApiSlice";
 import { useGetQuery } from "../slices/teamApiSlice";
 import { useMemo } from "react";
 
-export default function fixturesByMatchday(fixturesByMatchday) {
+export default function fixturesByMatchday(fixturesByMatchday) { 
   const { data = [], isLoading } = useGetMatchdaysQuery();
   const { data: teams = [] } = useGetQuery();
   return useMemo(() => {

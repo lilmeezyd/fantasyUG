@@ -1,7 +1,8 @@
-import { useReducer } from "react";
+import { useReducer, useEffect } from "react";
 import { Container, Button } from "react-bootstrap";
-import { Link, Outlet } from 'react-router-dom'
-const Leagues = () => {   
+import { Link, Outlet, useLocation } from 'react-router-dom'
+const Leagues = () => {
+  const { pathname } = useLocation()
 
 const reducer = (state, action) => {
   if(action.type === 'TEAM') {
@@ -31,7 +32,19 @@ const reducer = (state, action) => {
 }
   const [state, dispatch] = useReducer(reducer, { teamLeagues: '', overallLeague: 'league-active', privateLeagues: ''})
   const { teamLeagues, overallLeague, privateLeagues } = state
-  const changeToTeam = () => {
+
+  useEffect(() => {
+    if(pathname.includes('privateleagues')) {
+      dispatch({type: 'PRIVATE'})
+    }
+    if(pathname.includes('overallleagues')) {
+      dispatch({type: 'OVERALL'})
+    }
+    if(pathname.includes('teamleagues')) {
+      dispatch({type: 'TEAM'})
+    }
+  }, [pathname])
+ /* const changeToTeam = () => {
     dispatch({type: 'TEAM'})
   }
   const changeToOverall = () => {
@@ -40,14 +53,14 @@ const reducer = (state, action) => {
   const changeToPrivate = () => {
     dispatch({type: 'PRIVATE'})
   }
-  
+  */
   
   return (
     <Container>
       <div className="leagues p-2">
-        <Link onClick={changeToTeam} className={`${teamLeagues} league-baby`} to='/admin/dashboard/leagues/teamleagues'>Team</Link>
-        <Link onClick={changeToOverall} className={`${overallLeague} league-baby`} to='/admin/dashboard/leagues/overallleagues'>Overall</Link>
-        <Link onClick={changeToPrivate} className={`${privateLeagues} league-baby`} to='/admin/dashboard/leagues/privateleagues'>Private</Link>
+        <Link className={`${teamLeagues} league-baby`} to='/admin/dashboard/leagues/teamleagues'>Team</Link>
+        <Link className={`${overallLeague} league-baby`} to='/admin/dashboard/leagues/overallleagues'>Overall</Link>
+        <Link className={`${privateLeagues} league-baby`} to='/admin/dashboard/leagues/privateleagues'>Private</Link>
       </div>
       <Outlet />
       {/*<div className="add-button p-2">
