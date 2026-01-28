@@ -213,7 +213,6 @@ const undoAutos = async (id) => {
 const setPastRank = async () => {
   try {
     const res = await setLastAndCurrentRank().unwrap()
-    console.log(res)
     toast.success(res?.message)
   } catch (error) {
     toast.error(error?.data.message)
@@ -290,7 +289,6 @@ const memoMatchdays = useMemo(() => {
     if (key >= start && key < end) return true;
   })
 }, [matchdays, pageSize, curPage])
-console.log(memoMatchdays)
  if(isLoading) {
     return <div className="spinner"><Spinner /></div>
  }

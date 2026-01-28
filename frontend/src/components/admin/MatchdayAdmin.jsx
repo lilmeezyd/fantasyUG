@@ -13,7 +13,6 @@ const MatchdayAdmin = (props) => {
     undoAutos,
     endMatchday,
   } = props;
-  console.log(matchday);
   return (
     <div key={matchday.id}>
       <div className="deadline">
