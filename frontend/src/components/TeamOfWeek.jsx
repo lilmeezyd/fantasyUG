@@ -34,6 +34,9 @@ const TeamOfWeek = () => {
     setMatchdayId(myId);
     setMaxId(myId);
   }, [data]);
+  console.log(data)
+  console.log(matchdayId)
+  console.log(maxId)
 
 
   const allArray = useMemo(
