@@ -438,12 +438,11 @@ const Transfers = () => {
       );
       const newData = { nowCost: "", playerTeam: "", _id: "" };
       const newPlayer = { ...state.picks[openSlot], ...newData };
-      const slotIndex = state.transfersIn.findIndex((x) => x._id === data._id);
       return {
         ...state,
         transfersIn: ids.includes(data._id)
           ? state.transfersIn
-          : state.transfersIn.splice(slotIndex, 1),
+          : state.transfersIn.filter(x => x._id !== data._id),
         transfersOut: ids.includes(data._id)
           ? [...state.transfersOut, data]
           : state.transfersOut,
@@ -461,12 +460,11 @@ const Transfers = () => {
       );
       const newData = { nowCost: "", playerTeam: "", _id: "" };
       const newPlayer = { ...state.picks[openSlot], ...newData };
-      const slotIndex = state.transfersIn.findIndex((x) => x._id === data._id);
       return {
         ...state,
         transfersIn: ids.includes(data._id)
           ? state.transfersIn
-          : state.transfersIn.splice(slotIndex, 1),
+          : state.transfersIn.filter(x => x._id !== data._id),
         transfersOut: ids.includes(data._id)
           ? [...state.transfersOut, data]
           : state.transfersOut,
@@ -484,12 +482,11 @@ const Transfers = () => {
       );
       const newData = { nowCost: "", playerTeam: "", _id: "" };
       const newPlayer = { ...state.picks[openSlot], ...newData };
-      const slotIndex = state.transfersIn.findIndex((x) => x._id === data._id);
       return {
         ...state,
         transfersIn: ids.includes(data._id)
           ? state.transfersIn
-          : state.transfersIn.splice(slotIndex, 1),
+          : state.transfersIn.filter(x => x._id !== data._id),
         transfersOut: ids.includes(data._id)
           ? [...state.transfersOut, data]
           : state.transfersOut,
@@ -507,12 +504,11 @@ const Transfers = () => {
       );
       const newData = { nowCost: "", playerTeam: "", _id: "" };
       const newPlayer = { ...state.picks[openSlot], ...newData };
-      const slotIndex = state.transfersIn.findIndex((x) => x._id === data._id);
       return {
         ...state,
         transfersIn: ids.includes(data._id)
           ? state.transfersIn
-          : state.transfersIn.splice(slotIndex, 1),
+          : state.transfersIn.filter(x => x._id !== data._id),
         transfersOut: ids.includes(data._id)
           ? [...state.transfersOut, data]
           : state.transfersOut,
