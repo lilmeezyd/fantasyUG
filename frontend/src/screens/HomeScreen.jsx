@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import LoginScreen from "./LoginScreen";
 import { useSelector } from "react-redux";
 import TeamOfWeek from "../components/TeamOfWeek";
@@ -10,7 +10,7 @@ import { useGetPlayerQuery } from "../slices/playerApiSlice";
 const HomeScreen = () => {
   const { userInfo } = useSelector((state) => state.auth);
   const { data = [] } = useGetNextMatchdayDetailsQuery();
-  const { data: players = [] } = useGetPlayersQuery()
+  const { data: players = [], isLoading } = useGetPlayersQuery()
   const [transfers, setTransfers] = useState({
     transfersIn: [],
     transfersOut: [],
@@ -19,12 +19,28 @@ const HomeScreen = () => {
   const [showPInfo, setShowPInfo] = useState(false);
   const [ playerId, setPlayerId ] = useState('')
   const { data: player = {} } = useGetPlayerQuery(playerId);
-  const { transfersIn, transfersOut } = transfers;
+ /* const { transfersIn, transfersOut } = transfers;
   useEffect(() => {
     const transIn = data?.transfersIn || [];
     const transOut = data?.transfersOut || [];
     setTransfers({ transfersIn: transIn, transfersOut: transOut });
-  }, [data]);
+  }, [data]);*/
+  const transfersIn = useMemo(() => {
+    if(data?.transfersIn?.length) {
+      const newData = [...data?.transfersIn]
+      return newData?.sort((x,y) => x.transfersIn - y.transfersIn)?.slice(0,4) || [];
+    }
+    return []
+      
+    }, [data])
+    const transfersOut = useMemo(() => {
+      if(data?.transfersOut?.length) {
+        const newData = [...data?.transfersOut]
+      return newData?.sort((x,y) => x.transfersOut - y.transfersOut)?.slice(0,4) || [];
+      }
+      return []
+      
+    }, [data])
   const handleClose = () => setShow(false);
   const getInfo = (player) => {
     setPlayerId(player)
@@ -50,7 +66,7 @@ const HomeScreen = () => {
           <div className="home-section-grid-sub">
             <div>
               <h4 className="p-2">Highest Owned</h4>
-              {players?.highestOwned?.length > 0 ? (
+              { players?.highestOwned?.length > 0 ? (
                 <>
                 <div className="player-header-1">
                   <div className="info"></div>
