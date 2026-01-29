@@ -28,7 +28,7 @@ const HomeScreen = () => {
   const transfersIn = useMemo(() => {
     if(data?.transfersIn?.length) {
       const newData = [...data?.transfersIn]
-      return newData?.sort((x,y) => x.transfersIn - y.transfersIn)?.slice(0,4) || [];
+      return newData?.sort((x,y) => y.transfersIn - x.transfersIn)?.slice(0,4) || [];
     }
     return []
       
@@ -36,7 +36,7 @@ const HomeScreen = () => {
     const transfersOut = useMemo(() => {
       if(data?.transfersOut?.length) {
         const newData = [...data?.transfersOut]
-      return newData?.sort((x,y) => x.transfersOut - y.transfersOut)?.slice(0,4) || [];
+      return newData?.sort((x,y) => y.transfersOut - x.transfersOut)?.slice(0,4) || [];
       }
       return []
       
