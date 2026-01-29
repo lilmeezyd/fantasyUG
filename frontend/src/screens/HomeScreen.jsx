@@ -67,8 +67,8 @@ const HomeScreen = () => {
         <LoginScreen />
       )}
       <div className="home-section p-2">
-        <div className="p-2 home-section-sub home-section-grid">
-          <div className="home-section-grid-sub">
+        <div className="p-2 home-section-sub">
+          <div className="home-section-grid-sub my-2">
             <div>
               <h4 className="p-2">Highest Owned</h4>
               { isLoading ? (<p className="text-center font-bold">Loading...</p>) : (players?.highestOwned?.length > 0 ? (
@@ -88,7 +88,7 @@ const HomeScreen = () => {
               )) }
             </div>
           </div>
-          <div className="home-section-grid-sub">
+          <div className="home-section-grid-sub my-2">
             <div>
               <h4 className="p-2">Most Captained</h4>
               {isLoading ? (<p className="text-center font-bold">Loading...</p>) : (mostCaptained.length > 0 ? (
