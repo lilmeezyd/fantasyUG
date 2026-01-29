@@ -443,7 +443,6 @@ const PickTeam = () => {
   const inform = (data) => {
     console.log("view info");
   };
-  console.log(picks)
   if (isLoading && managerPicks === undefined) {
     return (
       <div className="spinner">

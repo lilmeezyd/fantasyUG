@@ -40,7 +40,6 @@ const LeagueDetails = (props) => {
     copyFix?.sort((x, y) => (x?.createdAt > y?.createdAt ? 1 : -1));
     setCopy(copyFix);
   }, [transferObj]);
-  console.log(transferObj)
   const toggleView = () => {
     setShow((prev) => !prev);
   };
