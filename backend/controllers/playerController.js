@@ -138,6 +138,7 @@ const getPlayers = asyncHandler(async (req, res) => {
     { $sort: { _id: 1 } },
   ]);
 
+
   const playerCountMap = new Map(picks.map((x) => [x._id.toString(), x.total]));
   const numberOfManagers = await getAllManagers();
   const positionMap = new Map();
@@ -213,7 +214,7 @@ const getPlayers = asyncHandler(async (req, res) => {
     const highestOwned = updatedPlayers.length
       ? updatedPlayers.filter((x) => +x.ownership === max).slice(0, 5)
       : [];
-    res.status(200).json({ highestOwned, updatedPlayers });
+    res.status(200).json({ lives, highestOwned, updatedPlayers });
   }
 });
 
@@ -303,6 +304,7 @@ const getPlayersByFixture = asyncHandler(async (req, res) => {
 //@access public
 //@role not restricted
 const getPlayer = asyncHandler(async (req, res) => {
+  const teams = await Team.find({});
   const player = await Player.findById(req.params.id);
   const matchdays = await Matchday.find({}).lean();
   const matchDayNext = await Matchday.findOne({ next: true });
@@ -325,6 +327,7 @@ const getPlayer = asyncHandler(async (req, res) => {
   }
 
   const playerCountMap = new Map(picks.map((x) => [x._id.toString(), x.total]));
+  const teamCodeMap = new Map(teams.map((x) => [x._id.toString(), x.code]));
   const team = player?.playerTeam;
   const pFixtures = await Fixture.find({
     stats: [],
@@ -396,6 +399,10 @@ const getPlayer = asyncHandler(async (req, res) => {
     saves,
     cleansheets,
     starts,
+    forwardImage:
+            playerPosition === 1
+              ? `${teamCodeMap.get(playerTeam.toString())}_1-66`
+              : `${teamCodeMap.get(playerTeam.toString())}-66`,
     ownership: `${b.toFixed(1)}`,
     fixtures: newFixtures,
     results: pResults,
