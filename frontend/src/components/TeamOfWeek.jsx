@@ -15,25 +15,29 @@ import PlayerInfo from "./PlayerInfo";
 
 const TeamOfWeek = () => {
   const [matchdayId, setMatchdayId] = useState(null);
-  const [maxId, setMaxId] = useState(null);
   const [show, setShow] = useState(false);
   const [showPInfo, setShowPInfo] = useState(false);
   //const [ player, setPlayer] = useState('')
   const [ playerId, setPlayerId ] = useState('')
   //const { data: maxId, isLoading } = useGetMaxIdQuery();
-  const { data = [], isLoading: getAllLoading } = useGetAllTOWsQuery();
+  const { data= [], isLoading: getAllLoading } = useGetAllTOWsQuery();
   //const { data: tows } = useGetMatchdayTOWQuery(matchdayId);
   const { data: matchdays = [] } = useGetMatchdaysQuery();
   const { data: teams = [] } = useGetQuery();
   const { data: player = {} } = useGetPlayerQuery(playerId);
-  const minId =
-    matchdays.length > 0 ? Math.min(...matchdays.map((x) => x.id)) : 1;
+  const minId = useMemo(
+    () => (matchdays.length ? Math.min(...matchdays.map(m => m.id)) : 1),
+    [matchdays]
+  );
+
+  const maxId = useMemo(
+    () => (data.length ? Math.max(...data.map(t => t.matchday)) : 1),
+    [data]
+  );
 
   useEffect(() => {
-    const myId = Math.max(...data.map((x) => x.matchday)) || 1;
-    setMatchdayId(myId);
-    setMaxId(myId);
-  }, [data]);
+    if (maxId) setMatchdayId(maxId);
+  }, [maxId]);
 
 
   const allArray = useMemo(
@@ -90,22 +94,15 @@ const TeamOfWeek = () => {
     setShowPInfo(false);
   };
 
-  /*
-  if (isLoading || getAllLoading || !data?.length) {
+   if (getAllLoading) {
     return (
-      <div className="spinner">
-        <Spinner />
-      </div>
-    )
-  }*/
-  /*console.log(allArray)
-  if (data?.length === 0) {
-    return (
-      <div className="home-section-sub" style={{fontWeight: 800}}>
-        No stars of the matchday yet
-      </div>
-    )
-  }*/
+      <p className="text-center font-bold">Loading...</p>
+    );
+  }
+
+  if (!data.length) {
+    return <div>No stars of the matchday yet</div>;
+  }
 
   return (
     <>
@@ -135,9 +132,7 @@ const TeamOfWeek = () => {
           <div>
             <h4 className="p-2">Stars of Matchday {matchdayId}</h4>
           </div>
-          {allArrays?.length === 0 ? (
-            <div className="p-2">No stars yet</div>
-          ) : (
+          {
             <>
               <div className="player-header-1">
                 <div className="info"></div>
@@ -160,7 +155,7 @@ const TeamOfWeek = () => {
                 <PlayerDetailsData details={'starTeam'} key={teamPlayer?.id} playerData={teamPlayer} playerId={teamPlayer?.id} />
               ))}
             </>
-          )}
+          }
         </div>
         <PlayerInfo
         player={player}

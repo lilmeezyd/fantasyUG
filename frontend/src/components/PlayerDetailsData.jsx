@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useGetPlayerQuery } from "../slices/playerApiSlice";
 import { useGetQuery } from "../slices/teamApiSlice"
 import { useGetPositionsQuery } from "../slices/positionApiSlice"
@@ -9,12 +9,28 @@ const PlayerDetailsData = (props) => {
   const [show, setShow] = useState(false);
   const [showPInfo, setShowPInfo] = useState(false);
   const { data: teams = [] } = useGetQuery()
-  const { data: player = {} } = useGetPlayerQuery(playerId)
+  const { data: player } = useGetPlayerQuery(playerId)
   const { data: positions = [] } = useGetPositionsQuery()
-  const teamCode = teams?.find((team) => team?._id === player?.playerTeam)?.code;
+ /* const teamCode = teams?.find((team) => team?._id === player?.playerTeam)?.code;
   const playerTeam = teams?.find((team) => team?._id === player?.playerTeam)?.name
   const playerPosition = positions?.find((x) => x?._id === player?.playerPosition)?.shortName
-  const image = player?.playerPosition === "669a41e50f8891d8e0b4eb2a" ? `${teamCode}_1` : teamCode;
+  const image = player?.playerPosition === "669a41e50f8891d8e0b4eb2a" ? `${teamCode}_1` : teamCode;*/
+  const memoData = useMemo(() => {
+    if (!player) return null;
+
+    const team = teams.find(t => t._id === player.playerTeam);
+    const position = positions.find(p => p._id === player.playerPosition);
+
+    return {
+      teamCode: team?.code,
+      teamName: team?.name,
+      positionName: position?.shortName,
+      image:
+        player.playerPosition === "669a41e50f8891d8e0b4eb2a"
+          ? `${team?.code}_1`
+          : team?.code,
+    };
+  }, [player, teams, positions]);
   const handleClose = () => setShow(false);
   const getInfo = () => {
     setShowPInfo(true);
@@ -60,16 +76,16 @@ const PlayerDetailsData = (props) => {
               />
             </div>
             <div className="player-cell-info">
-              <div className="name-1">{player.appName}</div>
+              <div className="name-1">{player?.appName}</div>
               <div className="player-cell-details">
-                <div className="team_name">{playerTeam}</div>
-                <div className="position">{playerPosition}</div>
+                <div className="team_name">{memoData?.teamName}</div>
+                <div className="position">{memoData?.positionName}</div>
               </div>
             </div>
           </button>
         </div>
         <div></div>
-        {details === 'highestDetails' && <div className="points others">{player.ownership}%</div>}
+        {details === 'highestDetails' && <div className="points others">{player?.ownership}%</div>}
         {details === 'transferDetailsOut' && <div className="points others">{playerData.transfersOut}</div>}
         {details === 'transferDetailsIn' && <div className="points others">{playerData.transfersIn}</div>}
         {details === 'starTeam' && <div className="points others">{playerData.totalPoints}</div>}
