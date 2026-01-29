@@ -55,15 +55,15 @@ const PlayerDetailsData = (props) => {
           >
             <div className="images">
               <img
-                src={`../shirt_${image}-66.svg`}
-                alt={image}
+                src={`../shirt_${playerData?.forwardImage}.svg`}
+                alt={playerData?.forwardImage}
               />
             </div>
             <div className="player-cell-info">
               <div className="name-1">{player.appName}</div>
               <div className="player-cell-details">
-                <div className="team_name">{playerTeam ?? '-'}</div>
-                <div className="position">{playerPosition ?? '-'}</div>
+                <div className="team_name">{playerTeam}</div>
+                <div className="position">{playerPosition}</div>
               </div>
             </div>
           </button>
@@ -73,6 +73,7 @@ const PlayerDetailsData = (props) => {
         {details === 'transferDetailsOut' && <div className="points others">{playerData.transfersOut}</div>}
         {details === 'transferDetailsIn' && <div className="points others">{playerData.transfersIn}</div>}
         {details === 'starTeam' && <div className="points others">{playerData.totalPoints}</div>}
+        {details === 'captaincy' && <div className="points others">{playerData.times}</div>}
       </div>
       <PlayerInfo
         player={player}

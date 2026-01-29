@@ -6,29 +6,34 @@ import StarsOfWeek from "../components/StarsOfWeek";
 import { useGetNextMatchdayDetailsQuery } from "../slices/transferApiSlice";
 import { useGetPlayersQuery } from "../slices/playerApiSlice";
 import PlayerDetailsData from "../components/PlayerDetailsData";
+import HomeScreenData from "../components/HomeScreenData";
 import { useGetPlayerQuery } from "../slices/playerApiSlice";
 const HomeScreen = () => {
   const { userInfo } = useSelector((state) => state.auth);
-  const { data = [] } = useGetNextMatchdayDetailsQuery();
-  const { data: players = [], isLoading } = useGetPlayersQuery()
-  const [transfers, setTransfers] = useState({
-    transfersIn: [],
-    transfersOut: [],
-  });
+  const { data = [], isLoading: nextIsLoading } = useGetNextMatchdayDetailsQuery();
+  const { data: players, isLoading } = useGetPlayersQuery()
   const [show, setShow] = useState(false);
   const [showPInfo, setShowPInfo] = useState(false);
   const [ playerId, setPlayerId ] = useState('')
   const { data: player = {} } = useGetPlayerQuery(playerId);
- /* const { transfersIn, transfersOut } = transfers;
-  useEffect(() => {
-    const transIn = data?.transfersIn || [];
-    const transOut = data?.transfersOut || [];
-    setTransfers({ transfersIn: transIn, transfersOut: transOut });
-  }, [data]);*/
+  const mostCaptained = useMemo(() => {
+    if(players) {
+      const playerMap = new Map(players?.updatedPlayers?.map(x => [x._id, x]))
+      const highest = Math.max(...players?.lives?.map(x => x?._id))
+      const highestObj = players?.lives?.find(x => x._id === highest)
+      return highestObj?.mostCaptained?.map(x => {
+        return {
+          ...x,
+          ...playerMap.get(x?.player)
+        }
+      })
+    }
+    return []
+  }, [players])
   const transfersIn = useMemo(() => {
     if(data?.transfersIn?.length) {
       const newData = [...data?.transfersIn]
-      return newData?.sort((x,y) => y.transfersIn - x.transfersIn)?.slice(0,4) || [];
+      return newData?.sort((x,y) => y.transfersIn - x.transfersIn) || [];
     }
     return []
       
@@ -36,7 +41,7 @@ const HomeScreen = () => {
     const transfersOut = useMemo(() => {
       if(data?.transfersOut?.length) {
         const newData = [...data?.transfersOut]
-      return newData?.sort((x,y) => y.transfersOut - x.transfersOut)?.slice(0,4) || [];
+      return newData?.sort((x,y) => y.transfersOut - x.transfersOut) || [];
       }
       return []
       
@@ -66,7 +71,7 @@ const HomeScreen = () => {
           <div className="home-section-grid-sub">
             <div>
               <h4 className="p-2">Highest Owned</h4>
-              { players?.highestOwned?.length > 0 ? (
+              { isLoading ? (<p className="text-center font-bold">Loading...</p>) : (players?.highestOwned?.length > 0 ? (
                 <>
                 <div className="player-header-1">
                   <div className="info"></div>
@@ -76,21 +81,34 @@ const HomeScreen = () => {
                   <div className="money"></div>
                   <div className="others">Ownership</div>
                 </div>
-                {players?.highestOwned?.map(player => (
-                  <PlayerDetailsData details={'highestDetails'} key={player._id} playerData={player} playerId={player._id} />
-                ))}
+                <HomeScreenData screenData={players?.highestOwned} pageSize={1} details={'highestDetails'} />
                 </>
               ) : (
                 "No Data yet"
-              ) }
-            </div>
-          </div>
-          {/*<div className="home-section-grid-sub">
-            <div>
-              <h4 className="p-2">Most Captained</h4>
+              )) }
             </div>
           </div>
           <div className="home-section-grid-sub">
+            <div>
+              <h4 className="p-2">Most Captained</h4>
+              {isLoading ? (<p className="text-center font-bold">Loading...</p>) : (mostCaptained.length > 0 ? (
+              <>
+                <div className="player-header-1">
+                  <div className="info"></div>
+                  <div className="position-table-1">
+                    <div className="p-t-1">Player</div>
+                  </div>
+                  <div className="money"></div>
+                  <div className="others">Managers</div>
+                </div>
+                <HomeScreenData screenData={mostCaptained} pageSize={1} details={'captaincy'} />
+              </>
+            ) : (
+              "No Transfer records"
+            ))}
+            </div>
+          </div>
+          {/*<div className="home-section-grid-sub">
             <div>
               <h4 className="p-2">Most Transferred IN</h4>
             </div>
@@ -107,7 +125,7 @@ const HomeScreen = () => {
         <div className="p-2 home-section-sub">
           <div>
             <h4 className="p-2">Transfers IN</h4>
-            {transfersIn.length > 0 ? (
+            {nextIsLoading ? (<p className="text-center font-bold">Loading...</p>) : (transfersIn.length > 0 ? (
               <>
                 <div className="player-header-1">
                   <div className="info"></div>
@@ -117,19 +135,17 @@ const HomeScreen = () => {
                   <div className="money"></div>
                   <div className="others">Transfers</div>
                 </div>
-                {transfersIn.map((transfer) => (
-                   <PlayerDetailsData details={'transferDetailsIn'} key={transfer._id} playerData={transfer} playerId={transfer._id} />
-                ))}
+                <HomeScreenData screenData={transfersIn} pageSize={5} details={'transferDetailsIn'} />
               </>
             ) : (
               "No Transfer records"
-            )}
+            ))}
           </div>
         </div>
         <div className="p-2 home-section-sub">
           <div>
             <h4 className="p-2">Transfers OUT</h4>
-            {transfersOut.length > 0 ? (
+            {nextIsLoading ? (<p className="text-center font-bold">Loading...</p>) : (transfersOut.length > 0 ? (
               <>
                 <div className="player-header-1">
                   <div className="info"></div>
@@ -139,13 +155,11 @@ const HomeScreen = () => {
                   <div className="money"></div>
                   <div className="others">Transfers</div>
                 </div>
-                {transfersOut.map((transfer) => (
-                  <PlayerDetailsData details={'transferDetailsOut'} playerData={transfer} key={transfer._id} playerId={transfer._id} />
-                ))}
+                <HomeScreenData screenData={transfersOut} pageSize={5} details={'transferDetailsOut'} />
               </>
             ) : (
               "No Transfer records"
-            )}
+            ))}
           </div>
         </div>
       </div>

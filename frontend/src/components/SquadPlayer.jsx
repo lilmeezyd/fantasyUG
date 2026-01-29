@@ -80,22 +80,23 @@ const SquadPlayer = (props) => {
       <div className="element">
         {baller._id ? (
           <div className="button-wrapper" id={baller._id}>
-            <div className="next-fix">&#163;{nowCost?.toFixed(1)}M</div>
+            {nowCost ? <div className="next-fix">&#163;{nowCost?.toFixed(1)}M</div> : 
+            <div className="next-fix">-</div>}
             <button onClick={handleShow} className="player-btn">
-              <img
+              {image && <img
                 src={`../shirt_${image}-66.svg`}
                 className="image_pic"
                 alt={appName}
-              />
+              />}
               <div className="player-name">
-                <div className="data_name">{appName}</div>
+                <div className="data_name">{appName ?? '-'}</div>
                 {opponentArr?.length > 0 ? (
                   <div
                     style={{ padding: `${opponentArr?.length === 0 && 0}` }}
                     className="data_fixtures"
                   >
                     {opponentArr?.map((x, idx) => (
-                      <div key={idx + 1}>{x}</div>
+                      <div key={idx + 1}>{x ?? '-'}</div>
                     ))}
                   </div>
                 ) : (

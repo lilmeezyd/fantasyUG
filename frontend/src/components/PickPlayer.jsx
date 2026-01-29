@@ -47,11 +47,11 @@ const PickPlayer = (props) => {
           style={{borderRadius: '0.5rem', border: `${switcher.slot === baller.slot ? '2px solid goldenrod' : ''}`,
           opacity: `${blocked?.includes(baller.slot) ? '0.6' : '1'}`}}
           className={`${okayed?.includes(baller.slot) ? 'h-light' : ''} player-btn`} onClick={handleShow}>
-            <img
+            {image && <img
               src={`../shirt_${image}-66.svg`}
               className="image_pic"
               alt={appName}
-            />
+            />}
             <div className="captain">
               {baller.IsCaptain ? (
                 <svg
@@ -144,11 +144,11 @@ const PickPlayer = (props) => {
               )}
             </div>
             <div className="player-name">
-              <div className="data_name">{appName}</div>
+              <div className="data_name">{appName ?? '-'}</div>
               {opponentArr?.length > 0 ? <div className="data_fixtures"
               style={{padding: `${opponentArr?.length === 0 && 0}`,background: `${switcher.slot === baller.slot ? 'goldenrod' : 
                 okayed?.includes(baller.slot) ? 'silver' : 'rgba(0, 0, 55, 0.9)'}`}}>
-                  {opponentArr?.map((x, idx) => <div key={idx+1}>{x}</div>)}
+                  {opponentArr?.map((x, idx) => <div key={idx+1}>{x ?? '-'}</div>)}
                 </div> : <div className="data_fixtures"><div className="blank"></div></div>}
             </div>
           </button>

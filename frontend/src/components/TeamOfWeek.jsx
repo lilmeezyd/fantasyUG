@@ -132,7 +132,6 @@ const TeamOfWeek = () => {
               <BsChevronRight />
             </button>
           </section>
-          {/*<h6 className="home-stars">Stars of Matchday {matchdayId}</h6>*/}
           <div>
             <h4 className="p-2">Stars of Matchday {matchdayId}</h4>
           </div>
@@ -140,49 +139,6 @@ const TeamOfWeek = () => {
             <div className="p-2">No stars yet</div>
           ) : (
             <>
-              {/*<>
-
-              <div className="default-player">
-                {goalkeepers?.map((x) => (
-                  <div key={x.id} className="squad-player">
-                    <PlayerDetails
-                      playerId={x.id}
-                      totalPoints={x.totalPoints}
-                    />
-                  </div>
-                ))}
-              </div>
-              <div className="default-player">
-                {defenders?.map((x) => (
-                  <div key={x.id} className="squad-player">
-                    <PlayerDetails
-                      playerId={x.id}
-                      totalPoints={x.totalPoints}
-                    />
-                  </div>
-                ))}
-              </div>
-              <div className="default-player">
-                {midfielders?.map((x) => (
-                  <div key={x.id} className="squad-player">
-                    <PlayerDetails
-                      playerId={x.id}
-                      totalPoints={x.totalPoints}
-                    />
-                  </div>
-                ))}
-              </div>
-              <div className="default-player">
-                {forwards?.map((x) => (
-                  <div key={x.id} className="squad-player">
-                    <PlayerDetails
-                      playerId={x.id}
-                      totalPoints={x.totalPoints}
-                    />
-                  </div>
-                ))}
-              </div>
-            </>*/}
               <div className="player-header-1">
                 <div className="info"></div>
                 <div className="position-table-1">

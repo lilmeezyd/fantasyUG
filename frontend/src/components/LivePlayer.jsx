@@ -63,11 +63,11 @@ const LivePlayer = (props) => {
           <div className="button-wrapper" id={baller._id}>
             {/*<div className="next-fix">&#163;{nowCost?.toFixed(1)}M</div>*/}
             <button className="player-btn" onClick={handleShow}>
-              <img
+              {image && <img
                 src={`../shirt_${image}-66.svg`}
                 className="image_pic"
                 alt={appName}
-              />
+              />}
               <div className="captain">
                 {baller.IsCaptain ? (
                   <svg
@@ -160,9 +160,9 @@ const LivePlayer = (props) => {
                 )}
               </div>
               <div className="player-name">
-                <div className="data_name">{appName}</div>
+                <div className="data_name">{appName ?? '-'}</div>
                 {opponentArr?.length > 0 ? <div style={{ fontWeight: 700 }} className="data_fixtures">
-                  {opponentArr?.map((x, idx) => <div key={idx+1}>{x}</div>)}
+                  {opponentArr?.map((x, idx) => <div key={idx+1}>{x ?? '-'}</div>)}
                 </div> : <div className="data_fixtures">
                   <div className="blank"></div></div>}
               </div>
