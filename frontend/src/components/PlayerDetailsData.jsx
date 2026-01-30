@@ -76,16 +76,16 @@ const PlayerDetailsData = (props) => {
               />
             </div>
             <div className="player-cell-info">
-              <div className="name-1">{player?.appName}</div>
+              <div className="name-1">{playerData?.appName}</div>
               <div className="player-cell-details">
-                <div className="team_name">{memoData?.teamName}</div>
-                <div className="position">{memoData?.positionName}</div>
+                <div className="team_name">{playerData?.playerTeamName || playerData?.playerTeam}</div>
+                <div className="position">{playerData?.playerPositionName || playerData?.playerPosition}</div>
               </div>
             </div>
           </button>
         </div>
         <div></div>
-        {details === 'highestDetails' && <div className="points others">{player?.ownership}%</div>}
+        {details === 'highestDetails' && <div className="points others">{playerData?.ownership}%</div>}
         {details === 'transferDetailsOut' && <div className="points others">{playerData.transfersOut}</div>}
         {details === 'transferDetailsIn' && <div className="points others">{playerData.transfersIn}</div>}
         {details === 'starTeam' && <div className="points others">{playerData.totalPoints}</div>}

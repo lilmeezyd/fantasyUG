@@ -163,7 +163,7 @@ const HomeScreen = () => {
           </div>
         </div>
       </div>
-      <StarsOfWeek />
+      <StarsOfWeek players={players?.updatedPlayers} />
     </>
   );
 };

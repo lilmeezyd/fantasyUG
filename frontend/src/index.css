@@ -1072,7 +1072,7 @@ form.login-cs {
   width: calc(100%);
   border-bottom: 0;
   background: white;
-  font-size: 9px;
+  /*font-size: 9px;*/
   border-top-left-radius: 0.5rem;
   border-top-right-radius: 0.5rem;
   /* position: absolute; */

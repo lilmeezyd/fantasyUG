@@ -201,7 +201,7 @@ const getPlayers = asyncHandler(async (req, res) => {
           playerTeamName: teamMap.get(playerTeam.toString()),
           playerPositionName: positionNameMap.get(playerPosition.toString()),
           forwardImage:
-            playerPosition === 1
+            positionMap[playerPosition] === 1
               ? `${teamCodeMap.get(playerTeam.toString())}_1-66`
               : `${teamCodeMap.get(playerTeam.toString())}-66`,
           ownership: `${b?.toFixed(1)}`,

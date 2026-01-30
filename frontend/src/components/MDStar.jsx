@@ -4,13 +4,9 @@ import { useGetPlayerQuery } from "../slices/playerApiSlice";
 import { useGetPlayersQuery } from "../slices/playerApiSlice";
 
 const MDStar = (props) => {
-  const { id, _id, topPlayer } = props;
+  const { id, _id, topPlayer, forwardImage, appName } = props;
   const { data: player ={} } = useGetPlayerQuery(topPlayer);
   const { data: players = [] } = useGetPlayersQuery();
-  const { data: teams } = useGetQuery();
-  const appName = players?.updatedPlayers?.find((play) => play._id === topPlayer)?.appName;
-  const nowCost = players?.updatedPlayers?.find((play) => play._id === topPlayer)?.nowCost;
-  const image = teams?.find((team) => team?._id === player?.playerTeam)?.code;
   const points = player?.results?.filter((x) => x?.matchday === _id)?.reduce((a,b) => a+b.totalPoints,0);
 
   const handleShow = () => {};
@@ -21,7 +17,7 @@ const MDStar = (props) => {
           {/*<div className="next-fix">&#163;{nowCost?.toFixed(1)}M</div>*/}
           <button className="player-btn" onClick={handleShow}>
             <img
-              src={`../shirt_${player?.forwardImage}.svg`}
+              src={`../shirt_${forwardImage}.svg`}
               className="image_pic"
               alt={appName}
             />
@@ -29,7 +25,7 @@ const MDStar = (props) => {
               <div className="data_name">{appName ?? '-'}</div>
               <div style={{ fontWeight: 700 }} className="data_fixtures">
                 <div>{points ?? '-'}</div>
-                <div>MD&nbsp;{id}</div>
+                <div className="border-t border-white">MD&nbsp;{id}</div>
               </div>
             </div>
           </button>

@@ -68,6 +68,7 @@ const TeamOfWeek = () => {
       })
       .sort((a, b) => (a.code > b.code ? 1 : -1));
   }, [matchdayId, data, teams]);
+  const totalPoints = allArrays?.reduce((x,y) => x+y?.totalPoints, 0)
 
   const goalkeepers = allArrays?.filter((pick) => pick?.code === 1);
   const defenders = allArrays?.filter((pick) => pick?.code === 2);
@@ -129,8 +130,9 @@ const TeamOfWeek = () => {
               <BsChevronRight />
             </button>
           </section>
-          <div>
+          <div className="flex justify-between items-center">
             <h4 className="p-2">Stars of Matchday {matchdayId}</h4>
+            <h4 className="p-2">{totalPoints} Points</h4>
           </div>
           {
             <>
