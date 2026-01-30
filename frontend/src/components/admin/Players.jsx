@@ -334,7 +334,7 @@ const Players = () => {
           <div className="spinner">No Players Found!</div>
         ) : (
           <>
-          <div className="overflow-auto">
+          <div className="overflow-auto flex justify-center">
       <table className="border rounded-lg">
         <thead>
           <tr className="border-b border-gray-400">

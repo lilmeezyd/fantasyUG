@@ -28,7 +28,12 @@ const md = matchdays?.find(matchday => matchday?.next === true)
     <header className="header">
       <Navbar className="bg-body-tertiary" expand="lg" collapseOnSelect>
         <Container>
-          <LinkContainer to="/">
+          <LinkContainer
+          className={`hover:text-gray-300 ${
+                      location.pathname === "/"
+                        ? "text-blue-400"
+                        : "text-gray-500"
+                    }`} to="/">
             <Navbar.Brand>Fantasy UG</Navbar.Brand>
           </LinkContainer>
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
@@ -36,53 +41,123 @@ const md = matchdays?.find(matchday => matchday?.next === true)
             <Nav className="ms-auto">
               {userInfo && userInfo?.roles?.ADMIN && (
                 <>
-                <LinkContainer to="/admin/dashboard">
+                <LinkContainer
+                className={`hover:text-gray-300 ${
+                      location.pathname === "/admin/dashboard"
+                        ? "text-blue-400"
+                        : "text-gray-500"
+                    }`} to="/admin/dashboard">
                   <Nav.Link>Dashboard</Nav.Link>
                 </LinkContainer>
-                <LinkContainer to="/admin/dashboard/users">
+                <LinkContainer
+                className={`hover:text-gray-300 ${
+                      location.pathname === "/admin/dashboard/users"
+                        ? "text-blue-400"
+                        : "text-gray-500"
+                    }`} to="/admin/dashboard/users">
                   <Nav.Link>Users</Nav.Link>
                 </LinkContainer>
-                <LinkContainer to="/admin/dashboard/teams">
+                <LinkContainer
+                className={`hover:text-gray-300 ${
+                      location.pathname === "/admin/dashboard/teams"
+                        ? "text-blue-400"
+                        : "text-gray-500"
+                    }`} to="/admin/dashboard/teams">
                   <Nav.Link>Teams</Nav.Link>
                 </LinkContainer>
-                <LinkContainer to="/admin/dashboard/positions">
+                <LinkContainer
+                className={`hover:text-gray-300 ${
+                      location.pathname === "/admin/dashboard/positions"
+                        ? "text-blue-400"
+                        : "text-gray-500"
+                    }`} to="/admin/dashboard/positions">
                   <Nav.Link>Positions</Nav.Link>
                 </LinkContainer>
-                <LinkContainer to="/admin/dashboard/players">
+                <LinkContainer
+                className={`hover:text-gray-300 ${
+                      location.pathname === "/admin/dashboard/players"
+                        ? "text-blue-400"
+                        : "text-gray-500"
+                    }`} to="/admin/dashboard/players">
                   <Nav.Link>Players</Nav.Link>
                 </LinkContainer>
-                <LinkContainer to="/admin/dashboard/fixtures">
+                <LinkContainer
+                className={`hover:text-gray-300 ${
+                      location.pathname === "/admin/dashboard/fixtures"
+                        ? "text-blue-400"
+                        : "text-gray-500"
+                    }`} to="/admin/dashboard/fixtures">
                   <Nav.Link>Fixtures</Nav.Link>
                 </LinkContainer>
-                <LinkContainer to="/admin/dashboard/matchdays">
+                <LinkContainer
+                className={`hover:text-gray-300 ${
+                      location.pathname === "/admin/dashboard/matchdays"
+                        ? "text-blue-400"
+                        : "text-gray-500"
+                    }`} to="/admin/dashboard/matchdays">
                   <Nav.Link>Matchdays</Nav.Link>
                 </LinkContainer>
-                <LinkContainer to="/admin/dashboard/leagues">
+                <LinkContainer
+                className={`hover:text-gray-300 ${
+                      location.pathname === "/admin/dashboard/leagues"
+                        ? "text-blue-400"
+                        : "text-gray-500"
+                    }`} to="/admin/dashboard/leagues">
                   <Nav.Link>leagues</Nav.Link>
                 </LinkContainer>
-                <LinkContainer to="/admin/dashboard/actions">
+                <LinkContainer
+                className={`hover:text-gray-300 ${
+                      location.pathname === "/admin/dashboard/actions"
+                        ? "text-blue-400"
+                        : "text-gray-500"
+                    }`} to="/admin/dashboard/actions">
                   <Nav.Link>Actions</Nav.Link>
                 </LinkContainer>
                 </>
               )}
               {userInfo?.roles?.NORMAL_USER && !userInfo?.hasPicks && 
-              <LinkContainer to="/create">
+              <LinkContainer
+              className={`hover:text-gray-300 ${
+                      location.pathname === "/create"
+                        ? "text-blue-400"
+                        : "text-gray-500"
+                    }`} to="/create">
               <Nav.Link>Create Team</Nav.Link>
             </LinkContainer>} 
               
                   {
                     userInfo?.hasPicks && (
                       <>
-                        <LinkContainer to="/points">
+                        <LinkContainer
+                        className={`hover:text-gray-300 ${
+                      location.pathname === '/points'
+                        ? "text-blue-400"
+                        : "text-gray-500"
+                    }`} to="/points">
                           <Nav.Link>Points</Nav.Link>
                         </LinkContainer>
-                        <LinkContainer to="/pickteam">
+                        <LinkContainer
+                        className={`hover:text-gray-300 ${
+                      location.pathname === "/pickteam"
+                        ? "text-blue-400"
+                        : "text-gray-500"
+                    }`} to="/pickteam">
                           <Nav.Link>Pick Team</Nav.Link>
                         </LinkContainer>
-                        <LinkContainer to="/transfers">
+                        <LinkContainer
+                        className={`hover:text-gray-300 ${
+                      location.pathname === "/transfers"
+                        ? "text-blue-400"
+                        : "text-gray-500"
+                    }`} to="/transfers">
                           <Nav.Link>Transfers</Nav.Link>
                         </LinkContainer>
-                        <LinkContainer to="/userleagues">
+                        <LinkContainer
+                        className={`hover:text-gray-300 ${
+                      location.pathname === "/userleagues"
+                        ? "text-blue-400"
+                        : "text-gray-500"
+                    }`} to="/userleagues">
                           <Nav.Link>Leagues</Nav.Link>
                         </LinkContainer>
                       </>
@@ -90,7 +165,12 @@ const md = matchdays?.find(matchday => matchday?.next === true)
               {userInfo ? (
                 <>
                   <NavDropdown title={userInfo.name} id="username">
-                    <LinkContainer to="/profile">
+                    <LinkContainer
+                    className={`hover:text-gray-300 ${
+                      location.pathname === "/profile"
+                        ? "text-blue-400"
+                        : "text-gray-500"
+                    }`} to="/profile">
                       <NavDropdown.Item>Profile</NavDropdown.Item>
                     </LinkContainer>
                     <NavDropdown.Item onClick={logoutHandler}>
@@ -105,7 +185,12 @@ const md = matchdays?.find(matchday => matchday?.next === true)
                       <FaSignInAlt /> Sign In
                     </Nav.Link>
                   </LinkContainer>*/}
-                  <LinkContainer to="/register">
+                  <LinkContainer
+                  className={`hover:text-gray-300 ${
+                      location.pathname === "/register"
+                        ? "text-blue-400"
+                        : "text-gray-500"
+                    }`} to="/register">
                     <Nav.Link>
                       <FaSignOutAlt /> Sign Up
                     </Nav.Link>
