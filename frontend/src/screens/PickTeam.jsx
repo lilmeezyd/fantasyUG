@@ -17,7 +17,7 @@ const PickTeam = () => {
     const ids = state?.picks?.map((x) => x.slot);
     if (action.type === "INITIAL_PICKS") {
       return action.payload;
-    }
+    } 
     if (action.type === "SWITCH_CAP") {
       const { data } = action;
       const exCap = state.picks.find((x) => x.multiplier > 1);
@@ -35,6 +35,8 @@ const PickTeam = () => {
       };
       return {
         ...state,
+        captain: data?._id,
+        save: true,
         picks: state.picks.map((x) =>
           x._id === data._id
             ? (x = player)
@@ -61,6 +63,8 @@ const PickTeam = () => {
       };
       return {
         ...state,
+        viceCaptain: data?._id,
+        save: true,
         picks: state.picks.map((x) =>
           x._id === data._id
             ? (x = player)
@@ -385,12 +389,17 @@ const PickTeam = () => {
     DEF: 0,
     MID: 0,
     FWD: 0,
+    captain: "",
+    oldCaptain: "",
+    oldViceCaptain: "",
+    viceCaptain: "",
     picks: [],
     switcher: {},
     blocked: [],
     okayed: [],
   });
-  const { picks, switcher, blocked, okayed, save } = state;
+  const { picks, switcher, blocked, okayed, captain, viceCaptain, oldCaptain, oldViceCaptain,  save } = state;
+  console.log(state)
 
   useEffect(() => {
     const goalkeepers = managerPicks?.picks?.filter(
@@ -405,10 +414,20 @@ const PickTeam = () => {
     const forwards = managerPicks?.picks?.filter(
       (pick) => pick?.playerPosition === 4 && pick?.multiplier > 0
     )?.length;
+    const pickCaptain = managerPicks?.picks?.find(
+      (pick) => pick?.IsCaptain
+    )?._id;
+    const pickVice = managerPicks?.picks?.find(
+      (pick) => pick?.IsViceCaptain
+    )?._id;
     dispatch({
       type: "INITIAL_PICKS",
       payload: {
         ...state,
+        oldCaptain: pickCaptain,
+        oldViceCaptain: pickVice,
+        captain: pickCaptain,
+        viceCaptain: pickVice,
         picks: managerPicks?.picks,
         GKP: goalkeepers,
         DEF: defenders,
@@ -462,6 +481,10 @@ const PickTeam = () => {
           save={save}
           setSaveToFalse={setSaveToFalse}
           picks={picks}
+          captain={captain}
+          oldCaptain={oldCaptain}
+          viceCaptain={viceCaptain}
+          oldViceCaptain={oldViceCaptain}
           switchCaptain={switchCaptain}
           switchVice={switchVice}
           inform={inform}
