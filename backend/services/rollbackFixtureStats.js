@@ -2,9 +2,9 @@ import PlayerHistory from "../models/playerHistoryModel.js";
 import Player from "../models/playerModel.js";
 import ManagerLive from "../models/managerLive.js";
 import ManagerInfo from "../models/managerInfoModel.js";
-import Matchday from "../models/matchdayModel.js";
+import Matchday from "../models/matchdayModel.js"; 
 
-async function rollbackFixtureStats(fixtureId, matchdayId, affectedPlayers, allLives) {
+async function rollbackFixtureStats(fixtureId, affectedPlayers ) {
     // 1. Delete fixture history
     await PlayerHistory.deleteMany({ fixture: fixtureId });
 
@@ -36,14 +36,14 @@ async function rollbackFixtureStats(fixtureId, matchdayId, affectedPlayers, allL
     }
 
     // 3. Update affected managers
-    for (const managerLive of allLives) {
+    /*for (const managerLive of allLives) {
         const updated = await recalculateManagerPicks(managerLive, matchdayId, affectedPlayers);
         if (updated) {
             await recalculateLeaguePoints(managerLive.manager);
         }
-    }
+    }*/
 }
-
+/*
 async function recalculateManagerPicks(managerLive, matchdayId, affectedPlayers) {
     const mLive = await ManagerLive.findOne({ manager: managerLive.manager });
     const mLivePicks = mLive.livePicks;
@@ -131,6 +131,6 @@ async function recalculateLeaguePoints(managerId) {
     managerInfo.overallLeagues[0].overallPoints = overallLeaguePoints;
     await managerInfo.save();
 }
-
+*/
 
 export { rollbackFixtureStats }
