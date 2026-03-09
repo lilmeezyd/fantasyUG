@@ -3,25 +3,24 @@ import {
   setLeague,
   setOverallLeague,
   setTeamLeague,
-  getLeagues,
   getLeague,
-  getOverallLeague,
   getTeamLeague,
   editLeague,
-  editOverallLeague,
   editTeamLeague,
   deleteLeague,
   deleteTeamLeague,
-  deleteOverallLeague,
   joinOverallLeague,
   joinTeamLeague,
   joinPrivateLeague,
   getTeamLeagues,
   getOverallLeagues,
+  getPrivateLeagues,
+  setCurrentAndLastRanks,
+  getOverallStandings,
+  getWeeklyStandings,
   updateOverallTable,
-  updateTeamTables,
   updatePrivateTables,
-  setCurrentAndLastRanks
+  updateTeamTables
 } from "../controllers/leagueController.js";
 import { protect, roles } from "../middleware/authMiddleware.js";
 import ROLES from "../config/permissions.js";
@@ -31,29 +30,32 @@ router.route("/leagues/setLastAndNow")
 .put(protect, roles(ROLES.ADMIN), setCurrentAndLastRanks)
 
 router
+  .route("/")
+  .post(protect, setLeague);
+  router
   .route("/overallleagues")
-  .post(protect, roles(ROLES.ADMIN), setOverallLeague);
-router.route("/teamleagues").post(protect, roles(ROLES.ADMIN), setTeamLeague);
-router
-  .route("/privateleagues")
-  .post(protect, roles(ROLES.NORMAL_USER, ROLES.ADMIN), setLeague);
+  .get(getOverallLeagues)
 router
   .route("/teamleagues")
   .get(getTeamLeagues)
-  .patch(protect, roles(ROLES.NORMAL_USER, ROLES.ADMIN), updateTeamTables);
-router
-  .route("/overallleagues")
-  .get(getOverallLeagues)
-  .patch(protect, roles(ROLES.NORMAL_USER, ROLES.ADMIN), updateOverallTable);
 router
   .route("/privateleagues")
-  .get(getLeagues)
-  .patch(protect, roles(ROLES.NORMAL_USER, ROLES.ADMIN), updatePrivateTables);
+  .get(getPrivateLeagues)
+
+  router
+  .route("/teamleagues")
+  .patch(protect, roles(ROLES.ADMIN), updateTeamTables);
 router
-  .route("/overallleagues/:id")
-  .get(getOverallLeague)
-  .patch(protect, roles(ROLES.ADMIN), editOverallLeague)
-  .delete(protect, roles(ROLES.ADMIN), deleteOverallLeague);
+  .route("/overallleagues")
+  .patch(protect, roles(ROLES.ADMIN), updateOverallTable);
+router
+  .route("/privateleagues")
+  .patch(protect, roles(ROLES.ADMIN), updatePrivateTables);
+  router
+  .route("/:id")
+  .get(getLeague)
+  .patch(protect, roles(ROLES.ADMIN), editLeague)
+  .delete(protect, roles(ROLES.ADMIN), deleteLeague);
 router
   .route("/teamleagues/:id")
   .get(getTeamLeague)
@@ -73,5 +75,7 @@ router
 router
   .route("/privateleagues/:id/join")
   .patch(protect, roles(ROLES.NORMAL_USER), joinPrivateLeague);
+router.route("/:id/standings").get(protect, getOverallStandings)
+router.route("/:id/standings/matchday/:mid").get(protect, getWeeklyStandings)
 
 export default router;

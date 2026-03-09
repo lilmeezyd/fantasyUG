@@ -4,7 +4,8 @@ const picksSchema = mongoose.Schema({
     manager: {
         type: mongoose.Schema.Types.ObjectId,
         required: true,
-        ref: 'ManagerInfo'
+        ref: 'ManagerInfo',
+        unique: true
     }, 
     picks: [
        { _id: { type: mongoose.Schema.Types.ObjectId, ref: 'Player', required: true},

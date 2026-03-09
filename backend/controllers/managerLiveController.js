@@ -10,13 +10,15 @@ import PlayerHistory from "../models/playerHistoryModel.js";
 import OverallLeague from "../models/overallLeagueModel.js";
 import TeamLeague from "../models/teamLeagueModel.js";
 import League from "../models/leagueModel.js";
+import Weekly from "../models/weeklyStandingModel.js";
 import mongoose from "mongoose";
+import Overall from "../models/overallStandingModel.js";
+import { rollbackFixtureStats } from "../services/rollbackFixtureStats.js";
 
 //@desc set live picks
 //@route PATCH api/livepicks/manager/
 //@access
 const setLivePicks = asyncHandler(async (req, res) => {
-  // Fetch current matchday
   const matchday = await Matchday.findOne({ current: true }).lean();
   if (!matchday) {
     res.status(400);
@@ -26,376 +28,361 @@ const setLivePicks = asyncHandler(async (req, res) => {
   const matchdayNumber = matchday.id;
   const matchdayId = matchday._id;
 
-  // Load fields with minimal fields
-  const allPicks = await Picks.find(
-    {},
-    { manager: 1, picks: 1, teamValue: 1, bank: 1 }
-  ).lean();
-  // Remove duplicate managerIds
-  const managerIds = [...new Set(allPicks.map((p) => p.manager.toString()))];
-
-  const [managerInfos, managerLives] = await Promise.all([
-    ManagerInfo.find(
-      { _id: { $in: managerIds } },
-      { matchdayJoined: 1 }
-    ).lean(),
-    ManagerLive.find(
-      { manager: { $in: managerIds } },
-      { manager: 1, livePicks: 1 }
-    ).lean(),
+  await Picks.aggregate([
+    {
+      $lookup: {
+        from: "managerinfos",
+        localField: "manager",
+        foreignField: "_id",
+        as: "managerInfo",
+      },
+    },
+    { $unwind: "$managerInfo" },
+    {
+      $match: {
+        "managerInfo.matchdayJoined": { $lte: matchdayNumber },
+      },
+    },
+    {
+      $project: {
+        manager: 1,
+        picks: 1,
+        teamValue: 1,
+        bank: 1,
+        matchday: { $literal: matchdayNumber },
+        matchdayId: { $literal: matchdayId },
+        activeChip: { $literal: null },
+      },
+    },
+    {
+      $merge: {
+        into: "managerlives",
+        on: ["manager", "matchdayId"],
+        whenMatched: "keepExisting",
+        whenNotMatched: "insert",
+      },
+    },
   ]);
 
-  const infoMap = new Map(managerInfos.map((m) => [m._id.toString(), m]));
-  const liveMap = new Map(managerLives.map((m) => [m.manager.toString(), m]));
+  await ManagerInfo.updateMany(
+    { matchdayJoined: { $lte: matchdayNumber } },
+    { $set: { matchdayPoints: 0 } },
+  );
 
-  const createdManagers = [];
-  const skippedManagers = [];
-
-  const existingLiveKeys = new Set();
-  for (const m of managerLives) {
-    for (const lp of m.livePicks) {
-      existingLiveKeys.add(`${m.manager.toString()}_${lp.matchday.toString()}`);
-    }
-  }
-
-  const infoUpdates = [];
-  const liveUpdates = [];
-  const BATCH_SIZE = 1000;
-
-  for (const pick of allPicks) {
-    const { manager, picks, teamValue, bank } = pick;
-    const managerId = manager.toString();
-    const mInfo = infoMap.get(managerId);
-    if (!mInfo || mInfo.matchdayJoined > matchdayNumber) {
-      skippedManagers.push(managerId);
-      continue;
-    }
-
-    const liveKey = `${managerId}_${matchdayNumber}`;
-    if (existingLiveKeys.has(liveKey)) {
-      skippedManagers.push(managerId);
-      continue;
-    }
-
-    const newLivePick = {
-      matchday: matchdayNumber,
-      matchdayId,
-      activeChip: null,
-      picks,
-      teamValue,
-      bank,
-    };
-
-    // ManagerInfo reset
-    infoUpdates.push({
-      updateOne: {
-        filter: { _id: manager },
-        update: { $set: { matchdayPoints: 0 } },
-      },
-    });
-
-    if (!liveMap.has(managerId)) {
-      liveUpdates.push({
-        updateOne: {
-          filter: { manager },
-          update: { $setOnInsert: { manager, livePicks: [newLivePick] } },
-          upsert: true,
-        },
-      });
-      createdManagers.push(managerId);
-    } else {
-      liveUpdates.push({
-        updateOne: {
-          filter: { manager },
-          update: { $push: { livePicks: newLivePick } },
-        },
-      });
-      createdManagers.push(managerId);
-    }
-
-    // Write in batches
-    if (liveUpdates.length >= BATCH_SIZE) {
-      await ManagerLive.bulkWrite(liveUpdates, { ordered: false });
-      liveUpdates.length = 0;
-    }
-    if (infoUpdates.length >= BATCH_SIZE) {
-      await ManagerInfo.bulkWrite(infoUpdates, { ordered: false });
-      infoUpdates.length = 0;
-    }
-  }
-
-  if (liveUpdates.length)
-    await ManagerLive.bulkWrite(liveUpdates, { ordered: false });
-  if (infoUpdates.length)
-    await ManagerInfo.bulkWrite(infoUpdates, { ordered: false });
+  await Overall.updateMany({}, [{ $set: { oldRank: "$rank" } }]);
 
   res.status(200).json({
     message: "Live picks processed successfully",
-    createdManagers: createdManagers,
-    skippedManagers: skippedManagers,
   });
 });
 
 //@desc set initial points
 //@route PATCH api/livepicks/manager/matchday/:mid/start/fixtures/:id
 //@access ADMIN
-const setInitialPoints = asyncHandler(
-  async (format, fid, mid, playerArray) => {
-    const matchday = await Matchday.findById(mid).lean();
-    const players = await PlayerHistory.find({
-      matchday: mid,
-      fixture: fid,
-      player: { $in: playerArray },
-    }).lean();
-    if (!matchday || !matchday.current || !players.length) {
-      throw new Error({ message: "Invalid matchday, or no players" });
-    }
-
-    const allLives = await ManagerLive.find({
-    "livePicks.matchdayId": mid,
-    "livePicks.picks._id": { $in: playerArray }
-  }).lean();
-
-    // Build lookup maps
-    const playerMap = {};
-    for (const p of players) {
-      if (!playerMap[p.player]) playerMap[p.player] = [];
-      playerMap[p.player].push(p);
-    }
-
-    const liveUpdates = [];
-    const infoUpdates = [];
-   for (const mLive of allLives) {
-      const mdPicks = mLive.livePicks.find(
-        (p) => p.matchdayId.toString() === mid.toString()
-      );
-      if (!mdPicks) continue;
-
-      const formatted = mdPicks.picks.map((pick) => {
-        const stats = playerMap[pick._id] || [];
-        if (stats.length > 0) {
-          const starts = stats.reduce((a, b) => a + b.starts, 0);
-          const bench = stats.reduce((a, b) => a + b.bench, 0);
-          const totalPoints = stats.reduce((a, b) => a + b.totalPoints, 0);
-          return {
-            ...pick,
-            starts,
-            bench,
-            points: format === "reset" ? pick.points - totalPoints : totalPoints,
-          };
-        } else {
-          return pick;
-        }
-      });
-      const newMdPoints = formatted
-        .filter((p) => p.multiplier > 0)
-        .reduce((a, b) => a + b.points * b.multiplier, 0);
-      const updatedLivePicks = mLive.livePicks.map((p) =>
-        p.matchdayId.toString() === mid.toString()
-          ? { ...mdPicks, picks: formatted, matchdayPoints: newMdPoints }
-          : p
-      );
-      liveUpdates.push({
-        updateOne: {
-          filter: { manager: mLive.manager },
-          update: { $set: { livePicks: updatedLivePicks } },
-        },
-      });
-      const managerInfo = await ManagerInfo.findById(mLive.manager).lean();
-      if (!managerInfo) continue;
-
-      const livePicks = updatedLivePicks;
-
-      const calculatePoints = (startId, endId) => {
-        return livePicks
-          .filter((x) => x.matchday >= startId && x.matchday <= (endId ?? 100))
-          .reduce((sum, x) => sum + x.matchdayPoints, 0);
-      };
-
-      const teamStart = await Matchday.findById(
-        managerInfo.teamLeagues[0].startMatchday
-      ).lean();
-      const teamEnd = await Matchday.findById(
-        managerInfo.teamLeagues[0].endMatchday
-      ).lean();
-      const overallStart = await Matchday.findById(
-        managerInfo.overallLeagues[0].startMatchday
-      ).lean();
-      const overallEnd = await Matchday.findById(
-        managerInfo.overallLeagues[0].endMatchday
-      ).lean();
-
-      const teamPts = calculatePoints(teamStart?.id ?? 0, teamEnd?.id);
-      const overallPts = calculatePoints(overallStart?.id ?? 0, overallEnd?.id);
-      const totalPts = livePicks.reduce((a, b) => a + b.matchdayPoints, 0);
-      infoUpdates.push({
-        updateOne: {
-          filter: { _id: mLive.manager },
-          update: {
-            $set: {
-              matchdayPoints: newMdPoints,
-              "teamLeagues.0.matchdayPoints": newMdPoints,
-              "overallLeagues.0.matchdayPoints": newMdPoints,
-              "teamLeagues.0.overallPoints": teamPts,
-              "overallLeagues.0.overallPoints": overallPts,
-              overallPoints: totalPts,
+const setInitialPoints = asyncHandler(async (format, fid, mid, playerArray) => {
+  const matchday = await Matchday.findById(mid).lean();
+  const matchdayObj = new mongoose.Types.ObjectId(mid);
+  const fixtureObj = new mongoose.Types.ObjectId(fid);
+  const playerObjIds = playerArray.map((id) => new mongoose.Types.ObjectId(id));
+  /* if (format === "reset") {
+    rollbackFixtureStats(fid, playerArray);
+  }*/
+  // Step 1: Aggregate PlayerHistory → precompute stats
+  const histFix = await Player.aggregate([
+    {
+      $match: {
+        _id: { $in: playerObjIds },
+      },
+    },
+    {
+      $lookup: {
+        from: "playerhistories",
+        let: { playerId: "$_id" },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $and: [
+                  { $eq: ["$player", "$$playerId"] },
+                  { $eq: ["$matchday", matchdayObj] },
+                ],
+              },
             },
           },
-        },
-      });
-    }
-    if (liveUpdates.length > 0) await ManagerLive.bulkWrite(liveUpdates);
-    if (infoUpdates.length > 0) await ManagerInfo.bulkWrite(infoUpdates);
-
-    //res.status(200).json({message: "Points updated successfully for all managers."});
-    return { message: "Points updated successfully for all managers." };
-  }
-);
-
-const setPointsWithAutoSubs = asyncHandler(async (req, res, format, mid) => {
-  const [matchday, players] = await Promise.all([
-    Matchday.findById(mid).lean(),
-    PlayerHistory.find({
-      matchday: mid
-    }).lean(),
-  ]);
-  if (!matchday?.current || !players.length) {
-    throw new Error({ message: "Invalid matchday, or no players" });
-  }
-  const playerArray = players.map((x) => x.player.toString());
-
-  const allLives = await ManagerLive.find({
-    "livePicks.matchdayId": mid,
-    "livePicks.picks._id": { $in: playerArray },
-  }).lean();
-   if (!allLives.length) {
-    throw new Error({ message: "No managers to update" });
-  }
-
-  // Build lookup maps
-  const playerMap = {};
-  for (const p of players) {
-    if (!playerMap[p.player]) playerMap[p.player] = [];
-    playerMap[p.player].push(p);
-  }
-
-  const managerIds = allLives.map((m) => m.manager);
-
-  const managerInfos = await ManagerInfo.find({
-    _id: { $in: managerIds },
-  }).lean();
-
-  const managerInfoMap = {};
-  for (const mi of managerInfos) {
-    managerInfoMap[mi._id.toString()] = mi;
-  }
-
-  const matchdayIds = new Set();
-
-  for (const mi of managerInfos) {
-    mi.teamLeagues?.[0]?.startMatchday &&
-      matchdayIds.add(mi.teamLeagues[0].startMatchday);
-    mi.teamLeagues?.[0]?.endMatchday &&
-      matchdayIds.add(mi.teamLeagues[0].endMatchday);
-    mi.overallLeagues?.[0]?.startMatchday &&
-      matchdayIds.add(mi.overallLeagues[0].startMatchday);
-    mi.overallLeagues?.[0]?.endMatchday &&
-      matchdayIds.add(mi.overallLeagues[0].endMatchday);
-  }
-
-  const matchdays = await Matchday.find({
-    _id: { $in: [...matchdayIds] },
-  }).lean();
-
-  const matchdayMap = {};
-  for (const md of matchdays) {
-    matchdayMap[md._id.toString()] = md;
-  }
-
-  const liveUpdates = [];
-  const infoUpdates = [];
-  for (const mLive of allLives) {
-    const managerInfo = managerInfoMap[mLive.manager.toString()];
-    if (!managerInfo) continue;
-    const mdPicks = mLive.livePicks.find(
-      (p) => p.matchdayId.toString() === mid.toString()
-    );
-    if (!mdPicks) continue;
-
-    const formatted = mdPicks.picks.map((pick) => {
-      const stats = playerMap[pick._id] || [];
-      if (!stats.length) return pick;
-
-      const totals = stats.reduce(
-        (acc, s) => {
-          acc.starts += s.starts;
-          acc.bench += s.bench;
-          acc.points += s.totalPoints;
-          return acc;
-        },
-        { starts: 0, bench: 0, points: 0 }
-      );
-      return {
-        ...pick,
-        starts: totals.starts,
-        bench: totals.bench,
-        points:
-          format === "reset" ? pick.points - totals.points : totals.points,
-      };
-    });
-    const newMdPoints = formatted
-      .filter((p) => p.multiplier > 0)
-      .reduce((a, b) => a + b.points * b.multiplier, 0);
-    const updatedLivePicks = mLive.livePicks.map((p) =>
-      p.matchdayId.toString() === mid.toString()
-        ? { ...mdPicks, picks: formatted, matchdayPoints: newMdPoints }
-        : p
-    );
-    liveUpdates.push({
-      updateOne: {
-        filter: { manager: mLive.manager },
-        update: { $set: { livePicks: updatedLivePicks } },
+        ],
+        as: "history",
       },
-    });
-    const livePicks = updatedLivePicks;
+    },
+    {
+      $unwind: {
+        path: "$history",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    {
+      $group: {
+        _id: { player: "$_id", matchday: matchdayObj },
+        starts: { $sum: { $ifNull: ["$history.starts", 0] } },
+        bench: { $sum: { $ifNull: ["$history.bench", 0] } },
+        totalPoints: { $sum: { $ifNull: ["$history.totalPoints", 0] } },
+      },
+    },
+    {
+      $merge: {
+        into: "PlayerStatsTemp",
+        whenMatched: "replace",
+        whenNotMatched: "insert",
+      },
+    },
+  ]);
 
-    const calculatePoints = (startId, endId) => {
-      return livePicks
-        .filter((x) => x.matchday >= startId && x.matchday <= (endId ?? 100))
-        .reduce((sum, x) => sum + x.matchdayPoints, 0);
-    };
-
-    const teamStart = matchdayMap[managerInfo.teamLeagues?.[0]?.startMatchday];
-    const teamEnd = matchdayMap[managerInfo.teamLeagues?.[0]?.endMatchday];
-    const overallStart =
-      matchdayMap[managerInfo.overallLeagues?.[0]?.startMatchday];
-    const overallEnd =
-      matchdayMap[managerInfo.overallLeagues?.[0]?.endMatchday];
-
-    const teamPts = calculatePoints(teamStart?.id ?? 0, teamEnd?.id);
-    const overallPts = calculatePoints(overallStart?.id ?? 0, overallEnd?.id);
-    const totalPts = livePicks.reduce((a, b) => a + b.matchdayPoints, 0);
-    infoUpdates.push({
-      updateOne: {
-        filter: { _id: mLive.manager },
-        update: {
-          $set: {
-            matchdayPoints: newMdPoints,
-            "teamLeagues.0.matchdayPoints": newMdPoints,
-            "overallLeagues.0.matchdayPoints": newMdPoints,
-            "teamLeagues.0.overallPoints": teamPts,
-            "overallLeagues.0.overallPoints": overallPts,
-            overallPoints: totalPts,
+  // Step 2: Update ManagerLive picks with stats
+  const managerAgg = await ManagerLive.aggregate([
+    {
+      $match: {
+        matchdayId: matchdayObj,
+        "picks._id": { $in: playerObjIds },
+      },
+    },
+    { $unwind: "$picks" },
+    {
+      $lookup: {
+        from: "PlayerStatsTemp",
+        let: { pickId: "$picks._id", mdId: "$matchdayId" },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $and: [
+                  { $eq: ["$_id.player", "$$pickId"] },
+                  { $eq: ["$_id.matchday", "$$mdId"] },
+                ],
+              },
+            },
+          },
+        ],
+        as: "stats",
+      },
+    },
+    {
+      $set: {
+        "picks.starts": {
+          $cond: [
+            { $gt: [{ $size: "$stats" }, 0] },
+            { $arrayElemAt: ["$stats.starts", 0] },
+            { $ifNull: ["$picks.starts", 0] },
+          ],
+        },
+        "picks.bench": {
+          $cond: [
+            { $gt: [{ $size: "$stats" }, 0] },
+            { $arrayElemAt: ["$stats.bench", 0] },
+            { $ifNull: ["$picks.bench", 0] },
+          ],
+        },
+        "picks.points": {
+          $cond: [
+            { $gt: [{ $size: "$stats" }, 0] },
+            { $arrayElemAt: ["$stats.totalPoints", 0] },
+            { $ifNull: ["$picks.points", 0] },
+          ],
+        },
+      },
+    },
+    {
+      $group: {
+        _id: { manager: "$manager", matchdayId: "$matchdayId" }, // group by manager+matchday
+        manager: { $first: "$manager" },
+        matchdayId: { $first: "$matchdayId" },
+        matchday: { $first: "$matchday" },
+        activeChip: { $first: "$activeChip" },
+        matchdayRank: { $first: "$matchdayRank" },
+        teamValue: { $first: "$teamValue" },
+        bank: { $first: "$bank" },
+        automaticSubs: { $first: "$automaticSubs" },
+        picks: { $push: "$picks" },
+        matchdayPoints: {
+          $sum: {
+            $cond: [
+              { $gt: ["$picks.multiplier", 0] },
+              { $multiply: ["$picks.points", "$picks.multiplier"] },
+              0,
+            ],
           },
         },
       },
-    });
-  }
-  if (liveUpdates.length > 0) await ManagerLive.bulkWrite(liveUpdates);
-  if (infoUpdates.length > 0) await ManagerInfo.bulkWrite(infoUpdates);
+    },
+    {
+      $project: {
+        _id: 0, // drop the artificial group _id
+        manager: 1,
+        matchdayId: 1,
+        matchday: 1,
+        activeChip: 1,
+        matchdayRank: 1,
+        teamValue: 1,
+        bank: 1,
+        automaticSubs: 1,
+        picks: 1,
+        matchdayPoints: 1,
+      },
+    },
+    {
+      $merge: {
+        into: "managerlives",
+        on: ["manager", "matchdayId"],
+        whenMatched: "replace",
+        whenNotMatched: "discard",
+      },
+    },
+  ]);
 
+  //console.log(managerAgg.length);
   //res.status(200).json({message: "Points updated successfully for all managers."});
-  return { message: "Points updated successfully for all managers." };
+  return {
+    managerAgg,
+    histFix,
+    message: "Points updated successfully for all managers.",
+  };
+});
+
+const setPointsWithAutoSubs = asyncHandler(async (format, mid) => {
+  const matchday = await Matchday.findById(mid).lean();
+  const matchdayObj = new mongoose.Types.ObjectId(mid);
+  /*const fixtureObj = new mongoose.Types.ObjectId(fid);
+  const playerObjIds = playerArray.map((id) => new mongoose.Types.ObjectId(id));*/
+  // Step 1: Aggregate PlayerHistory → precompute stats
+  await PlayerHistory.aggregate([
+    {
+      $match: {
+        matchday: matchdayObj,
+      },
+    },
+    {
+      $group: {
+        _id: { player: "$player", matchday: "$matchday" },
+        starts: { $sum: "$starts" },
+        bench: { $sum: "$bench" },
+        totalPoints: { $sum: "$totalPoints" },
+      },
+    },
+    {
+      $merge: {
+        into: "PlayerStatsTemp", // temporary collection
+        whenMatched: "replace",
+        whenNotMatched: "insert",
+      },
+    },
+  ]);
+
+  // Step 2: Update ManagerLive picks with stats
+  const managerAgg = await ManagerLive.aggregate([
+    {
+      $match: {
+        matchdayId: matchdayObj,
+      },
+    },
+    { $unwind: "$picks" },
+    {
+      $lookup: {
+        from: "PlayerStatsTemp",
+        let: { pickId: "$picks._id", mdId: "$matchdayId" },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $and: [
+                  { $eq: ["$_id.player", "$$pickId"] },
+                  { $eq: ["$_id.matchday", "$$mdId"] },
+                ],
+              },
+            },
+          },
+        ],
+        as: "stats",
+      },
+    },
+    {
+      $set: {
+        "picks.starts": {
+          $ifNull: [{ $arrayElemAt: ["$stats.starts", 0] }, "$picks.starts"],
+        },
+        "picks.bench": {
+          $ifNull: [{ $arrayElemAt: ["$stats.bench", 0] }, "$picks.bench"],
+        },
+        "picks.points": {
+          $cond: [
+            { $eq: [format, "reset"] },
+            {
+              $subtract: [
+                "$picks.points",
+                { $arrayElemAt: ["$stats.totalPoints", 0] },
+              ],
+            },
+            {
+              $ifNull: [
+                { $arrayElemAt: ["$stats.totalPoints", 0] },
+                "$picks.points",
+              ],
+            },
+          ],
+        },
+      },
+    },
+    {
+      $group: {
+        _id: { manager: "$manager", matchdayId: "$matchdayId" }, // group by manager+matchday
+        manager: { $first: "$manager" },
+        matchdayId: { $first: "$matchdayId" },
+        matchday: { $first: "$matchday" },
+        activeChip: { $first: "$activeChip" },
+        matchdayRank: { $first: "$matchdayRank" },
+        teamValue: { $first: "$teamValue" },
+        bank: { $first: "$bank" },
+        automaticSubs: { $first: "$automaticSubs" },
+        picks: { $push: "$picks" },
+        matchdayPoints: {
+          $sum: {
+            $cond: [
+              { $gt: ["$picks.multiplier", 0] },
+              { $multiply: ["$picks.points", "$picks.multiplier"] },
+              0,
+            ],
+          },
+        },
+      },
+    },
+    {
+      $project: {
+        _id: 0, // drop the artificial group _id
+        manager: 1,
+        matchdayId: 1,
+        matchday: 1,
+        activeChip: 1,
+        matchdayRank: 1,
+        teamValue: 1,
+        bank: 1,
+        automaticSubs: 1,
+        picks: 1,
+        matchdayPoints: 1,
+      },
+    },
+    {
+      $merge: {
+        into: "managerlives",
+        on: ["manager", "matchdayId"],
+        whenMatched: "replace",
+        whenNotMatched: "discard",
+      },
+    },
+  ]);
+
+  //console.log(managerAgg.length);
+  //res.status(200).json({message: "Points updated successfully for all managers."});
+  return {
+    managerAgg,
+    message: "Points updated successfully for all managers.",
+  };
 });
 
 //@desc update player scores in picks
@@ -409,7 +396,7 @@ const addPointsToPicks = asyncHandler(async (req, res) => {
   const mid = matchday._id;
   const { matchdays } = player;
   const mdPoints = matchdays.filter(
-    (x) => x.matchday.toString() === mid.toString()
+    (x) => x.matchday.toString() === mid.toString(),
   )[0].matchdayPoints;
   if (!matchday) {
     res.status(400);
@@ -424,19 +411,19 @@ const addPointsToPicks = asyncHandler(async (req, res) => {
     const mLivePicks = mLive.livePicks;
 
     const a = mLivePicks.filter(
-      (x) => x.matchdayId.toString() === req.params.mid
+      (x) => x.matchdayId.toString() === req.params.mid,
     );
     a.length > 0 &&
       a[0].picks.map((x) =>
         x._id.toString() === req.params.pid.toString()
           ? (x.points = mdPoints)
-          : x.points
+          : x.points,
       );
 
     await ManagerLive.findOneAndUpdate(
       { user: allLives[i].user },
       { livePicks: mLivePicks },
-      { new: true }
+      { new: true },
     );
   }
   res.status(200).send(allLives);
@@ -475,16 +462,16 @@ const deletePoints = asyncHandler(async (req, res) => {
       const mLivePicks = mLive.livePicks;
 
       const a = mLivePicks.filter(
-        (x) => x.matchdayId.toString() === mid.toString()
+        (x) => x.matchdayId.toString() === mid.toString(),
       );
       a[0].picks.map((x) =>
-        x._id.toString() === _id.toString() ? (x.points = null) : x.points
+        x._id.toString() === _id.toString() ? (x.points = null) : x.points,
       );
 
       await ManagerLive.findOneAndUpdate(
         { user: allLives[i].user },
         { livePicks: mLivePicks },
-        { new: true }
+        { new: true },
       );
     }
   }
@@ -510,7 +497,7 @@ const getLivePicks = asyncHandler(async (req, res) => {
     $or: [{ user: req.params.id }, { _id: req.params.id }],
   });
   const { _id } = managerInfo;
-  //const picks = await ManagerLive.find({ manager: _id })
+  const managerPicks = await ManagerLive.find({ manager: _id });
   const picks = await ManagerLive.aggregate([
     { $match: { manager: _id } },
     { $unwind: "$livePicks" },
@@ -545,7 +532,7 @@ const getLivePicks = asyncHandler(async (req, res) => {
     throw new Error("Manager not found");
   }
 
-  res.status(200).json({ picks: sortedPicks, managerInfo });
+  res.status(200).json({ managerPicks, managerInfo });
 });
 
 //@desc Get specific live picks
@@ -553,10 +540,21 @@ const getLivePicks = asyncHandler(async (req, res) => {
 //@access private
 const getRound = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user.id);
-  const allLivePicks = await ManagerLive.findOne({ user: req.params.id });
-  const livePicks = allLivePicks.livePicks;
-  const rlivePicks = livePicks.find(
-    (live) => live.matchday === +req.params.mid
+  const managerInfo = await ManagerInfo.findOne({ _id: req.params.id }).lean();
+  const league = await League.findOne({
+    name: "Overall",
+    leagueType: "Overall",
+  }).lean();
+  const livePicks = await ManagerLive.findOne({
+    manager: req.params.id,
+    matchday: Number(req.params.mid),
+  }).lean();
+  const weeklyLeagues = await Weekly.find({
+    manager: managerInfo?._id,
+    matchday: Number(req.params.mid),
+  }).lean();
+  const weeklyLeaguesMap = new Map(
+    weeklyLeagues.map((x) => [x.leagueId.toString(), x]),
   );
 
   if (!user) {
@@ -564,17 +562,20 @@ const getRound = asyncHandler(async (req, res) => {
     throw new Error("User not found");
   }
 
-  if (!allLivePicks) {
+  if (!livePicks) {
     res.status(400);
-    throw new Error("Manager not found");
+    throw new Error("No picks found");
   }
 
-  if (!rlivePicks) {
-    res.status(400);
-    throw new Error("Invalid round");
-  }
+  const newLivePicks = {
+    ...livePicks,
+    matchdayRank: weeklyLeaguesMap?.get(league._id.toString())?.rank ?? "-",
+  };
 
-  res.status(200).json(rlivePicks);
+  res.status(200).json({
+    matchdayJoined: managerInfo?.matchdayJoined,
+    livePicks: newLivePicks,
+  });
 });
 
 export {

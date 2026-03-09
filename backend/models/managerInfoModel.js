@@ -16,9 +16,9 @@ const managerInfoSchema = mongoose.Schema(
       required: true,
     },
     overallRanks: {},
-    teamLeagues: [],
-    overallLeagues: [],
-    privateLeagues: [],
+    teamLeagues: [{ type: mongoose.Schema.Types.ObjectId, ref: "League"}],
+    overallLeagues: [{ type: mongoose.Schema.Types.ObjectId, ref: "League"}],
+    privateLeagues: [{ type: mongoose.Schema.Types.ObjectId, ref: "League"}],
     matchdayPoints: {
       type: Number,
       default: 0,

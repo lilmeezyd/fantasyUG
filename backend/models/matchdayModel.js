@@ -7,7 +7,7 @@ const matchdaySchema = mongoose.Schema({
   deadlineTime: { type: Date, default: null },
   pastDeadline: { type: Boolean, default: false },
   finished: { type: Boolean, default: false },
-  avergeScore: { type: Number, default: 0 },
+  averageScore: { type: Number, default: 0 },
   highestScore: { type: Number, default: 0 },
   highestScoringEntry: {
     type: mongoose.Schema.Types.ObjectId,

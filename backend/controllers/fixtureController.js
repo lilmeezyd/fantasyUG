@@ -285,20 +285,19 @@ const dePopulateStats = asyncHandler(async (req, res) => {
     res.status(400);
     throw new Error("No players found");
   }
-  const message = await setInitialPoints(
-    "reset",
-    req.params.id,
-    req.params.mid,
-    playerArray
-  );
+  
   fixture.stats.length = 0;
   fixture.teamAwayScore = null;
   fixture.teamHomeScore = null;
   rollbackFixtureStats(
     req.params.id,
-    req.params.mid,
     affectedPlayers,
-    allLives
+  );
+  const message = await setInitialPoints(
+    "reset",
+    req.params.id,
+    req.params.mid,
+    playerArray
   );
 
   const updatedFixture = await Fixture.findByIdAndUpdate(
@@ -306,8 +305,12 @@ const dePopulateStats = asyncHandler(async (req, res) => {
     fixture,
     { new: true }
   );
-  res.status(200).json({message: `Player Points Added and ${message.message}`,
-    updatedFixture});
+  res.status(200).json({
+    histFix: message.histFix,
+     managerAgg: message.managerAgg,
+    message: `Player Points Added and ${message.message}`,
+    updatedFixture,
+  });
 });
 
 //@desc Edit a specific fixture
@@ -356,21 +359,25 @@ const editFixture = asyncHandler(async (req, res) => {
 //@desc Set stats for a specific fixture
 //@route PUT /api/fixtures/:id/stats
 //@access private
-//@role ADMIN, EDITOR 
+//@role ADMIN, EDITOR
 const editStats = asyncHandler(async (req, res) => {
   const fixture = await Fixture.findById(req.params.id);
+  const user = await User.findById(req.user.id).select("-password");
+  if (!user) {
+    throw new Error("User not found");
+  }
   if (!fixture) {
     throw new Error("Fixture not found");
   }
 
   let { teamHomeScore, teamAwayScore, matchday } = fixture;
-  const isCurrent = await Matchday.findOne({ _id: matchday });
+  const isCurrent = await Matchday.findById(matchday).lean();
   const { current } = isCurrent;
   if (current === false) {
     throw new Error("Can not edit stats of a completed matchday!");
   }
   const { identifier, homeAway, player, value } = req.body;
-  const newValue = +value;
+  const newValue = Number(value);
 
   if (
     !identifier ||
@@ -387,238 +394,144 @@ const editStats = asyncHandler(async (req, res) => {
   if (fixture.stats.length === 0) {
     throw new Error("Fixture stats not populated yet");
   }
-
-  const user = await User.findById(req.user.id).select("-password");
-  if (!user) {
-    throw new Error("User not found");
-  }
+  const players = await Player.find({ _id: { $in: player } }).lean();
+  const positions = await Position.find({
+    _id: { $in: players.map((p) => p.playerPosition) },
+  }).lean();
+  const posMap = new Map(positions.map((p) => [p._id.toString(), p.code]));
+  const bulkHistory = [];
+  const bulkPlayers = [];
 
   // Score tracking to prevent over-counting
-  let homeGoalDelta = 0;
-  let awayGoalDelta = 0;
+  let homeDelta = 0;
+  let awayDelta = 0;
   let oldFixture = fixture;
 
   // Utility function for weighted points
-  const getWeight = (identifier, code) => {
-    const weightMap = {
-      goalsScored: [10, 6, 5, 4, 0],
-      cleansheets: [4, 4, 1, 0, 0],
-      assists: 3,
-      ownGoals: -2,
-      penaltiesSaved: 5,
-      penaltiesMissed: -2,
-      yellowCards: -1,
-      redCards: -3,
-      saves: 0.5,
-      starts: 2,
-      bench: 1,
-      bestPlayer: 3,
-    };
-    const value = weightMap[identifier];
-    return Array.isArray(value) ? value[code - 1] || 0 : value || 0;
+  const weightMap = {
+    goalsScored: [10, 6, 5, 4, 0],
+    cleansheets: [4, 4, 1, 0, 0],
+    assists: 3,
+    ownGoals: -2,
+    penaltiesSaved: 5,
+    penaltiesMissed: -2,
+    yellowCards: -1,
+    redCards: -3,
+    saves: 0.5,
+    starts: 2,
+    bench: 1,
+    bestPlayer: 3,
   };
-  // Arrays for rollbacks
-  let playerHistoryArray = [];
-  let playerArray = [];
-  let message = null;
+
+  const getWeight = (id, code) =>
+    Array.isArray(weightMap[id])
+      ? weightMap[id][code - 1] || 0
+      : weightMap[id] || 0;
   const statBlock = fixture.stats.find((x) => x.identifier === identifier);
   if (!statBlock) {
     throw new Error("Stat identifier not found in fixture");
   }
-  try {
-    for (const playerId of player) {
-      const playerFound = await Player.findById(playerId);
-      if (!playerFound) {
-        throw new Error("Player not found");
-      }
 
-      if (
-        (homeAway === "home" &&
-          playerFound.playerTeam.toString() !== fixture.teamHome.toString()) ||
-        (homeAway === "away" &&
-          playerFound.playerTeam.toString() !== fixture.teamAway.toString())
-      ) {
-        throw new Error("Player does not belong to the selected team");
-      }
-
-      const position = await Position.findOne(playerFound.playerPosition);
-      const code = position.code;
-      const retrievedPlayer = playerFound._id;
-      const statArray = statBlock[homeAway];
-      const opponent =
-        playerFound.playerTeam.toString() === fixture.teamHome.toString()
-          ? fixture.teamAway
-          : fixture.teamHome;
-      const home =
-        playerFound.playerTeam.toString() === fixture.teamHome.toString();
-      const playerIndex = statArray.findIndex(
-        (x) => x.player.toString() === retrievedPlayer.toString()
-      );
-      const weight = getWeight(identifier, code);
-
-      let totalPoints = weight * newValue;
-
-      if (playerIndex !== -1) {
-        const currentVal = +statArray[playerIndex].value;
-        const updatedVal = currentVal + newValue;
-
-        if (updatedVal < 0) {
-          throw new Error("Stat value cannot be negative");
-        }
-
-        if (updatedVal === 0) {
-          statArray.splice(playerIndex, 1);
-        } else {
-          statArray[playerIndex].value = updatedVal;
-        }
-
-        await PlayerHistory.findOneAndUpdate(
-          {
-            player: retrievedPlayer,
-            fixture: req.params.id,
-          },
-          {
-            $inc: {
-              [identifier]: newValue,
-              totalPoints,
-            },
-            $setOnInsert: {
-              matchday: fixture.matchday,
-              opponent,
-              home,
-              player: retrievedPlayer,
-              fixture: req.params.id,
-            },
-          },
-          {
-            new: true,
-            upsert: true,
-          }
-        );
-
-        playerHistoryArray.push(retrievedPlayer);
-
-        await Player.findByIdAndUpdate(
-          retrievedPlayer,
-          { $inc: { [identifier]: newValue, totalPoints } },
-          { new: true }
-        );
-
-        playerArray.push(retrievedPlayer);
-      } else {
-        if (newValue <= 0) {
-          throw new Error("Stat value cannot be negative or 0");
-        }
-
-        statArray.push({ player: retrievedPlayer, value: newValue });
-
-        await PlayerHistory.findOneAndUpdate(
-          {
-            player: retrievedPlayer,
-            fixture: req.params.id,
-          },
-          {
-            $inc: {
-              [identifier]: newValue,
-              totalPoints,
-            },
-            $setOnInsert: {
-              matchday: fixture.matchday,
-              opponent,
-              home,
-              player: retrievedPlayer,
-              fixture: req.params.id,
-            },
-          },
-          {
-            new: true,
-            upsert: true,
-          }
-        );
-
-        playerHistoryArray.push(retrievedPlayer);
-
-        await Player.findByIdAndUpdate(
-          retrievedPlayer,
-          { $inc: { [identifier]: newValue, totalPoints } },
-          { new: true }
-        );
-        playerArray.push(retrievedPlayer);
-      }
-
-      if (identifier === "goalsScored") {
-        if (homeAway === "home") homeGoalDelta += newValue;
-        if (homeAway === "away") awayGoalDelta += newValue;
-      }
-
-      if (identifier === "ownGoals") {
-        if (homeAway === "home") awayGoalDelta += newValue;
-        if (homeAway === "away") homeGoalDelta += newValue;
-      }
-    }
-
-    fixture.teamHomeScore = teamHomeScore + homeGoalDelta;
-    fixture.teamAwayScore = teamAwayScore + awayGoalDelta;
-
-    const updatedFixture = await Fixture.findByIdAndUpdate(
-      req.params.id,
-      fixture,
-      {
-        new: true,
-      }
+  const statArray = statBlock[homeAway];
+  for (const p of players) {
+    const code = posMap.get(p.playerPosition.toString());
+    const points = getWeight(identifier, code) * newValue;
+    const playerIndex = statArray.findIndex(
+      (x) => x.player.toString() === p._id.toString()
     );
-    message = await setInitialPoints(
+    if (playerIndex !== -1) {
+      const currentVal = +statArray[playerIndex].value;
+      const updatedVal = currentVal + newValue;
+
+      if (updatedVal < 0) {
+        throw new Error("Stat value cannot be negative");
+      }
+
+      if (updatedVal === 0) {
+        statArray.splice(playerIndex, 1);
+      } else {
+        statArray[playerIndex].value = updatedVal;
+      }
+    } else {
+      if (newValue <= 0) {
+        throw new Error(
+          "A negative value or 0 detected for an entry that does not exist in the stats array!"
+        );
+      }
+
+      statArray.push({ player: p._id, value: newValue });
+    }
+    bulkHistory.push({
+      updateOne: {
+        filter: { player: p._id, fixture: fixture._id },
+        update: {
+          $inc: { [identifier]: newValue, totalPoints: points },
+          $setOnInsert: {
+            matchday: fixture.matchday,
+            opponent:
+              p.playerTeam.toString() === fixture.teamHome.toString()
+                ? fixture.teamAway
+                : fixture.teamHome,
+            home: p.playerTeam.toString() === fixture.teamHome.toString(),
+            player: p._id,
+            fixture: fixture._id,
+          },
+        },
+        upsert: true,
+      },
+    });
+
+    bulkPlayers.push({
+      updateOne: {
+        filter: { _id: p._id },
+        update: { $inc: { [identifier]: newValue, totalPoints: points } },
+      },
+    });
+
+    if (identifier === "goalsScored") {
+      p.playerTeam.equals(fixture.teamHome)
+        ? (homeDelta += newValue)
+        : (awayDelta += newValue);
+    }
+    if (identifier === "ownGoals") {
+      p.playerTeam.equals(fixture.teamHome)
+        ? (awayDelta += newValue)
+        : (homeDelta += newValue);
+    }
+  }
+
+  await PlayerHistory.bulkWrite(bulkHistory);
+  await Player.bulkWrite(bulkPlayers);
+
+  /*await Fixture.updateOne(
+      { _id: fixture._id },
+      {
+        $inc: {
+          teamHomeScore: homeDelta,
+          teamAwayScore: awayDelta,
+        },
+      }
+    );*/
+  fixture.teamHomeScore = teamHomeScore + homeDelta;
+  fixture.teamAwayScore = teamAwayScore + awayDelta;
+  const updatedFixture = await Fixture.findByIdAndUpdate(
+    req.params.id,
+    fixture,
+    { new: true }
+  );
+  // Fire and forget heavy recalculation
+  const message = await setInitialPoints(
       "normal",
       req.params.id,
       matchday,
       player
     );
     res.status(200).json({
+      histFix: message.histFix,
+      managerAgg: message.managerAgg,
       message: `Player Points Added and ${message.message}`,
       updatedFixture,
     });
-  } catch (error) {
-    let negativeValue = -newValue;
-    if (playerHistoryArray.length) {
-      for (const playerId of player) {
-        const playerFound = await Player.findById(playerId);
-        const position = await Position.findOne(playerFound.playerPosition);
-        const code = position.code;
-        const weight = getWeight(identifier, code);
-        let totalPoints = weight * negativeValue;
-        await PlayerHistory.findOneAndUpdate(
-          { player: playerId, fixture: req.params.id },
-          { $inc: { [identifier]: negativeValue, totalPoints } },
-          { new: true, upsert: true }
-        );
-      }
-    }
-    if (playerArray.length) {
-      for (const playerId of player) {
-        const playerFound = await Player.findById(playerId);
-        const position = await Position.findOne(playerFound.playerPosition);
-        const code = position.code;
-        const weight = getWeight(identifier, code);
-        let totalPoints = weight * negativeValue;
-        await Player.findByIdAndUpdate(
-          playerId,
-          { $inc: { [identifier]: negativeValue, totalPoints } },
-          { new: true }
-        );
-      }
-    }
-
-    if (message) {
-      await setInitialPoints(req, res, "normal", req.params.id, matchday);
-    }
-
-    await Fixture.findByIdAndUpdate(req.params.id, oldFixture, {
-      new: true,
-    });
-    res
-      .status(500)
-      .json({ error: "Something went wrong", details: error.message });
-  }
 });
 
 //@desc Get Fixture

@@ -89,6 +89,9 @@ const getPlayers = asyncHandler(async (req, res) => {
   const idNeeded = matchDayNext
     ? matchDayNext.id
     : Math.max(...matchdays.map((x) => x.id));
+    const idCurrent = matchDayNext
+    ? matchDayNext.id - 1
+    : Math.max(...matchdays.map((x) => x.id));
   const managers = await ManagerInfo.find({
     matchdayJoined: { $lte: idNeeded },
   }).lean();
@@ -100,14 +103,14 @@ const getPlayers = asyncHandler(async (req, res) => {
   ]);
 
   const lives = await ManagerLive.aggregate([
-    { $unwind: "$livePicks" },
-    { $unwind: "$livePicks.picks" },
-    { $match: { "livePicks.picks.IsCaptain": true } },
+    { $match: { matchday: idCurrent} },
+    { $unwind: "$picks"},
+    {$match: {"picks.IsCaptain": true}},
     {
       $group: {
         _id: {
-          matchday: "$livePicks.matchday",
-          player: "$livePicks.picks._id",
+          matchday: "$matchday",
+          player: "$picks._id",
         },
         times: { $sum: 1 },
       },
@@ -136,6 +139,7 @@ const getPlayers = asyncHandler(async (req, res) => {
       },
     },
     { $sort: { _id: 1 } },
+    
   ]);
 
 

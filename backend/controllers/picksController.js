@@ -5,8 +5,9 @@ import Matchday from "../models/matchdayModel.js";
 import ManagerInfo from "../models/managerInfoModel.js";
 import OverallLeague from "../models/overallLeagueModel.js";
 import TeamLeague from "../models/teamLeagueModel.js";
+import League from "../models/leagueModel.js";
 import TransfersModel from "../models/transfersModel.js";
-import Player from "../models/playerModel.js"
+import Player from "../models/playerModel.js";
 import { joinOverallLeague } from "./leagueController.js";
 import { joinTeamLeague } from "./leagueController.js";
 import { updateHasPicks } from "./userController.js";
@@ -17,125 +18,118 @@ import mongoose from "mongoose";
 //@route POST /api/picks/
 //@access Private
 const setPicks = asyncHandler(async (req, res) => {
-  const { picks, teamName, bank, teamValue, playerLeague, overallLeague } =
-    req.body;
+  const { picks, teamName, bank, teamValue, playerLeague } = req.body;
 
-  if (!picks) throw new Error("No players added");
-  if (picks.length !== 15) throw new Error("15 players should be picked");
-
-  const pos = { 1: 0, 2: 0, 3: 0, 4: 0 };
-  picks.forEach((p) => pos[p.playerPosition]++);
-  if (pos[1] !== 2) throw new Error("2 goalkeepers required");
-  if (pos[2] !== 5) throw new Error("5 defenders required");
-  if (pos[3] !== 5) throw new Error("5 midfielders required");
-  if (pos[4] !== 3) throw new Error("3 forwards required");
+  if (!Array.isArray(picks) || picks.length !== 15)
+    throw new Error("Exactly 15 players required");
 
   if (!teamValue || isNaN(bank)) throw new Error("Missing fields");
   if (bank < 0) throw new Error("Not enough funds");
 
-  const user = await User.findById(req.user.id);
+  const posCounts = picks.reduce((acc, p) => {
+    acc[p.playerPosition] = (acc[p.playerPosition] || 0) + 1;
+    return acc;
+  }, {});
+  if (posCounts[1] !== 2) throw new Error("2 goalkeepers required");
+  if (posCounts[2] !== 5) throw new Error("5 defenders required");
+  if (posCounts[3] !== 5) throw new Error("5 midfielders required");
+  if (posCounts[4] !== 3) throw new Error("3 forwards required");
+
+  const [
+    overallLeague,
+    teamLeague,
+    user,
+    existing,
+    mgrExists,
+    allMatchdays,
+    nextMD,
+  ] = await Promise.all([
+    League.findOne({ leagueType: "Overall", name: "Overall" }),
+    TeamLeague.findById(playerLeague),
+    User.findById(req.user.id),
+    Picks.findOne({ user: req.user.id }),
+    ManagerInfo.findOne({ user: req.user.id }),
+    Matchday.find({}).lean(),
+    Matchday.findOne({ next: true }),
+  ]);
+
   if (!user) throw new Error("User not found");
 
-  const existing = await Picks.findOne({ user: req.user.id });
   if (existing) throw new Error("User has already made picks");
 
-  const mgrExists = await ManagerInfo.findOne({ user: req.user.id });
   if (mgrExists) throw new Error("Manager info already exists");
+  if (!overallLeague) throw new Error("Overall leagues not found");
+  if (!teamLeague) throw new Error("Team league not found");
 
-  const allMatchdays = await Matchday.find({}).lean();
-  const maxMD = Math.max(...allMatchdays.map(x => x.id))
-  const nextMD = await Matchday.findOne({ next: true });
-  const matchdayId = nextMD ? nextMD.id : maxMD+1;
+  const maxMD = Math.max(...allMatchdays.map((x) => x.id));
+  const matchdayId = nextMD ? nextMD.id : maxMD + 1;
 
-  const overallL = await OverallLeague.findById(overallLeague);
-  const teamL = await TeamLeague.findById(playerLeague);
+  const overallLeagueId = overallLeague._id;
 
-  if (!overallL) throw new Error("Overall league not found");
-  if (!teamL) throw new Error("Team league not found");
-
-  const newOverall = {
-    creator: overallL.creator,
-    id: overallL.id,
-    name: overallL.name,
-    startMatchday: overallL.startMatchday,
-    endMatchday: overallL.endMatchday,
-    lastRank: null,
-    currentRank: null,
-    matchdayPoints: 0,
-    overallPoints: 0,
-  };
-
-  const newTeam = {
-    creator: teamL.creator,
-    team: teamL.team,
-    id: teamL.id,
-    startMatchday: teamL.startMatchday,
-    endMatchday: teamL.endMatchday,
-    lastRank: null,
-    currentRank: null,
-    matchdayPoints: 0,
-    overallPoints: 0,
-  };
-
-  let createdManager = null;
-  let createdPicks = null;
-  let ownershipIncrements = [];
-  let overallJoin = null;
-  let teamJoin = null;
+  const session = await mongoose.startSession();
+  session.startTransaction();
 
   try {
-    createdManager = await ManagerInfo.create({
-      user: req.user.id,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      matchdayJoined: matchdayId,
-      teamName,
-      teamLeagues: newTeam,
-      overallLeagues: newOverall,
-    });
-
-    if (!createdManager) throw new Error("Manager creation failed");
-
-    createdPicks = await Picks.create({
-      picks,
-      teamValue,
-      bank,
-      manager: createdManager._id,
-    });
-
-    if (!createdPicks) throw new Error("Picks creation failed");
-
-    for (const pick of picks) {
-      await Player.updateOne({ _id: pick._id }, { $inc: { playerCount: 1 } });
-      ownershipIncrements.push(pick._id);
-    }
-
-    overallJoin = await joinOverallLeague(
-      req.user,
-      createdManager._id,
-      overallLeague,
-      req,
-      res
+    const createdManager = await ManagerInfo.create(
+      [
+        {
+          user: req.user.id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          matchdayJoined: matchdayId,
+          teamName,
+          teamLeagues: playerLeague,
+          overallLeagues: overallLeagueId,
+        },
+      ],
+      { session },
     );
 
-    teamJoin = await joinTeamLeague(
-      req.user,
-      createdManager._id,
-      playerLeague,
-      req,
-      res
+    //if (!createdManager) throw new Error("Manager creation failed");
+
+    const createdPicks = await Picks.create(
+      [
+        {
+          picks,
+          teamValue,
+          bank,
+          manager: createdManager[0]._id,
+        },
+      ],
+      { session },
     );
 
-    const hasPicks = await User.findByIdAndUpdate({ _id: req.user.id }, {hasPicks: true}, {new: true}).select('-password')
+    const [ joinOverall, joinTeam, hasPicks] = await Promise.all([
+      joinOverallLeague(
+        req.user,
+        createdManager[0]._id,
+        overallLeague._id,
+        session,
+      ),
+      joinTeamLeague(req.user, createdManager[0]._id, playerLeague, session),
+      User.findByIdAndUpdate(
+        req.user.id,
+        { hasPicks: true },
+        { new: true, session },
+      ),
+    ]);
+
+    await session.commitTransaction();
+    session.endSession();
 
     res.status(200).json({
-      managerInfo: createdManager,
-      matchdayPicks: createdPicks,
+      managerInfo: createdManager[0],
+      matchdayPicks: createdPicks[0],
       hasPicks,
       message: "Team saved",
     });
   } catch (error) {
-    if (createdPicks) {
+    await session.abortTransaction();
+    session.endSession();
+    return res
+      .status(500)
+      .json({ message: "Operation failed, try again", details: error.message });
+    /*if (createdPicks) {
       await Picks.deleteOne({ manager: createdManager._id });
     }
 
@@ -148,10 +142,10 @@ const setPicks = asyncHandler(async (req, res) => {
         await Player.updateOne({ _id: id }, { $inc: { playerCount: -1 } });
       }
     }
-    
+
     if (overallJoin) {
       await OverallLeague.findByIdAndUpdate(overallLeague, {
-        $pull: { entrants: createdManager._id }
+        $pull: { entrants: createdManager._id },
       });
     }
     if (teamJoin) {
@@ -165,7 +159,7 @@ const setPicks = asyncHandler(async (req, res) => {
     res.status(500).json({
       message: "Operation failed, Try again",
       details: error.message,
-    });
+    });*/
   }
 });
 
@@ -274,7 +268,7 @@ const updatePicks = asyncHandler(async (req, res) => {
   if (!user) throw new Error("User not found");
   if (!playerPicks) throw new Error("Picks not found");
   if (!userManager) throw new Error("Manager profile not found");
-  if(!matchday) throw new Error("No more matchdays left")
+  if (!matchday) throw new Error("No more matchdays left");
 
   if (playerPicks.manager.toString() !== userManager._id.toString())
     throw new Error("Unauthorized access");
@@ -293,7 +287,7 @@ const updatePicks = asyncHandler(async (req, res) => {
   const updatedPicks = await Picks.findByIdAndUpdate(
     req.params.id,
     { picks, teamValue, bank },
-    { new: true }
+    { new: true },
   );
 
   if (
