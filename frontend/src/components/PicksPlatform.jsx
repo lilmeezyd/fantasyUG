@@ -98,8 +98,6 @@ const PicksPlatform = (props) => {
         bank: itb,
         teamValue,
         playerLeague,
-        /*overallLeague: "69036ac28188285980ec2bfb",*/
-        overallLeague: "66c13c3d1f44b30a427fb02f"
       }).unwrap();
       dispatch(setCredentials({ ...res.hasPicks }));
       toast.success(res?.message); 
@@ -256,7 +254,7 @@ const PicksPlatform = (props) => {
                   <option value="">Select Favorite Team</option>
                   {teamLeagues?.map((league) => (
                     <option value={league._id} key={league._id}>
-                      {league?.team?.name}
+                      {league?.name}
                     </option>
                   ))}
                 </select>

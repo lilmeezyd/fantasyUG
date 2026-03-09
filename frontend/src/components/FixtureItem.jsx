@@ -6,7 +6,7 @@ import { getPm, getPmString } from "../utils/getPm";
 
 const FixtureItem = (props) => {
   const { x } = props;
-  const [stats, displayStats] = useState(false);
+  const [stats, displayStats] = useState(false); 
   const { data: teams } = useGetQuery();
   const { data: players } = useGetPlayersQuery()
 
@@ -35,7 +35,7 @@ const FixtureItem = (props) => {
           {teams?.find((team) => team._id === x.teamHome)?.name}
         </div>
         <div className="ticker-image">
-          <img src={`../${teams?.find((team) => team._id === x.teamHome)?.shortName}.png`} alt="logo" />
+          <img src={`/${teams?.find((team) => team._id === x.teamHome)?.shortName}.png`} alt="logo" />
         </div>
       </div>
       <div className={`time-score ${x.live ? 'bg-color' : ''}`}>
@@ -67,7 +67,7 @@ const FixtureItem = (props) => {
       </div>
       <div className="away">
         <div className="ticker-image">
-        <img src={`../${teams?.find((team) => team._id === x.teamAway)?.shortName}.png`} alt="" />
+        <img src={`/${teams?.find((team) => team._id === x.teamAway)?.shortName}.png`} alt="" />
         </div>
         <div className="team">
           {teams?.find((team) => team._id === x.teamAway)?.name}

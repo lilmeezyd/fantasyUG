@@ -94,7 +94,7 @@ const PlayerInfo = (props) => {
               <div className="player-info-img">
                 <div className="ticker-image">
                   {playerShortTeam && (
-                    <img src={`../${playerShortTeam}.png`} alt="logo" />
+                    <img src={`/${playerShortTeam}.png`} alt="logo" />
                   )}
                 </div>
                 <span>{playerTeamName}</span>
@@ -136,7 +136,7 @@ const PlayerInfo = (props) => {
                     >
                       <div className="ticker-image">
                         {teamImg && (
-                          <img src={`../${teamImg}.png`} alt="logo" />
+                          <img src={`/${teamImg}.png`} alt="logo" />
                         )}
                       </div>
                     </div>

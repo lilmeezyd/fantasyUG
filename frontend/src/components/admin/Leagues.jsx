@@ -44,17 +44,6 @@ const reducer = (state, action) => {
       dispatch({type: 'TEAM'})
     }
   }, [pathname])
- /* const changeToTeam = () => {
-    dispatch({type: 'TEAM'})
-  }
-  const changeToOverall = () => {
-    dispatch({type: 'OVERALL'})
-  }
-  const changeToPrivate = () => {
-    dispatch({type: 'PRIVATE'})
-  }
-  */
-  
   return (
     <Container>
       <div className="leagues p-2">
@@ -63,10 +52,6 @@ const reducer = (state, action) => {
         <Link className={`${privateLeagues} league-baby`} to='/admin/dashboard/leagues/privateleagues'>Private</Link>
       </div>
       <Outlet />
-      {/*<div className="add-button p-2">
-        <Button onClick={addLeaguePop} className="btn btn-success">Add League</Button>
-      </div>
-      <AddModal submit={submit} show={added} closeAdd={closeAdd}></AddModal>*/}
     </Container>
   )
 }

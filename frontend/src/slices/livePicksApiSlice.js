@@ -26,8 +26,15 @@ export const livePicksApiSlice = apiSlice.injectEndpoints({
                 }
             },
             invalidatesTags: ['Live']
-        })
+        }),
+        getRound: builder.query({
+            query: ({id, mid}) => ({
+                url: `${LIVE_PICKS_URL}/${id}/matchday/${mid}`
+            }),
+            providesTags: ['Live']
+        },
+        )
     })
 })
 
-export const { useGetLivePicksQuery, useSetLivePicksMutation, useSetInitialPointsMutation } = livePicksApiSlice
+export const { useGetLivePicksQuery, useSetLivePicksMutation, useSetInitialPointsMutation, useGetRoundQuery } = livePicksApiSlice

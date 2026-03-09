@@ -12,62 +12,88 @@ import { Button, Modal, Spinner } from "react-bootstrap";
 import PlayerInfo from "./PlayerInfo";
 
 const LivePlayer = (props) => {
-  const { baller, posName, slot, multiplier, matchday, matchdayId, teams, players } = props;
+  const {
+    baller,
+    posName,
+    slot,
+    multiplier,
+    matchday,
+    matchdayId,
+    teams,
+    players,
+  } = props;
   const [show, setShow] = useState(false);
   const { data: elementTypes } = useGetPositionsQuery();
   const { data: fixtures, isLoading } = useGetFixturesQuery();
   const { data: matchdays } = useGetMatchdaysQuery();
-  const { data: history } = useGetHistoryQuery(baller._id)
-  
+  const { data: history } = useGetHistoryQuery(baller._id);
+  console.log(baller);
   const mdFixs = fixtures?.find((x) => x?._id?.id === matchday)?.fixtures;
   const appName = players?.find((player) => player._id === baller._id)?.appName;
   const nowCost = players?.find((player) => player._id === baller._id)?.nowCost;
-  const teamCode = teams?.find((team) => team?._id === baller?.playerTeam)?.code;
+  const teamCode = teams?.find(
+    (team) => team?._id === baller?.playerTeam,
+  )?.code;
   const image = baller?.playerPosition === 1 ? `${teamCode}_1` : teamCode;
   const shortName = teams?.find(
-    (team) => team?._id === baller?.playerTeam
+    (team) => team?._id === baller?.playerTeam,
   )?.shortName;
   const opponentFixArr = mdFixs?.filter(
-    (x) => x.teamAway === baller?.playerTeam || x.teamHome === baller?.playerTeam
-  )
-   /*
+    (x) =>
+      x.teamAway === baller?.playerTeam || x.teamHome === baller?.playerTeam,
+  );
+  /*
   const opponentArr = opponentFixArr?.map(opponent => baller?.playerTeam === opponent?.teamAway
     ? `${teams?.find((x) => x._id === opponent?.teamHome)?.shortName}(A)`
     : `${teams?.find((x) => x._id === opponent?.teamAway)?.shortName}(H)`)*/
-    const opponentArr = opponentFixArr?.map(opponent => 
-      opponent?.stats?.length === 0 && baller?.playerTeam === opponent?.teamAway ? 
-      `${teams?.find((x) => x._id === opponent?.teamHome)?.shortName}(A)`: 
-      opponent?.stats?.length === 0 && baller?.playerTeam === opponent?.teamHome ? 
-      `${teams?.find((x) => x._id === opponent?.teamAway)?.shortName}(H)`: 
-      (baller?.multiplier > 1 ?
-        baller?.multiplier * history?.find(x => opponent._id === x.fixture && x.player === baller._id && x.matchday === opponent.matchday)?.totalPoints : 
-        history?.find(x => opponent?._id === x.fixture && x.player === baller?._id && x.matchday === opponent.matchday)?.totalPoints)
-    )
+  const opponentArr = opponentFixArr?.map((opponent) =>
+    opponent?.stats?.length === 0 && baller?.playerTeam === opponent?.teamAway
+      ? `${teams?.find((x) => x._id === opponent?.teamHome)?.shortName}(A)`
+      : opponent?.stats?.length === 0 &&
+          baller?.playerTeam === opponent?.teamHome
+        ? `${teams?.find((x) => x._id === opponent?.teamAway)?.shortName}(H)`
+        : baller?.multiplier > 1
+          ? baller?.multiplier *
+            history?.find(
+              (x) =>
+                opponent._id === x.fixture &&
+                x.player === baller._id &&
+                x.matchday === opponent.matchday,
+            )?.totalPoints
+          : history?.find(
+              (x) =>
+                opponent?._id === x.fixture &&
+                x.player === baller?._id &&
+                x.matchday === opponent.matchday,
+            )?.totalPoints,
+  );
   const handleClose = () => {
     setShow(false);
   };
   const handleShow = () => {
     setShow(true);
   };
-  if(isLoading) {
+  if (isLoading) {
     return (
-    <div className="spinner">
-      <Spinner />
-    </div>
-    )
+      <div className="spinner">
+        <Spinner />
+      </div>
+    );
   }
-  return ( 
+  return (
     <>
       <div className="element">
         {baller._id ? (
           <div className="button-wrapper" id={baller._id}>
             {/*<div className="next-fix">&#163;{nowCost?.toFixed(1)}M</div>*/}
             <button className="player-btn" onClick={handleShow}>
-              {image && <img
-                src={`../shirt_${image}-66.svg`}
-                className="image_pic"
-                alt={appName}
-              />}
+              {image && (
+                <img
+                  src={`../../../shirt_${image}-66.svg`}
+                  className="image_pic"
+                  alt={appName}
+                />
+              )}
               <div className="captain">
                 {baller.IsCaptain ? (
                   <svg
@@ -160,11 +186,22 @@ const LivePlayer = (props) => {
                 )}
               </div>
               <div className="player-name">
-                <div className="data_name">{appName ?? '-'}</div>
-                {opponentArr?.length > 0 ? <div style={{ fontWeight: 700 }} className="data_fixtures">
-                  {opponentArr?.map((x, idx) => <div key={idx+1}>{x ?? '-'}</div>)}
-                </div> : <div className="data_fixtures">
-                  <div className="blank"></div></div>}
+                <div className="data_name">{appName ?? "-"}</div>
+                {opponentArr?.length > 0 ? (
+                  <div style={{ fontWeight: 700 }} className="data_fixtures">
+                    {baller?.points
+                      ? baller?.multiplier > 1
+                        ? baller?.multiplier * baller?.points
+                        : baller?.points
+                      : opponentArr?.map((x, idx) => (
+                          <div key={idx + 1}>{x ?? "-"}</div>
+                        ))}
+                  </div>
+                ) : (
+                  <div className="data_fixtures">
+                    <div className="blank"></div>
+                  </div>
+                )}
               </div>
             </button>
           </div>

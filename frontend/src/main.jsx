@@ -37,12 +37,14 @@ import AdminRoute from "./components/AdminRoute.jsx";
 import NormalRoute from "./components/NormalRoute.jsx";
 import HasPicks from "./components/HasPicks.jsx";
 import HasNoPicks from "./components/HasNoPicks.jsx";
-import PrivateLeague from "./components/PrivateLeague.jsx"
-import OverallLeague from "./components/OverallLeague.jsx"
-import TeamLeague from "./components/TeamLeague.jsx"
-import RequestPasswordReset from "./components/RequestPasswordReset.jsx"
-import ResetPassword from "./components/ResetPassword.jsx"
+import PrivateLeague from "./components/PrivateLeague.jsx";
+import OverallLeague from "./components/OverallLeague.jsx";
+import WeeklyLeague from "./components/WeeklyLeague.jsx";
+import TeamLeague from "./components/TeamLeague.jsx";
+import RequestPasswordReset from "./components/RequestPasswordReset.jsx";
+import ResetPassword from "./components/ResetPassword.jsx";
 import OtherPoints from "./screens/OtherPoints.jsx";
+import Standings from "./screens/Standings.jsx";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -51,10 +53,10 @@ const router = createBrowserRouter(
       {/*<Route path="login" element={<LoginScreen />} />*/}
       <Route path="register" element={<RegisterScreen />} />
       <Route
-                path="/request-password-reset"
-                element={<RequestPasswordReset />}
-              />
-              <Route path="/password-reset" element={<ResetPassword />} />
+        path="/request-password-reset"
+        element={<RequestPasswordReset />}
+      />
+      <Route path="/password-reset" element={<ResetPassword />} />
 
       {/* Private Routes */}
       <Route path="" element={<PrivateRoute />}>
@@ -69,11 +71,17 @@ const router = createBrowserRouter(
         <Route path="" element={<HasPicks />}>
           <Route path="/userleagues" element={<UserLeagues />} />
           <Route path="/userleagues/private/:id" element={<PrivateLeague />} />
-          <Route path="/userleagues/overall/:id" element={<OverallLeague />} />
+          <Route path="/leagues/:id/standings" element={<Standings />}>
+            <Route path="" element={<OverallLeague />} />
+            <Route
+              path="matchday/:mid"
+              element={<WeeklyLeague />}
+            />
+          </Route>
           <Route path="/userleagues/team/:id" element={<TeamLeague />} />
           <Route path="/transfers" element={<Transfers />} />
           <Route path="/pickteam" element={<PickTeam />} />
-          <Route path="/points" element={<Points />} />
+          <Route path="/points/:id/matchday/:mid" element={<Points />} />
           <Route path="/points/:id" element={<OtherPoints />} />
         </Route>
       </Route>
@@ -96,8 +104,8 @@ const router = createBrowserRouter(
           <Route path="actions" element={<Actions />} />
         </Route>
       </Route>
-    </Route>
-  )
+    </Route>,
+  ),
 );
 
 ReactDOM.createRoot(document.getElementById("root")).render(
@@ -106,5 +114,5 @@ ReactDOM.createRoot(document.getElementById("root")).render(
       <RouterProvider router={router} />
     </React.StrictMode>
     ,
-  </Provider>
+  </Provider>,
 );

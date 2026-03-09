@@ -1,6 +1,6 @@
 import { Modal, Button } from "react-bootstrap"
 import { useState, useEffect } from "react"
-import { useGetOverallLeagueQuery, useEditOverallLeagueMutation } from "../../../slices/leagueApiSlice" 
+import {  useEditLeagueMutation, useGetLeagueQuery } from "../../../slices/leagueApiSlice" 
 import { useGetMatchdaysQuery } from "../../../slices/matchdayApiSlice"
 import { toast } from "react-toastify"
 const EditModal = (props) => {
@@ -13,13 +13,13 @@ const EditModal = (props) => {
  
   const { name, startMatchday, endMatchday } = data
   
-  const { data: overallLeague, refetch } = useGetOverallLeagueQuery(overallLeagueId)
+  const { data: overallLeague, refetch } = useGetLeagueQuery(overallLeagueId)
   const { data: matchdays } = useGetMatchdaysQuery()
-  const [ editOverallLeague ] = useEditOverallLeagueMutation()
+  const [ editLeague ] = useEditLeagueMutation()
 
   useEffect(() => {
-    setData({name:overallLeague?.name, startMatchday: overallLeague?.startGW, endMatchday: overallLeague?.endMatchday})
-  }, [overallLeague?.name, overallLeague?.startMatchday, overallLeague?.endMatchday])
+    setData({name:overallLeague?.name, startMatchday: overallLeague?.startMatchdayId, endMatchday: overallLeague?.endMatchdayId})
+  }, [overallLeague?.name, overallLeague?.startMatchdayId, overallLeague?.endMatchdayId])
   const onSubmit = async (e) => {
     e.preventDefault()
     const { elements } = e.currentTarget
@@ -29,7 +29,7 @@ const EditModal = (props) => {
 
     if(name && startMatchday && endMatchday) {
       try {
-        const res = await editOverallLeague({id: overallLeague?._id, name, startMatchday, endMatchday})
+        const res = await editLeague({id: overallLeague?._id, name, startMatchday, endMatchday})
         toast.success("Update Complete")
       closeEdit()
       resetEdit()
@@ -52,12 +52,13 @@ const EditModal = (props) => {
     
   }
 return (
+  <>
   <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
       <div className="bg-white p-4 rounded-lg shadow-md max-w-sm w-full space-y-4">
         <h3 className="text-lg font-bold">Edit Overall League</h3>
         <form onSubmit={onSubmit}>
         <div className="py-2">
-          <label className="block text-sm font-medium" htmlFor="name">Team League</label>
+          <label className="block text-sm font-medium" htmlFor="name">Overall League</label>
           <input
                 onChange={(e) => {
                   setData((prev) => ({
@@ -116,7 +117,7 @@ return (
         </div>
         </form>
       </div>
-    </div>
+    </div></>
 )
 }
 

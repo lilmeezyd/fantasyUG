@@ -9,7 +9,7 @@ import {
   AiFillCaretDown,
   AiFillCaretUp,
 } from "react-icons/ai";
-import { BsChevronLeft, BsChevronRight } from "react-icons/bs";
+import { BsChevronLeft, BsChevronRight } from "react-icons/bs"; 
 const LeagueDetails = (props) => {
   const {
     privateLeagues,
@@ -34,12 +34,12 @@ const LeagueDetails = (props) => {
   const { data: transferObj = {} } = useGetTransfersQuery(id);
   const { userInfo } = useSelector((state) => state.auth);
   const navigate = useNavigate();
-  useEffect(() => {
+  /*useEffect(() => {
     const copyFix =
       transferObj?.transfers?.length > 0 ? [...transferObj?.transfers] : [];
     copyFix?.sort((x, y) => (x?.createdAt > y?.createdAt ? 1 : -1));
     setCopy(copyFix);
-  }, [transferObj]);
+  }, [transferObj]);*/
   const toggleView = () => {
     setShow((prev) => !prev);
   };
@@ -50,12 +50,15 @@ const LeagueDetails = (props) => {
   const onIncrement = () => {
     setPage((prevState) => prevState + 1);
   };
-
+  
   const transferList = useMemo(() => {
-    return copy?.filter(
+    const copyFix =
+      transferObj?.transfers?.length > 0 ? [...transferObj?.transfers] : [];
+    copyFix?.sort((x, y) => (x?.createdAt > y?.createdAt ? 1 : -1));
+    return copyFix?.filter(
       (x, idx) => idx >= (page - 1) * pageSize && idx < page * pageSize
     );
-  }, [copy, page, pageSize]);
+  }, [transferObj, page, pageSize]);
   const totalPages = Math.ceil(transferObj?.transfers?.length / pageSize);
   return (
     <div className="league-details">
@@ -101,8 +104,8 @@ const LeagueDetails = (props) => {
             <div>Rank</div>
             <div>League</div>
           </div>
-          {overallLeagues?.map((x) => (
-            <div className="my-leagues" key={x._id}>
+          {overallLeagues?.map((x, idx) => (
+            <div className="my-leagues" key={idx+1}>
               <div>
                 {(x.currentRank === x.lastRank || x.lastRank === null) && (
                   <AiFillCaretRight color="#aaa" />
@@ -115,13 +118,13 @@ const LeagueDetails = (props) => {
                 )}
               </div>
               <h6>{x.currentRank === null ? "-" : x.currentRank}</h6>
-              <Link to={`/userleagues/overall/${x.id}`}>
+              <Link to={`/leagues/${x.id}/standings`}>
                 <h6>{x.name}</h6>
               </Link>
             </div>
           ))}
-          {teamLeagues?.map((x) => (
-            <div className="my-leagues" key={x._id}>
+          {teamLeagues?.map((x, idx) => (
+            <div className="my-leagues" key={idx+1}>
               <div>
                 {(x.currentRank === x.lastRank || x.lastRank === null) && (
                   <AiFillCaretRight color="#aaa" />
@@ -134,8 +137,8 @@ const LeagueDetails = (props) => {
                 )}
               </div>
               <h6>{x.currentRank === null ? "-" : x.currentRank}</h6>
-              <Link to={`/userleagues/team/${x.id}`}>
-                <h6>{teams?.find((team) => team._id === x.team)?.name}</h6>
+              <Link to={`/leagues/${x.id}/standings`}>
+                <h6>{x?.name}</h6>
               </Link>
             </div>
           ))}
@@ -151,8 +154,8 @@ const LeagueDetails = (props) => {
                 <div>Rank</div>
                 <div>League</div>
               </div>
-              {privateLeagues?.map((x) => (
-                <div className="my-leagues" key={x._id}>
+              {privateLeagues?.map((x, idx) => (
+                <div className="my-leagues" key={idx+1}>
                   <div>
                   {x.currentRank === x.lastRank ? <AiFillCaretRight color="#aaa"/> : 
                 x.currentRank > x.lastRank ? <AiFillCaretUp color="green" /> : 

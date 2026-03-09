@@ -1,37 +1,35 @@
 import { Modal, Button } from "react-bootstrap"
 import { useState, useEffect } from "react"
-import { useGetTeamLeagueQuery, useEditTeamLeagueMutation } from "../../../slices/leagueApiSlice"
+import { useEditLeagueMutation, useGetLeagueQuery } from "../../../slices/leagueApiSlice"
 import { useGetMatchdaysQuery } from "../../../slices/matchdayApiSlice"
-import { useGetQuery } from "../../../slices/teamApiSlice"
 import { toast } from "react-toastify"
 const EditModal = (props) => {
   const { show, closeEdit, resetEdit, teamLeagueId } = props
   const [data, setData] = useState({
-    team: "",
+    name: "",
     startMatchday: "",
     endMatchday: "",
   })
 
-  const { data: teamLeague = {}, refetch } = useGetTeamLeagueQuery(teamLeagueId)
+  const { data: teamLeague = {}, refetch } = useGetLeagueQuery(teamLeagueId)
   const { data: matchdays = [] } = useGetMatchdaysQuery()
-  const { data: teams = [] } = useGetQuery()
-  const [editTeamLeague] = useEditTeamLeagueMutation()
-  const { team, startMatchday, endMatchday } = data
+  const [editLeague] = useEditLeagueMutation()
+  const { name, startMatchday, endMatchday } = data
  
 
   useEffect(() => {
-    setData({ team: teamLeague?.team, startMatchday: teamLeague?.startGW, endMatchday: teamLeague?.endMatchday })
-  }, [teamLeague?.team, teamLeague?.startMatchday, teamLeague?.endMatchday])
+    setData({ name: teamLeague?.name, startMatchday: teamLeague?.startMatchdayId, endMatchday: teamLeague?.endMatchdayId })
+  }, [teamLeague?.name, teamLeague?.startMatchdayId, teamLeague?.endMatchdayId])
   const onSubmit = async (e) => {
     e.preventDefault()
     const { elements } = e.currentTarget
-    const team = elements.name.value
+    const name = elements.name.value
     const startMatchday = elements.start.value
     const endMatchday = elements.end.value
 
-    if (team && startMatchday && endMatchday) {
+    if (name && startMatchday && endMatchday) {
       try {
-        const res = await editTeamLeague({ id: teamLeague?._id, team, startMatchday, endMatchday }).unwrap();
+        await editLeague({ id: teamLeague?._id, name, startMatchday, endMatchday }).unwrap();
         toast.success("Update complete")
       closeEdit()
       resetEdit()
@@ -60,25 +58,18 @@ const EditModal = (props) => {
         <form onSubmit={onSubmit}>
         <div className="py-2">
           <label className="block text-sm font-medium" htmlFor="name">Team League</label>
-          <select
-          value={team}
-              onChange={(e) => {
+          <input
+                onChange={(e) => {
                   setData((prev) => ({
                     ...prev,
-                    team: e.target.value,
+                    name: e.target.value,
                   }));
                 }}
+                value={name}
                 name="name"
                 id="name"
             className="w-full px-3 py-1 border rounded"
-          >
-            <option value="">---Select---</option>
-            {teams?.map((team) => (
-                  <option key={team._id} value={team._id}>
-                    {team.name}
-                  </option>
-                ))}
-          </select>
+          />
         </div>
         <div className="py-2">
           <label className="block text-sm font-medium" htmlFor="start">Start Matchday</label>

@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react"
 import { Container, Spinner, Button } from "react-bootstrap"
 import Pagination from "../Pagination"
-import { useUpdatePrivateTablesMutation, useGetLeaguesQuery, useDeleteLeagueMutation } from "../../slices/leagueApiSlice"
+import { useUpdatePrivateTablesMutation, useGetPrivateLeaguesQuery, useDeleteLeagueMutation } from "../../slices/leagueApiSlice"
 import EditModal from "./privateLeagueModals/EditModal"
 import DeleteModal from "./privateLeagueModals/DeleteModal"
 const PrivateLeagues = () => {
@@ -12,7 +12,7 @@ const PrivateLeagues = () => {
   const [privateLeagueId, setPrivateLeagueId] = useState("");
   const [curPage, setCurPage] = useState(1);
   const [page, setPage] = useState(1);
-  const { data: privateLeagues, isLoading, isError} = useGetLeaguesQuery()
+  const { data: privateLeagues, isLoading, isError} = useGetPrivateLeaguesQuery()
   const [ updatePrivateTables, {isLoading: a} ] = useUpdatePrivateTablesMutation()
   const [ deleteLeague ] = useDeleteLeagueMutation() 
 

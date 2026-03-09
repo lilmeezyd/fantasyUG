@@ -3,7 +3,7 @@ import { useState } from "react"
 import { useGetMatchdaysQuery } from "../../../slices/matchdayApiSlice"
 const AddModal = (props) => {
     const {show, closeAdd, submit} = props 
-    const [ data, setData ] = useState({name: '', startMatchday: '', endMatchday: ''})
+    const [ data, setData ] = useState({name: '', startMatchday: '', endMatchday: '', leagueType: "Overall"})
     const { data: matchdays } = useGetMatchdaysQuery()
     const onSubmit = (e) => {
       e.preventDefault()

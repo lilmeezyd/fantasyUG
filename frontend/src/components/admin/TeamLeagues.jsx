@@ -6,8 +6,8 @@ import Pagination from "../Pagination"
 import {
   useUpdateTeamTablesMutation,
   useGetTeamLeaguesQuery,
-  useAddTeamLeagueMutation,
-  useDeleteTeamLeagueMutation,
+  useAddLeagueMutation,
+  useDeleteLeagueMutation,
 } from "../../slices/leagueApiSlice";
 import AddModal from "./teamLeagueModals/AddModal"
 import EditModal from "./teamLeagueModals/EditModal"
@@ -24,8 +24,8 @@ const TeamLeagues = () => {
   const [curPage, setCurPage] = useState(1);
   const [page, setPage] = useState(1);
   const { data: teamLeagues = [], isLoading, isError } = useGetTeamLeaguesQuery();
-  const [addTeamLeague] = useAddTeamLeagueMutation()
-  const [deleteTeamLeague] = useDeleteTeamLeagueMutation()
+  const [addLeague] = useAddLeagueMutation()
+  const [deleteLeague] = useDeleteLeagueMutation()
   const [updateTeamTables, { isLoading: a }] = useUpdateTeamTablesMutation()
 
   const { deleted, edited, added } = show
@@ -58,7 +58,7 @@ const TeamLeagues = () => {
   }
   const submit = async (data) => {
     try {
-      await addTeamLeague(data).unwrap()
+      await addLeague(data).unwrap()
     } catch (error) {
       console.log(error)
     }
@@ -97,7 +97,8 @@ const TeamLeagues = () => {
 
   const deleteTeamLeagueNow = async () => {
     try {
-      await deleteTeamLeague(teamLeagueId).unwrap()
+      const res = await deleteLeague(teamLeagueId).unwrap()
+      toast.success(res.msg)
     } catch (error) {
       console.log(error)
     }
@@ -195,7 +196,7 @@ const TeamLeagues = () => {
           </thead>
           <tbody>
             {formattedDetails?.map((x, idx) => <tr className={`${idx%2 === 1 ? 'bg-green-200' : 'bg-white'} border border-gray-400 font-semibold`} key={x._id}>
-          <td className="team-name px-4 py-2">{x?.team?.name}</td>
+          <td className="team-name px-4 py-2">{x?.name}</td>
           <td className="px-4 py-2 text-center">{x?.startMatchday}</td>
           <td className="px-4 py-2 text-center">{x?.endMatchday}</td>
           <td className="px-4 py-2 text-center">{x?.standings}</td>

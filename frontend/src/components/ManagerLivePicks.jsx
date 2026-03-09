@@ -14,6 +14,7 @@ const ManagerPicks = (props) => {
     useGetPositionsQuery();
   const { data: matchdays } = useGetMatchdaysQuery();
   const md = matchdays?.find((matchday) => matchday?.next === true);
+  console.log(picks)
   const goalkeepers = picks?.filter(
     (pick) =>
       pick?.playerPosition === 1 &&
@@ -64,8 +65,8 @@ const ManagerPicks = (props) => {
   return (
     <div>
       <div className="no-picks-team">
-        {positionsArray.map(group => (
-          <div className="default-player">
+        {positionsArray.map((group, idx) => (
+          <div  key={idx + 1} className="default-player">
             {group.list.map((x) => (
             <div key={x.slot} className="squad-player">
               <LivePlayer

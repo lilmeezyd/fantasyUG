@@ -4,61 +4,43 @@ import FixtureList from "../components/FixtureList";
 import { Link } from "react-router-dom";
 import { Container, Spinner } from "react-bootstrap";
 import { useGetManagerInfoQuery } from "../slices/managerInfoApiSlice";
-import { useSelector } from "react-redux";
-import { useGetLivePicksQuery } from "../slices/livePicksApiSlice";
+import { useSelector } from "react-redux"; 
+import {
+  useGetRoundQuery,
+} from "../slices/livePicksApiSlice";
 import { useGetPicksQuery } from "../slices/picksSlice";
-import { useGetMatchdaysQuery } from "../slices/matchdayApiSlice";
+import { useGetMatchdaysQuery, useGetCurrentMDQuery, useGetMatchdayMaxNMinQuery } from "../slices/matchdayApiSlice";
 import ManagerLivePicks from "../components/ManagerLivePicks";
 import { BsChevronLeft, BsChevronRight } from "react-icons/bs";
+import { useParams, useNavigate } from "react-router-dom";
 
 const Points = () => {
-  const [pageDetails, setPageDetails] = useState({
-    page: null,
-    min: null,
-    max: null,
-  });
+  const { id, mid } = useParams();
+  const matchday = Number(mid);
+  const navigate = useNavigate();
   const { userInfo } = useSelector((state) => state.auth);
-  const {
-    data: picksDetails,
-    isLoading,
-    isSuccess,
-  } = useGetLivePicksQuery(userInfo?._id);
-  const { data: managerInfo } = useGetManagerInfoQuery(userInfo?._id);
-  const { data: managerPicks } = useGetPicksQuery(userInfo?._id);
+  const { data: managerInfo } = useGetManagerInfoQuery(id);
+  const { data: matchdayData = {} } = useGetCurrentMDQuery();
+  const { data: roundPicks, isLoading: roundLoading, isSuccess } = useGetRoundQuery({
+    id,
+    mid,
+  });
   const { data: matchdays } = useGetMatchdaysQuery();
-  const { page, min, max } = pageDetails;
-  const allLivePicks = useMemo(() => {
-    return picksDetails?.picks?.flatMap(p => p.livePicks) ?? [];
-  }, [picksDetails]);
+  const min = +roundPicks?.matchdayJoined;
+  const max = matchdayData;
 
-  useEffect(() => {
-    if (!allLivePicks.length) return;
-
-    const matchdayValues = allLivePicks.map(x => x.matchday);
-    const min = Math.min(...matchdayValues);
-    const max = Math.max(...matchdayValues);
-
-    setPageDetails({ page: max, min, max });
-  }, [allLivePicks]);
-
-  const realPicks = useMemo(() => {
-    return allLivePicks.filter(x => x.matchday === +page);
-  }, [allLivePicks, page]);
-  const onDecrement = () => {
-    setPageDetails((prev) => ({ ...prev, page: prev.page - 1 }));
+  const navigateToMatchday = (day) => {
+    //const base = userInfo?.roles?.ADMIN ? "/admin" : "/predictions";
+    navigate(`/points/${id}/matchday/${day}`);
   };
-
-  const onIncrement = () => {
-    setPageDetails((prev) => ({ ...prev, page: prev.page + 1 }));
-  };
-  if (isLoading && picksDetails === undefined) {
+  if (roundLoading) {
     return (
       <div className="spinner">
         <Spinner />
       </div>
     );
   }
-  if (isSuccess && picksDetails?.picks?.length === 0) {
+  if (!roundPicks) {
     return (
       <div className="tx-center">
         Live scores will appear here when matchday starts!
@@ -67,22 +49,22 @@ const Points = () => {
   }
   return (
     <>
-      {picksDetails?.picks?.length > 0 && matchdays?.length > 0 && (
+      {roundPicks && matchdays?.length > 0 && (
         <>
           <div className="main">
             <section className="btn-wrapper p-2">
               <button
-                disabled={page === +min}
-                onClick={onDecrement}
-                className={`${page === +min && "btn-hide"} btn-controls`}
+                disabled={matchday <= min}
+                onClick={() => navigateToMatchday(matchday - 1)}
+                className={`${matchday === +min && "btn-hide"} btn-controls`}
                 id="prevButton"
               >
                 <BsChevronLeft />
               </button>
               <button
-                disabled={page === +max}
-                onClick={onIncrement}
-                className={`${page === +max && "btn-hide"} btn-controls`}
+                disabled={matchday >= max}
+                onClick={() => navigateToMatchday(matchday + 1)}
+                className={`${matchday === +max && "btn-hide"} btn-controls`}
                 id="nextButton"
               >
                 <BsChevronRight />
@@ -90,83 +72,82 @@ const Points = () => {
             </section>
           </div>
           <div className="main">
-            {realPicks?.map((lp) => (
-              <div key={lp.matchday}>
-                <div className="pt-matchday">
-                  <div>Matchday&nbsp;{lp?.matchday}</div>
+            <div>
+              <div className="pt-matchday">
+                <div>Matchday&nbsp;{roundPicks?.livePicks?.matchday}</div>
+              </div>
+              <div className="pt-md-wrapper">
+                <div className="pt-points">
+                  <div>Points</div>
+                  <div>{roundPicks?.livePicks?.matchdayPoints ?? '0'}</div>
                 </div>
-                <div className="pt-md-wrapper">
-                  <div className="pt-points">
-                    <div>Points</div>
-                    <div>{+lp?.matchdayPoints}</div>
-                  </div>
-                  <div className="pt-rank">
+                <div className="pt-rank">
+                  <div>
+                    <div>Rank</div>
                     <div>
-                      <div>Rank</div>
-                      <div>
-                        {lp?.matchdayRank === null ? `-` : lp?.matchdayRank}
-                      </div>
+                      {roundPicks?.livePicks?.matchdayRank === null
+                        ? `-`
+                        : roundPicks?.livePicks?.matchdayRank}
                     </div>
                   </div>
-                  <div className="pt-ht-av">
+                </div>
+                <div className="pt-ht-av">
                     <div>
                       <div>Average</div>
                       <div>
                         {" "}
                         {matchdays
-                          ?.find((x) => x.id === lp?.matchday)
-                          ?.avergeScore.toFixed(0)}
+                          ?.find((x) => x.id === roundPicks?.livePicks?.matchday)
+                          ?.averageScore.toFixed(0)}
                       </div>
                     </div>
-                    {matchdays?.find((x) => x.id === lp?.matchday)
+                    {matchdays?.find((x) => x.id === roundPicks?.livePicks?.matchday)
                       ?.highestScore > 0 && (
                       <Link
                         to={`/points/${
-                          matchdays?.find((x) => x.id === lp?.matchday)
+                          matchdays?.find((x) => x.id === roundPicks?.livePicks?.matchday)
                             ?.highestScoringEntry
-                        }`}
+                        }/matchday/${mid}`}
                       >
                         <div>
                           <div>Highest</div>
                           <div>
                             {" "}
                             {
-                              matchdays?.find((x) => x.id === lp?.matchday)
+                              matchdays?.find((x) => x.id === roundPicks?.livePicks?.matchday)
                                 ?.highestScore
                             }
                           </div>
                         </div>
                       </Link>
                     )}
-                  </div>
-                </div>
-
-                <ManagerLivePicks
-                  matchday={lp?.matchday}
-                  matchdayId={lp?.matchdayId}
-                  automaticSubs={lp?.automaticSubs}
-                  isLoading={isLoading}
-                  picks={lp?.picks}
-                />
+                  </div> 
               </div>
-            ))}
+
+              <ManagerLivePicks
+                  matchday={roundPicks?.livePicks?.matchday}
+                  matchdayId={roundPicks?.livePicks?.matchdayId}
+                  automaticSubs={roundPicks?.livePicks?.automaticSubs}
+                  picks={roundPicks?.livePicks?.picks}
+                />
+            </div>
             <LeagueDetails
-              firstName={picksDetails?.managerInfo?.firstName}
-              lastName={picksDetails?.managerInfo?.lastName}
+              firstName={managerInfo?.firstName}
+              lastName={managerInfo?.lastName}
               privateLeagues={managerInfo?.privateLeagues}
               teamLeagues={managerInfo?.teamLeagues}
               overallLeagues={managerInfo?.overallLeagues}
               teamName={managerInfo?.teamName}
-              teamValue={managerPicks?.teamValue}
-              bank={managerPicks?.bank}
+              teamValue={managerInfo?.teamValue}
+              bank={managerInfo?.bank}
               matchdayPoints={managerInfo?.matchdayPoints}
               overallPoints={managerInfo?.overallPoints}
-              overallRank={managerInfo?.overallRank}
-              id={userInfo?._id}
+              overallRank={managerInfo?.overallRank} 
+              id={id}
             />
           </div>
           <Container className="main">
-            <FixtureList mdParam={page} />
+            <FixtureList mdParam={mid} />
           </Container>
         </>
       )}

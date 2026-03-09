@@ -7,48 +7,48 @@ const Leagues = () => {
   const { userInfo } = useSelector((state) => state.auth)
   const { data } = useGetManagerInfoQuery(userInfo?._id)
   const { data: teams } = useGetQuery()
+  console.log(data)
   return (
-    <div className="league-bg">
-      <div className="standing-wrap">
-      <h5 className="standing-header">Leagues</h5>
-      <div className="standing-grid-2 standing-grid-header">
-        <div className="standing-grid-name">League</div>
-        <div className="standing-grid-name">Previous rank</div>
-        <div className="standing-grid-name">Current rank</div>
-        <div className="standing-grid-name">Points</div>
-        <div className="standing-grid-name">Actions</div>
+    <div className="py-2">
+      <div className="p-2">
+      <p className="text-3xl text-center font-semibold">Leagues</p>
+      <div className="bg-gray-200 h-0.5 w-[60%] m-auto"></div>
+      <div className="min-w-[320px] overflow-auto">
+        <table className="m-auto text-xl">
+        <thead className="border-bottom border-gray-200 ">
+          <tr>
+            <th className="px-4 py-3 text-center text-truncate">League</th>
+            <th className="px-4 py-3 text-center text-truncate">Previous</th>
+            <th className="px-4 py-3 text-center text-truncate">Current</th>
+            <th className="px-4 py-3 text-center text-truncate">Points</th>
+            <th className="px-4 py-3 text-center text-truncate">Actions</th>
+          </tr>
+        </thead>
+        <tbody className="font-medium">
+          {data?.overallLeagues?.map(x => <tr className="border-bottom border-gray-200 " key={x.id}>
+            <td className="px-4 py-3 text-center text-truncate"><Link to={`/leagues/${x.id}/standings`}>{x.name}</Link></td>
+            <td className="px-4 py-3 text-center text-truncate"><div className="">{x.lastRank ?? '-'}</div></td>
+            <td className="px-4 py-3 text-center text-truncate"><div className="">{x.currentRank ?? '-'}</div></td>
+            <td className="px-4 py-3 text-center text-truncate"><div className="">{x.overallPoints ?? '0'}</div></td>
+            <td className="px-4 py-3 text-center text-truncate"><div className="">None</div></td>
+          </tr>)}
+          {data?.teamLeagues?.map(x => <tr className="border-bottom border-gray-200 " key={x.id}>
+            <td className="px-4 py-3 text-center text-truncate"><Link to={`/leagues/${x.id}/standings`}>{x.name}</Link></td>
+            <td className="px-4 py-3 text-center text-truncate"><div className="">{x.lastRank ?? '-'}</div></td>
+            <td className="px-4 py-3 text-center text-truncate"><div className="">{x.currentRank ?? '-'}</div></td>
+            <td className="px-4 py-3 text-center text-truncate"><div className="">{x.overallPoints ?? '0'}</div></td>
+            <td className="px-4 py-3 text-center text-truncate"><div className="">None</div></td>
+          </tr>)}
+          {data?.privateLeagues?.map(x => <tr key={x.id}>
+            <td className="px-4 py-3 text-center text-truncate"><Link to={`/leagues/${x.id}/standings`}>{x.name}</Link></td>
+            <td className="px-4 py-3 text-center text-truncate"><div className="">{x.lastRank ?? '-'}</div></td>
+            <td className="px-4 py-3 text-center text-truncate"><div className="">{x.currentRank ?? '-'}</div></td>
+            <td className="px-4 py-3 text-center text-truncate"><div className="">{x.overallPoints ?? '0'}</div></td>
+            <td className="px-4 py-3 text-center text-truncate"><div className="">None</div></td>
+          </tr>)}
+        </tbody>
+      </table>
       </div>
-        {data?.overallLeagues?.map(x => 
-          <div className="standing-grid-2" key={x.id}>
-            <div className="standing-grid-name">
-            <Link to={`/userleagues/overall/${x.id}`}>{x.name}</Link></div>
-            <div className="standing-grid-name">{x.lastRank}</div>
-            <div className="standing-grid-name">{x.currentRank}</div>
-            <div className="standing-grid-name">{x.overallPoints}</div>
-            <div className="standing-grid-name">None</div>
-          </div>
-        )}
-      {data?.teamLeagues?.map(x => 
-          <div className="standing-grid-2" key={x.id}>
-            <div className="standing-grid-name">
-            <Link to={`/userleagues/team/${x.id}`}>{teams?.find(team => team._id === x.team)?.name}
-            </Link></div>
-            <div className="standing-grid-name">{x.lastRank}</div>
-            <div className="standing-grid-name">{x.currentRank}</div>
-            <div className="standing-grid-name">{x.overallPoints}</div>
-            <div className="standing-grid-name">None</div>
-          </div>
-        )}
-      {data?.privateLeagues?.map(x => 
-          <div className="standing-grid-2" key={x.id}>
-            <div className="standing-grid-name">
-            <Link to={`/userleagues/private/${x.id}`}>{x.name}</Link></div>
-            <div className="standing-grid-name">{x.lastRank}</div>
-            <div className="standing-grid-name">{x.currentRank}</div>
-            <div className="standing-grid-name">{x.overallPoints}</div>
-            <div className="standing-grid-name"></div>
-          </div>
-        )}
         </div>
     </div>
   )

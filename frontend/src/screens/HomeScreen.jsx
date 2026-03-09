@@ -30,6 +30,7 @@ const HomeScreen = () => {
     }
     return []
   }, [players])
+  
   const transfersIn = useMemo(() => {
     if(data?.transfersIn?.length) {
       const newData = [...data?.transfersIn]
@@ -91,7 +92,7 @@ const HomeScreen = () => {
           <div className="home-section-grid-sub my-2">
             <div>
               <h4 className="p-2">Most Captained</h4>
-              {isLoading ? (<p className="text-center font-bold">Loading...</p>) : (mostCaptained.length > 0 ? (
+              {isLoading ? (<p className="text-center font-bold">Loading...</p>) : (mostCaptained?.length > 0 ? (
               <>
                 <div className="player-header-1">
                   <div className="info"></div>

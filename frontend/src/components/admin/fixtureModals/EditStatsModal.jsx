@@ -7,19 +7,32 @@ import { toast } from "react-toastify";
 const EditStatsModal = (props) => {
   const { show, handleClose, fixture } = props;
   const [data, setData] = useState({
-    identifier: "",
-    homeAway: "",
+    identifier: "starts",
+    homeAway: "home",
     player: [],
     value: "",
   });
 
   const { identifier, homeAway, player, value } = data;
-  const { data: players = [] } = useGetPlayersByFixtureQuery(fixture?._id);
+  const { data: players } = useGetPlayersByFixtureQuery(fixture?._id);
   const [editStats, isLoading] = useEditStatsMutation();
   const superPlayers = useMemo(() => {
-
-  }, [players, homeAway, fixture])
-  console.log(players)
+    if (players) {
+      const newPlayers = [...players?.updatedPlayers]
+        .filter((x) => {
+          return homeAway === "home"
+            ? x.playerTeam.toString() === fixture?.teamHomeId?.toString()
+            : x.playerTeam.toString() === fixture?.teamAwayId?.toString();
+        });
+        return {
+          'GKP': newPlayers.filter(x => x.playerPosition === 1).sort((x, y) => x.appName < y.appName ? -1 : 1),
+          'DEF': newPlayers.filter(x => x.playerPosition === 2).sort((x, y) => x.appName < y.appName ? -1 : 1),
+          'MID': newPlayers.filter(x => x.playerPosition === 3).sort((x, y) => x.appName < y.appName ? -1 : 1),
+          'FWD': newPlayers.filter(x => x.playerPosition === 4).sort((x, y) => x.appName < y.appName ? -1 : 1)
+        }
+    }
+  }, [players, homeAway, fixture]);
+  console.log(superPlayers?.DEF);
 
   const onSubmit = async (e) => {
     e.preventDefault();
@@ -66,8 +79,8 @@ const EditStatsModal = (props) => {
   };
 
   return (
-    <div className="overflow-auto w-min-[320px] fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
-      <div className="bg-white p-4 rounded-lg shadow-md max-w-sm w-full space-y-4">
+    <div className="overflow-auto  fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+      <div className="bg-white p-4 rounded-lg shadow-md m-4 w-full space-y-4">
         <h4 className="text-3xl font-bold">Edit Fixture Statistics</h4>
         <form onSubmit={onSubmit}>
           <div className="py-2">
@@ -77,6 +90,7 @@ const EditStatsModal = (props) => {
             <select
               name="identifier"
               id="identifier"
+              value={identifier}
               onChange={onChange}
               className="w-full px-3 py-1 border rounded"
             >
@@ -97,6 +111,7 @@ const EditStatsModal = (props) => {
             <select
               name="homeAway"
               id="homeAway"
+              value={homeAway}
               onChange={onChange}
               className="w-full px-3 py-1 border rounded"
             >
@@ -107,47 +122,97 @@ const EditStatsModal = (props) => {
           </div>
           <div className="py-2">
             <div className="font-medium pb-2">Select Players</div>
-                <div className="overflow-auto border rounded-lg">
-                  <div className="p-2 h-[200px]">
-            {homeAway === "home" &&
-              players?.updatedPlayers
-                ?.filter(
-                  (x) =>
-                    x.playerTeam.toString() === fixture?.teamHomeId?.toString()
-                )
-                ?.map((player) => (
-                  <div className="flex items-center" key={player._id}>
-                    <input
-                      onChange={onChange}
-                      type="checkbox"
-                      value={player._id}
-                      name="player"
-                      id={player.appName}
-                    />
-                    <label className="block font-medium p-1" htmlFor={player.appName}>{player.appName}</label>
-                  </div>
-                ))}
+            <div className="overflow-auto border rounded-lg">
+              <div className="p-2 h-[200px] grid gap-2 grid-cols-[repeat(auto-fit,minmax(250px,1fr))]">
+                <div className="border p-2 my-1 bg-body-tertiary rounded-sm">
+                <h5>Goalkeepers</h5>
+                <div className="h-line mb-2"></div>
+                {superPlayers?.GKP?.map((player) => (
+                      <div className="flex items-center" key={player._id}>
+                        <input
+                          onChange={onChange}
+                          type="checkbox"
+                          value={player._id}
+                          name="player"
+                          id={player.appName}
+                        />
+                        <label
+                          className="block font-medium p-1"
+                          htmlFor={player.appName}
+                        >
+                          {player.appName}
+                        </label>
+                      </div>
+                    ))}
+                    </div>
 
-            {homeAway === "away" &&
-              players?.updatedPlayers
-                ?.filter(
-                  (x) =>
-                    x.playerTeam.toString() === fixture?.teamAwayId?.toString()
-                )
-                ?.map((player) => (
-                  <div className="flex items-center" key={player._id}>
-                    <input
-                      onChange={onChange}
-                      type="checkbox"
-                      value={player._id}
-                      name="player"
-                      id={player.appName}
-                    />
-                    <label className="block font-medium p-1" htmlFor={player.appName}>{player.appName}</label>
-                  </div>
-                ))}
-                </div>
-                </div>
+                    <div className="border p-2 my-1 bg-body-tertiary rounded-sm">
+                <h5>Defenders</h5>
+                <div className="h-line mb-2"></div>
+                {superPlayers?.DEF?.map((player) => (
+                      <div className="flex items-center" key={player._id}>
+                        <input
+                          onChange={onChange}
+                          type="checkbox"
+                          value={player._id}
+                          name="player"
+                          id={player.appName}
+                        />
+                        <label
+                          className="block font-medium p-1"
+                          htmlFor={player.appName}
+                        >
+                          {player.appName}
+                        </label>
+                      </div>
+                    ))}
+                    </div>
+
+                    <div className="border p-2 my-1 bg-body-tertiary rounded-sm">
+                <h5>Midfielders</h5>
+                <div className="h-line mb-2"></div>
+                {superPlayers?.MID?.map((player) => (
+                      <div className="flex items-center" key={player._id}>
+                        <input
+                          onChange={onChange}
+                          type="checkbox"
+                          value={player._id}
+                          name="player"
+                          id={player.appName}
+                        />
+                        <label
+                          className="block font-medium p-1"
+                          htmlFor={player.appName}
+                        >
+                          {player.appName}
+                        </label>
+                      </div>
+                    ))}
+                    </div>
+
+                    <div className="border p-2 my-1 bg-body-tertiary rounded-sm">
+                <h5>Forwards</h5>
+                <div className="h-line mb-2"></div>
+                {superPlayers?.FWD?.map((player) => (
+                      <div className="flex items-center" key={player._id}>
+                        <input
+                          onChange={onChange}
+                          type="checkbox"
+                          value={player._id}
+                          name="player"
+                          id={player.appName}
+                        />
+                        <label
+                          className="block font-medium p-1"
+                          htmlFor={player.appName}
+                        >
+                          {player.appName}
+                        </label>
+                      </div>
+                    ))}
+                    </div>
+              </div>
+            </div>
           </div>
           <div className="py-2">
             <select

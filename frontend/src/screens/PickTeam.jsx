@@ -399,8 +399,7 @@ const PickTeam = () => {
     okayed: [],
   });
   const { picks, switcher, blocked, okayed, captain, viceCaptain, oldCaptain, oldViceCaptain,  save } = state;
-  console.log(state)
-
+  
   useEffect(() => {
     const goalkeepers = managerPicks?.picks?.filter(
       (pick) => pick?.playerPosition === 1 && pick?.multiplier > 0
@@ -468,7 +467,7 @@ const PickTeam = () => {
         <Spinner />
       </div>
     );
-  }
+  } 
   return (
     <>
       <div className="main">

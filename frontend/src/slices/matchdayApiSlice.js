@@ -70,6 +70,12 @@ export const matchdayApiSlice = apiSlice.injectEndpoints({
         method: 'GET'
       }),
     }),
+    getMatchdayMaxNMin: builder.query({
+      query: () => ({
+        url: `${MATCHDAYS_URL}/min-max`
+      }),
+      providesTags: ["Matchday"]
+    }),
     getMatchdayTOW: builder.query({
       query: (id) => ({
         url: `${MATCHDAYS_URL}/data/tows/${id}`,
@@ -122,4 +128,5 @@ export const {
   useStartMatchdayMutation,
   useEditMatchdayMutation,
   useDeleteMatchdayMutation,
+  useGetMatchdayMaxNMinQuery
 } = matchdayApiSlice;

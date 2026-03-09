@@ -3,7 +3,7 @@ const LEAGUES_URL = "/api/leagues";
 
 export const leagueApiSlice = apiSlice.injectEndpoints({ 
   endpoints: (builder) => ({
-    getLeagues: builder.query({
+    getPrivateLeagues: builder.query({
       query: () => ({
         url: `${LEAGUES_URL}/privateleagues`,
       }),
@@ -19,16 +19,21 @@ export const leagueApiSlice = apiSlice.injectEndpoints({
       query: () => ({
         url: `${LEAGUES_URL}/teamleagues`,
       }),
-      providesTags: ['TeamLeague']
+      providesTags: ['League']
     }),
     getLeague: builder.query({
       query: (id) => ({
         url: `${LEAGUES_URL}/${id}`
       })
     }),
-    getOverallLeague: builder.query({
-      query: (id) => ({
-        url: `${LEAGUES_URL}/overallleagues/${id}`
+    getOverallStandings: builder.query({
+      query: ({id, page, limit}) => ({
+        url: `${LEAGUES_URL}/${id}/standings?page=${page}&limit=${limit}`
+      })
+    }),
+    getWeeklyStandings: builder.query({
+      query: ({id, mid, page, limit}) => ({
+        url: `${LEAGUES_URL}/${id}/standings/matchday/${mid}?page=${page}&limit=${limit}`
       })
     }),
     getTeamLeague: builder.query({
@@ -165,11 +170,12 @@ export const {
   useJoinLeagueMutation,
   useJoinOverallLeagueMutation,
   useJoinTeamLeagueMutation,
-  useGetLeaguesQuery,
+  useGetPrivateLeaguesQuery,
   useGetOverallLeaguesQuery,
   useGetTeamLeaguesQuery,
   useGetLeagueQuery,
-  useGetOverallLeagueQuery,
+  useGetOverallStandingsQuery,
+  useGetWeeklyStandingsQuery,
   useGetTeamLeagueQuery,
   useAddLeagueMutation,
   useAddOverallLeagueMutation,

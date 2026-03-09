@@ -1,4 +1,4 @@
-import {  useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   useGetMatchdaysQuery,
   useStartMatchdayMutation,
@@ -8,322 +8,345 @@ import {
   useDeleteMatchdayMutation,
   useUpdateMatchdayDataMutation,
   useUpdateMatchdayTOWMutation,
-  useEndMatchdayDataMutation
-} from "../../slices/matchdayApiSlice"; 
+  useEndMatchdayDataMutation,
+} from "../../slices/matchdayApiSlice";
 import { useSetLivePicksMutation } from "../../slices/livePicksApiSlice";
 import { useSetLastAndCurrentRankMutation } from "../../slices/leagueApiSlice";
 import { Container, Button, Spinner } from "react-bootstrap";
 import MatchdayAdmin from "./MatchdayAdmin";
-import Pagination from "../Pagination"
+import Pagination from "../Pagination";
 import AddModal from "./matchdayModals/AddModal";
 import DeleteModal from "./matchdayModals/DeleteModal";
 import EditModal from "./matchdayModals/EditModal";
 import StartModal from "./matchdayModals/StartModal";
 import getTime from "../../utils/getTime";
-import { toast } from 'react-toastify';
+import { toast } from "react-toastify";
 
-const Matchdays = () => {  
+const Matchdays = () => {
   const [show, setShow] = useState({
     edited: false,
     deleted: false,
     added: false,
-    start: false
+    start: false,
   });
   const [matchdayId, setMatchdayId] = useState("");
   const [curPage, setCurPage] = useState(1);
   const [page, setPage] = useState(1);
-  const { data: matchdays = [],  isLoading}  = useGetMatchdaysQuery()
-  const [addMatchday ] = useAddMatchdayMutation()
-  const [ deleteMatchday ] = useDeleteMatchdayMutation()
-  const [ startMatchday ] = useStartMatchdayMutation()
-  const [ setLivePicks ] = useSetLivePicksMutation()
-  const [ endMatchdayData ] = useEndMatchdayDataMutation()
-  const [ updateMatchdayData ] = useUpdateMatchdayDataMutation()
-  const [ updateMatchdayTOW ] = useUpdateMatchdayTOWMutation()
-  const [ createAutosForMd ] = useCreateAutosForMdMutation()
-  const [ undoAutosForMd ] = useUndoAutosForMdMutation()
-  const [ setLastAndCurrentRank ] = useSetLastAndCurrentRankMutation()
-  const {deleted, edited, added, start } = show
-  const pageSize = 5
+  const { data: matchdays = [], isLoading } = useGetMatchdaysQuery();
+  const [addMatchday] = useAddMatchdayMutation();
+  const [deleteMatchday] = useDeleteMatchdayMutation();
+  const [startMatchday] = useStartMatchdayMutation();
+  const [setLivePicks] = useSetLivePicksMutation();
+  const [endMatchdayData, {isLoading: endMatchdayDataLoading}] = useEndMatchdayDataMutation();
+  const [updateMatchdayData, {isLoading: updateMatchdayDataLoading}] = useUpdateMatchdayDataMutation();
+  const [updateMatchdayTOW, {isLoading: updateMatchdayTOWLoading}] = useUpdateMatchdayTOWMutation();
+  const [createAutosForMd, {isLoading: createAutosForMdLoading}] = useCreateAutosForMdMutation();
+  const [undoAutosForMd, {isLoading: undoAutosForMdLoading}] = useUndoAutosForMdMutation();
+  const [setLastAndCurrentRank] = useSetLastAndCurrentRankMutation();
+  const { deleted, edited, added, start } = show;
+  const pageSize = 5;
   let totalPages = Math.ceil(matchdays?.length / pageSize);
+  const closeAdd = () => {
+    setShow((prevState) => ({
+      ...prevState,
+      added: false,
+    }));
+  };
+  const closeEdit = () => {
+    setShow((prevState) => ({
+      ...prevState,
+      edited: false,
+    }));
+    setMatchdayId("");
+  };
+  const closeDelete = () => {
+    setShow((prevState) => ({
+      ...prevState,
+      deleted: false,
+    }));
+    setMatchdayId("");
+  };
+  const closeStart = () => {
+    setShow((prevState) => ({
+      ...prevState,
+      start: false,
+    }));
+    setMatchdayId("");
+  };
 
- const closeAdd = () => {
-  setShow((prevState) => ({
-    ...prevState,
-    added: false,
-  }));
-};
-const closeEdit = () => {
-  setShow((prevState) => ({
-    ...prevState,
-    edited: false,
-  }));
-  setMatchdayId("");
-};
-const closeDelete = () => {
-  setShow((prevState) => ({
-    ...prevState,
-    deleted: false,
-  }));
-  setMatchdayId("");
-};
-const closeStart = () => {
-  setShow((prevState) => ({
-    ...prevState,
-    start: false,
-  }));
-  setMatchdayId("");
-};
+  const addMatchdayPop = () => {
+    setShow((prevState) => ({
+      ...prevState,
+      added: true,
+    }));
+  };
+  const editMatchdayPop = async (id) => {
+    setShow((prevState) => ({
+      ...prevState,
+      edited: true,
+    }));
+    setMatchdayId(id);
+  };
 
- const addMatchdayPop = () => {
-  setShow((prevState) => ({
-    ...prevState,
-    added: true,
-  }));
-};
-const editMatchdayPop = async (id) => {
-  setShow((prevState) => ({
-    ...prevState,
-    edited: true,
-  }));
-  setMatchdayId(id);
-}
+  const startMatchdayPop = async (id) => {
+    setShow((prevState) => ({
+      ...prevState,
+      start: true,
+    }));
+    setMatchdayId(id);
+  };
+  const cancelStart = () => {
+    setMatchdayId("");
+    setShow((prevState) => ({
+      ...prevState,
+      start: false,
+    }));
+  };
 
-const startMatchdayPop = async (id) => {
-  setShow((prevState) => ({
-    ...prevState,
-    start: true,
-  }));
-  setMatchdayId(id);
-}
-const cancelStart = () => {
-  setMatchdayId("");
-  setShow((prevState) => ({
-    ...prevState,
-    start: false,
-  }));
-};
+  const startMatchdayNow = async () => {
+    setShow((prevState) => ({
+      ...prevState,
+      start: false,
+    }));
+    try {
+      const res = await startMatchday(matchdayId).unwrap();
+      toast.success(res?.message);
+    } catch (error) {
+      console.log(error);
+      toast.error(error?.data?.message || error?.data?.error);
+    }
+    setMatchdayId("");
+  };
+  const deleteMatchdayPop = (id) => {
+    setShow((prevState) => ({
+      ...prevState,
+      deleted: true,
+    }));
+    setMatchdayId(id);
+  };
 
-const startMatchdayNow = async () => {
-  setShow((prevState) => ({
-    ...prevState,
-    start: false,
-  }));
-  try {
-    const res = await startMatchday(matchdayId).unwrap();
-    toast.success(res?.message)
-  } catch (error) {
-    console.log(error)
-    toast.error(error?.data?.message || error?.data?.error)
+  const cancelDelete = () => {
+    setMatchdayId("");
+    setShow((prevState) => ({
+      ...prevState,
+      deleted: false,
+    }));
+  };
+
+  const deleteMatchdayNow = async () => {
+    setShow((prevState) => ({
+      ...prevState,
+      deleted: false,
+    }));
+    try {
+      await deleteMatchday(matchdayId).unwrap();
+    } catch (error) {
+      console.log(error);
+    }
+    setMatchdayId("");
+  };
+
+  const submit = async (data) => {
+    try {
+      await addMatchday(data).unwrap();
+    } catch (error) {
+      console.log(error);
+    }
+    setShow((prevState) => ({
+      ...prevState,
+      added: false,
+    }));
+    setMatchdayId("");
+  };
+
+  const resetEdit = async () => {
+    setShow((prevState) => ({
+      ...prevState,
+      edited: false,
+    }));
+    setMatchdayId("");
+  };
+
+  const setLive = async () => {
+    try {
+      const res = await setLivePicks().unwrap();
+      toast.success(res?.message);
+    } catch (error) {
+      console.log(error);
+      toast.error(error?.data?.message);
+    }
+  };
+
+  const updateMDdata = async (id) => {
+    try {
+      const res = await updateMatchdayData(id).unwrap();
+      toast.success(res?.message);
+    } catch (error) {
+      toast.error(error?.data?.message);
+    }
+  };
+  const updateTOW = async (id) => {
+    try {
+      const res = await updateMatchdayTOW(id).unwrap();
+      toast.success(res?.message);
+    } catch (error) {
+      toast.error(error?.data.message);
+    }
+  };
+  const updateAutoSubs = async (id) => {
+    try {
+      const res = await createAutosForMd(id).unwrap();
+      toast.success(res?.message);
+    } catch (error) {
+      toast.error(error?.data.message);
+    }
+  };
+  const undoAutos = async (id) => {
+    try {
+      const res = await undoAutosForMd(id).unwrap();
+      toast.success(res?.message);
+    } catch (error) {
+      toast.error(error?.data.message);
+    }
+  };
+  const setPastRank = async () => {
+    try {
+      const res = await setLastAndCurrentRank().unwrap();
+      toast.success(res?.message);
+    } catch (error) {
+      toast.error(error?.data.message);
+    }
+  };
+  const endMatchday = async (id) => {
+    try {
+      const res = await endMatchdayData(id).unwrap();
+      toast.success(res?.message);
+    } catch (error) {
+      toast.error(error?.data.message);
+    }
+  };
+
+  {
+    /* Button Controls */
   }
-  setMatchdayId("");
-};
-const deleteMatchdayPop = (id) => {
-  setShow((prevState) => ({
-    ...prevState,
-    deleted: true,
-  }));
-  setMatchdayId(id);
-};
+  const onSubmit = (e) => {
+    e.preventDefault();
+    if (page > totalPages) {
+      setCurPage(totalPages);
+      setPage(totalPages);
+    } else if (page < 0) {
+      setCurPage(1);
+      setPage(1);
+    } else if (+page === 0) {
+      setCurPage(1);
+      setPage(1);
+    } else {
+      setCurPage(page);
+    }
+  };
+  const changePage = (e) => {
+    if (e.target.value === "") {
+      setPage("");
+    } else if (e.target.value > totalPages) {
+      setPage(totalPages);
+    } else {
+      setPage(+e.target.value);
+    }
+  };
+  const viewNextPage = () => {
+    setCurPage(curPage + 1);
+    setPage(curPage + 1);
+  };
+  const viewPreviousPage = () => {
+    setCurPage(curPage - 1);
+    setPage(curPage - 1);
+  };
+  const viewFirstPage = () => {
+    setCurPage(1);
+    setPage(1);
+  };
 
-const cancelDelete = () => {
-  setMatchdayId("");
-  setShow((prevState) => ({
-    ...prevState,
-    deleted: false,
-  }));
-};
-
-const deleteMatchdayNow = async () => {
-  setShow((prevState) => ({
-    ...prevState,
-    deleted: false,
-  }));
-  try {
-    await deleteMatchday(matchdayId).unwrap();
-  } catch (error) {
-    console.log(error);
-  }
-  setMatchdayId("");
-};
-
-const submit = async (data) => {
-  try {
-    await addMatchday(data).unwrap();
-  } catch (error) {
-    console.log(error);
-  }
-  setShow((prevState) => ({
-    ...prevState,
-    added: false,
-  }));
-  setMatchdayId("");
-};
-
-const resetEdit = async () => {
-  setShow((prevState) => ({
-    ...prevState,
-    edited: false,
-  }));
-  setMatchdayId("");
-};
-
-const setLive = async () => {
-  try {
-  const res = await setLivePicks().unwrap()
-  toast.success(res?.message)
-  } catch (error) {
-    console.log(error)
-    toast.error(error?.data?.message)
-  }
-}
-
-const updateMDdata = async (id) => {
-  try {
-    const res = await updateMatchdayData(id).unwrap()
-    toast.success(res?.message)
-  } catch (error) {
-    toast.error(error?.data?.message)
-  }
-}
-const updateTOW = async (id) => {
-  try {
-    const res = await updateMatchdayTOW(id).unwrap()
-     toast.success(res?.message)
-  } catch (error) {
-    toast.error(error?.data.message)
-  }
-}
-const updateAutoSubs = async (id) => {
-  try {
-    const res = await createAutosForMd(id).unwrap()
-     toast.success(res?.message)
-  } catch (error) {
-    toast.error(error?.data.message)
-  }
-}
-const undoAutos = async (id) => {
-  try {
-    const res = await undoAutosForMd(id).unwrap()
-    toast.success(res?.message)
-  } catch (error) {
-    toast.error(error?.data.message)
-  }
-}
-const setPastRank = async () => {
-  try {
-    const res = await setLastAndCurrentRank().unwrap()
-    toast.success(res?.message)
-  } catch (error) {
-    toast.error(error?.data.message)
-  }
-}
-const endMatchday = async (id) => {
-  try {
-    const res = await endMatchdayData(id).unwrap()
-    toast.success(res?.message)
-  } catch (error) {
-    toast.error(error?.data.message)
-  }
-}
-
-{/* Button Controls */}
-const onSubmit = (e) => {
-  e.preventDefault();
-  if (page > totalPages) {
+  const viewLastPage = () => {
     setCurPage(totalPages);
     setPage(totalPages);
-  } else if (page < 0) {
-    setCurPage(1);
-    setPage(1);
-  } else if (+page === 0) {
-    setCurPage(1);
-    setPage(1);
-  } else {
-    setCurPage(page);
-  }
-};
-const changePage = (e) => {
-  if (e.target.value === "") {
-    setPage("");
-  } else if (e.target.value > totalPages) {
-    setPage(totalPages);
-  } else {
-    setPage(+e.target.value);
-  }
-};
-const viewNextPage = () => {
-  setCurPage(curPage + 1);
-  setPage(curPage + 1);
-};
-const viewPreviousPage = () => {
-  setCurPage(curPage - 1);
-  setPage(curPage - 1);
-};
-const viewFirstPage = () => {
-  setCurPage(1);
-  setPage(1);
-};
+  };
 
-const viewLastPage = () => {
-  setCurPage(totalPages);
-  setPage(totalPages);
-};
-
-const memoMatchdays = useMemo(() => {  
-  return matchdays?.map(x => {
-    const newDate = new Date(x.deadlineTime);
-      const newTime = newDate.toLocaleTimeString();
-      const time =
-        newTime.length === 11
-          ? newTime.replace(newTime.substring(5, 10), newTime.substring(8, 10))
-          : newTime.replace(newTime.substring(4, 9), newTime.substring(7, 9));
+  const memoMatchdays = useMemo(() => {
+    return matchdays
+      ?.map((x) => {
+        const newDate = new Date(x.deadlineTime);
+        const newTime = newDate.toLocaleTimeString();
+        const time =
+          newTime.length === 11
+            ? newTime.replace(
+                newTime.substring(5, 10),
+                newTime.substring(8, 10),
+              )
+            : newTime.replace(newTime.substring(4, 9), newTime.substring(7, 9));
         return {
           ...x,
           deadlineTime1: time,
-        deadlineDate: newDate.toLocaleDateString()
-        }
-  })?.filter((matchday, key) => {
-    let start = (curPage - 1) * pageSize;
-    let end = curPage * pageSize;
-    if (key >= start && key < end) return true;
-  })
-}, [matchdays, pageSize, curPage])
- if(isLoading) {
-    return <div className="spinner"><Spinner /></div>
- }
+          deadlineDate: newDate.toLocaleDateString(),
+        };
+      })
+      ?.filter((matchday, key) => {
+        let start = (curPage - 1) * pageSize;
+        let end = curPage * pageSize;
+        if (key >= start && key < end) return true;
+      });
+  }, [matchdays, pageSize, curPage]);
+  if (isLoading) {
+    return (
+      <div className="spinner">
+        <Spinner />
+      </div>
+    );
+  }
   return (
     <Container>
-    {memoMatchdays?.map(matchday => (
-      <MatchdayAdmin
-      matchday={matchday}
-      startMatchdayPop={startMatchdayPop}
-      editMatchdayPop={editMatchdayPop}
-      deleteMatchdayPop={deleteMatchdayPop}
-      updateMDdata={updateMDdata}
-      updateTOW={updateTOW}
-      updateAutoSubs={updateAutoSubs}
-      undoAutos={undoAutos}
-      endMatchday={endMatchday}
-       />
-    ))}
+      {memoMatchdays?.map((matchday) => (
+        <MatchdayAdmin
+          matchday={matchday}
+          startMatchdayPop={startMatchdayPop}
+          editMatchdayPop={editMatchdayPop}
+          deleteMatchdayPop={deleteMatchdayPop}
+          updateMDdata={updateMDdata}
+          updateTOW={updateTOW}
+          updateAutoSubs={updateAutoSubs}
+          undoAutos={undoAutos}
+          endMatchday={endMatchday}
+          endMatchdayDataLoading={endMatchdayDataLoading}
+          updateMatchdayDataLoading={updateMatchdayDataLoading}
+          updateMatchdayTOWLoading={updateMatchdayTOWLoading}
+          createAutosForMdLoading={createAutosForMdLoading}
+          undoAutosForMdLoading={undoAutosForMdLoading}
+        />
+      ))}
       <div>
-      <div className="add-button p-2">
-      <div><Button onClick={setLive}>Set Live Picks</Button></div>
-      </div>
-      <div className="add-button p-2">
-      <div><Button onClick={setPastRank}>Set Past Ranks</Button></div>
-      </div>
-      <div className="add-button p-2">
-        <Button onClick={addMatchdayPop} className="btn btn-success">Add Matchday</Button>
-      </div>
+        <div className="add-button p-2">
+          <div>
+            <Button onClick={setLive}>Set Live Picks</Button>
+          </div>
+        </div>
+        <div className="add-button p-2">
+          <div>
+            <Button onClick={setPastRank}>Set Past Ranks</Button>
+          </div>
+        </div>
+        <div className="add-button p-2">
+          <Button onClick={addMatchdayPop} className="btn btn-success">
+            Add Matchday
+          </Button>
+        </div>
       </div>
       {added && <AddModal submit={submit} closeAdd={closeAdd} />}
-      {start && <StartModal
-      startMatchdayNow={startMatchdayNow}
-      cancelStart={cancelStart}
-      closeStart={closeStart}
-      />}
+      {start && (
+        <StartModal
+          startMatchdayNow={startMatchdayNow}
+          cancelStart={cancelStart}
+          closeStart={closeStart}
+        />
+      )}
       {edited && (
         <EditModal
           matchdayId={matchdayId}
@@ -333,19 +356,26 @@ const memoMatchdays = useMemo(() => {
       )}
       {deleted && (
         <DeleteModal
-        matchdayId={matchdayId}
+          matchdayId={matchdayId}
           deleteMatchdayNow={deleteMatchdayNow}
           cancelDelete={cancelDelete}
           closeDelete={closeDelete}
         />
       )}
 
-<Pagination curPage={curPage} viewFirstPage={viewFirstPage}
-         viewPreviousPage={viewPreviousPage}
-        viewNextPage={viewNextPage} viewLastPage={viewLastPage}
-         totalPages={totalPages} onSubmit={onSubmit} page={page} changePage={changePage} />
-  </Container>
-  )
-}
+      <Pagination
+        curPage={curPage}
+        viewFirstPage={viewFirstPage}
+        viewPreviousPage={viewPreviousPage}
+        viewNextPage={viewNextPage}
+        viewLastPage={viewLastPage}
+        totalPages={totalPages}
+        onSubmit={onSubmit}
+        page={page}
+        changePage={changePage}
+      />
+    </Container>
+  );
+};
 
-export default Matchdays
+export default Matchdays;

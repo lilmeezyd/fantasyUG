@@ -1,45 +1,36 @@
 import { Modal, Button } from "react-bootstrap";
 import { useState } from "react";
-import { useGetQuery } from "../../../slices/teamApiSlice";
 import { useGetMatchdaysQuery } from "../../../slices/matchdayApiSlice";
 const AddModal = (props) => {
   const { show, closeAdd, submit } = props;
   const [data, setData] = useState({
-    team: "",
+    name: "",
     startMatchday: "",
     endMatchday: "",
+    leagueType: "Team"
   });
   const { data: matchdays } = useGetMatchdaysQuery();
-  const { data: teams } = useGetQuery();
   const onSubmit = (e) => {
     e.preventDefault();
     submit(data);
   };
-  console.log(data)
+  
   return (
    <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
       <div className="bg-white p-4 rounded-lg shadow-md max-w-sm w-full space-y-4">
         <h3 className="text-lg font-bold">Add Team League</h3>
         <div className="py-2">
           <label className="block text-sm font-medium" htmlFor="name">Team League</label>
-          <select
-              onChange={(e) => {
+          <input
+            onChange={(e) => {
                   setData((prev) => ({
-                    ...prev,
-                    team: e.target.value,
-                  }));
+                    ...prev, name: e.target.value
+                  }))
                 }}
-                name="name"
-                id="name"
+            name="lname" id="lname"
             className="w-full px-3 py-1 border rounded"
-          >
-            <option value="">---Select---</option>
-            {teams?.map((team) => (
-                  <option key={team._id} value={team._id}>
-                    {team.name}
-                  </option>
-                ))}
-          </select>
+            type="text"
+          />
         </div>
         <div className="py-2">
           <label className="block text-sm font-medium" htmlFor="start">Start Matchday</label>
