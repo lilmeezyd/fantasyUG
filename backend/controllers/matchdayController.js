@@ -285,7 +285,7 @@ const updateMatchday = asyncHandler(async (req, res) => {
 //@role Admin, editor
 const updateMDdata = asyncHandler(async (req, res) => {
   try {
-   // const matchdayFound = await Matchday.findById(req.params.id);
+    const matchdayFound = await Matchday.findById(req.params.id);
     if (!matchdayFound) {
       throw new Error("Matchday not found!");
     }
