@@ -734,15 +734,7 @@ const updateOverallTable = asyncHandler(async (req, res) => {
         $merge: {
           into: "overalls",
           on: ["manager", "leagueId"],
-          whenMatched: [
-            {
-              $set: {
-                oldRank: "$$old.rank",
-                rank: "$rank",
-                overallPoints: "$overallPoints",
-              },
-            },
-          ],
+          whenMatched: "merge",
           whenNotMatched: "insert",
         },
       },
@@ -909,15 +901,7 @@ const updateTeamTables = asyncHandler(async (req, res) => {
         $merge: {
           into: "overalls",
           on: ["manager", "leagueId"],
-          whenMatched: [
-            {
-              $set: {
-                oldRank: "$$old.rank",
-                rank: "$rank",
-                overallPoints: "$overallPoints",
-              },
-            },
-          ],
+          whenMatched: "merge",
           whenNotMatched: "insert",
         },
       },
@@ -1078,15 +1062,7 @@ const updatePrivateTables = asyncHandler(async (req, res) => {
         $merge: {
           into: "overalls",
           on: ["manager", "leagueId"],
-          whenMatched: [
-            {
-              $set: {
-                oldRank: "$$old.rank",
-                rank: "$rank",
-                overallPoints: "$overallPoints",
-              },
-            },
-          ],
+          whenMatched: "merge",
           whenNotMatched: "insert",
         },
       },
