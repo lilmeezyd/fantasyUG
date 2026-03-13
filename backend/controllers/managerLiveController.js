@@ -45,6 +45,7 @@ const setLivePicks = asyncHandler(async (req, res) => {
     },
     {
       $project: {
+        _id: 0,
         manager: 1,
         picks: 1,
         teamValue: 1,
