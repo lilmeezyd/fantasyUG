@@ -585,13 +585,13 @@ const updateOverallTable = asyncHandler(async (req, res) => {
       },
     },
     {
-    $merge: {
-      into: "leagues",
-      on: "_id",
-      whenMatched: "merge",
-      whenNotMatched: "discard"
-    }
-  }
+      $merge: {
+        into: "leagues",
+        on: "_id",
+        whenMatched: "merge",
+        whenNotMatched: "discard",
+      },
+    },
   ]);
   const leagues = await League.find({ leagueType: "Overall" }).lean();
   const managers = await ManagerInfo.find({}).lean();
@@ -734,13 +734,20 @@ const updateOverallTable = asyncHandler(async (req, res) => {
         $merge: {
           into: "overalls",
           on: ["manager", "leagueId"],
-          whenMatched: "replace",
+          whenMatched: [
+            {
+              $set: {
+                oldRank: "$$old.rank",
+                rank: "$rank",
+                overallPoints: "$overallPoints",
+              },
+            },
+          ],
           whenNotMatched: "insert",
         },
       },
     ]);
   }
-
 
   res.status(200).json({
     aggArray,
@@ -808,16 +815,16 @@ const updateTeamTables = asyncHandler(async (req, res) => {
       },
     },
     {
-    $merge: {
-      into: "leagues",
-      on: "_id",
-      whenMatched: "merge",
-      whenNotMatched: "discard"
-    }
-  }
+      $merge: {
+        into: "leagues",
+        on: "_id",
+        whenMatched: "merge",
+        whenNotMatched: "discard",
+      },
+    },
   ]);
   const leagues = await League.find({ leagueType: "Team" }).lean();
-  
+
   for (const league of leagues) {
     const startGW = matchdayMap.get(league.startMatchday.toString());
     const endGW = matchdayMap.get(league.endMatchday.toString());
@@ -902,7 +909,15 @@ const updateTeamTables = asyncHandler(async (req, res) => {
         $merge: {
           into: "overalls",
           on: ["manager", "leagueId"],
-          whenMatched: "replace",
+          whenMatched: [
+            {
+              $set: {
+                oldRank: "$$old.rank",
+                rank: "$rank",
+                overallPoints: "$overallPoints",
+              },
+            },
+          ],
           whenNotMatched: "insert",
         },
       },
@@ -970,13 +985,13 @@ const updatePrivateTables = asyncHandler(async (req, res) => {
       },
     },
     {
-    $merge: {
-      into: "leagues",
-      on: "_id",
-      whenMatched: "merge",
-      whenNotMatched: "discard"
-    }
-  }
+      $merge: {
+        into: "leagues",
+        on: "_id",
+        whenMatched: "merge",
+        whenNotMatched: "discard",
+      },
+    },
   ]);
   const leagues = await League.find({ leagueType: "Private" }).lean();
   for (const league of leagues) {
@@ -1063,7 +1078,15 @@ const updatePrivateTables = asyncHandler(async (req, res) => {
         $merge: {
           into: "overalls",
           on: ["manager", "leagueId"],
-          whenMatched: "replace",
+          whenMatched: [
+            {
+              $set: {
+                oldRank: "$$old.rank",
+                rank: "$rank",
+                overallPoints: "$overallPoints",
+              },
+            },
+          ],
           whenNotMatched: "insert",
         },
       },
